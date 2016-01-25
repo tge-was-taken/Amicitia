@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AtlusLibSharp", "AtlusLibSharp\AtlusLibSharp.csproj", "{ADF5E4CA-D622-41A1-8A09-5AB964CBB411}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AtlusLibSharp.Test", "AtlusLibSharp.Test\AtlusLibSharp.Test.csproj", "{8C070CEC-9917-4A1F-A633-837D390DCF1E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ADF5E4CA-D622-41A1-8A09-5AB964CBB411} = {ADF5E4CA-D622-41A1-8A09-5AB964CBB411}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amicitia", "Amicitia\Amicitia.csproj", "{1D35A70E-A6BE-40CC-A829-3B4F0D5CAF74}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ADF5E4CA-D622-41A1-8A09-5AB964CBB411} = {ADF5E4CA-D622-41A1-8A09-5AB964CBB411}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADF5E4CA-D622-41A1-8A09-5AB964CBB411}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADF5E4CA-D622-41A1-8A09-5AB964CBB411}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADF5E4CA-D622-41A1-8A09-5AB964CBB411}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADF5E4CA-D622-41A1-8A09-5AB964CBB411}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C070CEC-9917-4A1F-A633-837D390DCF1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C070CEC-9917-4A1F-A633-837D390DCF1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C070CEC-9917-4A1F-A633-837D390DCF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C070CEC-9917-4A1F-A633-837D390DCF1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D35A70E-A6BE-40CC-A829-3B4F0D5CAF74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D35A70E-A6BE-40CC-A829-3B4F0D5CAF74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D35A70E-A6BE-40CC-A829-3B4F0D5CAF74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D35A70E-A6BE-40CC-A829-3B4F0D5CAF74}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

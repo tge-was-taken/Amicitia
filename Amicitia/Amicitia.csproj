@@ -37,7 +37,7 @@
       <HintPath>..\AtlusLibSharp\bin\Debug\AtlusLibSharp.dll</HintPath>
     </Reference>
     <Reference Include="PropertyGridEx">
-      <HintPath>..\..\..\..\..\Downloads\propertygridexcs\PropertyGridEx\bin\Release\PropertyGridEx.dll</HintPath>
+      <HintPath>..\Dependencies\PropertyGridEx.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

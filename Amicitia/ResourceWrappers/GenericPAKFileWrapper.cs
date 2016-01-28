@@ -4,6 +4,7 @@
     using System.IO;
     using System;
     using System.Windows.Forms;
+    using AtlusLibSharp.Persona3.Archives;
 
     internal class GenericPAKFileWrapper : ResourceWrapper
     {
@@ -22,24 +23,20 @@
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.GenericPAK);
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.GenericPAK, SupportedFileType.ARCArchive);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
+                switch (openFileDlg.FilterIndex)
                 {
-                    return;
-                }
-
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
-                {
-                    case SupportedFileType.GenericPAK:
+                    case 1:
                         ReplaceWrappedObjectAndInitialize(new GenericPAK(openFileDlg.FileName));
+                        break;
+                    case 2:
+                        ReplaceWrappedObjectAndInitialize(GenericPAK.From(new GenericVitaArchive(openFileDlg.FileName)));
                         break;
                     default:
                         break;
@@ -52,26 +49,22 @@
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.GenericPAK);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.GenericPAK, SupportedFileType.ARCArchive);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(saveFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
                 GenericPAK binArchive = GetWrappedObject<GenericPAK>(GetWrapperOptions.ForceRebuild);
 
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (saveFileDlg.FilterIndex)
                 {
-                    case SupportedFileType.GenericPAK:
+                    case 1:
                         binArchive.Save(saveFileDlg.FileName);
+                        break;
+                    case 2:
+                        GenericVitaArchive.From(binArchive).Save(saveFileDlg.FileName);
                         break;
                     default:
                         break;

@@ -1,19 +1,19 @@
 ﻿namespace AtlusLibSharp.Generic.Archives
 {
+    using Persona3.Archives;
     using System.IO;
     using Utilities;
 
     /// <summary>
     /// Class representing an entry in a GenericPAK instance.
     /// </summary>
-    public class GenericPAKEntry
+    public class GenericPAKEntry : IArchiveEntry
     {
         // Constants
         internal static int NAME_LENGTH = 252;
 
         // Fields
         private string _name;
-        private int _length;
         private byte[] _data;
 
         // Constructors
@@ -21,26 +21,23 @@
         {
             _name = Path.GetFileName(filePath);
             _data = File.ReadAllBytes(filePath);
-            _length = _data.Length;
         }
 
         public GenericPAKEntry(string name, byte[] data)
         {
             _name = name;
             _data = data;
-            _length = data.Length;
         }
 
         public GenericPAKEntry(string name, MemoryStream stream)
         {
             _name = name;
             _data = stream.ToArray();
-            _length = _data.Length;
         }
 
         internal GenericPAKEntry(BinaryReader reader)
         {
-            Read(reader);
+            InternalRead(reader);
         }
 
         // Properties
@@ -57,9 +54,9 @@
             }
         }
 
-        public int Length
+        public int DataLength
         {
-            get { return _length; }
+            get { return _data.Length; }
         }
 
         public byte[] Data
@@ -71,7 +68,6 @@
             set
             {
                 _data = value;
-                _length = _data.Length;
             }
         }
 
@@ -79,22 +75,22 @@
         internal void InternalWrite(BinaryWriter writer)
         {
             writer.WriteCString(_name, NAME_LENGTH);
-            writer.Write(_length);
+            writer.Write(_data.Length);
             writer.Write(_data);
             writer.AlignPosition(64);
         }
 
-        private void Read(BinaryReader reader)
+        private void InternalRead(BinaryReader reader)
         {
             _name = reader.ReadCString(NAME_LENGTH);
-            _length = reader.ReadInt32();
+            int dataLength = reader.ReadInt32();
 
-            if (_length > reader.BaseStream.Length || _length < 0)
+            if (dataLength > reader.BaseStream.Length || dataLength < 0)
             {
-                throw new InvalidDataException("GenericPAKEntry: length has an invalid value.");
+                throw new InvalidDataException("GenericPAKEntry: dataLength has an invalid value.");
             }
 
-            _data = reader.ReadBytes(_length);
+            _data = reader.ReadBytes(dataLength);
             reader.AlignPosition(64);
         }
     }

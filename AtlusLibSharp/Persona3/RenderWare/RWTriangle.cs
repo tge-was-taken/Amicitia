@@ -5,11 +5,12 @@ namespace AtlusLibSharp.Persona3.RenderWare
 {
     public struct RWTriangle
     {
-        public ushort C { get; set; }
-        public ushort B { get; set; }
-        public ushort MatID { get; set; }
-        public ushort A { get; set; }
+        public ushort C;
+        public ushort B;
+        public ushort MatID;
+        public ushort A;
 
+        // Constructors
         internal RWTriangle(BinaryReader reader)
         {
             C = reader.ReadUInt16();
@@ -26,14 +27,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
             MatID = matID;
         }
 
-        internal void Write(BinaryWriter writer)
-        {
-            writer.Write(C);
-            writer.Write(B);
-            writer.Write(MatID);
-            writer.Write(A);
-        }
-
+        // Properties
         public ushort this[int index]
         {
             get
@@ -58,6 +52,15 @@ namespace AtlusLibSharp.Persona3.RenderWare
                 else
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        // Methods
+        internal void Write(BinaryWriter writer)
+        {
+            writer.Write(C);
+            writer.Write(B);
+            writer.Write(MatID);
+            writer.Write(A);
         }
     }
 }

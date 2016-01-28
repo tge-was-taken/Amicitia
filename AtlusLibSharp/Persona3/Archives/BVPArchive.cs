@@ -3,39 +3,24 @@
     using System.IO;
     using System.Collections.Generic;
     using Utilities;
+    using System;
 
     /// <summary>
     /// Class containing all functionality required in order to load and create *.BVP archives.
     /// Used in Persona 3 and 4 for storing battle dialog.
     /// </summary>
-    public class BVPArchive : BinaryFileBase
+    public class BVPArchive : BinaryFileBase, IArchive
     {
         // Fields
         private List<BVPArchiveEntry> _entryTable;
 
-        /// <summary>
-        /// Creates a new BVPFile from the given path.
-        /// </summary>
-        /// <param name="folderPackingMode">If true, pack a folder into a .bvp pointed to by the path or else load a .bvp file from the path.</param>
-        public BVPArchive(string path, bool folderPackingMode = false)
+        // Constructors
+        public BVPArchive(string path)
         {
             _entryTable = new List<BVPArchiveEntry>();
-
-            if (folderPackingMode)
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                string[] filePaths = Directory.GetFiles(path);
-
-                for (int i = 0; i < filePaths.Length; i++)
-                {
-                    _entryTable.Add(new BVPArchiveEntry(filePaths[i]));
-                }
-            }
-            else
-            {
-                using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-                {
-                    Read(reader);
-                }
+                InternalRead(reader);
             }
         }
 
@@ -44,7 +29,7 @@
             _entryTable = new List<BVPArchiveEntry>();
             using (BinaryReader reader = new BinaryReader(stream))
             {
-                Read(reader);
+                InternalRead(reader);
             }
         }
 
@@ -62,10 +47,21 @@
         public List<BVPArchiveEntry> Entries
         {
             get { return _entryTable; }
-            set { _entryTable = value; }
         }
 
-        // Methods
+        // Static methods
+        public static BVPArchive Create(string directorypath)
+        {
+            BVPArchive bvp = new BVPArchive();
+            string[] filepaths = Directory.GetFiles(directorypath);
+            foreach (string item in filepaths)
+            {
+                bvp.Entries.Add(new BVPArchiveEntry(item));
+            }
+            return bvp;
+        }
+
+        // Instance Methods
         public void Extract(string path)
         {
             Directory.CreateDirectory(path);
@@ -83,7 +79,7 @@
             long posFileStart = writer.GetPosition();
 
             // Precalculate the first offset
-            long posPrevDataEnd = GetEntryTableSize();
+            long posPrevDataEnd = (_entryTable.Count + 1) * BVPArchiveEntry.ENTRY_SIZE;
 
             // Write the entry table
             for (int i = 0; i < _entryTable.Count; i++)
@@ -98,7 +94,7 @@
                 writer.Write(_entryTable[i].Data, posFileStart + _entryTable[i].Offset);
 
                 // Update the previous data end position
-                posPrevDataEnd = _entryTable[i].Offset + _entryTable[i].Length;
+                posPrevDataEnd = _entryTable[i].Offset + _entryTable[i].DataLength;
             }
 
             // Write empty terminator entry
@@ -109,13 +105,13 @@
             writer.AlignPosition(64);
         }
 
-        private void Read(BinaryReader reader)
+        private void InternalRead(BinaryReader reader)
         {
             // Read first entry
             BVPArchiveEntry entry = new BVPArchiveEntry(reader);
 
             // Loop while we haven't read an empty entry
-            while (entry.Length != 0)
+            while (entry.DataLength != 0)
             {
                 // Entry wasn't empty, so add it to the list
                 _entryTable.Add(entry);
@@ -125,9 +121,9 @@
             }
         }
 
-        private int GetEntryTableSize()
+        IArchiveEntry IArchive.GetEntry(int index)
         {
-            return (_entryTable.Count + 1) * BVPArchiveEntry.ENTRY_SIZE;
+            return _entryTable[index];
         }
     }
 }

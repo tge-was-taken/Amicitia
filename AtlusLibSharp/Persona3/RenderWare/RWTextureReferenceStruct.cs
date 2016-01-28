@@ -3,6 +3,7 @@
 namespace AtlusLibSharp.Persona3.RenderWare
 {
     using PS2.Graphics;
+    using Utilities;
 
     public class RWTextureReferenceStruct : RWNode
     {
@@ -12,32 +13,20 @@ namespace AtlusLibSharp.Persona3.RenderWare
         // Properties
         public FilterMode FilterMode
         {
-            get { return (FilterMode)((_flags & 0xFF)); }
-            set
-            {
-                _flags &= ~((uint)0xFF);
-                _flags |= ((uint)value & 0xFF);
-            }
+            get { return (FilterMode)BitHelper.GetBits(_flags, 8, 0); }
+            set { BitHelper.ClearAndSetBits(ref _flags, 8, (uint)value, 0); }
         }
 
-        public AddressingMode UAdressingMode
+        public AddressingMode HorizontalAdressingMode
         {
-            get { return (AddressingMode)((_flags & 0xF00) >> 8); }
-            set
-            {
-                _flags &= ~((uint)0xF << 8);
-                _flags |= (((uint)value & 0xF) << 8);
-            }
+            get { return (AddressingMode)BitHelper.GetBits(_flags, 4, 8); }
+            set { BitHelper.ClearAndSetBits(ref _flags, 4, (uint)value, 8); }
         }
 
-        public AddressingMode VAdressingMode
+        public AddressingMode VerticalAdressingMode
         {
-            get { return (AddressingMode)((_flags & 0xF000) >> 12); }
-            set
-            {
-                _flags &= ~((uint)0xF << 12);
-                _flags |= (((uint)value & 0xF) << 12);
-            }
+            get { return (AddressingMode)BitHelper.GetBits(_flags, 4, 12); }
+            set { BitHelper.ClearAndSetBits(ref _flags, 4, (uint)value, 12); }
         }
 
         public bool HasMipMaps
@@ -58,8 +47,8 @@ namespace AtlusLibSharp.Persona3.RenderWare
             : base(RWType.Struct)
         {
             FilterMode = FilterMode.Linear;
-            UAdressingMode = AddressingMode.Wrap;
-            VAdressingMode = AddressingMode.Wrap;
+            HorizontalAdressingMode = AddressingMode.Wrap;
+            VerticalAdressingMode = AddressingMode.Wrap;
             HasMipMaps = false;
         }
 
@@ -67,8 +56,8 @@ namespace AtlusLibSharp.Persona3.RenderWare
             : base(RWType.Struct)
         {
             FilterMode = fltr;
-            UAdressingMode = uA;
-            VAdressingMode = vA;
+            HorizontalAdressingMode = uA;
+            VerticalAdressingMode = vA;
             HasMipMaps = mip;
         }
 
@@ -78,6 +67,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
             _flags = reader.ReadUInt32();
         }
 
+        // methods
         protected override void InternalWriteData(BinaryWriter writer)
         {
             writer.Write(_flags);

@@ -1,23 +1,20 @@
-﻿using IOModelFormats.SourceModelData;
-using OpenTK;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿//using IOModelFormats.SourceModelData;
 using System.IO;
-using System.Linq;
 
 namespace AtlusLibSharp.Persona3.RenderWare
 {
     public class RWGeometry : RWNode
     {
+        // Fields
         private RWGeometryStruct _struct;
         private RWMaterialList _materialList;
         private RWExtension _extension;
 
+        // Properties
         public RWGeometryStruct Struct
         {
             get { return _struct; }
-            set
+            private set
             {
                 _struct = value;
                 _struct.Parent = this;
@@ -27,7 +24,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
         public RWMaterialList MaterialList
         {
             get { return _materialList; }
-            set
+            private set
             {
                 _materialList = value;
                 _materialList.Parent = this;
@@ -37,23 +34,17 @@ namespace AtlusLibSharp.Persona3.RenderWare
         public RWExtension Extension
         {
             get { return _extension; }
-            set
+            private set
             {
                 _extension = value;
                 _extension.Parent = this;
             }
         }
 
-        internal RWGeometry(uint size, uint version, RWNode parent, BinaryReader reader)
-                : base(RWType.Geometry, size, version, parent)
-        {
-            Struct = ReadNode(reader, this) as RWGeometryStruct;
-            MaterialList = ReadNode(reader, this) as RWMaterialList;
-            Extension = ReadNode(reader, this) as RWExtension;
-        }
-
+        // Constructors
         public RWGeometry()
-            : base(RWType.Geometry) { }
+            : base(RWType.Geometry)
+        { }
 
         public RWGeometry(RWGeometryStruct geo, RWMaterialList materialList, RWExtension extension)
             : base(RWType.Geometry)
@@ -63,13 +54,16 @@ namespace AtlusLibSharp.Persona3.RenderWare
             Extension = extension;
         }
 
-        protected override void InternalWriteData(BinaryWriter writer)
+        internal RWGeometry(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+                : base(header)
         {
-            Struct.Write(writer);
-            MaterialList.Write(writer);
-            Extension.Write(writer);
+            Struct = RWNodeFactory.GetNode<RWGeometryStruct>(this, reader);
+            MaterialList = RWNodeFactory.GetNode<RWMaterialList>(this, reader);
+            Extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
         }
 
+        // Methods
+        /*
         public static RWGeometry FromSMD(RWClump refClump, string filename)
         {
             SMDFile smd = new SMDFile(filename);
@@ -147,6 +141,13 @@ namespace AtlusLibSharp.Persona3.RenderWare
 
             return geometry;
         }
+        */
 
+        protected override void InternalWriteData(BinaryWriter writer)
+        {
+            _struct.InternalWrite(writer);
+            _materialList.InternalWrite(writer);
+            _extension.InternalWrite(writer);
+        }
     }
 }

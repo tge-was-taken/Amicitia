@@ -1,74 +1,69 @@
 ﻿using System.IO;
-using PS2;
 
 namespace AtlusLibSharp.Persona3.RenderWare
 {
+    using PS2.Graphics;
+    using Utilities;
+
     public class RWTextureNativeStruct : RWNode
     {
+        // Fields
         private RWPlatformID _platformID;
         private uint _flags;
 
+        // Properties
         public RWPlatformID PlatformID
         {
             get { return _platformID; }
         }
 
-        public PS2FilterMode FilterMode
+        public FilterMode FilterMode
         {
-            get
-            {
-                return (PS2FilterMode)(_flags & 0xFF);
-            }
-            set
-            {
-                _flags &= ~((uint)0xFF);
-                _flags |= ((uint)value & 0xFF);
-            }
+            get { return (FilterMode)BitHelper.GetBits(_flags, 8, 0); }
+            set { BitHelper.ClearAndSetBits(ref _flags, 8, (uint)value, 0); }
         }
 
-        public PS2AddressingMode UAdressingMode
+        public AddressingMode HorizontalAddressingMode
         {
-            get
-            {
-                return (PS2AddressingMode)((_flags & (0xF << 8)) >> 8);
-            }
-            set
-            {
-                _flags &= ~((uint)(0xF << 8));
-                _flags |= (((uint)value & 0xF) << 8);
-            }
+
+            get { return (AddressingMode)BitHelper.GetBits(_flags, 4, 8); }
+            set { BitHelper.ClearAndSetBits(ref _flags, 4, (uint)value, 8); }
         }
 
-        public PS2AddressingMode VAddressingMode
+        public AddressingMode VerticalAddressingMode
         {
-            get
-            {
-                return (PS2AddressingMode)((_flags & (0xF << 12)) >> 12);
-            }
-            set
-            {
-                _flags &= ~((uint)0xF << 12);
-                _flags |= (((uint)value & 0xF) << 12);
-            }
+            get { return (AddressingMode)BitHelper.GetBits(_flags, 4, 12); }
+            set { BitHelper.ClearAndSetBits(ref _flags, 4, (uint)value, 12); }
         }
 
-        internal RWTextureNativeStruct(uint size, uint version, RWNode parent, BinaryReader reader)
-            : base(RWType.Struct, size, version, parent)
+        // Constructors
+        public RWTextureNativeStruct()
+            : base(RWType.Struct)
+        {
+            _platformID = RWPlatformID.PS2;
+            FilterMode = FilterMode.Linear;
+            HorizontalAddressingMode = AddressingMode.Wrap;
+            VerticalAddressingMode = AddressingMode.Wrap;
+        }
+
+        public RWTextureNativeStruct(RWPlatformID rwPlatformID, FilterMode filterMode, 
+                                     AddressingMode horizontalAddrMode, AddressingMode verticalAddrMode)
+            : base(RWType.Struct)
+        {
+            _platformID = rwPlatformID;
+            FilterMode = filterMode;
+            HorizontalAddressingMode = horizontalAddrMode;
+            VerticalAddressingMode = verticalAddrMode;
+        }
+
+        internal RWTextureNativeStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+            : base(header)
         {
             _platformID = (RWPlatformID)reader.ReadUInt32();
             _flags = reader.ReadUInt32();
         }
-
-        public RWTextureNativeStruct(RWPlatformID pfID = RWPlatformID.PS2, PS2FilterMode flt = PS2FilterMode.Linear, 
-                                     PS2AddressingMode u = PS2AddressingMode.Wrap, PS2AddressingMode v = PS2AddressingMode.Wrap)
-            : base(RWType.Struct)
-        {
-            _platformID = pfID;
-            FilterMode = flt;
-            UAdressingMode = u;
-            VAddressingMode = v;
-        }
-
+        
+        // Methods
         protected override void InternalWriteData(BinaryWriter writer)
         {
             writer.Write((uint)_platformID);

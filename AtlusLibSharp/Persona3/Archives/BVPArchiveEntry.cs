@@ -7,7 +7,7 @@
     /// <summary>
     /// Class representing an entry in a BVPArchive instance.
     /// </summary>
-    public class BVPArchiveEntry
+    public class BVPArchiveEntry : IArchiveEntry
     {
         // Constants
         internal const int ENTRY_SIZE = 0xC;
@@ -15,7 +15,6 @@
         // Fields
         private int _flag;
         private int _offset;
-        private int _length;
         private byte[] _data;
 
         // Constructors
@@ -23,25 +22,23 @@
         {
             _flag = flag;
             _data = File.ReadAllBytes(filePath);
-            _length = _data.Length;
         }
 
         public BVPArchiveEntry(byte[] data, int flag = 0)
         {
             _flag = flag;
             _data = data;
-            _length = data.Length;
         }
 
         internal BVPArchiveEntry(BinaryReader reader)
         {
             _flag = reader.ReadInt32();
             _offset = reader.ReadInt32();
-            _length = reader.ReadInt32();
+            int length = reader.ReadInt32();
 
-            if (_length != 0)
+            if (length != 0)
             {
-                _data = reader.ReadBytesAtOffset(_length, _offset);
+                _data = reader.ReadBytesAtOffset(length, _offset);
             }
             else
             {
@@ -56,9 +53,9 @@
             set { _flag = value; }
         }
 
-        public int Length
+        public int DataLength
         {
-            get { return _length; }
+            get { return _data.Length; }
         }
 
         public byte[] Data
@@ -67,7 +64,6 @@
             set
             {
                 _data = value;
-                _length = _data.Length;
             }
         }
 
@@ -77,12 +73,17 @@
             set { _offset = value; }
         }
 
+        string IArchiveEntry.Name
+        {
+            get { return "Entry"; }
+        }
+
         // Methods
         internal void WriteEntry(BinaryWriter writer)
         {
             writer.Write(_flag);
             writer.Write(_offset);
-            writer.Write(_length);
+            writer.Write(_data.Length);
         }
     }
 }

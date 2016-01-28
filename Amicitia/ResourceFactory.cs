@@ -31,6 +31,8 @@
                     return new SPRWrapper(text, SPRChunk.LoadFrom(stream));
                 case SupportedFileType.BVPArchive:
                     return new BVPArchiveWrapper(text, new BVPArchive(stream));
+                case SupportedFileType.ARCArchive:
+                    return new ARCArchiveWrapper(text, new GenericVitaArchive(stream));
                 default:
                     return new ResourceWrapper(text, new GenericBinaryFile(stream));
             }

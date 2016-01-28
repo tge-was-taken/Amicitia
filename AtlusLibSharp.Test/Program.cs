@@ -9,6 +9,7 @@
     using SMT3.ChunkResources.Scripting;
     using SMT3.ChunkResources.Modeling;
     using Persona3.Archives;
+    using Generic.Archives;
 
     class Program
     {
@@ -16,9 +17,9 @@
         {
             SetCulture();
 
-            DirectoryDataTable ddt = new DirectoryDataTable(@"C:\Users\TGE\Downloads\Dengeki PlayStation 2 D69\DDSAT\dds3.ddt");
-            //ddt.RootDirectory.Export(File.OpenRead(@"C:\Users\TGE\Downloads\Dengeki PlayStation 2 D69\DDSAT\dds3.img"), @"C:\Users\TGE\Downloads\Dengeki PlayStation 2 D69\DDSAT\dds3_out\");
-            //ddt = new DirectoryDataTable(@"C:\Users\TGE\Downloads\Dengeki PlayStation 2 D69\DDSAT\_test_dds3.ddt");
+            //RunARCTool(args);
+            //RunBFTool(args);
+            //RunMessageTool(args);
         }
 
         private static void SetCulture()
@@ -86,8 +87,47 @@
             }
             else if (!Path.HasExtension(args[0]))
             {
-                BVPArchive bvp = new BVPArchive(args[0], true);
+                BVPArchive bvp = BVPArchive.Create(args[0]);
                 bvp.Save(Path.GetFileName(args[0]) + ".BVP");
+            }
+        }
+
+        private static void RunARCTool(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("No input specified.");
+                Console.WriteLine("Usage:");
+                Console.WriteLine(" Enter path to ARC file to extract it to a folder of the same name.");
+                Console.WriteLine(" Enter path to directory to pack into a ARC.");
+                Console.WriteLine("Press any key to continue.");
+                Console.ReadKey();
+                return;
+            }
+
+            if (Path.HasExtension(args[0]))
+            {
+                if (!GenericVitaArchive.VerifyFileType(args[0]))
+                {
+                    Console.WriteLine("This is not a proper arc file!");
+                    if (GenericPAK.VerifyFileType(args[0]))
+                    {
+                        Console.WriteLine("Detected format: regular .bin/.pac/.pak archive.");
+                    }
+                }
+
+                GenericVitaArchive arc = new GenericVitaArchive(args[0]);
+                string path = Path.GetFileNameWithoutExtension(args[0]);
+                Directory.CreateDirectory(path);
+                for (int i = 0; i < arc.EntryCount; i++)
+                {
+                    File.WriteAllBytes(path + "//" + arc.Entries[i].Name, arc.Entries[i].Data);
+                }
+            }
+            else if (!Path.HasExtension(args[0]))
+            {
+                GenericVitaArchive arc = GenericVitaArchive.Create(args[0]);
+                arc.Save(Path.GetFileName(args[0]) + ".arc");
             }
         }
 

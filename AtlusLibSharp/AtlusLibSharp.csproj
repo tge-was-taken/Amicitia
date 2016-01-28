@@ -47,6 +47,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -63,6 +64,9 @@
   <ItemGroup>
     <Compile Include="BinaryFileBase.cs" />
     <Compile Include="Generic\Archives\GenericPAKFile.cs" />
+    <Compile Include="Generic\Archives\GenericVitaArchive.cs" />
+    <Compile Include="Generic\Archives\GenericVitaArchiveEntry.cs" />
+    <Compile Include="Generic\Archives\IArchive.cs" />
     <Compile Include="Persona3\Archives\BVPArchiveEntry.cs" />
     <Compile Include="Persona3\Archives\BVPArchive.cs" />
     <Compile Include="Generic\Archives\GenericPAKEntry.cs" />

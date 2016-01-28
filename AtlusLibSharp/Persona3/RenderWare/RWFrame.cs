@@ -8,17 +8,44 @@ namespace AtlusLibSharp.Persona3.RenderWare
 
     public class RWFrame
     {
-        public int Index { get; private set; }
-        public Matrix4 WorldMatrix { get; private set; }
-        public Matrix4 LocalMatrix { get; private set; }
-        public int ParentIndex { get; private set; }
-        public int ExportFlag { get; private set; }
+        // Fields
+        private int _index;
+        private Matrix4 _worldMatrix;
+        private Matrix4 _localMatrix;
+        private int _parentIndex;
+        private int _exportFlag;
         private RWFrame _parent;
+
+        // Properties
+        public int Index
+        {
+            get { return _index; }
+        }
+
+        public Matrix4 WorldMatrix
+        {
+            get { return _worldMatrix; }
+        }
+
+        public Matrix4 LocalMatrix
+        {
+            get { return _localMatrix; }
+        }
+
+        public int ParentIndex
+        {
+            get { return _parentIndex; }
+        }
+
+        public int ExportFlag
+        {
+            get { return _exportFlag; }
+        }
 
         public RWFrame Parent
         {
             get { return _parent; }
-            set
+            private set
             {
                 if (value == null)
                     return;
@@ -33,41 +60,41 @@ namespace AtlusLibSharp.Persona3.RenderWare
         public List<RWFrame> Children { get; set; }
 
         // Constructors
-        public RWFrame(Matrix4 localMatrix, int index, int parentIndex, RWFrame[] frames)
+        internal RWFrame(BinaryReader reader, int index, RWFrameListStruct rwStruct)
         {
-            LocalMatrix = localMatrix;
-            ParentIndex = parentIndex;
-            ExportFlag = 0;
-            Parent = frames[parentIndex];
+            _index = index;
+            _localMatrix = reader.ReadMatrix4x3().ToMatrix4();
+            _parentIndex = reader.ReadInt32();
+            _exportFlag = reader.ReadInt32();
 
-            if (Parent != null)
-                WorldMatrix = LocalMatrix * Parent.WorldMatrix;
+            if (_parentIndex != -1)
+                Parent = rwStruct.Frames[_parentIndex];
+
+            if (_parent != null)
+                _worldMatrix = _localMatrix * _parent._worldMatrix;
             else
-                WorldMatrix = LocalMatrix;
+                _worldMatrix = _localMatrix;
         }
 
-        internal RWFrame(BinaryReader reader, int index, RWFrame[] frames)
+        public RWFrame(Matrix4 localMatrix, int index, int parentIndex, RWFrameListStruct rwStruct)
         {
-            LocalMatrix = reader.ReadMatrix4x3().ToMatrix4();
-            ParentIndex = reader.ReadInt32();
-            ExportFlag = reader.ReadInt32();
+            _localMatrix = localMatrix;
+            _parentIndex = parentIndex;
+            _exportFlag = 0;
+            Parent = rwStruct.Frames[_parentIndex];
 
-            Index = index;
-
-            if (ParentIndex != -1)
-                Parent = frames[ParentIndex];
-
-            if (Parent != null)
-                WorldMatrix = LocalMatrix * Parent.WorldMatrix;
+            if (_parent != null)
+                _worldMatrix = _localMatrix * _parent._worldMatrix;
             else
-                WorldMatrix = LocalMatrix;
+                _worldMatrix = _localMatrix;
         }
 
-        public void Write(BinaryWriter writer)
+        // Methods
+        internal void InternalWrite(BinaryWriter writer)
         {
-            writer.Write(LocalMatrix);
-            writer.Write(ParentIndex);
-            writer.Write(ExportFlag);
+            writer.Write(_localMatrix);
+            writer.Write(_parentIndex);
+            writer.Write(_exportFlag);
         }
     }
 }

@@ -9,10 +9,10 @@ namespace AtlusLibSharp.Persona3.RenderWare
     public struct RWBoundingInfo
     {
         // Fields
-        public Vector3 Center;
-        public float Radius;
-        public int PositionFlag;
-        public int NormalFlag;
+        public readonly Vector3 Center;
+        public readonly float Radius;
+        public readonly int PositionFlag;
+        public readonly int NormalFlag;
 
         // Constructors
         public RWBoundingInfo(Vector3 sphereCentre, float sphereRadius)

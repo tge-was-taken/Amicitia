@@ -10,7 +10,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
         public RWAtomicStruct Struct
         {
             get { return _struct; }
-            set
+            private set
             {
                 _struct = value;
                 _struct.Parent = this;
@@ -20,31 +20,31 @@ namespace AtlusLibSharp.Persona3.RenderWare
         public RWExtension Extension
         {
             get { return _extension; }
-            set
+            private set
             {
                 _extension = value;
                 _extension.Parent = this;
             }
         }
 
-        public RWAtomic(uint size, uint version, RWNode parent, BinaryReader reader)
-                : base(RWType.Atomic, size, version, parent)
+        internal RWAtomic(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+                : base(header)
         {
-            Struct = ReadNode(reader, this) as RWAtomicStruct;
-            Extension = ReadNode(reader, this) as RWExtension;
+            _struct = RWNodeFactory.GetNode<RWAtomicStruct>(this, reader);
+            _extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
         }
 
-        public RWAtomic(RWAtomicStruct data, RWExtension ext)
+        public RWAtomic(RWAtomicStruct atomicStruct, RWExtension extension)
             : base(RWType.Atomic)
         {
-            Struct = data;
-            Extension = ext;
+            Struct = atomicStruct;
+            Extension = extension;
         }
 
         protected override void InternalWriteData(BinaryWriter writer)
         {
-            Struct.Write(writer);
-            Extension.Write(writer);
+            _struct.InternalWrite(writer);
+            _extension.InternalWrite(writer);
         }
     }
 }

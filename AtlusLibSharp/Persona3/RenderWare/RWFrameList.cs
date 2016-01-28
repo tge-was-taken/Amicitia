@@ -57,7 +57,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
         // Public methods
         public RWFrame GetFrameByHierarchyIndex(uint hierarchyIndex)
         {
-            return _struct.Frames[(int)(HierarchyIndexToFrameIndex(hierarchyIndex))];
+            return _struct.Frames[(int)(ConvertHierarchyIndexToFrameIndex(hierarchyIndex))];
         }
 
         public int GetFrameIndexByNameID(uint nameID)
@@ -81,7 +81,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
 
         public int GetHierarchyIndexByNameID(uint nameID)
         {
-            RWHierarchyAnimPlugin root = GetRoot(this);
+            RWHierarchyAnimPlugin root = GetRoot();
             foreach (RWHierarchyAnimNode node in root.NodeList)
             {
                 if (node.FrameNameID == nameID)
@@ -90,11 +90,11 @@ namespace AtlusLibSharp.Persona3.RenderWare
             return -1;
         }
 
-        public int HierarchyIndexToFrameIndex(uint hierarchyIndex)
+        public int ConvertHierarchyIndexToFrameIndex(uint hierarchyIndex)
         {
             int name = -1;
 
-            RWHierarchyAnimPlugin root = GetRoot(this);
+            RWHierarchyAnimPlugin root = GetRoot();
             foreach (RWHierarchyAnimNode node in root.NodeList)
             {
                 if (node.HierarchyIndex == hierarchyIndex)
@@ -165,7 +165,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
                 _extension[i].InternalWrite(writer);
         }
 
-        // Static methods
+        // Private methods
         private static void DepthFirstTraversal(RWFrame frame, ref List<RWFrame> list, ref int nIndex)
         {
             list.Add(frame);

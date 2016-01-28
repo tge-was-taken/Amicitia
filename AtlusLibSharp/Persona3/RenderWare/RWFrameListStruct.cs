@@ -4,39 +4,48 @@ namespace AtlusLibSharp.Persona3.RenderWare
 {
     public class RWFrameListStruct : RWNode
     {
+        // Fields
         private RWFrame[] _frames;
-        public int FrameCount { get; private set; }
+        private int _frameCount;
+
+        // Properties
+        public int FrameCount
+        {
+            get { return _frameCount; }
+        }
 
         public RWFrame[] Frames
         {
             get { return _frames; }
-            set
+            private set
             {
                 _frames = value;
-                FrameCount = _frames.Length;
+                _frameCount = _frames.Length;
             }
         }
 
-        internal RWFrameListStruct(uint size, uint version, RWNode parent, BinaryReader reader)
-                : base(RWType.Struct, size, version, parent)
-        {
-            FrameCount = reader.ReadInt32();
-            Frames = new RWFrame[FrameCount];
-            for (int i = 0; i < FrameCount; i++)
-                Frames[i] = new RWFrame(reader, i, Frames);
-        }
-
+        // Constructors
         public RWFrameListStruct(RWFrame[] frames)
             : base(RWType.Struct)
         {
             Frames = frames;
         }
 
+        internal RWFrameListStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+                : base(header)
+        {
+            _frameCount = reader.ReadInt32();
+            _frames = new RWFrame[_frameCount];
+            for (int i = 0; i < FrameCount; i++)
+                _frames[i] = new RWFrame(reader, i, this);
+        }
+
+        // Methods
         protected override void InternalWriteData(BinaryWriter writer)
         {
-            writer.Write(FrameCount);
-            for (int i = 0; i < FrameCount; i++)
-                Frames[i].Write(writer);
+            writer.Write(_frameCount);
+            for (int i = 0; i < _frameCount; i++)
+                _frames[i].InternalWrite(writer);
         }
     }
 }

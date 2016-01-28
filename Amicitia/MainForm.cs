@@ -228,12 +228,15 @@ namespace Amicitia
 
             TreeNode treeNode = null;
 
+#if !DEBUG
             try
             {
+#endif
                 // Get the resource from the factory and it to the tree view
                 treeNode = ResourceFactory.GetResource(
                     Path.GetFileName(filePath),
                     File.OpenRead(filePath), supportedFileIndex);
+#if !DEBUG
             }
             catch (InvalidDataException exception)
             {
@@ -241,6 +244,7 @@ namespace Amicitia
                     MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 return;
             }
+#endif
 
             mainTreeView.BeginUpdate();
 

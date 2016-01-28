@@ -23,6 +23,7 @@
         TMX,
         PNG,
         SPR,
-        BVPArchive
+        BVPArchive,
+        ARCArchive,
     }
 }

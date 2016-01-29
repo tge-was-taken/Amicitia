@@ -37,7 +37,7 @@
                 return;
             }
 
-            reader.BaseStream.Seek((uint)model.offset + MDChunk.MD00_DATA_START_ADDRESS + _subMeshPointerTableOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek((uint)model.offset + MDChunk.DATA_START_ADDRESS + _subMeshPointerTableOffset, SeekOrigin.Begin);
             _numSubmeshes = reader.ReadUInt16();
             _numUnknown = reader.ReadUInt16();
             _subMeshPointerArray = new uint[_numSubmeshes];
@@ -55,7 +55,7 @@
             _subMeshes = new IMDSubMesh[_numSubmeshes];
             for (int i = 0; i < _numSubmeshes; i++)
             {
-                reader.BaseStream.Seek((uint)model.offset + MDChunk.MD00_DATA_START_ADDRESS + _subMeshPointerArray[i], SeekOrigin.Begin);
+                reader.BaseStream.Seek((uint)model.offset + MDChunk.DATA_START_ADDRESS + _subMeshPointerArray[i], SeekOrigin.Begin);
                 _subMeshes[i] = MDSubMeshFactory.Get(model, node, reader);
             }
         }

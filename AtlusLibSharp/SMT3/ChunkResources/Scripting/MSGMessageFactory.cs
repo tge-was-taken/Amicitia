@@ -8,7 +8,7 @@
     {
         internal static MSGMessage GetMessage(BinaryReader reader, int filePointer, MessageTable msgTbl)
         {
-            reader.BaseStream.Seek(filePointer + MSGChunk.MSG1_DATA_START_ADDRESS + msgTbl.Offset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(filePointer + MSGChunk.DATA_START_ADDRESS + msgTbl.Offset, SeekOrigin.Begin);
             switch (msgTbl.Type)
             {
                 case 0:

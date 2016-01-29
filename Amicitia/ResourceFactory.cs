@@ -16,7 +16,7 @@
 
         public static ResourceWrapper GetResource(string text, Stream stream)
         {
-            return GetResource(text, stream, SupportedFileHandler.GetSupportedFileIndex(text));
+            return GetResource(text, stream, SupportedFileHandler.GetSupportedFileIndex(text, stream));
         }
 
         public static ResourceWrapper GetResource(string text, Stream stream, int supportedFileIndex)
@@ -24,7 +24,7 @@
             switch (SupportedFileHandler.GetType(supportedFileIndex))
             {
                 case SupportedFileType.GenericPAK:
-                    return new GenericPAKFileWrapper(text, new GenericPAK(stream, 252));
+                    return new GenericPAKFileWrapper(text, new GenericPAK(stream));
                 case SupportedFileType.TMX:
                     return new TMXWrapper(text, TMXChunk.LoadFrom(stream));
                 case SupportedFileType.SPR:

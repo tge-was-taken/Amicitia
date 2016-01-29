@@ -8,6 +8,12 @@
 
     internal class ARCArchiveWrapper : ResourceWrapper
     {
+        // Fields
+        private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
+        {
+            SupportedFileType.ARCArchive, SupportedFileType.GenericPAK
+        };
+
         // Constructor
         public ARCArchiveWrapper(string text, GenericVitaArchive arc) : base(text, arc) { }
 
@@ -23,7 +29,7 @@
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.ARCArchive, SupportedFileType.GenericPAK);
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
@@ -37,15 +43,13 @@
                     return;
                 }
 
-                switch (openFileDlg.FilterIndex)
+                switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
-                    case 1:
-                        ReplaceWrappedObjectAndInitialize(GenericVitaArchive.From(new GenericPAK(openFileDlg.FileName)));
-                        break;
-                    case 2:
+                    case SupportedFileType.ARCArchive:
                         ReplaceWrappedObjectAndInitialize(new GenericVitaArchive(openFileDlg.FileName));
                         break;
-                    default:
+                    case SupportedFileType.GenericPAK:
+                        ReplaceWrappedObjectAndInitialize(GenericVitaArchive.Create(new GenericPAK(openFileDlg.FileName)));
                         break;
                 }
             }
@@ -56,7 +60,7 @@
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.ARCArchive, SupportedFileType.GenericPAK);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
@@ -65,15 +69,13 @@
 
                 GenericVitaArchive arc = GetWrappedObject<GenericVitaArchive>(GetWrapperOptions.ForceRebuild);
 
-                switch (saveFileDlg.FilterIndex)
+                switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
-                    case 1:
-                        GenericPAK.From(arc).Save(saveFileDlg.FileName);
-                        break;
-                    case 2:
+                    case SupportedFileType.ARCArchive:
                         arc.Save(saveFileDlg.FileName);
                         break;
-                    default:
+                    case SupportedFileType.GenericPAK:
+                        GenericPAK.Create(arc).Save(saveFileDlg.FileName);
                         break;
                 }
             }

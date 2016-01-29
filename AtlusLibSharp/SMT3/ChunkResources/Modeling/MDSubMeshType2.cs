@@ -80,7 +80,7 @@
                 _usedNodes[i] = model.Nodes[_usedNodeIndices[i]];
             } 
 
-            reader.BaseStream.Seek((int)model.offset + MDChunk.MD00_DATA_START_ADDRESS + _batchOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek((int)model.offset + MDChunk.DATA_START_ADDRESS + _batchOffset, SeekOrigin.Begin);
             _vifPackets = VIFCodeEvaluator.EvaluateBlock(reader, _batchSize);
             _batches = MDSubMeshVifBatch.ParseBatches(_vifPackets, _numUsedNodes);
 

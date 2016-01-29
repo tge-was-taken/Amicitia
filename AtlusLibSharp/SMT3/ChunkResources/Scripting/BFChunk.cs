@@ -12,8 +12,8 @@
     public class BFChunk : Chunk
     {
         // Constants
-        internal const int FLW0_FLAG = 0;
-        internal const string FLW0_TAG = "FLW0";
+        internal const int FLAG = 0;
+        internal const string TAG = "FLW0";
 
         // Fields
         private int _numTypeTableEntries;
@@ -22,13 +22,13 @@
 
         // Constructors
         internal BFChunk(ushort id, int length, BinaryReader reader)
-            : base(FLW0_FLAG, id, length, FLW0_TAG)
+            : base(FLAG, id, length, TAG)
         {
             Read(reader);
         }
 
         public BFChunk(string xmlPath)
-            : base(FLW0_FLAG, 0, 0, FLW0_TAG)
+            : base(FLAG, 0, 0, TAG)
         {
             XDocument xDoc = XDocument.Load(xmlPath);
             XElement xRoot = xDoc.Root;
@@ -59,9 +59,9 @@
 
                 if (_typeTable[i].ElementLength == 1 && _typeTable[i].ElementCount > 16)
                 {
-                    AddExtensionIfMatched(_typeTable[i].Data, MSGChunk.MSG1_TAG, ".BMD", ref fileName);
-                    AddExtensionIfMatched(_typeTable[i].Data, MDChunk.MD00_TAG, ".MB", ref fileName);
-                    AddExtensionIfMatched(_typeTable[i].Data, TXPChunk.TXP0_TAG, ".TB", ref fileName);
+                    AddExtensionIfMatched(_typeTable[i].Data, MSGChunk.TAG, ".BMD", ref fileName);
+                    AddExtensionIfMatched(_typeTable[i].Data, MDChunk.TAG, ".MB", ref fileName);
+                    AddExtensionIfMatched(_typeTable[i].Data, TXPChunk.TAG, ".TB", ref fileName);
                     AddExtensionIfMatched(_typeTable[i].Data, "PIB0", ".PB", ref fileName);
                     if (!Path.HasExtension(fileName))
                     {
@@ -87,7 +87,7 @@
         {
             int fp = (int)writer.BaseStream.Position;
 
-            writer.BaseStream.Seek(CHUNK_HEADER_SIZE, SeekOrigin.Current);
+            writer.BaseStream.Seek(HEADER_SIZE, SeekOrigin.Current);
             writer.AlignPosition(16);
 
             writer.Write(_numTypeTableEntries);

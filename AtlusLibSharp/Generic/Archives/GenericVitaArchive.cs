@@ -38,6 +38,15 @@ namespace AtlusLibSharp.Persona3.Archives
             }
         }
 
+        public GenericVitaArchive(string[] filepaths)
+        {
+            _entries = new List<GenericVitaArchiveEntry>(filepaths.Length);
+            foreach (string path in filepaths)
+            {
+                _entries.Add(new GenericVitaArchiveEntry(path));
+            }
+        }
+
         public GenericVitaArchive()
         {
             _entries = new List<GenericVitaArchiveEntry>();
@@ -57,20 +66,10 @@ namespace AtlusLibSharp.Persona3.Archives
         // static methods
         public static GenericVitaArchive Create(string directorypath)
         {
-            GenericVitaArchive arc = new GenericVitaArchive();
-            string[] filepaths = Directory.GetFiles(directorypath);
-
-            arc._entries = new List<GenericVitaArchiveEntry>(filepaths.Length);
-
-            for (int i = 0; i < arc.EntryCount; i++)
-            {
-                arc._entries[i] = new GenericVitaArchiveEntry(filepaths[i]);
-            }
-
-            return arc;
+            return new GenericVitaArchive(Directory.GetFiles(directorypath));
         }
 
-        public static GenericVitaArchive From(GenericPAK pak)
+        public static GenericVitaArchive Create(GenericPAK pak)
         {
             GenericVitaArchive arc = new GenericVitaArchive();
             foreach (GenericPAKEntry entry in pak.Entries)
@@ -99,6 +98,7 @@ namespace AtlusLibSharp.Persona3.Archives
             byte[] testData = new byte[4 + GenericVitaArchiveEntry.NAME_LENGTH + 4];
             stream.Read(testData, 0, 4 + GenericVitaArchiveEntry.NAME_LENGTH + 4);
             stream.Position = 0;
+
             int numOfFiles = BitConverter.ToInt32(testData, 0);
 
             // num of files sanity check
@@ -117,7 +117,7 @@ namespace AtlusLibSharp.Persona3.Archives
             }
 
             // first entry length sanity check
-            int length = BitConverter.ToInt32(testData, 4 + GenericVitaArchiveEntry.NAME_LENGTH - 1);
+            int length = BitConverter.ToInt32(testData, 4 + GenericVitaArchiveEntry.NAME_LENGTH);
             if (length >= (1024 * 1024 * 100) || length < 0)
             {
                 return false;

@@ -17,9 +17,9 @@
     public class TMXChunk : Chunk
     {
         // Internal Constants
-        internal const int    TMX0_FLAG = 0x0002;
-        internal const string TMX0_TAG = "TMX0";
-        internal const int    TMX0_COMMENT_MAX_LENGTH = 28;
+        internal const int    FLAG = 0x0002;
+        internal const string TAG = "TMX0";
+        internal const int    COMMENT_MAX_LENGTH = 28;
 
         // Private Fields
         private byte _numPalettes;
@@ -46,13 +46,13 @@
 
         // Constructors
         internal TMXChunk(ushort id, int length, BinaryReader reader)
-            : base(TMX0_FLAG, id, length, TMX0_TAG)
+            : base(FLAG, id, length, TAG)
         {
             Read(reader);
         }
 
         public TMXChunk(Bitmap bitmap, PixelFormat pixelFormat, string comment = "")
-            : base(TMX0_FLAG, 0, 0, TMX0_TAG)
+            : base(FLAG, 0, 0, TAG)
         {
             _width = (ushort)bitmap.Width;
             _height = (ushort)bitmap.Height;
@@ -213,10 +213,10 @@
             set
             {
                 _userComment = value;
-                if (_userComment.Length > TMX0_COMMENT_MAX_LENGTH)
+                if (_userComment.Length > COMMENT_MAX_LENGTH)
                 {
                     // Remove excess characters
-                    _userComment = _userComment.Remove(TMX0_COMMENT_MAX_LENGTH-1);
+                    _userComment = _userComment.Remove(COMMENT_MAX_LENGTH-1);
                 }
             }
         }
@@ -292,7 +292,7 @@
             int fp = (int)writer.BaseStream.Position;
 
             // Seek past chunk header
-            writer.BaseStream.Seek(CHUNK_HEADER_SIZE + 4, SeekOrigin.Current);
+            writer.BaseStream.Seek(HEADER_SIZE + 4, SeekOrigin.Current);
 
             writer.Write(_numPalettes);
             writer.Write((byte)_paletteFmt);
@@ -305,7 +305,7 @@
             writer.Write(_wrapModes);
             writer.Write(_userTextureID);
             writer.Write(_userCLUTID);
-            writer.WriteCString(_userComment, TMX0_COMMENT_MAX_LENGTH);
+            writer.WriteCString(_userComment, COMMENT_MAX_LENGTH);
 
             // Check if there's any palettes and write them
             if (_numPalettes > 0)

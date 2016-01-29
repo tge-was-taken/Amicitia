@@ -9,10 +9,10 @@
     public class SPRChunk : Chunk
     {
         // Internal Constants
-        internal const ushort SPR0_FLAGS = 0x0001;
-        internal const string SPR0_TAG = "SPR0";
-        internal const int    SPR0_HEADER_SIZE = 0x20;
-        internal const int SPR0_TABLE_ENTRY_SIZE = 0x08;
+        internal const ushort FLAGS = 0x0001;
+        internal const string TAG = "SPR0";
+        internal const int    SPR_HEADER_SIZE = 0x20;
+        internal const int    TABLE_ENTRY_SIZE = 0x08;
 
         // Private Fields
         private int _headerSize;
@@ -28,16 +28,16 @@
 
         // Constructors
         internal SPRChunk(ushort id, ref int length, BinaryReader reader)
-            : base(SPR0_FLAGS, id, length, SPR0_TAG)
+            : base(FLAGS, id, length, TAG)
         {
             Read(reader);
             FixLength(ref length);
         }
 
         public SPRChunk(IList<SPRKeyFrame> keyFrames, IList<TMXChunk> textures)
-            : base(SPR0_FLAGS, 0, 0, SPR0_TAG)
+            : base(FLAGS, 0, 0, TAG)
         {
-            _headerSize = SPR0_HEADER_SIZE;
+            _headerSize = SPR_HEADER_SIZE;
             _numTextures = (ushort)textures.Count;
             _numKeyFrames = (ushort)keyFrames.Count;
             _textures = new TMXChunk[_numTextures];
@@ -100,15 +100,15 @@
             // Save the start position to calculate the filesize and 
             // to write out the header after we know where all the structure offsets are
             int filePtr = (int)writer.BaseStream.Position;
-            writer.BaseStream.Seek(SPR0_HEADER_SIZE, SeekOrigin.Current);
+            writer.BaseStream.Seek(SPR_HEADER_SIZE, SeekOrigin.Current);
 
             // Set the pointer table offsets and seek past the entries
             // as the entries will be written later
             _texturePointerTableOffset = (int)(writer.BaseStream.Position - filePtr);
-            writer.BaseStream.Seek(SPR0_TABLE_ENTRY_SIZE * _numTextures, SeekOrigin.Current);
+            writer.BaseStream.Seek(TABLE_ENTRY_SIZE * _numTextures, SeekOrigin.Current);
 
             _keyFramePointerTableOffset = (int)(writer.BaseStream.Position - filePtr);
-            writer.BaseStream.Seek(SPR0_TABLE_ENTRY_SIZE * _numKeyFrames, SeekOrigin.Current);
+            writer.BaseStream.Seek(TABLE_ENTRY_SIZE * _numKeyFrames, SeekOrigin.Current);
 
             // Write out the keyframe data and fill up the pointer table
             _keyFramePointerTable = new int[_numKeyFrames];
@@ -116,7 +116,7 @@
             {
                 writer.AlignPosition(16);
                 _keyFramePointerTable[i] = (int)(writer.BaseStream.Position - filePtr);
-                _keyFrames[i].Write(writer);
+                _keyFrames[i].InternalWrite(writer);
             }
 
             // Write out the texture data and fill up the pointer table
@@ -172,7 +172,7 @@
         // Private Methods
         private void Read(BinaryReader reader)
         {
-            int filePtr = (int)reader.BaseStream.Position - CHUNK_HEADER_SIZE;
+            int filePtr = (int)reader.BaseStream.Position - Chunk.HEADER_SIZE;
             _headerSize = reader.ReadInt32();
             _fileSizeMin4 = reader.ReadInt32();
             _numTextures = reader.ReadUInt16();

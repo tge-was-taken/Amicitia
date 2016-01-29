@@ -70,7 +70,7 @@
             long dialogDataStart = writer.BaseStream.Position;
             for (int i = 0; i < _numChoices; i++)
             {
-                _dialogPointerTable[i] = (int)writer.BaseStream.Position - MSGChunk.MSG1_DATA_START_ADDRESS - fp;
+                _dialogPointerTable[i] = (int)writer.BaseStream.Position - MSGChunk.DATA_START_ADDRESS - fp;
                 _dialogs[i].Write(writer);
             }
 
@@ -165,7 +165,7 @@
             _dialogs = new MSGDialog[_numChoices];
             for (int i = 0; i < _numChoices; i++)
             {
-                reader.BaseStream.Seek(fp + MSGChunk.MSG1_DATA_START_ADDRESS + _dialogPointerTable[i], SeekOrigin.Begin);
+                reader.BaseStream.Seek(fp + MSGChunk.DATA_START_ADDRESS + _dialogPointerTable[i], SeekOrigin.Begin);
                 _dialogs[i] = new MSGDialog(reader);
             }
         }

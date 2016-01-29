@@ -8,6 +8,13 @@ namespace Amicitia.ResourceWrappers
 
     internal class SPRWrapper : ResourceWrapper
     {
+        // Fields
+        private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
+        {
+            SupportedFileType.SPR
+        };
+
+        // Constructor
         public SPRWrapper(string text, SPRChunk spr) : base(text, spr) { }
 
         // Properties
@@ -31,28 +38,19 @@ namespace Amicitia.ResourceWrappers
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.SPR);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(saveFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
                 SPRChunk spr = GetWrappedObject<SPRChunk>(GetWrapperOptions.ForceRebuild);
 
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.SPR:
                         spr.Save(saveFileDlg.FileName);
-                        break;
-                    default:
                         break;
                 }
             }
@@ -63,26 +61,17 @@ namespace Amicitia.ResourceWrappers
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.SPR);
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.SPR:
                         ReplaceWrappedObjectAndInitialize(SPRChunk.LoadFrom(openFileDlg.FileName));
-                        break;
-                    default:
                         break;
                 }
             }

@@ -8,9 +8,9 @@
     public class MDChunk : Chunk
     {
         // Internal Constants
-        internal const int    MD00_FLAG = 0x0006;
-        internal const string MD00_TAG = "MD00";
-        internal const int    MD00_DATA_START_ADDRESS = 0x20;
+        internal const int    FLAG = 0x0006;
+        internal const string TAG = "MD00";
+        internal const int    DATA_START_ADDRESS = 0x20;
 
         // Private fields
         internal int offset;
@@ -32,7 +32,7 @@
 
         // Constructors
         internal MDChunk(ushort id, int length, BinaryReader reader)
-            : base(MD00_FLAG, id, length, MD00_TAG)
+            : base(FLAG, id, length, TAG)
         {
             Read(reader);
         }
@@ -72,7 +72,7 @@
         // Private Methods
         private void Read(BinaryReader reader)
         {
-            offset = (int)reader.BaseStream.Position - CHUNK_HEADER_SIZE; 
+            offset = (int)reader.BaseStream.Position - HEADER_SIZE; 
             _unused = reader.ReadUInt32();
             _addressRelocTableOffset = reader.ReadInt32();
             _addressRelocTableSize = reader.ReadInt32();
@@ -83,12 +83,12 @@
             _unk3 = reader.ReadUInt32();
             _nodeNameSectionOffset = reader.ReadUInt32();
 
-            reader.BaseStream.Seek(offset + MD00_DATA_START_ADDRESS + _nodeArrayOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(offset + DATA_START_ADDRESS + _nodeArrayOffset, SeekOrigin.Begin);
             _numNodes = reader.ReadUInt32();
             reader.AlignPosition(16);
             long nodeArrayPos = reader.BaseStream.Position;
 
-            reader.BaseStream.Seek(offset + MD00_DATA_START_ADDRESS + _materialArrayOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(offset + DATA_START_ADDRESS + _materialArrayOffset, SeekOrigin.Begin);
             _numMaterials = reader.ReadUInt32();
             _materials = new MDMaterial[_numMaterials];
             for (int i = 0; i < _numMaterials; i++)
@@ -98,14 +98,14 @@
 
             if (_nodeNameSectionOffset != 0)
             {
-                reader.BaseStream.Seek(offset + MD00_DATA_START_ADDRESS + _nodeNameSectionOffset, SeekOrigin.Begin);
+                reader.BaseStream.Seek(offset + DATA_START_ADDRESS + _nodeNameSectionOffset, SeekOrigin.Begin);
                 _nodeNameSection = new NDNM(_numNodes, reader);
             }
 
             _nodes = new MDNode[_numNodes];
             for (int i = 0; i < _numNodes; i++)
             {
-                reader.BaseStream.Seek(nodeArrayPos + (i * MDNode.MD00_NODE_SIZE), SeekOrigin.Begin);
+                reader.BaseStream.Seek(nodeArrayPos + (i * MDNode.SIZE), SeekOrigin.Begin);
                 _nodes[i] = new MDNode(this, reader);
             }
 

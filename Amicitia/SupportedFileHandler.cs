@@ -2,10 +2,12 @@
 {
     using AtlusLibSharp.Generic.Archives;
     using AtlusLibSharp.Persona3.Archives;
+    using AtlusLibSharp.SMT3.ChunkResources.Graphics;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
 
     internal static class SupportedFileHandler
     {
@@ -17,6 +19,15 @@
             new SupportedFileInfo("Atlus PS2 Sprite Container",     SupportedFileType.SPR,          false, ".spr"),
             new SupportedFileInfo("Persona 3 Battle Voice Package", SupportedFileType.BVPArchive,   false, ".bvp"),
             new SupportedFileInfo("Atlus Vita Archive",             SupportedFileType.ARCArchive,   false, ".arc", ".bin", ".pak", ".pac")
+        };
+
+        private static readonly Dictionary<SupportedFileType, Type> _supportedFileTypeEnumToType = new Dictionary<SupportedFileType, Type>()
+        {
+            { SupportedFileType.GenericPAK,  typeof(GenericPAK)},
+            { SupportedFileType.TMX, typeof(TMXChunk) },
+            { SupportedFileType.SPR, typeof(SPRChunk) },
+            { SupportedFileType.BVPArchive, typeof(BVPArchive) },
+            { SupportedFileType.ARCArchive, typeof(GenericVitaArchive) }
         };
 
         private static readonly string _fileFilter;
@@ -47,26 +58,39 @@
         // Public Methods
         public static int GetSupportedFileIndex(string path)
         {
-            // TODO: Add support for multiple possible support formats, and distinguishing between those ala content based file type checks.
-            SupportedFileInfo[] matched = Array.FindAll(_supportedFiles, s => s.Extensions.Contains(Path.GetExtension(path).ToLowerInvariant()));
+            int idx = -1;
+            using (FileStream stream = File.OpenRead(path))
+            {
+                idx = GetSupportedFileIndex(path, stream);
+            }
+            return idx;
+        }
 
+        public static int GetSupportedFileIndex(string name, Stream stream)
+        {
+            // TODO: Add support for multiple possible support formats, and distinguishing between those ala content based file type checks.
+            string ext = Path.GetExtension(name).ToLowerInvariant();
+            SupportedFileInfo[] matched = Array.FindAll(_supportedFiles, s => s.Extensions.Contains(ext));
+
+            // No matches were found
             if (matched.Length == 0)
                 return -1;
 
             // TODO: Get rid of this crap
             if (matched.Length > 1)
             {
-                if (matched[0].Type == SupportedFileType.GenericPAK && matched[1].Type == SupportedFileType.ARCArchive)
+                for (int i = 0; i < matched.Length; i++)
                 {
-                    if (GenericPAK.VerifyFileType(path))
-                        return Array.IndexOf(_supportedFiles, matched[0]);
-                    else if (GenericVitaArchive.VerifyFileType(path))
-                        return Array.IndexOf(_supportedFiles, matched[1]);
-                    else
-                        return -1;
+                    Type type = _supportedFileTypeEnumToType[matched[i].Type];
+                    MethodInfo methodInfo = type.GetRuntimeMethod("VerifyFileType", new Type[] { typeof(Stream) });
+                    bool verifiedSuccess = (bool)methodInfo.Invoke(null, new object[] { stream });
+                    if (verifiedSuccess)
+                    {
+                        return Array.IndexOf(_supportedFiles, matched[i]);
+                    }
                 }
-                else
-                    return -1;
+
+                return -1;
             }
             else
             {
@@ -87,6 +111,8 @@
                 }
             }
 
+            filteredInfo = GetSortedFilteredInfo(filteredInfo, includedTypes);
+
             for (int i = 0; i < filteredInfo.Count; i++)
             {
                 filter += SupportedFileInfoToFilterString(filteredInfo[i]);
@@ -102,6 +128,16 @@
         }
 
         // Private Methods
+        private static List<SupportedFileInfo> GetSortedFilteredInfo(List<SupportedFileInfo> unsortedInfo, SupportedFileType[] includedTypes)
+        {
+            List<SupportedFileInfo> filteredInfo = new List<SupportedFileInfo>(unsortedInfo.Count);
+            foreach (SupportedFileType fileType in includedTypes)
+            {
+                filteredInfo.Add(unsortedInfo.Find(info => info.Type == fileType));
+            }
+            return filteredInfo;
+        }
+
         private static string GetFileFilter()
         {
             string filter = "All files|*.*|";

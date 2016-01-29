@@ -32,10 +32,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>AtlusLibSharp.Test.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AtlusLibSharp">
-      <HintPath>..\AtlusLibSharp\bin\Debug\AtlusLibSharp.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,6 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AtlusLibSharp\AtlusLibSharp.csproj">
+      <Project>{adf5e4ca-d622-41a1-8a09-5ab964cbb411}</Project>
+      <Name>AtlusLibSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

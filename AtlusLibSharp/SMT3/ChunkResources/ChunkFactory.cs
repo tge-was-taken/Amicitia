@@ -68,25 +68,25 @@
 
                 switch (magic)
                 {
-                    case TXPChunk.TXP0_TAG:
+                    case TXPChunk.TAG:
                         list.Add(new TXPChunk(id, length, reader));
                         break;
-                    case TMXChunk.TMX0_TAG:
+                    case TMXChunk.TAG:
                         list.Add(new TMXChunk(id, length, reader));
                         break;
-                    case MDChunk.MD00_TAG:
+                    case MDChunk.TAG:
                         list.Add(new MDChunk(id, length, reader));
                         break;
-                    case MTChunk.MT00_TAG:
+                    case MTChunk.TAG:
                         list.Add(new MTChunk(id, length, reader));
                         break;
-                    case SPRChunk.SPR0_TAG:
+                    case SPRChunk.TAG:
                         list.Add(new SPRChunk(id, ref length /* pass length by ref to fix */, reader));
                         break;
-                    case MSGChunk.MSG1_TAG:
+                    case MSGChunk.TAG:
                         list.Add(new MSGChunk(id, length, reader));
                         break;
-                    case BFChunk.FLW0_TAG:
+                    case BFChunk.TAG:
                         list.Add(new BFChunk(id, length, reader));
                         break;
                 }

@@ -1,7 +1,6 @@
 ﻿namespace AtlusLibSharp.SMT3.ChunkResources.Graphics
 {
     using System.IO;
-
     using Utilities;
 
     public class SPRKeyFrame
@@ -46,11 +45,11 @@
         // Constructors
         internal SPRKeyFrame(BinaryReader reader)
         {
-            Read(reader);
+            InternalRead(reader);
         }
 
         // Internal Methods
-        internal void Write(BinaryWriter writer)
+        internal void InternalWrite(BinaryWriter writer)
         {
             writer.Write(_unk0x00);
             writer.WriteCString(_comment, 16);
@@ -84,7 +83,7 @@
         }
 
         // Private Methods
-        private void Read(BinaryReader reader)
+        private void InternalRead(BinaryReader reader)
         {
             _unk0x00 = reader.ReadInt32();
             _comment = reader.ReadCString(16);

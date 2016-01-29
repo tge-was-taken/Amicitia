@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,18 +84,40 @@
             // 
             // mainPropertyGrid
             // 
-            this.mainPropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Right);
+            this.mainPropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.mainPropertyGrid.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            // 
+            // 
+            // 
+            this.mainPropertyGrid.DocCommentDescription.Location = new System.Drawing.Point(0, 0);
+            this.mainPropertyGrid.DocCommentDescription.Name = "";
+            this.mainPropertyGrid.DocCommentDescription.Size = new System.Drawing.Size(0, 52);
+            this.mainPropertyGrid.DocCommentDescription.TabIndex = 1;
+            this.mainPropertyGrid.DocCommentImage = null;
+            // 
+            // 
+            // 
+            this.mainPropertyGrid.DocCommentTitle.Location = new System.Drawing.Point(0, 0);
+            this.mainPropertyGrid.DocCommentTitle.Name = "";
+            this.mainPropertyGrid.DocCommentTitle.Size = new System.Drawing.Size(0, 0);
+            this.mainPropertyGrid.DocCommentTitle.TabIndex = 0;
             this.mainPropertyGrid.HelpVisible = false;
             this.mainPropertyGrid.Location = new System.Drawing.Point(273, 0);
             this.mainPropertyGrid.Name = "mainPropertyGrid";
             this.mainPropertyGrid.Size = new System.Drawing.Size(375, 267);
             this.mainPropertyGrid.TabIndex = 2;
             // 
+            // 
+            // 
+            this.mainPropertyGrid.ToolStrip.Location = new System.Drawing.Point(0, 0);
+            this.mainPropertyGrid.ToolStrip.Name = "";
+            this.mainPropertyGrid.ToolStrip.Size = new System.Drawing.Size(375, 25);
+            this.mainPropertyGrid.ToolStrip.TabIndex = 1;
+            // 
             // mainPictureBox
             // 
-            this.mainPictureBox.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
+            this.mainPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.mainPictureBox.Enabled = false;
             this.mainPictureBox.Location = new System.Drawing.Point(273, 273);
             this.mainPictureBox.Name = "mainPictureBox";
@@ -114,8 +137,8 @@
             this.Controls.Add(this.mainTreeView);
             this.Controls.Add(this.mainMenuStrip);
             this.MainMenuStrip = this.mainMenuStrip;
-            this.Name = "MainForm";
-            this.Text = "Amicitia version 1.0.0.0 [DEBUG]";
+            this.Name = "MainForm";   
+            this.Text = Program.TitleString;
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).EndInit();
@@ -124,7 +147,7 @@
 
         }
 
-        #endregion
+#endregion
 
         private System.Windows.Forms.MenuStrip mainMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;

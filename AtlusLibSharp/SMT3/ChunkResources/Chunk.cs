@@ -10,7 +10,7 @@
     public abstract class Chunk : BinaryFileBase
     {
         // Internal Constants
-        internal const int CHUNK_HEADER_SIZE = 12;
+        internal const int HEADER_SIZE = 12;
 
         // Private fields
         private ushort _flag;

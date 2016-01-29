@@ -8,6 +8,13 @@
 
     internal class TMXWrapper : ResourceWrapper
     {
+        // Fields
+        private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
+        {
+            SupportedFileType.TMX, SupportedFileType.PNG
+        };
+
+        // Constructor
         public TMXWrapper(string text, TMXChunk tmx) : base(text, tmx) { }
 
         // Properties
@@ -59,31 +66,22 @@
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.TMX, SupportedFileType.PNG);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(saveFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
                 TMXChunk tmx = GetWrappedObject<TMXChunk>(GetWrapperOptions.ForceRebuild);
 
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.TMX:
                         tmx.Save(saveFileDlg.FileName);
                         break;
                     case SupportedFileType.PNG:
                         tmx.GetBitmap().Save(saveFileDlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                        break;
-                    default:
                         break;
                 }
             }
@@ -94,21 +92,14 @@
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.TMX, SupportedFileType.PNG);
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.TMX:
                         ReplaceWrappedObjectAndInitialize(TMXChunk.LoadFrom(openFileDlg.FileName));
@@ -118,8 +109,6 @@
                             (System.Drawing.Bitmap)System.Drawing.Image.FromFile(openFileDlg.FileName),
                             PixelFormat,
                             Comment));
-                        break;
-                    default:
                         break;
                 }
             }

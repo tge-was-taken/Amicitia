@@ -8,6 +8,12 @@
 
     internal class GenericPAKFileWrapper : ResourceWrapper
     {
+        // Fields
+        private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
+        {
+            SupportedFileType.GenericPAK, SupportedFileType.ARCArchive
+        };
+
         // Constructor
         public GenericPAKFileWrapper(string text, GenericPAK bin) : base(text, bin) { }
 
@@ -30,15 +36,13 @@
                     return;
                 }
 
-                switch (openFileDlg.FilterIndex)
+                switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
-                    case 1:
+                    case SupportedFileType.GenericPAK:
                         ReplaceWrappedObjectAndInitialize(new GenericPAK(openFileDlg.FileName));
                         break;
-                    case 2:
-                        ReplaceWrappedObjectAndInitialize(GenericPAK.From(new GenericVitaArchive(openFileDlg.FileName)));
-                        break;
-                    default:
+                    case SupportedFileType.ARCArchive:
+                        ReplaceWrappedObjectAndInitialize(GenericPAK.Create(new GenericVitaArchive(openFileDlg.FileName)));
                         break;
                 }
             }
@@ -49,7 +53,7 @@
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.GenericPAK, SupportedFileType.ARCArchive);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
@@ -58,15 +62,13 @@
 
                 GenericPAK binArchive = GetWrappedObject<GenericPAK>(GetWrapperOptions.ForceRebuild);
 
-                switch (saveFileDlg.FilterIndex)
+                switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
-                    case 1:
+                    case SupportedFileType.GenericPAK:
                         binArchive.Save(saveFileDlg.FileName);
                         break;
-                    case 2:
-                        GenericVitaArchive.From(binArchive).Save(saveFileDlg.FileName);
-                        break;
-                    default:
+                    case SupportedFileType.ARCArchive:
+                        GenericVitaArchive.Create(binArchive).Save(saveFileDlg.FileName);
                         break;
                 }
             }

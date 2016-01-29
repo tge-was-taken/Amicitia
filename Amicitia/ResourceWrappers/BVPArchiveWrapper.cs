@@ -7,6 +7,12 @@
 
     internal class BVPArchiveWrapper : ResourceWrapper
     {
+        // Fields
+        private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
+        {
+            SupportedFileType.BVPArchive
+        };
+
         // Constructor
         public BVPArchiveWrapper(string text, BVPArchive arc) : base(text, arc) { }
 
@@ -22,21 +28,14 @@
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.BVPArchive);
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.BVPArchive:
                         ReplaceWrappedObjectAndInitialize(new BVPArchive(openFileDlg.FileName));
@@ -50,23 +49,16 @@
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(SupportedFileType.BVPArchive);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(saveFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
                 BVPArchive arc = GetWrappedObject<BVPArchive>(GetWrapperOptions.ForceRebuild);
 
-                switch (SupportedFileHandler.GetType(supportedFileIndex))
+                switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.BVPArchive:
                         arc.Save(saveFileDlg.FileName);

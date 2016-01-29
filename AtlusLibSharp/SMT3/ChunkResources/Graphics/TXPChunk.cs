@@ -10,8 +10,8 @@
     public class TXPChunk : Chunk
     {
         // Internal Constants
-        internal const int    TXP0_FLAG = 0x0009;
-        internal const string TXP0_TAG  = "TXP0";
+        internal const int    FLAG = 0x0009;
+        internal const string TAG  = "TXP0";
 
         // Private Fields
         private int _numTextures;
@@ -20,13 +20,13 @@
 
         // Constructors
         internal TXPChunk(ushort id, int length, BinaryReader reader)
-            : base(TXP0_FLAG, id, length, TXP0_TAG)
+            : base(FLAG, id, length, TAG)
         {
             Read(reader);
         }
 
         public TXPChunk(IList<TMXChunk> textures)
-            : base(TXP0_FLAG, 0, 0, TXP0_TAG)
+            : base(FLAG, 0, 0, TAG)
         {
             _numTextures = textures.Count;
             _textures = textures.ToArray();
@@ -49,7 +49,7 @@
             int fp = (int)writer.BaseStream.Position;
 
             // Seek past chunk header
-            writer.BaseStream.Seek(CHUNK_HEADER_SIZE+8, SeekOrigin.Current);
+            writer.BaseStream.Seek(HEADER_SIZE+8, SeekOrigin.Current);
 
             // Seek past texture pack header
             writer.BaseStream.Seek(_numTextures * sizeof(int), SeekOrigin.Current);
@@ -86,7 +86,7 @@
         // Private Methods
         private void Read(BinaryReader reader)
         {
-            int fp = (int)reader.BaseStream.Position - CHUNK_HEADER_SIZE;
+            int fp = (int)reader.BaseStream.Position - HEADER_SIZE;
             reader.AlignPosition(16);
 
             _numTextures = reader.ReadInt32();

@@ -12,9 +12,9 @@
     public class MSGChunk : Chunk
     {
         // Constants
-        internal const int MSG1_FLAG = 0x0007;
-        internal const string MSG1_TAG = "MSG1";
-        internal const int MSG1_DATA_START_ADDRESS = 0x20;
+        internal const int FLAG = 0x0007;
+        internal const string TAG = "MSG1";
+        internal const int DATA_START_ADDRESS = 0x20;
 
         // Private Fields
         private int _addressRelocTableOffset;
@@ -30,13 +30,13 @@
 
         // Constructors
         public MSGChunk(string xmlPath)
-            : base(MSG1_FLAG, 0, 0, MSG1_TAG)
+            : base(FLAG, 0, 0, TAG)
         {
             ConvertFromXml(xmlPath);
         }
 
         internal MSGChunk(ushort id, int length, BinaryReader reader)
-            : base(MSG1_FLAG, id, length, MSG1_TAG)
+            : base(FLAG, id, length, TAG)
         {
             Read(reader);
         }
@@ -64,7 +64,7 @@
         public void SaveXml(string path)
         {
             XDocument xDoc = new XDocument();
-            XElement xRoot = new XElement(MSG1_TAG);
+            XElement xRoot = new XElement(TAG);
 
             foreach (MSGMessage msg in Messages)
             {
@@ -82,7 +82,7 @@
             List<int> addressList = new List<int>();
 
             // Seek past chunk and msg header for writing later
-            writer.BaseStream.Seek(MSG1_DATA_START_ADDRESS, SeekOrigin.Current);
+            writer.BaseStream.Seek(DATA_START_ADDRESS, SeekOrigin.Current);
 
             // Write a dummy message pointer table
             for (int i = 0; i < _numMessages; i++)
@@ -107,12 +107,12 @@
             for (int i = 0; i < _numMessages; i++)
             {
                 writer.AlignPosition(4);
-                _messagePointerTable[i].Offset = (int)writer.BaseStream.Position - MSG1_DATA_START_ADDRESS - fp;
+                _messagePointerTable[i].Offset = (int)writer.BaseStream.Position - DATA_START_ADDRESS - fp;
                 _messages[i].Write(writer, ref addressList, fp);
             }
 
             writer.AlignPosition(4);
-            _actorNamePointerTableOffset = (int)writer.BaseStream.Position - MSG1_DATA_START_ADDRESS - fp;
+            _actorNamePointerTableOffset = (int)writer.BaseStream.Position - DATA_START_ADDRESS - fp;
 
             // Write dummy actor name pointer table if there are actors present
             if (_numActors > 0)
@@ -127,7 +127,7 @@
                 _actorNamePointerTable = new int[_numActors];
                 for (int i = 0; i < _numActors; i++)
                 {
-                    _actorNamePointerTable[i] = (int)writer.BaseStream.Position - MSG1_DATA_START_ADDRESS - fp;
+                    _actorNamePointerTable[i] = (int)writer.BaseStream.Position - DATA_START_ADDRESS - fp;
                     writer.WriteCString(_actorNames[i]);
                 }
 
@@ -140,7 +140,7 @@
             }
 
             // Compress and write the address relocationt able
-            byte[] addressRelocTable = AddressRelocationTableCompression.Compress(addressList, MSG1_DATA_START_ADDRESS);
+            byte[] addressRelocTable = AddressRelocationTableCompression.Compress(addressList, DATA_START_ADDRESS);
             _addressRelocTableOffset = (int)writer.BaseStream.Position - fp;
             _addressRelocTableSize = addressRelocTable.Length;
             writer.Write(addressRelocTable);
@@ -181,9 +181,9 @@
             XDocument xDoc = XDocument.Load(path);
             XElement xRoot = xDoc.Root;
 
-            if (xRoot.Name != MSG1_TAG)
+            if (xRoot.Name != TAG)
             {
-                throw new InvalidDataException($"Root element name = {xRoot.Name}. Expected: {MSG1_TAG}");
+                throw new InvalidDataException($"Root element name = {xRoot.Name}. Expected: {TAG}");
             }
 
             XElement[] messageElements = xRoot.Elements().ToArray();
@@ -243,7 +243,7 @@
 
         private void Read(BinaryReader reader)
         {
-            int fp = (int)reader.BaseStream.Position - CHUNK_HEADER_SIZE;
+            int fp = (int)reader.BaseStream.Position - HEADER_SIZE;
             reader.AlignPosition(16);
             _addressRelocTableOffset = reader.ReadInt32();
             _addressRelocTableSize = reader.ReadInt32();
@@ -265,13 +265,13 @@
             _actorNamePointerTableOffset = reader.ReadInt32();
             _numActors = reader.ReadInt32();
 
-            reader.BaseStream.Seek(fp + MSG1_DATA_START_ADDRESS + _actorNamePointerTableOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(fp + DATA_START_ADDRESS + _actorNamePointerTableOffset, SeekOrigin.Begin);
             _actorNamePointerTable = reader.ReadInt32Array(_numActors);
 
             _actorNames = new string[_numActors];
             for (int i = 0; i < _numActors; i++)
             {
-                reader.BaseStream.Seek(fp + MSG1_DATA_START_ADDRESS + _actorNamePointerTable[i], SeekOrigin.Begin);
+                reader.BaseStream.Seek(fp + DATA_START_ADDRESS + _actorNamePointerTable[i], SeekOrigin.Begin);
                 _actorNames[i] = reader.ReadCString();
             }
 

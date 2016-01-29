@@ -17,10 +17,10 @@
         private byte[] _data;
 
         // Constructors
-        public GenericPAKEntry(string filePath)
+        public GenericPAKEntry(string filepath)
         {
-            _name = Path.GetFileName(filePath);
-            _data = File.ReadAllBytes(filePath);
+            _name = Path.GetFileName(filepath);
+            _data = File.ReadAllBytes(filepath);
         }
 
         public GenericPAKEntry(string name, byte[] data)

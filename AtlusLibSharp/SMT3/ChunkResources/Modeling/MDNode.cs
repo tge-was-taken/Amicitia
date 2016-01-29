@@ -9,7 +9,7 @@
 
     public class MDNode
     {
-        internal const int MD00_NODE_SIZE = 0x50;
+        internal const int SIZE = 0x50;
 
         // Fields
         private IntPtr _ptr;
@@ -162,7 +162,7 @@
         {
             if (_meshOffset != 0)
             {
-                reader.BaseStream.Seek((uint)model.offset + MDChunk.MD00_DATA_START_ADDRESS + _meshOffset, SeekOrigin.Begin);
+                reader.BaseStream.Seek((uint)model.offset + MDChunk.DATA_START_ADDRESS + _meshOffset, SeekOrigin.Begin);
                 _mesh = new MDMesh(model, this, reader);
             }
         }
@@ -203,7 +203,7 @@
 
             if (_meshBoundingBoxOffset != 0)
             {
-                reader.BaseStream.Seek((uint)model.offset + MDChunk.MD00_DATA_START_ADDRESS + _meshBoundingBoxOffset, SeekOrigin.Begin);
+                reader.BaseStream.Seek((uint)model.offset + MDChunk.DATA_START_ADDRESS + _meshBoundingBoxOffset, SeekOrigin.Begin);
                 _bbox = new MDBoundingBox();
                 _bbox.Min = reader.ReadVector3();
                 _bbox.Max = reader.ReadVector3();

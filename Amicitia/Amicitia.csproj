@@ -56,9 +56,6 @@
     <StartupObject>Amicitia.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AtlusLibSharp">
-      <HintPath>..\AtlusLibSharp\bin\Debug\AtlusLibSharp.dll</HintPath>
-    </Reference>
     <Reference Include="PropertyGridEx">
       <HintPath>..\Dependencies\PropertyGridEx.dll</HintPath>
     </Reference>
@@ -138,6 +135,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AtlusLibSharp\AtlusLibSharp.csproj">
+      <Project>{adf5e4ca-d622-41a1-8a09-5ab964cbb411}</Project>
+      <Name>AtlusLibSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,9 +6,9 @@
 
     public class MTChunk : Chunk
     {
-        internal const int MT00_FLAG = 0x0008;
-        internal const string MT00_TAG = "MT00";
-        internal const int MT00_DATA_START_ADDRESS = 0x20;
+        internal const int FLAG = 0x0008;
+        internal const string TAG = "MT00";
+        internal const int DATA_START_ADDRESS = 0x20;
 
         // Private fields
         private int _posFileStart;
@@ -29,7 +29,7 @@
 
         // Constructors
         internal MTChunk(ushort id, int length, BinaryReader reader)
-            : base(MT00_FLAG, id, length, MT00_TAG)
+            : base(FLAG, id, length, TAG)
         {
             Read(reader);
         }
@@ -57,7 +57,7 @@
 
         private int GetRelativeAddress(long absAddress)
         {
-            return (int)absAddress - _posFileStart - MT00_DATA_START_ADDRESS;
+            return (int)absAddress - _posFileStart - DATA_START_ADDRESS;
         }
 
         // Methods
@@ -65,7 +65,7 @@
         {
             // Skip header
             _posFileStart = (int)writer.BaseStream.Position;
-            writer.Seek(MT00_DATA_START_ADDRESS, SeekOrigin.Current);
+            writer.Seek(DATA_START_ADDRESS, SeekOrigin.Current);
 
             // Create address list for reloc table
             List<int> addressList = new List<int>();
@@ -125,7 +125,7 @@
             writer.Seek(animPointerBase, SeekOrigin.Begin);
 
             // Calculate address reloc table values
-            _addressRelocTable = AddressRelocationTableCompression.Compress(addressList, MT00_DATA_START_ADDRESS);
+            _addressRelocTable = AddressRelocationTableCompression.Compress(addressList, DATA_START_ADDRESS);
             _addressRelocTableSize = _addressRelocTable.Length;
             _addressRelocTableOffset = GetRelativeAddress(writer.GetPosition());
 
@@ -139,9 +139,9 @@
 
             // Write header
             writer.Seek(_posFileStart, SeekOrigin.Begin);
-            writer.Write(MT00_FLAG);
+            writer.Write(FLAG);
             writer.Write(UserID);
-            writer.WriteCString(MT00_TAG);
+            writer.WriteCString(TAG);
             writer.Write(Length);
             writer.Write(0);
             writer.Write(_addressRelocTableOffset);
@@ -177,10 +177,10 @@
                 _animKeyInfo[i].BoneIndex = reader.ReadInt32();
             }
 
-            reader.BaseStream.Seek(fp + MT00_DATA_START_ADDRESS + _addressRelocTableOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(fp + DATA_START_ADDRESS + _addressRelocTableOffset, SeekOrigin.Begin);
             _addressRelocTable = reader.ReadBytes(_addressRelocTableSize);
 
-            reader.BaseStream.Seek(fp + MT00_DATA_START_ADDRESS + _animPointerTableOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(fp + DATA_START_ADDRESS + _animPointerTableOffset, SeekOrigin.Begin);
             _animPointers = reader.ReadInt32Array(_numAnims);
 
             _anims = new MTAnimation[_numAnims];
@@ -192,7 +192,7 @@
                     continue;
                 }
 
-                reader.BaseStream.Seek(fp + MT00_DATA_START_ADDRESS + _animPointers[i], SeekOrigin.Begin);
+                reader.BaseStream.Seek(fp + DATA_START_ADDRESS + _animPointers[i], SeekOrigin.Begin);
                 _anims[i] = new MTAnimation(_numKeys, reader);
             }
         }

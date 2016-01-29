@@ -36,6 +36,14 @@
             _offset = reader.ReadInt32();
             int length = reader.ReadInt32();
 
+            if (length > reader.BaseStream.Length)
+            {
+                _flag = 0;
+                _offset = 0;
+                _data = new byte[0];
+                return;
+            }
+
             if (length != 0)
             {
                 _data = reader.ReadBytesAtOffset(length, _offset);

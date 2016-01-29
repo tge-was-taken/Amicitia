@@ -8,26 +8,19 @@
     internal class NDNM
     {
         // Internal Constants
-        internal const string NDNM_TAG = "NDNM";
+        internal const string TAG = "NDNM";
 
         // Fields
-        private IntPtr _ptr;
         private uint _length;
         private MDNodeName[] _names;
 
         // Constructors
         internal NDNM(uint numNodes, BinaryReader reader)
         {
-            _ptr = (IntPtr)reader.BaseStream.Position;
             Read(numNodes, reader);
         }
 
         // Properties
-        public IntPtr Pointer
-        {
-            get { return _ptr; }
-        }
-
         public MDNodeName[] Names
         {
             get { return _names; }
@@ -53,7 +46,7 @@
 
             // Seek back to the start and write the header
             writer.BaseStream.Seek(startOffset, SeekOrigin.Begin);
-            writer.WriteCString(NDNM_TAG, 4);
+            writer.WriteCString(TAG, 4);
             writer.Write(_length);
 
             // Seek to the end of the section to align the writer position
@@ -64,7 +57,7 @@
         private void Read(uint numNodes, BinaryReader reader)
         {
             string tag = reader.ReadCString(4);
-            if (tag != NDNM_TAG)
+            if (tag != TAG)
             {
                 // Shouldn't happen
                 throw new InvalidDataException("NDNM Tag mismatch!");

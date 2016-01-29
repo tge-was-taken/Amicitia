@@ -18,16 +18,11 @@
 
         // Constructors
         public GenericPAK(string path) 
-            : this(File.OpenRead(path), 252)
+            : this(File.OpenRead(path))
         {
         }
 
-        public GenericPAK(string path, int nameLength) 
-            : this(File.OpenRead(path), nameLength)
-        {
-        }
-
-        public GenericPAK(Stream stream, int nameLength)
+        public GenericPAK(Stream stream)
         {
             if (!InternalVerifyFileType(stream))
             {
@@ -37,7 +32,7 @@
             _entries = new List<GenericPAKEntry>();
             using (BinaryReader reader = new BinaryReader(stream))
             {
-                InternalRead(reader, nameLength);
+                InternalRead(reader);
             }
         }
 
@@ -69,22 +64,12 @@
         }
 
         // static methods
-        public static bool VerifyFileType(string path)
-        {
-            return InternalVerifyFileType(File.OpenRead(path));
-        }
-
-        public static bool VerifyFileType(Stream stream)
-        {
-            return InternalVerifyFileType(stream);
-        }
-
         public static GenericPAK Create(string directorypath)
         {
             return new GenericPAK(Directory.GetFiles(directorypath));
         }
 
-        public static GenericPAK From(GenericVitaArchive arc)
+        public static GenericPAK Create(GenericVitaArchive arc)
         {
             GenericPAK pak = new GenericPAK();
             for (int i = 0; i < arc.EntryCount; i++)
@@ -93,6 +78,16 @@
                 pak.Entries.Add(new GenericPAKEntry(arcEntry.Name, arcEntry.Data));
             }
             return pak;
+        }
+
+        public static bool VerifyFileType(string path)
+        {
+            return InternalVerifyFileType(File.OpenRead(path));
+        }
+
+        public static bool VerifyFileType(Stream stream)
+        {
+            return InternalVerifyFileType(stream);
         }
 
         private static bool InternalVerifyFileType(Stream stream)
@@ -124,7 +119,7 @@
                     return false;
             }
 
-            int testLength = BitConverter.ToInt32(testData, GenericPAKEntry.NAME_LENGTH - 1);
+            int testLength = BitConverter.ToInt32(testData, GenericPAKEntry.NAME_LENGTH);
 
             // sanity check, if the length of the first file is >= 100 mb, fail the test
             if (testLength >= (1024 * 1024 * 100) || testLength < 0)
@@ -147,7 +142,7 @@
             writer.Write(0, GenericPAKEntry.NAME_LENGTH + 4);
         }
 
-        private void InternalRead(BinaryReader reader, int nameLength)
+        private void InternalRead(BinaryReader reader)
         {
             // Read first entry
             GenericPAKEntry entry = new GenericPAKEntry(reader);

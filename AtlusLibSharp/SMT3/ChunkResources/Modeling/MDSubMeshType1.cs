@@ -69,7 +69,7 @@
             _materialID = reader.ReadUInt16();
             _batchOffset = reader.ReadInt32();
 
-            reader.BaseStream.Seek((uint)model.offset + MDChunk.MD00_DATA_START_ADDRESS + _batchOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek((uint)model.offset + MDChunk.DATA_START_ADDRESS + _batchOffset, SeekOrigin.Begin);
             _vifPackets = VIFCodeEvaluator.EvaluateBlock(reader, _batchSize);
             _batches = MDSubMeshVifBatch.ParseBatches(_vifPackets, UsedNodeCount);
 

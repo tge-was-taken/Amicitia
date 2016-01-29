@@ -14,10 +14,10 @@ namespace AtlusLibSharp.Persona3.Archives
         private byte[] _data;
 
         // Constructors
-        public GenericVitaArchiveEntry(string path)
+        public GenericVitaArchiveEntry(string filepath)
         {
-            _name = Path.GetFileName(path);
-            _data = File.ReadAllBytes(path);
+            _name = Path.GetFileName(filepath);
+            _data = File.ReadAllBytes(filepath);
         }
 
         public GenericVitaArchiveEntry(string name, Stream stream)

@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.SMT3.ChunkResources.Animation
 {
-    public enum MTKeyType : short
+    public enum ABKeyType : short
     {
         Translation = 0,
         Scale       = 2,

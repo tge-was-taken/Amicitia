@@ -4,6 +4,7 @@ using System.IO;
 using Amicitia.ResourceWrappers;
 using Amicitia.Utilities;
 using AtlusLibSharp.SMT3.ChunkResources.Graphics;
+using AtlusLibSharp.Utilities;
 
 namespace Amicitia
 {
@@ -93,7 +94,7 @@ namespace Amicitia
                 mainPictureBox.Visible = true;
 
                 // TODO: Implement generic texture interface
-                mainPictureBox.Image = res.GetWrappedObject<TMXChunk>().GetBitmap();
+                mainPictureBox.Image = res.GetWrappedObject<TMXFile>().GetBitmap();
             }
             else
             {

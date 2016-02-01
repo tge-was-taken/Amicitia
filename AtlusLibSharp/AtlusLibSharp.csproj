@@ -63,54 +63,47 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BinaryFileBase.cs" />
+    <Compile Include="Persona3\CRIWare\CVMDirectoryListingEntry.cs" />
+    <Compile Include="Persona3\CRIWare\CVMFile.cs" />
     <Compile Include="Generic\Archives\GenericPAKFile.cs" />
-    <Compile Include="Generic\Archives\GenericVitaArchive.cs" />
-    <Compile Include="Generic\Archives\GenericVitaArchiveEntry.cs" />
+    <Compile Include="Generic\Archives\GenericPSVitaArchive.cs" />
+    <Compile Include="Generic\Archives\GenericPSVitaArchiveEntry.cs" />
     <Compile Include="Generic\Archives\IArchive.cs" />
     <Compile Include="Persona3\Archives\BVPArchiveEntry.cs" />
     <Compile Include="Persona3\Archives\BVPArchive.cs" />
     <Compile Include="Generic\Archives\GenericPAKEntry.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\BFChunk.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGDialog.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGDialogToken.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGDialogTokenType.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGMessage.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGMessageFactory.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGMessageType0.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGChunk.cs" />
-    <Compile Include="SMT3\ChunkResources\Scripting\MSGMessageType1.cs" />
+    <Compile Include="Persona3\CRIWare\CVMDirectoryListing.cs" />
+    <Compile Include="Persona3\CRIWare\ISODirectoryRecord.cs" />
+    <Compile Include="Persona3\CRIWare\CVMExecutableListing.cs" />
+    <Compile Include="SMT3\ChunkResources\Graphics\SPR4File.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BFFile.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDDialog.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDDialogToken.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDDialogTokenType.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDMessage.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDMessageFactory.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDRegularMessage.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDFile.cs" />
+    <Compile Include="SMT3\ChunkResources\Scripting\BMDSelectionMessage.cs" />
     <Compile Include="SMT3\DirectoryDataTable.cs" />
     <Compile Include="Utilities\AddressRelocationTableCompression.cs" />
     <Compile Include="Utilities\AlignmentHelper.cs" />
     <Compile Include="Utilities\BinaryIOExtension.cs" />
-    <Compile Include="SMT3\ChunkResources\ChunkFactory.cs" />
     <Compile Include="Utilities\BitHelper.cs" />
     <Compile Include="Utilities\BitmapHelper.cs" />
+    <Compile Include="Utilities\EnumExtension.cs" />
     <Compile Include="Utilities\ICollectionExtension.cs" />
     <Compile Include="Utilities\IListExtension.cs" />
     <Compile Include="Utilities\MatrixExtension.cs" />
     <Compile Include="Utilities\MeshUtilities.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDBoundingBox.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDMaterial.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDMesh.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDChunk.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDNode.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDNodeName.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\NDNM.cs" />
-    <Compile Include="SMT3\ChunkResources\Graphics\SPRChunk.cs" />
+    <Compile Include="SMT3\ChunkResources\Graphics\SPRFile.cs" />
     <Compile Include="SMT3\ChunkResources\Graphics\SPRKeyFrame.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDSubMeshFactory.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDSubMeshType2.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDSubMeshType1.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\IMDSubMesh.cs" />
-    <Compile Include="SMT3\ChunkResources\Animation\MTChunk.cs" />
-    <Compile Include="SMT3\ChunkResources\Animation\MTAnimation.cs" />
-    <Compile Include="SMT3\ChunkResources\Animation\MTKey.cs" />
-    <Compile Include="SMT3\ChunkResources\Animation\MTKeyInfo.cs" />
-    <Compile Include="SMT3\ChunkResources\Animation\MTKeyType.cs" />
-    <Compile Include="SMT3\ChunkResources\Chunk.cs" />
-    <Compile Include="SMT3\ChunkResources\Modeling\MDSubMeshVifBatch.cs" />
-    <Compile Include="SMT3\ChunkResources\Graphics\TMXChunk.cs" />
+    <Compile Include="SMT3\ChunkResources\Animation\ABFile.cs" />
+    <Compile Include="SMT3\ChunkResources\Animation\ABAnimation.cs" />
+    <Compile Include="SMT3\ChunkResources\Animation\ABKey.cs" />
+    <Compile Include="SMT3\ChunkResources\Animation\ABKeyInfo.cs" />
+    <Compile Include="SMT3\ChunkResources\Animation\ABKeyType.cs" />
+    <Compile Include="SMT3\ChunkResources\Graphics\TMXFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PS2\Graphics\Enum.cs" />
     <Compile Include="PS2\Graphics\PixelFormatHelper.cs" />
@@ -118,8 +111,9 @@
     <Compile Include="PS2\Graphics\VIFCodeEvaluator.cs" />
     <Compile Include="PS2\Graphics\VIFTag.cs" />
     <Compile Include="PS2\Graphics\VIFUnpack.cs" />
-    <Compile Include="SMT3\ChunkResources\Graphics\TXPChunk.cs" />
+    <Compile Include="SMT3\ChunkResources\Graphics\TBFile.cs" />
     <Compile Include="SMT3\ChunkResources\Scripting\TypeTableEntry.cs" />
+    <Compile Include="Utilities\StreamExtension.cs" />
     <Compile Include="WuQuantizer\Box.cs" />
     <Compile Include="WuQuantizer\ColorData.cs" />
     <Compile Include="WuQuantizer\CubeCut.cs" />
@@ -135,7 +129,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SMT3\ChunkResources\Modeling\" />
+  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
       <Visible>False</Visible>

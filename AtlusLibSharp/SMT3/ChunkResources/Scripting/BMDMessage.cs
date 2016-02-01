@@ -4,12 +4,12 @@
     using System.IO;
     using System.Xml.Linq;
 
-    public abstract class MSGMessage
+    public abstract class BMDMessage
     {
         internal const int MSG_MESSAGE_NAME_LENGTH = 24;
 
         protected string _name;
-        protected MSGDialog[] _dialogs;
+        protected BMDDialog[] _dialogs;
         protected int[] _dialogPointerTable;
         protected int _dialogDataLength;
 
@@ -18,13 +18,15 @@
             get { return _name; }
         }
 
-        public MSGDialog[] Dialogs
+        public BMDDialog[] Dialogs
         {
             get { return _dialogs; }
         }
 
+        public abstract MessageType MessageType { get; }
+
         protected internal abstract XElement ConvertToXmlElement(params object[] param);
 
-        protected internal abstract void Write(BinaryWriter writer, ref List<int> addressList, int fp);
+        protected internal abstract void InternalWrite(BinaryWriter writer, ref List<int> addressList, int fp);
     }
 }

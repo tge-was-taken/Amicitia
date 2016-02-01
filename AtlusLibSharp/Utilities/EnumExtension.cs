@@ -1,8 +1,8 @@
-﻿namespace Amicitia.Utilities
+﻿namespace AtlusLibSharp.Utilities
 {
     using System;
 
-    internal static class EnumExtension
+    public static class EnumExtension
     {
         public static bool HasFlagFast(this Enum var, Enum val)
         {

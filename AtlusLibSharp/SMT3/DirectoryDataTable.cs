@@ -5,22 +5,22 @@ using System.Diagnostics;
 
 namespace AtlusLibSharp.SMT3
 {
-    public class DirectoryDataTable
+    public class DDTFile
     {
         internal const int IMG_BLOCKSIZE = 0x800;
 
-        private DirectoryDataTableDirectoryEntry _rootDirectory;
+        private DDTDirectoryEntry _rootDirectory;
 
-        public DirectoryDataTableDirectoryEntry RootDirectory
+        public DDTDirectoryEntry RootDirectory
         {
             get { return _rootDirectory; }
         }
 
-        public DirectoryDataTable(string path)
+        public DDTFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                _rootDirectory = (DirectoryDataTableDirectoryEntry)DirectoryDataTableEntryFactory.GetEntry(null, reader);
+                _rootDirectory = (DDTDirectoryEntry)DDTEntryFactory.GetEntry(null, reader);
             }
         }
     }
@@ -35,14 +35,14 @@ namespace AtlusLibSharp.SMT3
         */
     }
 
-    public abstract class DirectoryDataTableEntry
+    public abstract class DDTEntry
     {
         internal const int SizeInBytes = 12;
 
         protected int _nameOffset;
         protected uint _dataOffset;
         protected string _name;
-        protected DirectoryDataTableEntry _parent;
+        protected DDTEntry _parent;
 
         public string Name
         {
@@ -50,7 +50,7 @@ namespace AtlusLibSharp.SMT3
             set { _name = value; }
         }
 
-        public DirectoryDataTableEntry Parent
+        public DDTEntry Parent
         {
             get { return _parent; }
         }
@@ -65,29 +65,29 @@ namespace AtlusLibSharp.SMT3
         internal abstract void InternalWrite(DirectoryDataTableWritingContext ctx);
     }
 
-    public class DirectoryDataTableDirectoryEntry : DirectoryDataTableEntry
+    public class DDTDirectoryEntry : DDTEntry
     {
         private int _numChildren;
-        private DirectoryDataTableEntry[] _childEntries;
+        private DDTEntry[] _childEntries;
 
-        public DirectoryDataTableEntry[] Entries
+        public DDTEntry[] Entries
         {
             get { return _childEntries; }
         }
 
-        public DirectoryDataTableDirectoryEntry(BinaryReader reader, DirectoryDataTableEntry parent, int nameOffset, uint dataOffset, int numChildren)
+        public DDTDirectoryEntry(BinaryReader reader, DDTEntry parent, int nameOffset, uint dataOffset, int numChildren)
         {
             _parent = parent;
             _nameOffset = nameOffset;
             _dataOffset = dataOffset;
             _name = reader.ReadCStringAtOffset(_nameOffset);
             _numChildren = numChildren;
-            _childEntries = new DirectoryDataTableEntry[numChildren];
+            _childEntries = new DDTEntry[numChildren];
 
             reader.Seek(dataOffset, SeekOrigin.Begin);
             for (int i = 0; i < numChildren; i++)
             {
-                _childEntries[i] = DirectoryDataTableEntryFactory.GetEntry(this, reader);
+                _childEntries[i] = DDTEntryFactory.GetEntry(this, reader);
             }
         }
 
@@ -108,16 +108,16 @@ namespace AtlusLibSharp.SMT3
         }
     }
 
-    public class DirectoryDataTableFileEntry : DirectoryDataTableEntry
+    public class DDTFileEntry : DDTEntry
     {
         private int _size;
 
-        public DirectoryDataTableFileEntry(BinaryReader reader, DirectoryDataTableEntry parent, int nameOffset, uint dataOffset, int size)
+        public DDTFileEntry(BinaryReader reader, DDTEntry parent, int nameOffset, uint dataOffset, int size)
         {
             _parent = parent;
             _nameOffset = nameOffset;
             _name = reader.ReadCStringAtOffset(_nameOffset);
-            _dataOffset = dataOffset * DirectoryDataTable.IMG_BLOCKSIZE;
+            _dataOffset = dataOffset * DDTFile.IMG_BLOCKSIZE;
             _size = size;
         }
 
@@ -137,9 +137,9 @@ namespace AtlusLibSharp.SMT3
         }
     }
 
-    internal static class DirectoryDataTableEntryFactory
+    internal static class DDTEntryFactory
     {
-        public static DirectoryDataTableEntry GetEntry(DirectoryDataTableEntry parent, BinaryReader reader)
+        public static DDTEntry GetEntry(DDTEntry parent, BinaryReader reader)
         {
             int nameOffset = reader.ReadInt32();
             uint dataOffset = reader.ReadUInt32();
@@ -147,16 +147,16 @@ namespace AtlusLibSharp.SMT3
 
             long posNextEntry = reader.GetPosition();
 
-            DirectoryDataTableEntry entry;
+            DDTEntry entry;
 
             if (numData < 0)
             {
                 int numChildren = ~numData + 1;
-                entry = new DirectoryDataTableDirectoryEntry(reader, parent, nameOffset, dataOffset, numChildren);
+                entry = new DDTDirectoryEntry(reader, parent, nameOffset, dataOffset, numChildren);
             }
             else
             {
-                entry = new DirectoryDataTableFileEntry(reader, parent, nameOffset, dataOffset, numData);
+                entry = new DDTFileEntry(reader, parent, nameOffset, dataOffset, numData);
             }
 
             reader.Seek(posNextEntry, SeekOrigin.Begin);

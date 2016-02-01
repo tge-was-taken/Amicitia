@@ -15,7 +15,7 @@
         };
 
         // Constructor
-        public TMXWrapper(string text, TMXChunk tmx) : base(text, tmx) { }
+        public TMXWrapper(string text, TMXFile tmx) : base(text, tmx) { }
 
         // Properties
         [Category("Texture info")]
@@ -73,7 +73,7 @@
                     return;
                 }
 
-                TMXChunk tmx = GetWrappedObject<TMXChunk>(GetWrapperOptions.ForceRebuild);
+                TMXFile tmx = GetWrappedObject<TMXFile>(GetWrapperOptions.ForceRebuild);
 
                 switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
@@ -102,22 +102,24 @@
                 switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.TMX:
-                        ReplaceWrappedObjectAndInitialize(TMXChunk.LoadFrom(openFileDlg.FileName));
+                        ReplaceWrappedObjectAndInitialize(TMXFile.LoadFrom(openFileDlg.FileName));
                         break;
                     case SupportedFileType.PNG:
-                        ReplaceWrappedObjectAndInitialize(new TMXChunk(
+                        ReplaceWrappedObjectAndInitialize(new TMXFile(
                             (System.Drawing.Bitmap)System.Drawing.Image.FromFile(openFileDlg.FileName),
                             PixelFormat,
                             Comment));
                         break;
                 }
+
+                MessageBox.Show(Text, Text);
             }
         }
 
         // Protected Methods
         protected override void RebuildWrappedObject()
         {
-            TMXChunk tmx = GetWrappedObject<TMXChunk>();
+            TMXFile tmx = GetWrappedObject<TMXFile>();
             tmx.HorizontalWrappingMode = HorizontalWrappingMode;
             tmx.VerticalWrappingMode = VerticalWrappingMode;
             tmx.UserTextureID = TextureID;
@@ -128,7 +130,7 @@
 
         protected override void InitializeWrapper()
         {
-            TMXChunk tmx = GetWrappedObject<TMXChunk>();
+            TMXFile tmx = GetWrappedObject<TMXFile>();
             PaletteCount = tmx.PaletteCount;
             PaletteFormat = tmx.PaletteFormat;
             Width = tmx.Width;

@@ -11,11 +11,11 @@ namespace Amicitia.ResourceWrappers
         // Fields
         private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
         {
-            SupportedFileType.SPR
+            SupportedFileType.SPR0
         };
 
         // Constructor
-        public SPRWrapper(string text, SPRChunk spr) : base(text, spr) { }
+        public SPRWrapper(string text, SPRFile spr) : base(text, spr) { }
 
         // Properties
         public int KeyFrameCount
@@ -30,7 +30,7 @@ namespace Amicitia.ResourceWrappers
 
         internal SPRKeyFramesWrapper KeyFramesWrapper { get; private set; }
 
-        internal SPRTexturesWrapper TexturesWrapper { get; private set; }
+        internal SPR0TexturesWrapper TexturesWrapper { get; private set; }
 
         // Event Handlers
         public override void Export(object sender, EventArgs e)
@@ -45,11 +45,11 @@ namespace Amicitia.ResourceWrappers
                     return;
                 }
 
-                SPRChunk spr = GetWrappedObject<SPRChunk>(GetWrapperOptions.ForceRebuild);
+                SPRFile spr = GetWrappedObject<SPRFile>(GetWrapperOptions.ForceRebuild);
 
                 switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
-                    case SupportedFileType.SPR:
+                    case SupportedFileType.SPR0:
                         spr.Save(saveFileDlg.FileName);
                         break;
                 }
@@ -70,8 +70,8 @@ namespace Amicitia.ResourceWrappers
 
                 switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
-                    case SupportedFileType.SPR:
-                        ReplaceWrappedObjectAndInitialize(SPRChunk.LoadFrom(openFileDlg.FileName));
+                    case SupportedFileType.SPR0:
+                        ReplaceWrappedObjectAndInitialize(SPRFile.LoadFrom(openFileDlg.FileName));
                         break;
                 }
             }
@@ -81,17 +81,17 @@ namespace Amicitia.ResourceWrappers
         protected override void RebuildWrappedObject()
         {
             SPRKeyFrame[] keyFrames = KeyFramesWrapper.GetWrappedObject<SPRKeyFrame[]>(GetWrapperOptions.ForceRebuild);
-            TMXChunk[] textures = TexturesWrapper.GetWrappedObject<TMXChunk[]>(GetWrapperOptions.ForceRebuild);
-            ReplaceWrappedObjectAndInitialize(new SPRChunk(keyFrames, textures));
+            TMXFile[] textures = TexturesWrapper.GetWrappedObject<TMXFile[]>(GetWrapperOptions.ForceRebuild);
+            ReplaceWrappedObjectAndInitialize(new SPRFile(keyFrames, textures));
         }
 
         protected override void InitializeWrapper()
         {
             Nodes.Clear();
 
-            SPRChunk spr = GetWrappedObject<SPRChunk>();
+            SPRFile spr = GetWrappedObject<SPRFile>();
             KeyFramesWrapper = new SPRKeyFramesWrapper("KeyFrames", spr.KeyFrames);
-            TexturesWrapper = new SPRTexturesWrapper("Textures", spr.Textures);
+            TexturesWrapper = new SPR0TexturesWrapper("Textures", spr.Textures);
 
             Nodes.Add(KeyFramesWrapper, TexturesWrapper);
 

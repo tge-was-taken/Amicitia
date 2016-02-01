@@ -22,7 +22,7 @@ namespace arctool
 
             if (Path.HasExtension(args[0]))
             {
-                if (!GenericVitaArchive.VerifyFileType(args[0]))
+                if (!GenericPSVitaArchive.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper arc file!");
                     if (GenericPAK.VerifyFileType(args[0]))
@@ -32,7 +32,7 @@ namespace arctool
                     return;
                 }
 
-                GenericVitaArchive arc = new GenericVitaArchive(args[0]);
+                GenericPSVitaArchive arc = new GenericPSVitaArchive(args[0]);
                 string path = Path.GetFileNameWithoutExtension(args[0]);
                 Directory.CreateDirectory(path);
                 for (int i = 0; i < arc.EntryCount; i++)
@@ -42,7 +42,7 @@ namespace arctool
             }
             else if (!Path.HasExtension(args[0]))
             {
-                GenericVitaArchive arc = GenericVitaArchive.Create(args[0]);
+                GenericPSVitaArchive arc = GenericPSVitaArchive.Create(args[0]);
                 arc.Save(Path.GetFileName(args[0]) + ".arc");
             }
         }

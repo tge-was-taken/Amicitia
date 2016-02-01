@@ -14,12 +14,13 @@
         Clamp  = 0x01
     }
 
-    public class TMXChunk : Chunk
+    public class TMXFile : BinaryFileBase
     {
         // Internal Constants
-        internal const int    FLAG = 0x0002;
+        internal const byte HEADER_SIZE = 0x10;
+        internal const short FLAG = 0x0002;
         internal const string TAG = "TMX0";
-        internal const int    COMMENT_MAX_LENGTH = 28;
+        internal const byte COMMENT_MAX_LENGTH = 28;
 
         // Private Fields
         private byte _numPalettes;
@@ -45,14 +46,12 @@
         private Bitmap _bitmap;
 
         // Constructors
-        internal TMXChunk(ushort id, int length, BinaryReader reader)
-            : base(FLAG, id, length, TAG)
+        internal TMXFile(BinaryReader reader)
         {
-            Read(reader);
+            InternalRead(reader);
         }
 
-        public TMXChunk(Bitmap bitmap, PixelFormat pixelFormat, string comment = "")
-            : base(FLAG, 0, 0, TAG)
+        public TMXFile(Bitmap bitmap, PixelFormat pixelFormat, string comment = "")
         {
             _width = (ushort)bitmap.Width;
             _height = (ushort)bitmap.Height;
@@ -257,14 +256,16 @@
         }
 
         // Public Static Methods
-        public static TMXChunk LoadFrom(string path)
+        public static TMXFile LoadFrom(string path)
         {
-            return ChunkFactory.Get<TMXChunk>(path);
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
+                return new TMXFile(reader);
         }
 
-        public static TMXChunk LoadFrom(Stream stream)
+        public static TMXFile LoadFrom(Stream stream, bool leaveStreamOpen)
         {
-            return ChunkFactory.Get<TMXChunk>(stream);
+            using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
+                return new TMXFile(reader);
         }
 
         // Public Methods
@@ -289,10 +290,10 @@
         // Internal methods
         internal override void InternalWrite(BinaryWriter writer)
         {
-            int fp = (int)writer.BaseStream.Position;
+            int posFileStart = (int)writer.BaseStream.Position;
 
             // Seek past chunk header
-            writer.BaseStream.Seek(HEADER_SIZE + 4, SeekOrigin.Current);
+            writer.BaseStream.Seek(HEADER_SIZE, SeekOrigin.Current);
 
             writer.Write(_numPalettes);
             writer.Write((byte)_paletteFmt);
@@ -317,19 +318,18 @@
             WritePixels(writer);
 
             // Calculate the length
-            int endOffset = (int)writer.BaseStream.Position;
-            Length = endOffset - fp;
+            int posFileEnd = (int)writer.BaseStream.Position;
+            int length = posFileEnd - posFileStart;
 
             // Seek back to the chunk header and write it
-            writer.BaseStream.Seek(fp, SeekOrigin.Begin);
-            writer.Write(Flags);
-            writer.Write(UserID);
-            writer.Write(Length);
-            writer.WriteCString(Tag, 4);
-            writer.AlignPosition(16);
+            writer.BaseStream.Seek(posFileStart, SeekOrigin.Begin);
+            writer.Write(FLAG);
+            writer.Write((short)0); // userID
+            writer.Write(length);
+            writer.WriteCString(TAG, 4);
 
             // Seek back to the end of the data
-            writer.BaseStream.Seek(endOffset, SeekOrigin.Begin);
+            writer.BaseStream.Seek(posFileEnd, SeekOrigin.Begin);
             writer.AlignPosition(64);
         }
 
@@ -367,9 +367,20 @@
             return dim / div;
         }
 
-        private void Read(BinaryReader reader)
+        private void InternalRead(BinaryReader reader)
         {
+            long posFileStart = reader.GetPosition();
+            short flag = reader.ReadInt16();
+            short userID = reader.ReadInt16();
+            int length = reader.ReadInt32();
+            string tag = reader.ReadCString(4);
             reader.AlignPosition(16);
+
+            if (tag != TAG)
+            {
+                throw new InvalidDataException();
+            }
+
             _numPalettes = reader.ReadByte();
             _paletteFmt = (PixelFormat)reader.ReadByte();
             _width = reader.ReadUInt16();

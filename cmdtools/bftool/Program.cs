@@ -22,17 +22,17 @@ namespace bftool
 
             if (args[0].EndsWith(".BF", StringComparison.InvariantCultureIgnoreCase))
             {
-                BFChunk bf = ChunkFactory.Get<BFChunk>(args[0]);
+                BFFile bf = BFFile.LoadFrom(args[0]);
                 string baseName = Path.GetFileNameWithoutExtension(args[0]);
                 bf.Extract(Path.GetDirectoryName(baseName) + baseName + "\\" + baseName);
             }
             else if (args[0].EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
             {
-                BFChunk bf;
+                BFFile bf;
 
                 try
                 {
-                    bf = new BFChunk(args[0]);
+                    bf = new BFFile(args[0]);
                 }
                 catch (InvalidDataException)
                 {

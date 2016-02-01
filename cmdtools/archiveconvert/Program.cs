@@ -20,9 +20,9 @@ namespace archiveconvert
                 return;
             }
 
-            if (GenericVitaArchive.VerifyFileType(args[0]))
+            if (GenericPSVitaArchive.VerifyFileType(args[0]))
             {
-                GenericVitaArchive arc = new GenericVitaArchive(args[0]);
+                GenericPSVitaArchive arc = new GenericPSVitaArchive(args[0]);
                 for (int i = 0; i < arc.EntryCount; i++)
                 {
                     GenericVitaArchiveEntry entry = arc.Entries[i];
@@ -43,7 +43,7 @@ namespace archiveconvert
                     pak.Entries[i] = entry;
                 }
 
-                GenericVitaArchive arc = GenericVitaArchive.Create(pak);
+                GenericPSVitaArchive arc = GenericPSVitaArchive.Create(pak);
                 arc.Save(args[0] + ".arc");
             }
             else
@@ -56,9 +56,9 @@ namespace archiveconvert
         {
             using (MemoryStream mStream = new MemoryStream(entry.Data))
             {
-                if (GenericVitaArchive.VerifyFileType(mStream))
+                if (GenericPSVitaArchive.VerifyFileType(mStream))
                 {
-                    GenericVitaArchive subArc = new GenericVitaArchive(mStream);
+                    GenericPSVitaArchive subArc = new GenericPSVitaArchive(mStream);
                     for (int i = 0; i < subArc.EntryCount; i++)
                     {
                         GenericVitaArchiveEntry subEntry = subArc.Entries[i];
@@ -85,7 +85,7 @@ namespace archiveconvert
                         subPak.Entries[i] = subEntry;
                     }
 
-                    entry = new GenericPAKEntry(entry.Name, GenericVitaArchive.Create(subPak).GetBytes());
+                    entry = new GenericPAKEntry(entry.Name, GenericPSVitaArchive.Create(subPak).GetBytes());
                 }
             }
         }

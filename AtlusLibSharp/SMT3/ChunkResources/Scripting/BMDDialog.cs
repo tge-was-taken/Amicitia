@@ -6,34 +6,34 @@
     using System.Xml.Linq;
     using System.Text;
 
-    public class MSGDialog
+    public class BMDDialog
     {
-        internal List<MSGDialogToken> dialogTokens;
+        internal List<BMDDialogToken> dialogTokens;
 
-        internal MSGDialog(BinaryReader reader)
+        internal BMDDialog(BinaryReader reader)
         {
-            dialogTokens = new List<MSGDialogToken>();
+            dialogTokens = new List<BMDDialogToken>();
             Read(reader);
         }
 
-        internal MSGDialog()
+        internal BMDDialog()
         {
-            dialogTokens = new List<MSGDialogToken>();
+            dialogTokens = new List<BMDDialogToken>();
         }
 
         internal XElement ConvertToXmlElement()
         {
             XElement dlgElement = new XElement("Dialog");
 
-            foreach (MSGDialogToken dlgToken in dialogTokens)
+            foreach (BMDDialogToken dlgToken in dialogTokens)
             {
-                string type = Enum.IsDefined(typeof(MSGDialogTokenType), dlgToken.Type) ? dlgToken.Type.ToString() : ((byte)dlgToken.Type).ToString("X"); 
+                string type = Enum.IsDefined(typeof(BMDDialogTokenType), dlgToken.Type) ? dlgToken.Type.ToString() : ((byte)dlgToken.Type).ToString("X"); 
 
                 XElement tokenElement =
                     new XElement("Token",
                     new XAttribute("Type", type));
 
-                if (dlgToken.Type == MSGDialogTokenType.Text)
+                if (dlgToken.Type == BMDDialogTokenType.Text)
                 {
                     string str = "\n" + Encoding.GetEncoding("Shift_JIS").GetString(dlgToken.Data);
                     tokenElement.Add(new XText(str));
@@ -55,7 +55,7 @@
         {
             for (int i = 0; i < dialogTokens.Count; i++)
             {
-                if (dialogTokens[i].Type != MSGDialogTokenType.Text)
+                if (dialogTokens[i].Type != BMDDialogTokenType.Text)
                 {
                     writer.Write((byte)dialogTokens[i].Type);
                 }
@@ -73,7 +73,7 @@
         {
             while (true)
             {
-                MSGDialogToken token = new MSGDialogToken();
+                BMDDialogToken token = new BMDDialogToken();
 
                 byte b = reader.ReadByte();
 
@@ -93,9 +93,9 @@
                         numBytes += (2 * ((b & 0x0F) - 1));
                     }
 
-                    token = new MSGDialogToken
+                    token = new BMDDialogToken
                     {
-                        Type = (MSGDialogTokenType)b,
+                        Type = (BMDDialogTokenType)b,
                         Data = reader.ReadBytes(numBytes)
                     };
                 }
@@ -119,9 +119,9 @@
                         }
                     }
 
-                    token = new MSGDialogToken
+                    token = new BMDDialogToken
                     {
-                        Type = MSGDialogTokenType.Text,
+                        Type = BMDDialogTokenType.Text,
                         Data = textBytes.ToArray()
                     };
                 }

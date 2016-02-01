@@ -15,7 +15,7 @@
         };
 
         // Constructor
-        public ARCArchiveWrapper(string text, GenericVitaArchive arc) : base(text, arc) { }
+        public ARCArchiveWrapper(string text, GenericPSVitaArchive arc) : base(text, arc) { }
 
         // Properties
         public int EntryCount
@@ -46,10 +46,10 @@
                 switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.ARCArchive:
-                        ReplaceWrappedObjectAndInitialize(new GenericVitaArchive(openFileDlg.FileName));
+                        ReplaceWrappedObjectAndInitialize(new GenericPSVitaArchive(openFileDlg.FileName));
                         break;
                     case SupportedFileType.GenericPAK:
-                        ReplaceWrappedObjectAndInitialize(GenericVitaArchive.Create(new GenericPAK(openFileDlg.FileName)));
+                        ReplaceWrappedObjectAndInitialize(GenericPSVitaArchive.Create(new GenericPAK(openFileDlg.FileName)));
                         break;
                 }
             }
@@ -67,7 +67,7 @@
                     return;
                 }
 
-                GenericVitaArchive arc = GetWrappedObject<GenericVitaArchive>(GetWrapperOptions.ForceRebuild);
+                GenericPSVitaArchive arc = GetWrappedObject<GenericPSVitaArchive>(GetWrapperOptions.ForceRebuild);
 
                 switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
@@ -84,7 +84,7 @@
         // Protected methods
         protected override void RebuildWrappedObject()
         {
-            GenericVitaArchive arc = new GenericVitaArchive();
+            GenericPSVitaArchive arc = new GenericPSVitaArchive();
             foreach (ResourceWrapper node in Nodes)
             {
                 arc.Entries.Add(new GenericVitaArchiveEntry(node.Text, node.GetBytes()));
@@ -96,7 +96,7 @@
         protected override void InitializeWrapper()
         {
             Nodes.Clear();
-            GenericVitaArchive bin = GetWrappedObject<GenericVitaArchive>();
+            GenericPSVitaArchive bin = GetWrappedObject<GenericPSVitaArchive>();
             foreach (GenericVitaArchiveEntry entry in bin.Entries)
             {
                 Nodes.Add(ResourceFactory.GetResource(entry.Name, new MemoryStream(entry.Data)));

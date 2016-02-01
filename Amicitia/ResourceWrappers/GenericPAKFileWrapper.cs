@@ -42,7 +42,7 @@
                         ReplaceWrappedObjectAndInitialize(new GenericPAK(openFileDlg.FileName));
                         break;
                     case SupportedFileType.ARCArchive:
-                        ReplaceWrappedObjectAndInitialize(GenericPAK.Create(new GenericVitaArchive(openFileDlg.FileName)));
+                        ReplaceWrappedObjectAndInitialize(GenericPAK.Create(new GenericPSVitaArchive(openFileDlg.FileName)));
                         break;
                 }
             }
@@ -68,7 +68,7 @@
                         binArchive.Save(saveFileDlg.FileName);
                         break;
                     case SupportedFileType.ARCArchive:
-                        GenericVitaArchive.Create(binArchive).Save(saveFileDlg.FileName);
+                        GenericPSVitaArchive.Create(binArchive).Save(saveFileDlg.FileName);
                         break;
                 }
             }

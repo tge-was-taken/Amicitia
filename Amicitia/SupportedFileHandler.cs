@@ -13,21 +13,28 @@
     {
         private static readonly SupportedFileInfo[] _supportedFiles = new SupportedFileInfo[]
         {
-            new SupportedFileInfo("Atlus Generic Archive",          SupportedFileType.GenericPAK,   false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac"),
-            new SupportedFileInfo("Atlus PS2 Texture",              SupportedFileType.TMX,          false, ".tmx"),
-            new SupportedFileInfo("Portable Network Graphics",      SupportedFileType.PNG,          true , ".png"),
-            new SupportedFileInfo("Atlus PS2 Sprite Container",     SupportedFileType.SPR,          false, ".spr"),
+            // Non-openable formats
+            new SupportedFileInfo("Portable Network Graphics",      SupportedFileType.PNG,          true,  ".png"),
+
+            // Archive formats
+            new SupportedFileInfo("Atlus Generic Archive",          SupportedFileType.GenericPAK,   false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack"),
             new SupportedFileInfo("Persona 3 Battle Voice Package", SupportedFileType.BVPArchive,   false, ".bvp"),
-            new SupportedFileInfo("Atlus Vita Archive",             SupportedFileType.ARCArchive,   false, ".arc", ".bin", ".pak", ".pac")
+            new SupportedFileInfo("Atlus PSVita Archive",           SupportedFileType.ARCArchive,   false, ".arc", ".bin", ".pak", ".pac"),
+
+            // Texture formats
+            new SupportedFileInfo("Atlus PS2 Texture",              SupportedFileType.TMX,          false, ".tmx"),
+            new SupportedFileInfo("Atlus PS2 Sprite Container",     SupportedFileType.SPR0,         false, ".spr"),
+            new SupportedFileInfo("Atlus PSVita Sprite Container",  SupportedFileType.SPR4,         false, ".spr4")
         };
 
         private static readonly Dictionary<SupportedFileType, Type> _supportedFileTypeEnumToType = new Dictionary<SupportedFileType, Type>()
         {
             { SupportedFileType.GenericPAK,  typeof(GenericPAK)},
-            { SupportedFileType.TMX, typeof(TMXChunk) },
-            { SupportedFileType.SPR, typeof(SPRChunk) },
             { SupportedFileType.BVPArchive, typeof(BVPArchive) },
-            { SupportedFileType.ARCArchive, typeof(GenericVitaArchive) }
+            { SupportedFileType.ARCArchive, typeof(GenericPSVitaArchive) },
+            { SupportedFileType.TMX, typeof(TMXFile) },
+            { SupportedFileType.SPR0, typeof(SPRFile) },
+            { SupportedFileType.SPR4, typeof(SPR4File) },
         };
 
         private static readonly string _fileFilter;
@@ -147,6 +154,7 @@
                     continue;
 
                 filter += SupportedFileInfoToFilterString(_supportedFiles[i]);
+
                 if (i != _supportedFiles.Length - 1)
                 {
                     // For every entry that isn't the last, add a seperator

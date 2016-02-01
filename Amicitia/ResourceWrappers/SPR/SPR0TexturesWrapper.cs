@@ -2,9 +2,9 @@
 {
     using AtlusLibSharp.SMT3.ChunkResources.Graphics;
 
-    internal class SPRTexturesWrapper : ResourceWrapper
+    internal class SPR0TexturesWrapper : ResourceWrapper
     {
-        public SPRTexturesWrapper(string text, TMXChunk[] textures) : base(text, textures) { }
+        public SPR0TexturesWrapper(string text, TMXFile[] textures) : base(text, textures) { }
 
         // Properties
         protected internal override bool IsExportable
@@ -35,10 +35,10 @@
         // Protected Methods
         protected override void RebuildWrappedObject()
         {
-            TMXChunk[] textures = new TMXChunk[Nodes.Count];
+            TMXFile[] textures = new TMXFile[Nodes.Count];
             for (int i = 0; i < Nodes.Count; i++)
             {
-                textures[i] = ((TMXWrapper)Nodes[i]).GetWrappedObject<TMXChunk>(GetWrapperOptions.ForceRebuild);
+                textures[i] = ((TMXWrapper)Nodes[i]).GetWrappedObject<TMXFile>(GetWrapperOptions.ForceRebuild);
             }
 
             ReplaceWrappedObjectAndInitialize(textures);
@@ -47,10 +47,10 @@
         protected override void InitializeWrapper()
         {
             Nodes.Clear();
-            TMXChunk[] textures = GetWrappedObject<TMXChunk[]>();
+            TMXFile[] textures = GetWrappedObject<TMXFile[]>();
 
             int index = -1;
-            foreach (TMXChunk texture in textures)
+            foreach (TMXFile texture in textures)
             {
                 ++index;
 

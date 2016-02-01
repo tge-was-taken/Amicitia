@@ -9,17 +9,17 @@
 
     using Utilities;
 
-    public class MSGMessageType0 : MSGMessage
+    public class BMDRegularMessage : BMDMessage
     {
         private ushort _numDialogs;
         private short _actor;
 
-        internal MSGMessageType0(BinaryReader reader, int fp)
+        internal BMDRegularMessage(BinaryReader reader, int fp)
         {
             Read(reader, fp);
         }
 
-        internal MSGMessageType0(XElement xElement)
+        internal BMDRegularMessage(XElement xElement)
         {
             ParseXmlElement(xElement);
         }
@@ -34,6 +34,11 @@
             get { return _actor; }
         }
 
+        public override MessageType MessageType
+        {
+            get { return MessageType.Regular; }
+        }
+
         protected internal override XElement ConvertToXmlElement(params object[] param)
         {
             string actorString = "None";
@@ -45,12 +50,12 @@
 
             XElement msgElement =
                 new XElement("Message",
-                new XAttribute("Type", 0),
+                new XAttribute("Type", "Regular"),
                 new XAttribute("Name", _name),
                 new XAttribute("Actor", actorString));
 
 
-            foreach (MSGDialog dlg in Dialogs)
+            foreach (BMDDialog dlg in Dialogs)
             {
                 XElement dlgElement = dlg.ConvertToXmlElement();
                 msgElement.Add(dlgElement);
@@ -59,7 +64,7 @@
             return msgElement;
         }
 
-        protected internal override void Write(BinaryWriter writer, ref List<int> addressList, int fp)
+        protected internal override void InternalWrite(BinaryWriter writer, ref List<int> addressList, int fp)
         {
             // Write header fields
             writer.WriteCString(_name, MSG_MESSAGE_NAME_LENGTH);
@@ -85,7 +90,7 @@
             long dialogDataStart = writer.BaseStream.Position;
             for (int i = 0; i < _numDialogs; i++)
             {
-                _dialogPointerTable[i] = (int)writer.BaseStream.Position - MSGChunk.DATA_START_ADDRESS - fp;
+                _dialogPointerTable[i] = (int)writer.BaseStream.Position - BMDFile.DATA_START_ADDRESS - fp;
                 _dialogs[i].Write(writer);
             }
 
@@ -110,30 +115,30 @@
             _name = xElement.Attribute("Name").Value;
             _numDialogs = (ushort)dialogElements.Length;
             _actor = short.Parse(xElement.Attribute("Actor").Value);
-            _dialogs = new MSGDialog[_numDialogs];
+            _dialogs = new BMDDialog[_numDialogs];
 
             for (int i = 0; i < _numDialogs; i++)
             {
                 XElement[] tokenElements = dialogElements[i].Elements().ToArray();
-                _dialogs[i] = new MSGDialog();
+                _dialogs[i] = new BMDDialog();
 
                 for (int j = 0; j < tokenElements.Length; j++)
                 {
-                    MSGDialogTokenType type;
+                    BMDDialogTokenType type;
                     bool hasNamedType = Enum.TryParse(tokenElements[j].Attribute("Type").Value, out type);
 
                     if (!hasNamedType)
                     {
-                        type = (MSGDialogTokenType)int.Parse(tokenElements[j].Attribute("Type").Value, System.Globalization.NumberStyles.HexNumber);
+                        type = (BMDDialogTokenType)int.Parse(tokenElements[j].Attribute("Type").Value, System.Globalization.NumberStyles.HexNumber);
                     }
 
-                    MSGDialogToken token =
-                        new MSGDialogToken
+                    BMDDialogToken token =
+                        new BMDDialogToken
                         {
                             Type = type
                         };
 
-                    if (token.Type == MSGDialogTokenType.Text)
+                    if (token.Type == BMDDialogTokenType.Text)
                     {
                         if (tokenElements[j].FirstNode != null)
                         {
@@ -175,11 +180,11 @@
             _dialogPointerTable = reader.ReadInt32Array(_numDialogs);
             _dialogDataLength = reader.ReadInt32();
 
-            _dialogs = new MSGDialog[_numDialogs];
+            _dialogs = new BMDDialog[_numDialogs];
             for (int i = 0; i < _numDialogs; i++)
             {
-                reader.BaseStream.Seek(fp + MSGChunk.DATA_START_ADDRESS + _dialogPointerTable[i], SeekOrigin.Begin);
-                _dialogs[i] = new MSGDialog(reader);
+                reader.BaseStream.Seek(fp + BMDFile.DATA_START_ADDRESS + _dialogPointerTable[i], SeekOrigin.Begin);
+                _dialogs[i] = new BMDDialog(reader);
             }
         }
     }

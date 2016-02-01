@@ -1,8 +1,8 @@
 ﻿namespace AtlusLibSharp.SMT3.ChunkResources.Scripting
 {
-    public struct MSGDialogToken
+    public struct BMDDialogToken
     {
-        public MSGDialogTokenType Type;
+        public BMDDialogTokenType Type;
         public byte[] Data;
     }
 }

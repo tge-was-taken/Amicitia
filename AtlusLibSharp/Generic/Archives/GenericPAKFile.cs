@@ -69,7 +69,7 @@
             return new GenericPAK(Directory.GetFiles(directorypath));
         }
 
-        public static GenericPAK Create(GenericVitaArchive arc)
+        public static GenericPAK Create(GenericPSVitaArchive arc)
         {
             GenericPAK pak = new GenericPAK();
             for (int i = 0; i < arc.EntryCount; i++)

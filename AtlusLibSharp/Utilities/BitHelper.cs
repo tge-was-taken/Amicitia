@@ -2,7 +2,7 @@
 {
     using System;
 
-    internal static class BitHelper
+    public static class BitHelper
     {
         // Bitwise operations extensions
         public static bool IsBitSet<T>(T value, int bitIndex) 

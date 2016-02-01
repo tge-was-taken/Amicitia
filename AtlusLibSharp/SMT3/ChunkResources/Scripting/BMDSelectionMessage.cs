@@ -9,30 +9,35 @@
 
     using Utilities;
 
-    public class MSGMessageType1 : MSGMessage
+    public class BMDSelectionMessage : BMDMessage
     {
         private ushort _unk0x18;
         private ushort _numChoices;
 
-        internal MSGMessageType1(BinaryReader reader, int fp)
+        internal BMDSelectionMessage(BinaryReader reader, int fp)
         {
             Read(reader, fp);
         }
 
-        internal MSGMessageType1(XElement xElement)
+        internal BMDSelectionMessage(XElement xElement)
         {
             ParseXmlElement(xElement);
+        }
+
+        public override MessageType MessageType
+        {
+            get { return MessageType.Selection; }
         }
 
         protected internal override XElement ConvertToXmlElement(params object[] param)
         {
             XElement msgElement =
                 new XElement("Message",
-                new XAttribute("Type", 1),
+                new XAttribute("Type", "Selection"),
                 new XAttribute("Name", _name));
 
 
-            foreach (MSGDialog dlg in Dialogs)
+            foreach (BMDDialog dlg in Dialogs)
             {
                 XElement dlgElement = dlg.ConvertToXmlElement();
                 msgElement.Add(dlgElement);
@@ -41,7 +46,7 @@
             return msgElement;
         }
 
-        protected internal override void Write(BinaryWriter writer, ref List<int> addressList, int fp)
+        protected internal override void InternalWrite(BinaryWriter writer, ref List<int> addressList, int fp)
         {
             // Write header fields
             writer.WriteCString(_name, MSG_MESSAGE_NAME_LENGTH);
@@ -70,7 +75,7 @@
             long dialogDataStart = writer.BaseStream.Position;
             for (int i = 0; i < _numChoices; i++)
             {
-                _dialogPointerTable[i] = (int)writer.BaseStream.Position - MSGChunk.DATA_START_ADDRESS - fp;
+                _dialogPointerTable[i] = (int)writer.BaseStream.Position - BMDFile.DATA_START_ADDRESS - fp;
                 _dialogs[i].Write(writer);
             }
 
@@ -95,30 +100,30 @@
             _name = xElement.Attribute("Name").Value;
             _unk0x18 = 0;
             _numChoices = (ushort)dialogElements.Length;
-            _dialogs = new MSGDialog[_numChoices];
+            _dialogs = new BMDDialog[_numChoices];
 
             for (int i = 0; i < _numChoices; i++)
             {
                 XElement[] tokenElements = dialogElements[i].Elements().ToArray();
-                _dialogs[i] = new MSGDialog();
+                _dialogs[i] = new BMDDialog();
 
                 for (int j = 0; j < tokenElements.Length; j++)
                 {
-                    MSGDialogTokenType type;
+                    BMDDialogTokenType type;
                     bool hasNamedType = Enum.TryParse(tokenElements[j].Attribute("Type").Value, out type);
 
                     if (!hasNamedType)
                     {
-                        type = (MSGDialogTokenType)int.Parse(tokenElements[j].Attribute("Type").Value, System.Globalization.NumberStyles.HexNumber);
+                        type = (BMDDialogTokenType)int.Parse(tokenElements[j].Attribute("Type").Value, System.Globalization.NumberStyles.HexNumber);
                     }
 
-                    MSGDialogToken token =
-                        new MSGDialogToken
+                    BMDDialogToken token =
+                        new BMDDialogToken
                         {
                             Type = type
                         };
 
-                    if (token.Type == MSGDialogTokenType.Text)
+                    if (token.Type == BMDDialogTokenType.Text)
                     {
                         if (tokenElements[j].FirstNode != null)
                         {
@@ -140,6 +145,7 @@
                             token.Data[k - 1] = byte.Parse(attribs[k].Value);
                         }
                     }
+
                     _dialogs[i].dialogTokens.Add(token);
                 }
             }
@@ -153,7 +159,7 @@
 
             if (_unk0x18 != 0)
             {
-                throw new NotImplementedException("MSGMessageType1.Read: _unk0x18 is not zero!");
+                throw new NotImplementedException("MSGChoiceMessage.Read(): _unk0x18 is not zero!");
             }
 
             // unknown zero 4 bytesz
@@ -162,11 +168,11 @@
             _dialogPointerTable = reader.ReadInt32Array(_numChoices);
             _dialogDataLength = reader.ReadInt32();
 
-            _dialogs = new MSGDialog[_numChoices];
+            _dialogs = new BMDDialog[_numChoices];
             for (int i = 0; i < _numChoices; i++)
             {
-                reader.BaseStream.Seek(fp + MSGChunk.DATA_START_ADDRESS + _dialogPointerTable[i], SeekOrigin.Begin);
-                _dialogs[i] = new MSGDialog(reader);
+                reader.BaseStream.Seek(fp + BMDFile.DATA_START_ADDRESS + _dialogPointerTable[i], SeekOrigin.Begin);
+                _dialogs[i] = new BMDDialog(reader);
             }
         }
     }

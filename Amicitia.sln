@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "paktool", "cmdtools\paktool
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "archiveconvert", "cmdtools\archiveconvert\archiveconvert.csproj", "{2AD606BE-CF0B-4D3D-A5D0-A06E6C3FE1D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonaPatcher", "cmdtools\PersonaPatcher\PersonaPatcher.csproj", "{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{2AD606BE-CF0B-4D3D-A5D0-A06E6C3FE1D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AD606BE-CF0B-4D3D-A5D0-A06E6C3FE1D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AD606BE-CF0B-4D3D-A5D0-A06E6C3FE1D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +88,6 @@ Global
 		{F2170F51-67E7-41DC-84A6-E256A89DF32D} = {27DF8CE2-0297-4B9E-90E1-0014201F6F4E}
 		{C7C88BB6-4912-49CC-97F9-78B42CCCF895} = {27DF8CE2-0297-4B9E-90E1-0014201F6F4E}
 		{2AD606BE-CF0B-4D3D-A5D0-A06E6C3FE1D9} = {27DF8CE2-0297-4B9E-90E1-0014201F6F4E}
+		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50} = {27DF8CE2-0297-4B9E-90E1-0014201F6F4E}
 	EndGlobalSection
 EndGlobal

@@ -22,7 +22,8 @@
         GenericPAK,
         TMX,
         PNG,
-        SPR,
+        SPR0,
+        SPR4,
         BVPArchive,
         ARCArchive,
     }

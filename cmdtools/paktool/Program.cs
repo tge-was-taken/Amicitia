@@ -25,7 +25,7 @@ namespace paktool
                 if (!GenericPAK.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper pak file!");
-                    if (GenericVitaArchive.VerifyFileType(args[0]))
+                    if (GenericPSVitaArchive.VerifyFileType(args[0]))
                     {
                         Console.WriteLine("Detected format: Vita .arc archive.");
                     }

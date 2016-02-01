@@ -22,7 +22,7 @@ namespace msgtool
 
             if (args[0].EndsWith(".BMD", StringComparison.InvariantCultureIgnoreCase))
             {
-                MSGChunk msg = ChunkFactory.Get<MSGChunk>(args[0]);
+                BMDFile msg = BMDFile.LoadFrom(args[0]);
 
                 if (msg == null)
                 {
@@ -35,10 +35,10 @@ namespace msgtool
             }
             else if (args[0].EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
             {
-                MSGChunk msg;
+                BMDFile msg;
                 try
                 {
-                    msg = new MSGChunk(args[0]);
+                    msg = new BMDFile(args[0]);
                 }
                 catch (InvalidDataException)
                 {

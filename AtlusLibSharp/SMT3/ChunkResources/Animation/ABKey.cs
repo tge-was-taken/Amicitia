@@ -3,23 +3,22 @@
     using System.IO;
     using Utilities;
 
-    public class MTKey
+    public class ABKey
     {
         // Private constants
-        private const int MT_KEY_HEADER_SIZE = 8;
-        private const int MT_FIXED_POINT = 1 << 15; 
+        private const int HEADER_SIZE = 8;
+        private const int FIXED_POINT = 1 << 15; 
 
         // Private fields
-        private int _size;
         private ushort _numAssignedFrames;
         private ushort _type;
         private ushort[] _assignedFrameIndices;
         private float[][] _boneKeyData;
 
         // Constructors
-        internal MTKey(BinaryReader reader)
+        internal ABKey(BinaryReader reader)
         {
-            Read(reader);
+            InternalRead(reader);
         }
 
         // Properties
@@ -44,10 +43,10 @@
         }
 
         // Methods
-        internal void Write(BinaryWriter writer)
+        internal void InternalWrite(BinaryWriter writer)
         {
-            _size = GetSize();
-            writer.Write(_size);
+            int size = GetSize();
+            writer.Write(size);
             writer.Write(_numAssignedFrames);
             writer.Write(_type);
 
@@ -66,7 +65,7 @@
                         {
                             for (int j = 0; j < 2; j++)
                             {
-                                writer.Write((ushort)(_boneKeyData[i][j] * MT_FIXED_POINT));
+                                writer.Write((ushort)(_boneKeyData[i][j] * FIXED_POINT));
                             }
                         }
 
@@ -75,7 +74,7 @@
                         {
                             for (int j = 0; j < 4; j++)
                             {
-                                writer.Write((ushort)(_boneKeyData[i][j] * MT_FIXED_POINT));
+                                writer.Write((ushort)(_boneKeyData[i][j] * FIXED_POINT));
                             }
                         }
 
@@ -100,12 +99,12 @@
             int assignedFrameIndicesSize = AlignmentHelper.Align(_numAssignedFrames * sizeof(ushort), 4);
             int boneKeySize = GetKeySize(_type);
             int boneKeyDataSize = _numAssignedFrames * boneKeySize;
-            return MT_KEY_HEADER_SIZE + assignedFrameIndicesSize + boneKeyDataSize;
+            return HEADER_SIZE + assignedFrameIndicesSize + boneKeyDataSize;
         }
 
-        private void Read(BinaryReader reader)
+        private void InternalRead(BinaryReader reader)
         {
-            _size = reader.ReadInt32();
+            int size = reader.ReadInt32();
             _numAssignedFrames = reader.ReadUInt16();
             _type = reader.ReadUInt16();
 
@@ -124,7 +123,7 @@
                             _boneKeyData[i] = new float[2];
                             for (int j = 0; j < 2; j++)
                             {
-                                _boneKeyData[i][j] = (float)reader.ReadInt16() / MT_FIXED_POINT;
+                                _boneKeyData[i][j] = (float)reader.ReadInt16() / FIXED_POINT;
                             }
                         }
 
@@ -134,7 +133,7 @@
                             _boneKeyData[i] = new float[4];
                             for (int j = 0; j < 4; j++)
                             {
-                                _boneKeyData[i][j] = (float)reader.ReadInt16() / MT_FIXED_POINT;
+                                _boneKeyData[i][j] = (float)reader.ReadInt16() / FIXED_POINT;
                             }
                         }
 

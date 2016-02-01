@@ -2,16 +2,16 @@
 {
     using System.IO;
 
-    public class MTAnimation
+    public class ABAnimation
     {
         // Private fields
         private int _numFrames;
-        private MTKey[] _keys;
+        private ABKey[] _keys;
 
         // Constructors
-        internal MTAnimation(ushort numKeys, BinaryReader reader)
+        internal ABAnimation(short numKeys, BinaryReader reader)
         {
-            Read(numKeys, reader);
+            InternalRead(numKeys, reader);
         }
 
         // Properties
@@ -20,7 +20,7 @@
             get { return _numFrames; }
         }
 
-        public MTKey[] Keys
+        public ABKey[] Keys
         {
             get { return _keys; }
         }
@@ -29,29 +29,29 @@
         internal void Write(BinaryWriter writer)
         {
             writer.Write(_numFrames);
-            foreach (MTKey key in _keys)
+            foreach (ABKey key in _keys)
             {
-                key.Write(writer);
+                key.InternalWrite(writer);
             }
         }
 
         internal int GetSize()
         {
             int size = sizeof(int);
-            foreach (MTKey key in _keys)
+            foreach (ABKey key in _keys)
             {
                 size += key.GetSize();
             }
             return size;
         }
 
-        private void Read(ushort numKeys, BinaryReader reader)
+        private void InternalRead(short numKeys, BinaryReader reader)
         {
             _numFrames = reader.ReadInt32();
-            _keys = new MTKey[numKeys];
+            _keys = new ABKey[numKeys];
             for (int i = 0; i < numKeys; i++)
             {
-                _keys[i] = new MTKey(reader);
+                _keys[i] = new ABKey(reader);
             }
         }
     }

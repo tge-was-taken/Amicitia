@@ -7,12 +7,12 @@
 
     using Utilities;
     using Graphics;
-    using Modeling;
 
-    public class BFChunk : Chunk
+    public class BFFile : BinaryFileBase
     {
         // Constants
-        internal const int FLAG = 0;
+        internal const byte HEADER_SIZE = 0x10;
+        internal const short FLAG = 0;
         internal const string TAG = "FLW0";
 
         // Fields
@@ -21,14 +21,12 @@
         private TypeTableEntry[] _typeTable;
 
         // Constructors
-        internal BFChunk(ushort id, int length, BinaryReader reader)
-            : base(FLAG, id, length, TAG)
+        internal BFFile(BinaryReader reader)
         {
-            Read(reader);
+            InternalRead(reader);
         }
 
-        public BFChunk(string xmlPath)
-            : base(FLAG, 0, 0, TAG)
+        public BFFile(string xmlPath)
         {
             XDocument xDoc = XDocument.Load(xmlPath);
             XElement xRoot = xDoc.Root;
@@ -49,6 +47,20 @@
             }
         }
 
+        // Public Static Methods
+        public static BFFile LoadFrom(string path)
+        {
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
+                return new BFFile(reader);
+        }
+
+        public static BFFile LoadFrom(Stream stream, bool leaveStreamOpen)
+        {
+            using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
+                return new BFFile(reader);
+        }
+
+        // Public methods
         public void Extract(string baseName)
         {
             XDocument xDoc = new XDocument();
@@ -59,9 +71,8 @@
 
                 if (_typeTable[i].ElementLength == 1 && _typeTable[i].ElementCount > 16)
                 {
-                    AddExtensionIfMatched(_typeTable[i].Data, MSGChunk.TAG, ".BMD", ref fileName);
-                    AddExtensionIfMatched(_typeTable[i].Data, MDChunk.TAG, ".MB", ref fileName);
-                    AddExtensionIfMatched(_typeTable[i].Data, TXPChunk.TAG, ".TB", ref fileName);
+                    AddExtensionIfMatched(_typeTable[i].Data, BMDFile.TAG, ".BMD", ref fileName);
+                    AddExtensionIfMatched(_typeTable[i].Data, TBFile.TAG, ".TB", ref fileName);
                     AddExtensionIfMatched(_typeTable[i].Data, "PIB0", ".PB", ref fileName);
                     if (!Path.HasExtension(fileName))
                     {
@@ -80,15 +91,15 @@
             }
 
             xDoc.Add(xRoot);
-            xDoc.Save(Path.GetPathRoot(baseName) + Path.GetFileNameWithoutExtension(baseName) + ".XML");
+            string xmlPath = Path.GetDirectoryName(baseName) + "\\" + Path.GetFileNameWithoutExtension(baseName) + ".XML";
+            xDoc.Save(xmlPath);
         }
 
         internal override void InternalWrite(BinaryWriter writer)
         {
-            int fp = (int)writer.BaseStream.Position;
+            int posFileStart = (int)writer.BaseStream.Position;
 
             writer.BaseStream.Seek(HEADER_SIZE, SeekOrigin.Current);
-            writer.AlignPosition(16);
 
             writer.Write(_numTypeTableEntries);
             writer.Write(_numUnknown);
@@ -103,7 +114,8 @@
                 writer.Write(_typeTable[i].Data);
             }
 
-            Length = (int)writer.BaseStream.Position - fp;
+            long posFileEnd = writer.BaseStream.Position;
+            int length = (int)posFileEnd - posFileStart;
 
             writer.BaseStream.Seek(arrayDescriptorPos, SeekOrigin.Begin);
             for (int i = 0; i < _numTypeTableEntries; i++)
@@ -111,18 +123,30 @@
                 _typeTable[i].WriteEntryInfo(writer);
             }
 
-            writer.BaseStream.Seek(fp, SeekOrigin.Begin);
-            writer.Write(Flags);
-            writer.Write(UserID);
-            writer.Write(Length);
-            writer.WriteCString(Tag, 4);
+            writer.BaseStream.Seek(posFileStart, SeekOrigin.Begin);
+            writer.Write(FLAG);
+            writer.Write((short)0); // userID
+            writer.Write(length);
+            writer.WriteCString(TAG, 4);
 
-            writer.BaseStream.Seek(fp + Length, SeekOrigin.Begin);
+            writer.BaseStream.Seek(posFileEnd, SeekOrigin.Begin);
+            writer.AlignPosition(64);
         }
 
-        private void Read(BinaryReader reader)
+        private void InternalRead(BinaryReader reader)
         {
+            long posFileStart = reader.GetPosition();
+            short flag = reader.ReadInt16();
+            short userID = reader.ReadInt16();
+            int length = reader.ReadInt32();
+            string tag = reader.ReadCString(4);
             reader.AlignPosition(16);
+
+            if (tag != TAG)
+            {
+                throw new InvalidDataException();
+            }
+
 
             _numTypeTableEntries = reader.ReadInt32();
             _numUnknown = reader.ReadInt32();

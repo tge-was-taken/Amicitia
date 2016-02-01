@@ -6,13 +6,13 @@ namespace AtlusLibSharp.Persona3.Archives
     using Generic.Archives;
     using System.Collections.Generic;
 
-    public class GenericVitaArchive : BinaryFileBase, IArchive
+    public class GenericPSVitaArchive : BinaryFileBase, IArchive
     {
         // Fields
         private List<GenericVitaArchiveEntry> _entries;
 
         // Constructors
-        public GenericVitaArchive(string path)
+        public GenericPSVitaArchive(string path)
         {
             if (!VerifyFileType(path))
             {
@@ -25,7 +25,7 @@ namespace AtlusLibSharp.Persona3.Archives
             }
         }
 
-        public GenericVitaArchive(Stream stream)
+        public GenericPSVitaArchive(Stream stream)
         {
             if (!VerifyFileType(stream))
             {
@@ -38,7 +38,7 @@ namespace AtlusLibSharp.Persona3.Archives
             }
         }
 
-        public GenericVitaArchive(string[] filepaths)
+        public GenericPSVitaArchive(string[] filepaths)
         {
             _entries = new List<GenericVitaArchiveEntry>(filepaths.Length);
             foreach (string path in filepaths)
@@ -47,7 +47,7 @@ namespace AtlusLibSharp.Persona3.Archives
             }
         }
 
-        public GenericVitaArchive()
+        public GenericPSVitaArchive()
         {
             _entries = new List<GenericVitaArchiveEntry>();
         }
@@ -64,14 +64,14 @@ namespace AtlusLibSharp.Persona3.Archives
         }
 
         // static methods
-        public static GenericVitaArchive Create(string directorypath)
+        public static GenericPSVitaArchive Create(string directorypath)
         {
-            return new GenericVitaArchive(Directory.GetFiles(directorypath));
+            return new GenericPSVitaArchive(Directory.GetFiles(directorypath));
         }
 
-        public static GenericVitaArchive Create(GenericPAK pak)
+        public static GenericPSVitaArchive Create(GenericPAK pak)
         {
-            GenericVitaArchive arc = new GenericVitaArchive();
+            GenericPSVitaArchive arc = new GenericPSVitaArchive();
             foreach (GenericPAKEntry entry in pak.Entries)
             {
                 arc.Entries.Add(new GenericVitaArchiveEntry(entry.Name, entry.Data));

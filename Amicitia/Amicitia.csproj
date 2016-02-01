@@ -75,7 +75,8 @@
     <Compile Include="ResourceProperty.cs" />
     <Compile Include="ResourceWrappers\BVPArchiveWrapper.cs" />
     <Compile Include="ResourceWrappers\ARCArchiveWrapper.cs" />
-    <Compile Include="Utilities\EnumExtension.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR4TexturesWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR4Wrapper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,8 +91,8 @@
     <Compile Include="ResourceWrappers\ResourceWrapperHideProperties.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRKeyFramesWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRKeyFrameWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPRTexturesWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPRWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR0TexturesWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR0Wrapper.cs" />
     <Compile Include="ResourceWrappers\TMXWrapper.cs" />
     <Compile Include="SupportedFileHandler.cs" />
     <Compile Include="SupportedFileInfo.cs" />

@@ -26,13 +26,15 @@
                 case SupportedFileType.GenericPAK:
                     return new GenericPAKFileWrapper(text, new GenericPAK(stream));
                 case SupportedFileType.TMX:
-                    return new TMXWrapper(text, TMXChunk.LoadFrom(stream));
-                case SupportedFileType.SPR:
-                    return new SPRWrapper(text, SPRChunk.LoadFrom(stream));
+                    return new TMXWrapper(text, TMXFile.LoadFrom(stream, false));
+                case SupportedFileType.SPR0:
+                    return new SPRWrapper(text, SPRFile.LoadFrom(stream, false));
+                case SupportedFileType.SPR4:
+                    return new SPR4Wrapper(text, SPR4File.LoadFrom(stream, false));
                 case SupportedFileType.BVPArchive:
                     return new BVPArchiveWrapper(text, new BVPArchive(stream));
                 case SupportedFileType.ARCArchive:
-                    return new ARCArchiveWrapper(text, new GenericVitaArchive(stream));
+                    return new ARCArchiveWrapper(text, new GenericPSVitaArchive(stream));
                 default:
                     return new ResourceWrapper(text, new GenericBinaryFile(stream));
             }

@@ -1,5 +1,5 @@
-﻿using AtlusLibSharp.Generic.Archives;
-using AtlusLibSharp.Persona3.Archives;
+﻿using AtlusLibSharp.Common.FileSystem.Archives;
+using AtlusLibSharp.Persona3.FileSystem.Archives;
 using System;
 using System.IO;
 
@@ -20,30 +20,30 @@ namespace archiveconvert
                 return;
             }
 
-            if (GenericPSVitaArchive.VerifyFileType(args[0]))
+            if (ListArchiveFile.VerifyFileType(args[0]))
             {
-                GenericPSVitaArchive arc = new GenericPSVitaArchive(args[0]);
+                ListArchiveFile arc = new ListArchiveFile(args[0]);
                 for (int i = 0; i < arc.EntryCount; i++)
                 {
-                    GenericVitaArchiveEntry entry = arc.Entries[i];
+                    ListArchiveFileEntry entry = arc.Entries[i];
                     ConvertEntry(ref entry);
                     arc.Entries[i] = entry;
                 }
 
-                GenericPAK pak = GenericPAK.Create(arc);
+                PAKToolFile pak = PAKToolFile.Create(arc);
                 pak.Save(args[0] + ".pak");
             }
-            else if (GenericPAK.VerifyFileType(args[0]))
+            else if (PAKToolFile.VerifyFileType(args[0]))
             {
-                GenericPAK pak = new GenericPAK(args[0]);
+                PAKToolFile pak = new PAKToolFile(args[0]);
                 for (int i = 0; i < pak.EntryCount; i++)
                 {
-                    GenericPAKEntry entry = pak.Entries[i];
+                    PAKToolFileEntry entry = pak.Entries[i];
                     ConvertEntry(ref entry);
                     pak.Entries[i] = entry;
                 }
 
-                GenericPSVitaArchive arc = GenericPSVitaArchive.Create(pak);
+                ListArchiveFile arc = ListArchiveFile.Create(pak);
                 arc.Save(args[0] + ".arc");
             }
             else
@@ -52,40 +52,40 @@ namespace archiveconvert
             }
         }
 
-        static void ConvertEntry(ref GenericVitaArchiveEntry entry)
+        static void ConvertEntry(ref ListArchiveFileEntry entry)
         {
             using (MemoryStream mStream = new MemoryStream(entry.Data))
             {
-                if (GenericPSVitaArchive.VerifyFileType(mStream))
+                if (ListArchiveFile.VerifyFileType(mStream))
                 {
-                    GenericPSVitaArchive subArc = new GenericPSVitaArchive(mStream);
+                    ListArchiveFile subArc = new ListArchiveFile(mStream);
                     for (int i = 0; i < subArc.EntryCount; i++)
                     {
-                        GenericVitaArchiveEntry subEntry = subArc.Entries[i];
+                        ListArchiveFileEntry subEntry = subArc.Entries[i];
                         ConvertEntry(ref subEntry);
                         subArc.Entries[i] = subEntry;
                     }
 
-                    entry = new GenericVitaArchiveEntry(entry.Name, GenericPAK.Create(subArc).GetBytes());
+                    entry = new ListArchiveFileEntry(entry.Name, PAKToolFile.Create(subArc).GetBytes());
                 }
             }
         }
 
-        static void ConvertEntry(ref GenericPAKEntry entry)
+        static void ConvertEntry(ref PAKToolFileEntry entry)
         {
             using (MemoryStream mStream = new MemoryStream(entry.Data))
             {
-                if (GenericPAK.VerifyFileType(mStream))
+                if (PAKToolFile.VerifyFileType(mStream))
                 {
-                    GenericPAK subPak = new GenericPAK(mStream);
+                    PAKToolFile subPak = new PAKToolFile(mStream);
                     for (int i = 0; i < subPak.EntryCount; i++)
                     {
-                        GenericPAKEntry subEntry = subPak.Entries[i];
+                        PAKToolFileEntry subEntry = subPak.Entries[i];
                         ConvertEntry(ref subEntry);
                         subPak.Entries[i] = subEntry;
                     }
 
-                    entry = new GenericPAKEntry(entry.Name, GenericPSVitaArchive.Create(subPak).GetBytes());
+                    entry = new PAKToolFileEntry(entry.Name, ListArchiveFile.Create(subPak).GetBytes());
                 }
             }
         }

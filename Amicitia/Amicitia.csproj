@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Amicitia</RootNamespace>
     <AssemblyName>Amicitia</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -27,6 +27,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,6 +57,10 @@
     <StartupObject>Amicitia.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.1.1.2225.0\lib\net20\OpenTK.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PropertyGridEx">
       <HintPath>..\Dependencies\PropertyGridEx.dll</HintPath>
     </Reference>
@@ -74,9 +79,12 @@
   <ItemGroup>
     <Compile Include="ResourceProperty.cs" />
     <Compile Include="ResourceWrappers\BVPArchiveWrapper.cs" />
-    <Compile Include="ResourceWrappers\ARCArchiveWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPR4TexturesWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPR4Wrapper.cs" />
+    <Compile Include="ResourceWrappers\ListArchiveFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\RMD\RMDSceneWrapper.cs" />
+    <Compile Include="ResourceWrappers\RMD\RWTextureDictionaryWrapper.cs" />
+    <Compile Include="ResourceWrappers\RMD\RWTextureNativeWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR4FileTexturesWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR4FileWrapper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,14 +94,14 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceFactory.cs" />
-    <Compile Include="ResourceWrappers\GenericPAKFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\PAKToolFileWrapper.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapper.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapperHideProperties.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPRKeyFramesWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPRKeyFrameListWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRKeyFrameWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPR0TexturesWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPR0Wrapper.cs" />
-    <Compile Include="ResourceWrappers\TMXWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPRFileTexturesWrapper.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPRFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\TMXFileWrapper.cs" />
     <Compile Include="SupportedFileHandler.cs" />
     <Compile Include="SupportedFileInfo.cs" />
     <Compile Include="Utilities\TreeNodeCollectionExtension.cs" />
@@ -108,7 +116,10 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -143,6 +154,7 @@
       <Name>AtlusLibSharp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

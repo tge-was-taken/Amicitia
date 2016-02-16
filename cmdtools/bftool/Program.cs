@@ -1,5 +1,4 @@
-﻿using AtlusLibSharp.SMT3.ChunkResources;
-using AtlusLibSharp.SMT3.ChunkResources.Scripting;
+﻿using AtlusLibSharp.SMT3.Scripting;
 using System;
 using System.IO;
 

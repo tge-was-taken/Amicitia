@@ -1,5 +1,5 @@
-﻿using AtlusLibSharp.Generic.Archives;
-using AtlusLibSharp.Persona3.Archives;
+﻿using AtlusLibSharp.Common.FileSystem.Archives;
+using AtlusLibSharp.Persona3.FileSystem.Archives;
 using System;
 using System.IO;
 
@@ -22,17 +22,17 @@ namespace arctool
 
             if (Path.HasExtension(args[0]))
             {
-                if (!GenericPSVitaArchive.VerifyFileType(args[0]))
+                if (!ListArchiveFile.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper arc file!");
-                    if (GenericPAK.VerifyFileType(args[0]))
+                    if (PAKToolFile.VerifyFileType(args[0]))
                     {
                         Console.WriteLine("Detected format: regular .bin/.pac/.pak archive.");
                     }
                     return;
                 }
 
-                GenericPSVitaArchive arc = new GenericPSVitaArchive(args[0]);
+                ListArchiveFile arc = new ListArchiveFile(args[0]);
                 string path = Path.GetFileNameWithoutExtension(args[0]);
                 Directory.CreateDirectory(path);
                 for (int i = 0; i < arc.EntryCount; i++)
@@ -42,7 +42,7 @@ namespace arctool
             }
             else if (!Path.HasExtension(args[0]))
             {
-                GenericPSVitaArchive arc = GenericPSVitaArchive.Create(args[0]);
+                ListArchiveFile arc = ListArchiveFile.Create(args[0]);
                 arc.Save(Path.GetFileName(args[0]) + ".arc");
             }
         }

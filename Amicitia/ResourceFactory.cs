@@ -1,9 +1,10 @@
 ﻿namespace Amicitia
 {
-    using AtlusLibSharp;
-    using AtlusLibSharp.Generic.Archives;
-    using AtlusLibSharp.Persona3.Archives;
-    using AtlusLibSharp.SMT3.ChunkResources.Graphics;
+    using AtlusLibSharp.Common;
+    using AtlusLibSharp.Common.FileSystem.Archives;
+    using AtlusLibSharp.Persona3.FileSystem.Archives;
+    using AtlusLibSharp.Persona3.RenderWare;
+    using AtlusLibSharp.SMT3.Graphics;
     using ResourceWrappers;
     using System.IO;
 
@@ -23,18 +24,27 @@
         {
             switch (SupportedFileHandler.GetType(supportedFileIndex))
             {
-                case SupportedFileType.GenericPAK:
-                    return new GenericPAKFileWrapper(text, new GenericPAK(stream));
-                case SupportedFileType.TMX:
-                    return new TMXWrapper(text, TMXFile.LoadFrom(stream, false));
-                case SupportedFileType.SPR0:
-                    return new SPRWrapper(text, SPRFile.LoadFrom(stream, false));
-                case SupportedFileType.SPR4:
-                    return new SPR4Wrapper(text, SPR4File.LoadFrom(stream, false));
-                case SupportedFileType.BVPArchive:
-                    return new BVPArchiveWrapper(text, new BVPArchive(stream));
-                case SupportedFileType.ARCArchive:
-                    return new ARCArchiveWrapper(text, new GenericPSVitaArchive(stream));
+                case SupportedFileType.PAKToolFile:
+                    return new PAKToolFileWrapper(text, new PAKToolFile(stream));
+
+                case SupportedFileType.TMXFile:
+                    return new TMXFileWrapper(text, TMXFile.LoadFrom(stream, false));
+
+                case SupportedFileType.SPRFile:
+                    return new SPRFileWrapper(text, SPRFile.LoadFrom(stream, false));
+
+                case SupportedFileType.SPR4File:
+                    return new SPR4FileWrapper(text, SPR4File.LoadFrom(stream, false));
+
+                case SupportedFileType.BVPArchiveFile:
+                    return new BVPArchiveFileWrapper(text, new BVPArchiveFile(stream));
+
+                case SupportedFileType.ListArchiveFile:
+                    return new ListArchiveFileWrapper(text, new ListArchiveFile(stream));
+
+                case SupportedFileType.RMDScene:
+                    return new RMDSceneWrapper(text, new RMDScene(stream, false));
+
                 default:
                     return new ResourceWrapper(text, new GenericBinaryFile(stream));
             }

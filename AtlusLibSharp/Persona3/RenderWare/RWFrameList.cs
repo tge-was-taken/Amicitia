@@ -9,58 +9,62 @@ namespace AtlusLibSharp.Persona3.RenderWare
     {
         // Fields
         private RWFrameListStruct _struct;
-        private List<RWExtension> _extension;
+        private List<RWExtension> _extensionNodes;
+        private RWHierarchyAnimPlugin _root;
 
-        // Properties
-        public RWFrameListStruct Struct
+        public RWHierarchyAnimPlugin HierarchyAnimRoot
         {
-            get { return _struct; }
-            set
+            get
             {
-                _struct = value;
-                if (value == null)
-                    return;
-                _struct.Parent = this;
+                if (_root == null)
+                {
+                    _root = GetRoot();
+                }
+
+                return _root;
             }
         }
 
-        public List<RWExtension> Extensions
+        // Properties
+        public List<RWFrame> Frames
         {
-            get { return _extension; }
-            set
-            {
-                _extension = value;
-                for (int i = 0; i < _extension.Count; i++)
-                {
-                    _extension[i].Parent = this;
-                }
-            }
+            get { return _struct.Frames; }
+        }
+
+        public int FrameCount
+        {
+            get { return _struct.FrameCount; }
+        }
+
+        internal List<RWExtension> Extensions
+        {
+            get { return _extensionNodes; }
         }
 
         // Constructors
-        public RWFrameList(RWFrameListStruct str, List<RWExtension> extensions)
+        internal RWFrameList(IList<RWFrame> frames, List<RWExtension> extensions)
             : base(RWType.FrameList)
         {
-            Struct = str;
-            Extensions = extensions;
+            _struct = new RWFrameListStruct(frames);
+            _extensionNodes = extensions;
         }
 
         internal RWFrameList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWFrameListStruct>(this, reader);
-            _extension = new List<RWExtension>(_struct.FrameCount);
-            for (int i = 0; i < Struct.FrameCount; i++)
-                _extension.Add(RWNodeFactory.GetNode<RWExtension>(this, reader));
+            _extensionNodes = new List<RWExtension>(_struct.FrameCount);
+            for (int i = 0; i < _struct.FrameCount; i++)
+                _extensionNodes.Add(RWNodeFactory.GetNode<RWExtension>(this, reader));
         }
 
         // Public methods
-        public RWFrame GetFrameByHierarchyIndex(uint hierarchyIndex)
+        public RWFrame GetFrameByHierarchyIndex(int hierarchyIndex)
         {
-            return _struct.Frames[(int)(ConvertHierarchyIndexToFrameIndex(hierarchyIndex))];
+            return _struct.Frames[ConvertHierarchyIndexToFrameIndex(hierarchyIndex)];
         }
 
-        public int GetFrameIndexByNameID(uint nameID)
+        public int GetFrameIndexByNameID(int nameID)
         {
             int frameIdx = -1;
             foreach (RWExtension ext in Extensions)
@@ -79,10 +83,10 @@ namespace AtlusLibSharp.Persona3.RenderWare
             return -1;
         }
 
-        public int GetHierarchyIndexByNameID(uint nameID)
+        public int GetHierarchyIndexByNameID(int nameID)
         {
             RWHierarchyAnimPlugin root = GetRoot();
-            foreach (RWHierarchyAnimNode node in root.NodeList)
+            foreach (RWHierarchyAnimNode node in root.Nodes)
             {
                 if (node.FrameNameID == nameID)
                     return (int)node.HierarchyIndex;
@@ -90,12 +94,12 @@ namespace AtlusLibSharp.Persona3.RenderWare
             return -1;
         }
 
-        public int ConvertHierarchyIndexToFrameIndex(uint hierarchyIndex)
+        public int ConvertHierarchyIndexToFrameIndex(int hierarchyIndex)
         {
             int name = -1;
 
             RWHierarchyAnimPlugin root = GetRoot();
-            foreach (RWHierarchyAnimNode node in root.NodeList)
+            foreach (RWHierarchyAnimNode node in root.Nodes)
             {
                 if (node.HierarchyIndex == hierarchyIndex)
                     name = (int)node.FrameNameID;
@@ -135,34 +139,17 @@ namespace AtlusLibSharp.Persona3.RenderWare
         public List<RWFrame> GetBreadthFirstTree()
         {
             List<RWFrame> newTree = new List<RWFrame>(_struct.FrameCount);
-            List<RWFrame> rootBones = Array.FindAll(_struct.Frames, (frame => frame.ParentIndex == -1)).ToList();
+            List<RWFrame> rootBones = _struct.Frames.FindAll(frame => frame.ParentIndex == -1).ToList();
             BreadthFirstTraversal(ref newTree, rootBones);
             return newTree;
         }
 
-        public RWHierarchyAnimPlugin GetRoot()
-        {
-            foreach (RWExtension ext in _extension)
-            {
-                if (ext.Children == null || ext.Children.Count == 0)
-                    continue;
-
-                foreach (RWHierarchyAnimPlugin plug in ext.Children)
-                {
-                    if (plug.NodeCount != 0)
-                        return plug;
-                }
-            }
-
-            return null;
-        }
-
         // Protected methods
-        protected override void InternalWriteData(BinaryWriter writer)
+        protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             _struct.InternalWrite(writer);
             for (int i = 0; i < _struct.FrameCount; i++)
-                _extension[i].InternalWrite(writer);
+                _extensionNodes[i].InternalWrite(writer);
         }
 
         // Private methods
@@ -189,6 +176,23 @@ namespace AtlusLibSharp.Persona3.RenderWare
             {
                 BreadthFirstTraversal(ref newTree, child.Children);
             }
+        }
+
+        private RWHierarchyAnimPlugin GetRoot()
+        {
+            foreach (RWExtension ext in _extensionNodes)
+            {
+                if (ext.Children == null || ext.Children.Count == 0)
+                    continue;
+
+                foreach (RWHierarchyAnimPlugin plug in ext.Children)
+                {
+                    if (plug.NodeCount != 0)
+                        return plug;
+                }
+            }
+
+            return null;
         }
     }
 }

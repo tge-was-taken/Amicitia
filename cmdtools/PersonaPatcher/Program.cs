@@ -1,5 +1,5 @@
-﻿using AtlusLibSharp.Persona3.CRIWare;
-using AtlusLibSharp.Utilities;
+﻿using AtlusLibSharp.Persona3.FileSystem.CRIWare;
+using AtlusLibSharp.Common.Utilities;
 using System;
 using System.IO;
 using System.Timers;

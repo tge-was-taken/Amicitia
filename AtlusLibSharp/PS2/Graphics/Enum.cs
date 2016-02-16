@@ -19,7 +19,7 @@
         Clamp   = 0x03
     }
 
-    public enum GIFModes
+    public enum GIFMode
     {
         Packed  = 0x00,
         RegList = 0x01,
@@ -27,7 +27,7 @@
         Image2  = 0x03
     }
 
-    public enum GIFRegs
+    public enum GIFReg
     {
         PRIM    = 0x00,
         RGBA    = 0x01,
@@ -64,13 +64,13 @@
         PSMZ16S  = 0x3A
     }
 
-    public enum ColorComponents
+    public enum ColorComponent
     {
         RGB  = 0x00,
         RGBA = 0x01
     }
 
-    public enum TextureFunctions
+    public enum TextureFunction
     {
         Modulate    = 0x00,
         Decal       = 0x01,
@@ -78,13 +78,13 @@
         Highlight2  = 0x03
     }
 
-    public enum CLUTStorageModes
+    public enum CLUTStorageMode
     {
         CSM1 = 0x00,
         CSM2 = 0x01
     }
 
-    public enum PixelTransOrders
+    public enum TRXPOSPixelTransmissionOrder
     {
         UpLToLoR = 0x00,
         LoLToUpR = 0x01,
@@ -92,7 +92,7 @@
         LoRToUpL = 0x03
     }
 
-    public enum TransDirections
+    public enum TRXDIRTransmissionDirection
     {
         HostToLocal  = 0x00,
         LocalToHost  = 0x01,

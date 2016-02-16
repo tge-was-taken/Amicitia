@@ -4,29 +4,44 @@ namespace AtlusLibSharp.Persona3.RenderWare
 {
     public struct RWHierarchyAnimNode
     {
-        public uint FrameNameID { get; set; }
-        public uint HierarchyIndex { get; set; }
-        public RWHierarchyNodeFlag Flags { get; set; }
+        private int _nameID;
+        private int _hIndex;
+        private RWHierarchyNodeFlag _flag;
 
-        public RWHierarchyAnimNode(BinaryReader reader)
+        public int FrameNameID
         {
-            FrameNameID = reader.ReadUInt32();
-            HierarchyIndex = reader.ReadUInt32();
-            Flags = (RWHierarchyNodeFlag) reader.ReadUInt32();
+            get { return _nameID; }
         }
 
-        public RWHierarchyAnimNode(uint frameNameID, uint hierarchyIndex, RWHierarchyNodeFlag flags)
+        public int HierarchyIndex
         {
-            FrameNameID = frameNameID;
-            HierarchyIndex = hierarchyIndex;
-            Flags = flags;
+            get { return _hIndex; }
         }
 
-        public void Write(BinaryWriter writer)
+        public RWHierarchyNodeFlag Flags
         {
-            writer.Write(FrameNameID);
-            writer.Write(HierarchyIndex);
-            writer.Write((uint)Flags);
+            get { return _flag; }
+        }
+
+        public RWHierarchyAnimNode(int frameNameID, int hierarchyIndex, RWHierarchyNodeFlag flag)
+        {
+            _nameID = frameNameID;
+            _hIndex = hierarchyIndex;
+            _flag = flag;
+        }
+
+        internal RWHierarchyAnimNode(BinaryReader reader)
+        {
+            _nameID = reader.ReadInt32();
+            _hIndex = reader.ReadInt32();
+            _flag = (RWHierarchyNodeFlag)reader.ReadUInt32();
+        }
+
+        internal void InternalWrite(BinaryWriter writer)
+        {
+            writer.Write(_nameID);
+            writer.Write(_hIndex);
+            writer.Write((uint)_flag);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Amicitia
 {
-    static class Program
+    internal static class Program
     {
         public static Assembly Assembly = Assembly.GetExecutingAssembly();
         public static string Name = Assembly.GetName().Name;
@@ -30,7 +30,7 @@ namespace Amicitia
         }
     }
 
-    static class AssemblyExtension
+    internal static class AssemblyExtension
     {
         public static DateTime GetLinkerTime(this Assembly assembly, TimeZoneInfo target = null)
         {

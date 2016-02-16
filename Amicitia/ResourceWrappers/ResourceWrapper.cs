@@ -1,16 +1,11 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp;
     using System;
     using System.Windows.Forms;
+    using AtlusLibSharp.Common;
+    using System.ComponentModel;
 
-    internal enum GetWrapperOptions
-    {
-        None,
-        ForceRebuild
-    }
-
-    internal partial class ResourceWrapper : TreeNode
+    internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
     {
         private object _wrappedObject;
         private Type _wrappedType;
@@ -27,10 +22,37 @@
             InitializeWrapper();
         }
 
-        // Properties
+
+        // TODO: Actually implement PropertyChanged on the properties
+
+        /// <summary>
+        /// Fired when a property in this class changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Triggers the property changed event for a specific property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has changed.</param>
+        public void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        // Common Wrapper properties
+
         protected internal Type WrappedType
         {
             get { return _wrappedType; }
+        }
+
+        protected internal virtual object WrappedObject
+        {
+            get { return _wrappedObject; }
+            set { _wrappedObject = value; }
         }
 
         protected internal ResourceProperty[] ResourceProperties
@@ -49,37 +71,72 @@
         }
 
         // Context menu bools
-        protected internal virtual bool IsExportable
+
+        /// <summary>
+        /// Determines whether the Export context menu option is visible for this wrapper. Default is true.
+        /// </summary>
+        protected internal virtual bool CanExport
         {
             get { return true; }
         }
 
-        protected internal virtual bool IsReplaceable
+        /// <summary>
+        /// Determines whether the Replace context menu option is visible for this wrapper. Default is true.
+        /// </summary>
+        protected internal virtual bool CanReplace
         {
             get { return true; }
         }
 
-        protected internal virtual bool IsMoveable
+        /// <summary>
+        /// Determines whether the Move Up / Move Up context menu option are visible for this wrapper. Default is true.
+        /// </summary>
+        protected internal virtual bool CanMove
         {
             get { return true; }
         }
 
-        protected internal virtual bool IsRenameable
+        /// <summary>
+        /// Determines whether the Rename context menu option is visible for this wrapper. Default is true.
+        /// </summary>
+        protected internal virtual bool CanRename
         {
             get { return true; }
         }
 
-        protected internal virtual bool IsDeleteable
+        /// <summary>
+        /// Determines whether the Delete context menu option is visible for this wrapper. Default is true.
+        /// </summary>
+        protected internal virtual bool CanDelete
         {
             get { return true; }
         }
 
+        /// <summary>
+        /// Determines whether the Add context menu option is visible for this wrapper. Default is false.
+        /// </summary>
+        protected internal virtual bool CanAdd
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Determines whether the Encode context menu option is visible for this wrapper. Default is false.
+        /// </summary>
+        protected internal virtual bool CanEncode
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Indicates if this wrapped object implements the <see cref="ITextureFile"/> interface.
+        /// </summary>
         protected internal virtual bool IsImageResource
         {
             get { return false; }
         }
 
-        // Event handlers
+        // Context menu handlers
         public void MoveUp(object sender, EventArgs e)
         {
             TreeNode parent = Parent;
@@ -152,7 +209,10 @@
                     return;
                 }
 
-                GetWrappedObject<GenericBinaryFile>().Save(saveFileDlg.FileName);
+                // rebuild data before export
+                RebuildWrappedObject();
+
+                (WrappedObject as BinaryFileBase).Save(saveFileDlg.FileName);
             }
         }
 
@@ -168,18 +228,23 @@
                     return;
                 }
 
-                ReplaceWrappedObjectAndInitialize(new GenericBinaryFile(openFileDlg.FileName));
+                WrappedObject = new GenericBinaryFile(openFileDlg.FileName);
+
+                // re-init
+                InitializeWrapper();
             }
         }
 
-        // Public Methods
+        public virtual void Add(object sender, EventArgs e) { }
+
+        public virtual void Encode(object sender, EventArgs e) { }
+
+        // Other methods
         public byte[] GetBytes()
         {
-            RebuildWrappedObject();
-            return GetWrappedObject<BinaryFileBase>().GetBytes();
+            return (WrappedObject as BinaryFileBase).GetBytes();
         }
 
-        // Property Methods
         public ResourceProperty GetProperty(string name)
         {
             return Array.Find(_resProperties, item => item.Name == name);
@@ -190,16 +255,7 @@
             return GetProperty(name).GetValue<T>();
         }
 
-        // Protected Methods
-        protected internal T GetWrappedObject<T>(GetWrapperOptions options = GetWrapperOptions.None)
-        {
-            if (options == GetWrapperOptions.ForceRebuild)
-            {
-                RebuildWrappedObject();
-            }
-
-            return (T)_wrappedObject;
-        }
+        protected internal virtual void RebuildWrappedObject() { }
 
         protected internal virtual void InitializeCustomPropertyGrid()
         {
@@ -211,11 +267,11 @@
             MainForm.Instance.MainPropertyGrid.Refresh();
         }
 
-        protected virtual void InitializeWrapper()
+        protected internal virtual void InitializeWrapper()
         {
             if (IsInitialized)
             {
-
+                MainForm.Instance.UpdateReferences();
             }
             else
             {
@@ -223,47 +279,50 @@
             }
         }
 
-        protected virtual void RebuildWrappedObject()
-        {
-
-        }
-
-        protected void ReplaceWrappedObjectAndInitialize<T>(T newObject)
-        {
-            _wrappedObject = null;
-            _wrappedObject = newObject;
-            InitializeWrapper();
-        }
-
-        // Private Methods
         private void InitializeContextMenuStrip()
         {
             ContextMenuStrip = new ContextMenuStrip();
 
-            if (IsExportable)
+            if (CanExport)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Export", null, Export, Keys.Control | Keys.E));
             }
 
-            if (IsReplaceable)
+            if (CanReplace)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Replace", null, Replace, Keys.Control | Keys.R));
-                ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                if (!CanAdd)
+                    ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (IsMoveable)
+            if (CanAdd)
+            {
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Add", null, Add, Keys.Control | Keys.A));
+                if (CanMove)
+                    ContextMenuStrip.Items.Add(new ToolStripSeparator());
+            }
+
+            if (CanMove)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Up", null, MoveUp, Keys.Control | Keys.Up));
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Down", null, MoveDown, Keys.Control | Keys.Down));
             }
 
-            if (IsRenameable)
+            if (CanRename)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Re&name", null, Rename, Keys.Control | Keys.N));
-                ContextMenuStrip.Items.Add(new ToolStripSeparator());
+                if (!CanEncode && CanDelete)
+                    ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (IsDeleteable)
+            if (CanEncode)
+            {
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Encode", null, Encode, Keys.Control | Keys.N));
+                if (CanDelete)
+                    ContextMenuStrip.Items.Add(new ToolStripSeparator());
+            }
+
+            if (CanDelete)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Delete", null, Delete, Keys.Control | Keys.Delete));
             }

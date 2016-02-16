@@ -1,46 +1,56 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.Persona3.Archives;
     using System.IO;
     using System;
     using System.Windows.Forms;
+    using AtlusLibSharp.Persona3.FileSystem.Archives;
 
-    internal class BVPArchiveWrapper : ResourceWrapper
+    internal class BVPArchiveFileWrapper : ResourceWrapper
     {
-        // Fields
-        private static readonly SupportedFileType[] _fileFilterTypes = new SupportedFileType[]
+        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
-            SupportedFileType.BVPArchive
+            SupportedFileType.BVPArchiveFile
         };
 
-        // Constructor
-        public BVPArchiveWrapper(string text, BVPArchive arc) : base(text, arc) { }
+        public BVPArchiveFileWrapper(string text, BVPArchiveFile arc) : base(text, arc) { }
 
-        // Properties
+        public SupportedFileType FileType
+        {
+            get { return SupportedFileType.BVPArchiveFile; }
+        }
+
         public int EntryCount
         {
             get { return Nodes.Count; }
         }
 
-        // Event handlers
+        protected internal new BVPArchiveFile WrappedObject
+        {
+            get { return (BVPArchiveFile)base.WrappedObject; }
+            set { base.WrappedObject = value; }
+        }
+
         public override void Replace(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                switch (_fileFilterTypes[openFileDlg.FilterIndex-1])
+                switch (FileFilterTypes[openFileDlg.FilterIndex-1])
                 {
-                    case SupportedFileType.BVPArchive:
-                        ReplaceWrappedObjectAndInitialize(new BVPArchive(openFileDlg.FileName));
+                    case SupportedFileType.BVPArchiveFile:
+                        WrappedObject = new BVPArchiveFile(openFileDlg.FileName);
                         break;
                 }
+
+                // Reinitialize
+                InitializeWrapper();
             }
         }
 
@@ -49,46 +59,46 @@
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(_fileFilterTypes);
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                BVPArchive arc = GetWrappedObject<BVPArchive>(GetWrapperOptions.ForceRebuild);
+                // Rebuild the wrapper before export
+                RebuildWrappedObject();
 
-                switch (_fileFilterTypes[saveFileDlg.FilterIndex-1])
+                switch (FileFilterTypes[saveFileDlg.FilterIndex-1])
                 {
-                    case SupportedFileType.BVPArchive:
-                        arc.Save(saveFileDlg.FileName);
+                    case SupportedFileType.BVPArchiveFile:
+                        WrappedObject.Save(saveFileDlg.FileName);
                         break;
                 }
             }
         }
 
-        // Protected methods
-        protected override void RebuildWrappedObject()
+        protected internal override void RebuildWrappedObject()
         {
-            BVPArchive arc = new BVPArchive();
+            WrappedObject.Entries.Clear();
             foreach (ResourceWrapper node in Nodes)
             {
-                arc.Entries.Add(new BVPArchiveEntry(node.GetBytes(), node.GetPropertyValue<int>("Flag")));
+                node.RebuildWrappedObject();
+                WrappedObject.Entries.Add(new BVPArchiveEntry(node.GetBytes(), node.GetPropertyValue<int>("Flag")));
             }
-
-            ReplaceWrappedObjectAndInitialize(arc);
         }
 
-        protected override void InitializeWrapper()
+        protected internal override void InitializeWrapper()
         {
             Nodes.Clear();
-            BVPArchive arc = GetWrappedObject<BVPArchive>();
 
             int idx = -1;
-            foreach (BVPArchiveEntry entry in arc.Entries)
+            foreach (BVPArchiveEntry entry in WrappedObject.Entries)
             {
                 ++idx;
                 ResourceWrapper res = ResourceFactory.GetResource("Entry" + idx + ".bmd", new MemoryStream(entry.Data));
+
+                // TODO: this thing doesn't even show up on the property grid
                 res.ResourceProperties = new ResourceProperty[] { new ResourceProperty("Flag", entry.Flag) };
                 Nodes.Add(res); ;
             }

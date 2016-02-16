@@ -1,38 +1,62 @@
-﻿using OpenTK;
-using System;
-using System.IO;
-
-namespace AtlusLibSharp.Persona3.RenderWare
+﻿namespace AtlusLibSharp.Persona3.RenderWare
 {
-    using Utilities;
+    using OpenTK;
+    using System;
+    using System.IO;
+    using Common.Utilities;
 
-    public struct RWBoundingInfo
+    /// <summary>
+    /// Represents a RenderWare bounding sphere used for collision and culling calculations.
+    /// </summary>
+    public struct RWBoundingSphere
     {
-        // Fields
-        public readonly Vector3 Center;
-        public readonly float Radius;
-        public readonly int PositionFlag;
-        public readonly int NormalFlag;
+        private const int POS_FLAG = 1;
+        private const int NRM_FLAG = 1;
 
-        // Constructors
-        public RWBoundingInfo(Vector3 sphereCentre, float sphereRadius)
+        /// <summary>
+        /// The <see cref="RWBoundingSphere"/> center vector.
+        /// </summary>
+        public readonly Vector3 Center;
+
+        /// <summary>
+        /// The <see cref="RWBoundingSphere"/> sphere radius.
+        /// </summary>
+        public readonly float Radius;
+
+        /// <summary>
+        /// Initialize a <see cref="RWBoundingSphere"/> using a given sphere center vector and radius.
+        /// </summary>
+        /// <param name="sphereCentre">The sphere center vector.</param>
+        /// <param name="sphereRadius">The sphere radius.</param>
+        public RWBoundingSphere(Vector3 sphereCentre, float sphereRadius)
         {
             Center = sphereCentre;
             Radius = sphereRadius;
-            PositionFlag = 1;
-            NormalFlag = 1;
         }
 
-        internal RWBoundingInfo(BinaryReader reader)
+        /// <summary>
+        /// Initialize a <see cref="RWBoundingSphere"/> by reading the structure from a stream using the <see cref="BinaryReader"/>.
+        /// </summary>
+        /// <param name="reader">The <see cref="BinaryReader"/> used to read from the stream.</param>
+        internal RWBoundingSphere(BinaryReader reader)
         {
             Center = reader.ReadVector3();
             Radius = reader.ReadSingle();
-            PositionFlag = reader.ReadInt32();
-            NormalFlag = reader.ReadInt32();
+            int positionFlag = reader.ReadInt32();
+            int normalFlag = reader.ReadInt32();
+
+            if (positionFlag != POS_FLAG || normalFlag != NRM_FLAG) // maybe overzealous
+            {
+                throw new InvalidDataException("Position and normal flags are not set to 1");
+            }
         }
 
-        // Methods
-        public static RWBoundingInfo Create(Vector3[] vertices)
+        /// <summary>
+        /// Calculate a <see cref="RWBoundingSphere"/> using the given vertices.
+        /// </summary>
+        /// <param name="vertices">The vertices used in calculation.</param>
+        /// <returns>A calculated <see cref="RWBoundingSphere"/></returns>
+        public static RWBoundingSphere Calculate(Vector3[] vertices)
         {
             Vector3 minExtent = Vector3.Zero;
             Vector3 maxExtent = Vector3.Zero;
@@ -63,15 +87,19 @@ namespace AtlusLibSharp.Persona3.RenderWare
 
             float sphereRadius = (float)Math.Sqrt(maxDistSq);
 
-            return new RWBoundingInfo(sphereCentre, sphereRadius);
+            return new RWBoundingSphere(sphereCentre, sphereRadius);
         }
 
-        internal void Write(BinaryWriter writer)
+        /// <summary>
+        /// Write the <see cref="RWBoundingSphere"/> to a stream using the provided <see cref="BinaryWriter"/>.
+        /// </summary>
+        /// <param name="writer">The <see cref="BinaryWriter"/> used to write to the stream.</param>
+        internal void InternalWrite(BinaryWriter writer)
         {
             writer.Write(Center);
             writer.Write(Radius);
-            writer.Write(PositionFlag);
-            writer.Write(NormalFlag);
+            writer.Write(POS_FLAG);
+            writer.Write(NRM_FLAG);
         }
     }
 }

@@ -1,15 +1,112 @@
 ﻿namespace AtlusLibSharp.Test
 {
-    using SMT3.ChunkResources.Scripting;
-    using Persona3.CRIWare;
-    using SMT3.ChunkResources.Animation;
-    using SMT3.ChunkResources.Graphics;
+    using System.Collections.Generic;
+    using Persona3.RenderWare;
+    using Common.Utilities;
+    using Common.FileSystem.Archives;
+    using System.Drawing;
 
     class Program
     {
         static void Main(string[] args)
         {
             SetCulture();
+            
+            PAKToolFile pac = new PAKToolFile(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\MODEL\PACK\BC001.PAC");
+            RMDScene scene = new RMDScene(pac.Entries.Find(entry => entry.Name.Contains(".RMD")).Data);
+
+            Assimp.AssimpContext aiContext = new Assimp.AssimpContext();
+            Assimp.Scene aiScene = new Assimp.Scene();
+            aiScene.RootNode = new Assimp.Node("Root");
+
+            foreach (RWClump clump in scene.Clumps)
+            {
+                int geoIdx = 0;
+                foreach (RWGeometry geo in clump.GeometryList)
+                {
+                    Assimp.Mesh aiMesh = new Assimp.Mesh("mesh_" + geoIdx++, Assimp.PrimitiveType.Triangle);
+
+                    aiMesh.MaterialIndex = 0;
+
+                    foreach (RWTriangle tri in geo.Triangles)
+                    {
+                        aiMesh.Faces.Add(new Assimp.Face(new int[] { tri.A, tri.B, tri.C }));
+                    }
+
+                    foreach (OpenTK.Vector3 vertex in geo.Vertices)
+                    {
+                        aiMesh.Vertices.Add(new Assimp.Vector3D(vertex.X, vertex.Y, vertex.Z));
+                    }
+
+                    if (geo.HasNormals)
+                    {
+                        foreach (OpenTK.Vector3 normal in geo.Normals)
+                        {
+                            aiMesh.Normals.Add(new Assimp.Vector3D(normal.X, normal.Y, normal.Z));
+                        }
+                    }
+
+                    for (int i = 0; i < geo.TextureCoordinateChannelCount; i++)
+                    {
+                        List<Assimp.Vector3D> texCoordChannel = new List<Assimp.Vector3D>();
+                        foreach (OpenTK.Vector2 texCoord in geo.TextureCoordinateChannels[i])
+                        {
+                            texCoordChannel.Add(new Assimp.Vector3D(texCoord.X, texCoord.Y, 0));
+                        }
+
+                        aiMesh.TextureCoordinateChannels[i] = texCoordChannel;
+                    }
+
+                    if (geo.HasColors)
+                    {
+                        List<Assimp.Color4D> vertColorChannel = new List<Assimp.Color4D>();
+
+                        foreach (Color color in geo.Colors)
+                        {
+                            vertColorChannel.Add(new Assimp.Color4D(color.R * 255, color.G * 255, color.B * 255, color.A * 255));
+                        }
+
+                        aiMesh.VertexColorChannels.Add(vertColorChannel);
+                    }
+
+                    int idx = 0;
+                    foreach (RWMaterial mat in geo.Materials)
+                    {
+                        Assimp.Material aiMaterial = new Assimp.Material();
+                        aiMaterial.Name = "material_" + idx++;
+                        aiScene.Materials.Add(aiMaterial);
+                    }
+
+                    aiScene.Meshes.Add(aiMesh);
+                }
+
+                foreach (RWAtomic atomic in clump.Atomics)
+                {
+                    Assimp.Node node = new Assimp.Node();
+                    node.Name = aiScene.Meshes[atomic.GeometryIndex].Name;
+                    node.MeshIndices.Add(atomic.GeometryIndex);
+                    node.Transform = clump.FrameListNode.Frames[atomic.FrameIndex].WorldMatrix.ToAssimpMatrix4x4();
+                    aiScene.RootNode.Children.Add(node);
+                }
+            }
+
+            aiContext.ExportFile(aiScene, "test.dae", "collada");
+            
+            /*
+            for (int i = 0; i < scene.TextureDictionary.TextureCount; i++)
+            {
+                Bitmap bitmap = scene.TextureDictionary.Textures[i].GetBitmap();
+                string name = scene.TextureDictionary.Textures[i].Name;
+
+                //scene.TextureDictionary.Textures[i] = new RWTextureNative(name, bitmap, PS2.Graphics.PixelFormat.PSMT8);
+            }
+
+            scene.TextureDictionary.Save("_test.txd");
+
+            PAKToolFile newPac = new PAKToolFile();
+            newPac.Entries.Add(new PAKToolFileEntry("bc001.RMD", scene.GetBytes()));
+            newPac.Save("BC001.PAC");
+            */
         }
 
         private static void SetCulture()

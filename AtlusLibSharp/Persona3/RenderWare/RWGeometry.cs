@@ -1,68 +1,190 @@
-﻿//using IOModelFormats.SourceModelData;
-using System.IO;
-
-namespace AtlusLibSharp.Persona3.RenderWare
+﻿namespace AtlusLibSharp.Persona3.RenderWare
 {
+    using OpenTK;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+
+    /// <summary>
+    /// Encapsulates a RenderWare geometry mesh and all of its corresponding data structures.
+    /// </summary>
     public class RWGeometry : RWNode
     {
-        // Fields
         private RWGeometryStruct _struct;
         private RWMaterialList _materialList;
         private RWExtension _extension;
 
-        // Properties
-        public RWGeometryStruct Struct
+        #region Properties
+
+        /*****************************************/
+        /* RWGeometryStruct forwarded properties */
+        /*****************************************/
+
+        /// <summary>
+        /// Gets if the geometry contains any vertices.
+        /// </summary>
+        public bool HasVertices
         {
-            get { return _struct; }
-            private set
-            {
-                _struct = value;
-                _struct.Parent = this;
-            }
+            get { return _struct.HasVertices; }
         }
 
-        public RWMaterialList MaterialList
+        /// <summary>
+        /// Gets if the geometry contains any vertex normals.
+        /// </summary>
+        public bool HasNormals
         {
-            get { return _materialList; }
-            private set
-            {
-                _materialList = value;
-                _materialList.Parent = this;
-            }
+            get { return _struct.HasNormals; }
         }
 
-        public RWExtension Extension
+        /// <summary>
+        /// Gets if the geometry contains any vertex colors.
+        /// </summary>
+        public bool HasColors
         {
-            get { return _extension; }
-            private set
-            {
-                _extension = value;
-                _extension.Parent = this;
-            }
+            get { return _struct.HasColors; }
         }
 
-        // Constructors
-        public RWGeometry()
-            : base(RWType.Geometry)
-        { }
-
-        public RWGeometry(RWGeometryStruct geo, RWMaterialList materialList, RWExtension extension)
-            : base(RWType.Geometry)
+        /// <summary>
+        /// Gets if the geometry contains any vertex texture coordinates.
+        /// </summary>
+        public bool HasTexCoords
         {
-            Struct = geo;
-            MaterialList = materialList;
-            Extension = extension;
+            get { return _struct.HasTexCoords; }
         }
 
+        /// <summary>
+        /// Gets the <see cref="RWGeometryFlags"/> of the geometry.
+        /// </summary>
+        public RWGeometryFlags Flags
+        {
+            get { return _struct.Flags; }
+        }
+
+        /// <summary>
+        /// Gets the number of texture coordinate channels in the geometry.
+        /// </summary>
+        public int TextureCoordinateChannelCount
+        {
+            get { return _struct.TextureCoordinateChannelCount; }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="RWGeometryNativeFlag"/> of the geometry.
+        /// </summary>
+        public RWGeometryNativeFlag NativeFlag
+        {
+            get { return _struct.NativeFlag; }
+        }
+
+        /// <summary>
+        /// Gets the number of triangles in the geometry.
+        /// </summary>
+        public int TriangleCount
+        {
+            get { return _struct.TriangleCount; }
+        }
+
+        /// <summary>
+        /// Gets the number of vertices in the geometry.
+        /// </summary>
+        public int VertexCount
+        {
+            get { return _struct.VertexCount; }
+        }
+
+        /// <summary>
+        /// Gets the array of vertex colors in the geometry.
+        /// </summary>
+        public Color[] Colors
+        {
+            get { return _struct.Colors; }
+        }
+
+        /// <summary>
+        /// Gets the array of texture coordinate channels in the geometry.
+        /// </summary>
+        public Vector2[][] TextureCoordinateChannels
+        {
+            get { return _struct.TextureCoordinateChannels; }
+        }
+
+        /// <summary>
+        /// Gets the array of triangles in the geometry.
+        /// </summary>
+        public RWTriangle[] Triangles
+        {
+            get { return _struct.Triangles; }
+        }
+
+        /// <summary>
+        /// Gets the bounding sphere of the geometry.
+        /// </summary>
+        public RWBoundingSphere BoundingSphere
+        {
+            get { return _struct.BoundingSphere; }
+        }
+
+        /// <summary>
+        /// Gets the array of vertices in the geometry.
+        /// </summary>
+        public Vector3[] Vertices
+        {
+            get { return _struct.Vertices; }
+        }
+
+        /// <summary>
+        /// Gets the array of vertex normals in the geometry.
+        /// </summary>
+        public Vector3[] Normals
+        {
+            get { return _struct.Normals; }
+        }
+
+        /***************************************/
+        /* RWMaterialList forwarded properties */
+        /***************************************/
+
+        /// <summary>
+        /// Gets the number of materials in the geometry.
+        /// </summary>
+        public int MaterialCount
+        {
+            get { return _materialList.MaterialCount; }
+        }
+
+        /// <summary>
+        /// Gets the array of materials in the geometry.
+        /// </summary>
+        public RWMaterial[] Materials
+        {
+            get { return _materialList.Materials; }
+        }
+
+        /// <summary>
+        /// Gets the extension nodes of the geometry.
+        /// </summary>
+        public List<RWNode> ExtensionNodes
+        {
+            get { return _extension.Children; }
+        }
+
+        /****************************************************************************************/
+        /* TODO: add the skin plugin and mesh strip plugin here instead of the extension itself */
+        /****************************************************************************************/
+
+        #endregion
+
+        /// <summary>
+        /// Initializer only to be called <see cref="RWNodeFactory"/>
+        /// </summary>
         internal RWGeometry(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
-            Struct = RWNodeFactory.GetNode<RWGeometryStruct>(this, reader);
-            MaterialList = RWNodeFactory.GetNode<RWMaterialList>(this, reader);
-            Extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
+            _struct = RWNodeFactory.GetNode<RWGeometryStruct>(this, reader);
+            _materialList = RWNodeFactory.GetNode<RWMaterialList>(this, reader);
+            _extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
         }
 
-        // Methods
         /*
         public static RWGeometry FromSMD(RWClump refClump, string filename)
         {
@@ -143,7 +265,11 @@ namespace AtlusLibSharp.Persona3.RenderWare
         }
         */
 
-        protected override void InternalWriteData(BinaryWriter writer)
+        /// <summary>
+        /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
+        /// </summary>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             _struct.InternalWrite(writer);
             _materialList.InternalWrite(writer);

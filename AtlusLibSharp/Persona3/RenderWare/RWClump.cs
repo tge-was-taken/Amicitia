@@ -1,62 +1,74 @@
-﻿using System.Collections.Generic;
-using System.IO;
-
-namespace AtlusLibSharp.Persona3.RenderWare
+﻿namespace AtlusLibSharp.Persona3.RenderWare
 {
+    using System.Collections.Generic;
+    using System.IO;
+
+    /// <summary>
+    /// Encapsulates a RenderWare clump model and all of its corresponding data structures.
+    /// </summary>
     public class RWClump : RWNode
     {
-        // Fields
         private RWClumpStruct _struct;
-        private RWFrameList _frameList;
-        private RWGeometryList _geometryList;
+        private RWFrameList _frameListNode;
+        private RWGeometryList _geometryListNode;
         private List<RWAtomic> _atomicList;
         private RWExtension _extension;
 
-        // Properties
-        public RWClumpStruct Struct
+        #region Properties
+
+        /// <summary>
+        /// Gets the number of RenderWare atomics (draw calls) in this clump.
+        /// </summary>
+        public int AtomicCount
         {
-            get { return _struct; }
+            get { return _atomicList.Count; }
+        }
+
+        public RWFrameList FrameListNode
+        {
+            get { return _frameListNode; }
             private set
             {
-                _struct = value;
+                _frameListNode = value;
                 if (value == null)
                     return;
-                _struct.Parent = this;
+                _frameListNode.Parent = this;
             }
         }
 
-        public RWFrameList FrameList
+        /***************************************/
+        /* RWGeometryList forwarded properties */
+        /***************************************/
+
+        /// <summary>
+        /// Gets the number of geometries in this clump.
+        /// </summary>
+        public int GeometryCount
         {
-            get { return _frameList; }
-            private set
-            {
-                _frameList = value;
-                if (value == null)
-                    return;
-                _frameList.Parent = this;
-            }
+            get { return _geometryListNode.GeometryCount; }
         }
 
-        public RWGeometryList GeometryList
+        /// <summary>
+        /// Gets the list of geometries in this clump.
+        /// </summary>
+        public List<RWGeometry> GeometryList
         {
-            get { return _geometryList; }
-            private set
-            {
-                _geometryList = value;
-                if (value == null)
-                    return;
-                _geometryList.Parent = this;
-            }
+            get { return _geometryListNode.GeometryList; }
         }
 
-        public List<RWAtomic> AtomicList
+        /// <summary>
+        /// Gets or sets the list of atomics in this clump.
+        /// </summary>
+        public List<RWAtomic> Atomics
         {
             get { return _atomicList; }
-            private set
+            set
             {
                 _atomicList = value;
+
                 if (value == null)
                     return;
+
                 for (int i = 0; i < _atomicList.Count; i++)
                 {
                     _atomicList[i].Parent = this;
@@ -64,36 +76,31 @@ namespace AtlusLibSharp.Persona3.RenderWare
             }
         }
 
-        public RWExtension Extension
+        /// <summary>
+        /// Gets the extension nodes for this clump.
+        /// </summary>
+        public List<RWNode> Extensions
         {
-            get { return _extension; }
-            private set
-            {
-                _extension = value;
-                if (value == null)
-                    return;
-                _extension.Parent = this;
-            }
+            get { return _extension.Children; }
         }
 
-        // Constructors
-        public RWClump(RWFrameList frameList, RWGeometryList geoList, List<RWAtomic> atomicList, RWExtension extension)
+        #endregion
+
+        public RWClump(Assimp.Scene scene)
             : base(RWType.Clump)
         {
-            FrameList = frameList;
-            GeometryList = geoList;
-            AtomicList = atomicList;
-            Extension = extension;
-            Struct = new RWClumpStruct(this);
         }
 
+        /// <summary>
+        /// Constructor only to be called in <see cref="RWNodeFactory"/>.
+        /// </summary>
         internal RWClump(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
             : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWClumpStruct>(this, reader);
-            _frameList = RWNodeFactory.GetNode<RWFrameList>(this, reader);
-            _geometryList = RWNodeFactory.GetNode<RWGeometryList>(this, reader);
-            _atomicList = new List<RWAtomic>(Struct.AtomicCount);
+            _frameListNode = RWNodeFactory.GetNode<RWFrameList>(this, reader);
+            _geometryListNode = RWNodeFactory.GetNode<RWGeometryList>(this, reader);
+            _atomicList = new List<RWAtomic>(_struct.AtomicCount);
 
             for (int i = 0; i < _struct.AtomicCount; i++)
             {
@@ -103,13 +110,17 @@ namespace AtlusLibSharp.Persona3.RenderWare
             _extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
         }
 
-        protected override void InternalWriteData(BinaryWriter writer)
+        /// <summary>
+        /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
+        /// </summary>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             _struct.InternalWrite(writer);
-            _frameList.InternalWrite(writer);
-            _geometryList.InternalWrite(writer);
+            _frameListNode.InternalWrite(writer);
+            _geometryListNode.InternalWrite(writer);
 
-            for (int i = 0; i < _struct.AtomicCount; i++)
+            for (int i = 0; i < _atomicList.Count; i++)
             {
                 _atomicList[i].InternalWrite(writer);
             }

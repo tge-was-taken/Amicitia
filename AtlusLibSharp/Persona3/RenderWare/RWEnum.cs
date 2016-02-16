@@ -2,48 +2,53 @@
 {
     public enum RWType : uint
     {
-        None = 0x00,
-        Struct = 0x1,
-        String = 0x2,
-        Extension = 0x3,
-        TextureReference = 0x6,
-        Material = 0x7,
-        MaterialList = 0x8,
-        World = 0xB, // found in some map files
-        FrameList = 0xE,
-        Geometry = 0xF,
-        Clump = 0x10,
-        Atomic = 0x14,
-        TextureNative = 0x15,
-        GeometryList = 0x1A,
-        Animation = 0x1B,
-        TextureDictionary = 0x16,
-        UVAnimDictionary = 0x2B,
-        StripMeshPlugin = 0x50E,
-        SkyMipMapValue = 0x110,
-        SkinPlugin = 0x116,
-        HierarchyAnimPlugin = 0x11E,
-        UserDataPlugin = 0x11F,
-        Maestro2D = 0x1B1, // ???
-        AnimSetDummy = 0xF0F00001,
-        AnimSetReference = 0xF0F00003,
-        AnimSetTerminator = 0xF0F00004,
-        TransformOverride = 0xF0F00005,
-        AtomicMatrixPlugin = 0xF0F00006,
-        VisibilityAnim = 0xF0F00080,
-        AnimSetCount = 0xF0F000F0,
-        ParticleList = 0xF0F000E0,
-        ParticleAnimation = 0xF0F000E1
+        None                        = 0x00000000,
+        Struct                      = 0x00000001,
+        String                      = 0x00000002,
+        Extension                   = 0x00000003,
+        TextureReference            = 0x00000006,
+        Material                    = 0x00000007,
+        MaterialList                = 0x00000008,
+        World                       = 0x0000000B, // found in some map files
+        FrameList                   = 0x0000000E,
+        Geometry                    = 0x0000000F,
+        Clump                       = 0x00000010,
+        Atomic                      = 0x00000014,
+        TextureNative               = 0x00000015,
+        GeometryList                = 0x0000001A,
+        Animation                   = 0x0000001B,
+        TextureDictionary           = 0x00000016,
+        UVAnimationDictionary       = 0x0000002B,
+        StripMeshPlugin             = 0x0000050E,
+        SkyMipMapValue              = 0x00000110,
+        SkinPlugin                  = 0x00000116,
+        HierarchyAnimPlugin         = 0x0000011E,
+        UserDataPlugin              = 0x0000011F,
+        Maestro2D                   = 0x000001B1, // ???
+        RMDAnimationSetPlaceholder  = 0xF0F00001,
+        RMDAnimationSetRedirect     = 0xF0F00003,
+        RMDAnimationSetTerminator   = 0xF0F00004,
+        RMDTransformOverride        = 0xF0F00005,
+        RMDFrameLinkList            = 0xF0F00006,
+        RMDVisibilityAnim           = 0xF0F00080,
+        RMDAnimationSetCount        = 0xF0F000F0,
+        RMDParticleList             = 0xF0F000E0,
+        RMDParticleAnimation        = 0xF0F000E1,
+
+        // Reserved for internal use
+        // 474952 > 524947 = "RIG" ;)
+        RMDScene                    = 0x47495200,
+        RMDAnimationSet             = 0x47495201
     }
 
     public enum RWGeometryFlags : ushort
     {
         Default = 0x0000,
         CanTriStrip = 0x0001,
-        HasVertexPosition = 0x0002,
+        HasVertices = 0x0002,
         HasTexCoord1 = 0x0004,
-        HasVertexColor = 0x0008,
-        HasVertexNormal = 0x0010,
+        HasColors = 0x0008,
+        HasNormals = 0x0010,
         HasVertexLighting = 0x0020,
         ModulateMatColor = 0x0040,
         HasTexCoord2 = 0x0080

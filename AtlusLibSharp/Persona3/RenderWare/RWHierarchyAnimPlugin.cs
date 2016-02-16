@@ -1,66 +1,97 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AtlusLibSharp.Persona3.RenderWare
 {
     public class RWHierarchyAnimPlugin : RWNode
     {
-        private uint _animVersion;
+        private const int VERSION = 0x100;
+        private const int KEYFRAME_SIZE = 36;
 
-        public float AnimVersion
+        private int _nameID;
+        private RWHierarchyAnimFlag _flag;
+        private List<RWHierarchyAnimNode> _nodes = new List<RWHierarchyAnimNode>();
+
+        public int FrameNameID
         {
-            get { return (float)_animVersion / 0x100; }
+            get { return _nameID; }
         }
 
-        public int FrameNameID { get; set; }
-        public int NodeCount { get; set; }
-        public RWHierarchyAnimFlag Flags { get; set; }
-        public int KeyFrameSize { get; set; }
-        public List<RWHierarchyAnimNode> NodeList { get; set; }
-
-        public RWHierarchyAnimPlugin(uint size, uint version, RWNode parent, BinaryReader reader)
-                : base(RWType.HierarchyAnimPlugin, size, version, parent)
+        public int NodeCount
         {
-            _animVersion = reader.ReadUInt32();
-            FrameNameID = reader.ReadInt32();
-            NodeCount = reader.ReadInt32();
-            if (NodeCount == 0)
-                return;
-            Flags = (RWHierarchyAnimFlag) reader.ReadUInt32();
-            KeyFrameSize = reader.ReadInt32();
-            NodeList = new List<RWHierarchyAnimNode>(NodeCount);
-            for (int i = 0; i < NodeCount; i++)
-                NodeList.Add(new RWHierarchyAnimNode(reader));
+            get { return _nodes.Count; }
         }
 
-        public RWHierarchyAnimPlugin(int boneNameID, RWHierarchyAnimFlag flags, List<RWHierarchyAnimNode> nodes)
+        public RWHierarchyAnimFlag Flags
+        {
+            get { return _flag; }
+        }
+
+        public List<RWHierarchyAnimNode> Nodes
+        {
+            get { return _nodes; }
+        }
+
+        public RWHierarchyAnimPlugin(int frameNameID)
             : base(RWType.HierarchyAnimPlugin)
         {
-            _animVersion = 0x100;
-            FrameNameID = boneNameID;
-            NodeCount = nodes.Count;
-            if (NodeCount == 0)
-                return;
-            Flags = flags;
-            KeyFrameSize = 36;
-            NodeList = nodes;
+            _nameID = frameNameID;
+            _flag = 0;
         }
 
-        protected override void InternalWriteData(BinaryWriter writer)
+        public RWHierarchyAnimPlugin(int frameNameID, RWHierarchyAnimFlag flags, List<RWHierarchyAnimNode> nodes)
+            : base(RWType.HierarchyAnimPlugin)
         {
-            writer.Write(_animVersion);
-            writer.Write(FrameNameID);
+            _nameID = frameNameID;
+
+            if (nodes.Count == 0)
+                throw new ArgumentException("List of hierarchy anim nodes cannot be empty!");
+
+            _flag = flags;
+            _nodes = nodes;
+        }
+
+        internal RWHierarchyAnimPlugin(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+                : base(header)
+        {
+            int version = reader.ReadInt32();
+
+            if (version != VERSION)
+            {
+                throw new NotImplementedException("Unexpected version for RWHierarchyAnimPlugin");
+            }
+
+            _nameID = reader.ReadInt32();
+            int numNodes = reader.ReadInt32();
+
+            if (numNodes == 0)
+                return;
+
+            _flag = (RWHierarchyAnimFlag)reader.ReadUInt32();
+            int keyFrameSize = reader.ReadInt32();
+            _nodes = new List<RWHierarchyAnimNode>(numNodes);
+
+            for (int i = 0; i < numNodes; i++)
+            {
+                _nodes.Add(new RWHierarchyAnimNode(reader));
+            }
+        }
+
+        protected internal override void InternalWriteInnerData(BinaryWriter writer)
+        {
+            writer.Write(VERSION);
+            writer.Write(_nameID);
             writer.Write(NodeCount);
+
             if (NodeCount == 0)
                 return;
-            writer.Write((uint)Flags);
-            writer.Write(KeyFrameSize);
+
+            writer.Write((uint)_flag);
+            writer.Write(KEYFRAME_SIZE);
+
             for (int i = 0; i < NodeCount; i++)
-                NodeList[i].Write(writer);
+                _nodes[i].InternalWrite(writer);
         }
     }
 }

@@ -1,35 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AtlusLibSharp.Persona3.RenderWare
+﻿namespace AtlusLibSharp.Persona3.RenderWare
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
+    /// <summary>
+    /// Encapsulates a RenderWare texture dictionary and all of its corresponding data structures.
+    /// </summary>
     public class RWTextureDictionary : RWNode
     {
         private RWTextureDictionaryStruct _struct;
-        private RWTextureNative[] _textures;
+        private List<RWTextureNative> _textures;
         private RWExtension _extension;
 
-        public RWTextureDictionaryStruct Struct
+        #region Properties
+
+        /***************************************************/
+        /* RWTextureDictionaryStruct forwarded properties */
+        /***************************************************/
+
+        /// <summary>
+        /// Gets the <see cref="RWDeviceID"/> of this texture dictionary. Used to indicate for which platform the data is compiled.
+        /// </summary>
+        public RWDeviceID DeviceID
         {
-            get { return _struct; }
-            set
+            get
             {
-                _struct = value;
-                _struct.Parent = this;
+                if (_struct != null)
+                    return _struct.DeviceID;
+                else
+                    return RWDeviceID.Default;
             }
         }
 
-        public RWTextureNative[] Textures
+        /// <summary>
+        /// Gets the amount of textures contained in this texture dictionary.
+        /// </summary>
+        public int TextureCount
+        {
+            get
+            {
+                if (_textures != null)
+                    return _textures.Count;
+                else
+                    return 0;
+            }
+        }
+
+        /****************************/
+        /* Non-forwarded properties */
+        /****************************/
+
+        /// <summary>
+        /// Gets the list of texture nodes contained in this texture dictionary.
+        /// </summary>
+        public List<RWTextureNative> Textures
         {
             get { return _textures; }
             set
             {
                 _textures = value;
-                for (int i = 0; i < _textures.Length; i++)
+
+                if (_textures == null)
+                    return;
+
+                for (int i = 0; i < _textures.Count; i++)
                 {
                     if (_textures[i] != null)
                         _textures[i].Parent = this;
@@ -37,44 +72,82 @@ namespace AtlusLibSharp.Persona3.RenderWare
             }
         }
 
-        public RWExtension Extension
+        /// <summary>
+        /// Gets the list of extension nodes applied to this texture dictionary.
+        /// </summary>
+        public List<RWNode> ExtensionNodes
         {
-            get { return _extension; }
-            set
+            get
             {
-                _extension = value;
-                _extension.Parent = this;
+                if (_extension != null)
+                    return _extension.Children;
+                else
+                    return null;
             }
         }
 
-        internal RWTextureDictionary(uint size, uint version, RWNode parent, BinaryReader reader)
-            : base(RWType.TextureDictionary, size, version, parent)
-        {
-            Struct = ReadNode(reader, this) as RWTextureDictionaryStruct;
-            Textures = new RWTextureNative[Struct.TextureCount];
-            for (int i = 0; i < Struct.TextureCount; i++)
-            {
-                Textures[i] = ReadNode(reader, this) as RWTextureNative;
-            }
-            Extension = ReadNode(reader, this) as RWExtension;
-        }
+        #endregion
 
-        public RWTextureDictionary(IEnumerable<RWTextureNative> textures)
+        /// <summary>
+        /// Initialize a new <see cref="RWTextureDictionary"/> instance with an <see cref="IList{T}"/> of texture nodes.
+        /// </summary>
+        /// <param name="textures"><see cref="IList{T}"/>containing texture nodes to initialize the dictionary with.</param> 
+        public RWTextureDictionary(IList<RWTextureNative> textures)
             : base(RWType.TextureDictionary)
         {
-            Textures = textures.ToArray();
-            Extension = new RWExtension { Plugins = new List<RWNode>() };
-            Struct = new RWTextureDictionaryStruct(this);
+            Textures = textures.ToList();
+            _extension = new RWExtension(this);
+            _struct = new RWTextureDictionaryStruct(this);
         }
 
-        protected override void InternalWriteData(BinaryWriter writer)
+        /// <summary>
+        /// Initialize a new empty <see cref="RWTextureDictionary"/> instance.
+        /// </summary>
+        public RWTextureDictionary()
+            : base(RWType.TextureDictionary)
         {
-            _struct.Write(writer);
+            _struct = new RWTextureDictionaryStruct(this);
+            _textures = new List<RWTextureNative>();
+            _extension = new RWExtension(this);
+        }
+
+        /// <summary>
+        /// Constructor only to be called in <see cref="RWNodeFactory.GetNode(RWNode, BinaryReader)"/>.
+        /// </summary>
+        internal RWTextureDictionary(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+            : base(header)
+        {
+            _struct = RWNodeFactory.GetNode<RWTextureDictionaryStruct>(this, reader);
+            _textures = new List<RWTextureNative>(_struct.TextureCount);
+
             for (int i = 0; i < _struct.TextureCount; i++)
             {
-                _textures[i].Write(writer);
+                _textures.Add(RWNodeFactory.GetNode<RWTextureNative>(this, reader));
             }
-            _extension.Write(writer);
+
+            _extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
+        }
+
+        /// <summary>
+        /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
+        /// </summary>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        protected internal override void InternalWriteInnerData(BinaryWriter writer)
+        {
+            // Update the texture count in the struct
+            _struct.TextureCount = (ushort)TextureCount;
+
+            // And write the updated struct to the stream
+            _struct.InternalWrite(writer);
+
+            // Write textures
+            foreach (RWTextureNative texture in _textures)
+            {
+                texture.InternalWrite(writer);
+            }
+
+            // Write extension
+            _extension.InternalWrite(writer);
         }
     }
 }

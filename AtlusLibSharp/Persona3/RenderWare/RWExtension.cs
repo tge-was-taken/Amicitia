@@ -4,29 +4,18 @@ using System.Linq;
 
 namespace AtlusLibSharp.Persona3.RenderWare
 {
-    public class RWExtension : RWNode
+    internal class RWExtension : RWNode
     {
-        public List<RWNode> Plugins
-        {
-            get { return Children; }
-            set
-            {
-                Children = value;
-                if (value == null)
-                    return;
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    Children[i].Parent = this;
-                }
-            }
-        }
-
-        public RWExtension() : base(RWType.Extension) { }
-
         public RWExtension(params RWNode[] plugins)
             : base(RWType.Extension)
         {
-            Plugins = plugins.ToList();
+            Children = plugins.ToList();
+        }
+
+        public RWExtension(RWNode parent = null)
+            : base(RWType.Extension, parent)
+        {
+            Children = new List<RWNode>();
         }
 
         internal RWExtension(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
@@ -39,7 +28,7 @@ namespace AtlusLibSharp.Persona3.RenderWare
             }
         }
 
-        protected override void InternalWriteData(BinaryWriter writer)
+        protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             if (Children == null)
                 return;

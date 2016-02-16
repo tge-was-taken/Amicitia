@@ -1,54 +1,36 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.SMT3.ChunkResources.Graphics;
+    using AtlusLibSharp.SMT3.Graphics;
 
     internal class SPRKeyFrameWrapper : ResourceWrapper
     {
         public SPRKeyFrameWrapper(string text, SPRKeyFrame keyFrame) : base(text, keyFrame) { }
 
-        // Properties
-        public string Comment { get; set; }
+        protected internal new SPRKeyFrame WrappedObject
+        {
+            get { return (SPRKeyFrame)base.WrappedObject; }
+            set { base.WrappedObject = value; }
+        }
 
-        protected internal override bool IsExportable
+        public string Comment
+        {
+            get { return WrappedObject.Comment; }
+            set { WrappedObject.Comment = value; }
+        }
+
+        protected internal override bool CanExport
         {
             get { return false; }
         }
 
-        protected internal override bool IsRenameable
+        protected internal override bool CanRename
         {
             get { return false; }
         }
 
-        protected internal override bool IsReplaceable
+        protected internal override bool CanReplace
         {
             get { return false; }
-        }
-
-        // Protected Methods
-        protected override void InitializeWrapper()
-        {
-            SPRKeyFrame keyFrame = GetWrappedObject<SPRKeyFrame>();
-
-            Comment = keyFrame.Comment;
-
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
-        }
-
-        protected override void RebuildWrappedObject()
-        {
-            // Update the changed properties in the wrapped object
-            SPRKeyFrame keyFrame = GetWrappedObject<SPRKeyFrame>();
-            keyFrame.Comment = Comment;
-
-            // Re-intialize the wrapper to update it
-            InitializeWrapper();
         }
     }
 }

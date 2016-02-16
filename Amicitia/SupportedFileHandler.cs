@@ -1,40 +1,50 @@
 ﻿namespace Amicitia
 {
-    using AtlusLibSharp.Generic.Archives;
-    using AtlusLibSharp.Persona3.Archives;
-    using AtlusLibSharp.SMT3.ChunkResources.Graphics;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
 
+    using AtlusLibSharp.Common.FileSystem.Archives;
+    using AtlusLibSharp.Persona3.FileSystem.Archives;
+    using AtlusLibSharp.SMT3.Graphics;
+    using AtlusLibSharp.Persona3.RenderWare;
+
     internal static class SupportedFileHandler
     {
         private static readonly SupportedFileInfo[] _supportedFiles = new SupportedFileInfo[]
         {
             // Non-openable formats
-            new SupportedFileInfo("Portable Network Graphics",      SupportedFileType.PNG,          true,  ".png"),
+            new SupportedFileInfo("Portable Network Graphics",          SupportedFileType.PNGFile,              true,  ".png"),
 
             // Archive formats
-            new SupportedFileInfo("Atlus Generic Archive",          SupportedFileType.GenericPAK,   false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack"),
-            new SupportedFileInfo("Persona 3 Battle Voice Package", SupportedFileType.BVPArchive,   false, ".bvp"),
-            new SupportedFileInfo("Atlus PSVita Archive",           SupportedFileType.ARCArchive,   false, ".arc", ".bin", ".pak", ".pac"),
+            new SupportedFileInfo("Atlus Generic Archive",              SupportedFileType.PAKToolFile,          false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack"),
+            new SupportedFileInfo("Atlus Generic List Archive",         SupportedFileType.ListArchiveFile,      false, ".arc", ".bin", ".pak", ".pac"),
+            new SupportedFileInfo("Persona 3/4 Battle Voice Package",   SupportedFileType.BVPArchiveFile,       false, ".bvp"),
 
-            // Texture formats
-            new SupportedFileInfo("Atlus PS2 Texture",              SupportedFileType.TMX,          false, ".tmx"),
-            new SupportedFileInfo("Atlus PS2 Sprite Container",     SupportedFileType.SPR0,         false, ".spr"),
-            new SupportedFileInfo("Atlus PSVita Sprite Container",  SupportedFileType.SPR4,         false, ".spr4")
+            // Texture (container) formats
+            new SupportedFileInfo("Atlus PS2 Texture",                  SupportedFileType.TMXFile,              false, ".tmx"),
+            new SupportedFileInfo("Atlus PS2 Sprite Container",         SupportedFileType.SPRFile,              false, ".spr"),
+            new SupportedFileInfo("Atlus TGA Sprite Container",         SupportedFileType.SPR4File,             false, ".spr4"),
+            new SupportedFileInfo("RenderWare PS2 Texture Container",   SupportedFileType.RWTextureDictionary,  false, ".txd"),
+            new SupportedFileInfo("RenderWare PS2 Texture",             SupportedFileType.RWTextureNative,      false, ".txn"),
+
+            // Model formats
+            new SupportedFileInfo("RenderWare Model",                   SupportedFileType.RMDScene,             false, ".rmd", ".rws", ".dff")
         };
 
         private static readonly Dictionary<SupportedFileType, Type> _supportedFileTypeEnumToType = new Dictionary<SupportedFileType, Type>()
         {
-            { SupportedFileType.GenericPAK,  typeof(GenericPAK)},
-            { SupportedFileType.BVPArchive, typeof(BVPArchive) },
-            { SupportedFileType.ARCArchive, typeof(GenericPSVitaArchive) },
-            { SupportedFileType.TMX, typeof(TMXFile) },
-            { SupportedFileType.SPR0, typeof(SPRFile) },
-            { SupportedFileType.SPR4, typeof(SPR4File) },
+            { SupportedFileType.PAKToolFile,            typeof(PAKToolFile) },
+            { SupportedFileType.BVPArchiveFile,         typeof(BVPArchiveFile) },
+            { SupportedFileType.ListArchiveFile,        typeof(ListArchiveFile) },
+            { SupportedFileType.TMXFile,                typeof(TMXFile) },
+            { SupportedFileType.SPRFile,                typeof(SPRFile) },
+            { SupportedFileType.SPR4File,               typeof(SPR4File) },
+            { SupportedFileType.RMDScene,               typeof(RMDScene) },
+            { SupportedFileType.RWTextureDictionary,    typeof(RWTextureDictionary) },
+            { SupportedFileType.RWTextureNative,        typeof(RWTextureNative) }
         };
 
         private static readonly string _fileFilter;
@@ -70,6 +80,7 @@
             {
                 idx = GetSupportedFileIndex(path, stream);
             }
+
             return idx;
         }
 
@@ -83,7 +94,7 @@
             if (matched.Length == 0)
                 return -1;
 
-            // TODO: Get rid of this crap
+            // TODO: Reflection is slow, perhaps speed it up somehow?
             if (matched.Length > 1)
             {
                 for (int i = 0; i < matched.Length; i++)

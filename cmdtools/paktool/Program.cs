@@ -1,5 +1,5 @@
-﻿using AtlusLibSharp.Generic.Archives;
-using AtlusLibSharp.Persona3.Archives;
+﻿using AtlusLibSharp.Common.FileSystem.Archives;
+using AtlusLibSharp.Persona3.FileSystem.Archives;
 using System;
 using System.IO;
 
@@ -22,17 +22,17 @@ namespace paktool
 
             if (Path.HasExtension(args[0]))
             {
-                if (!GenericPAK.VerifyFileType(args[0]))
+                if (!PAKToolFile.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper pak file!");
-                    if (GenericPSVitaArchive.VerifyFileType(args[0]))
+                    if (ListArchiveFile.VerifyFileType(args[0]))
                     {
                         Console.WriteLine("Detected format: Vita .arc archive.");
                     }
                     return;
                 }
 
-                GenericPAK pak = new GenericPAK(args[0]);
+                PAKToolFile pak = new PAKToolFile(args[0]);
                 string path = Path.GetFileNameWithoutExtension(args[0]);
                 Directory.CreateDirectory(path);
                 for (int i = 0; i < pak.EntryCount; i++)
@@ -42,7 +42,7 @@ namespace paktool
             }
             else if (!Path.HasExtension(args[0]))
             {
-                GenericPAK pak = GenericPAK.Create(args[0]);
+                PAKToolFile pak = PAKToolFile.Create(args[0]);
                 pak.Save(Path.GetFileName(args[0]) + ".PAK");
             }
         }

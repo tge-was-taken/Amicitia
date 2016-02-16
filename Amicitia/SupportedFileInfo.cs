@@ -19,12 +19,15 @@
     internal enum SupportedFileType : int
     {
         Default,
-        GenericPAK,
-        TMX,
-        PNG,
-        SPR0,
-        SPR4,
-        BVPArchive,
-        ARCArchive,
+        PAKToolFile,
+        TMXFile,
+        PNGFile,
+        SPRFile,
+        SPR4File,
+        BVPArchiveFile,
+        ListArchiveFile,
+        RMDScene,
+        RWTextureDictionary,
+        RWTextureNative
     }
 }

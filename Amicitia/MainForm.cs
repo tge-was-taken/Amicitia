@@ -2,9 +2,8 @@
 using System.Windows.Forms;
 using System.IO;
 using Amicitia.ResourceWrappers;
-using Amicitia.Utilities;
-using AtlusLibSharp.SMT3.ChunkResources.Graphics;
-using AtlusLibSharp.Utilities;
+using AtlusLibSharp.Common.Utilities;
+using AtlusLibSharp.Common;
 
 namespace Amicitia
 {
@@ -84,25 +83,24 @@ namespace Amicitia
 
         private void MainTreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            ResourceWrapper res = (ResourceWrapper)mainTreeView.SelectedNode;
+            // hide the picture box
+            mainPictureBox.Visible = false;
+
+            ResourceWrapper res = mainTreeView.SelectedNode as ResourceWrapper;
             mainPropertyGrid.SelectedObject = res;
+
+            if (res == null)
+                return;
 
             // Check if the resource is a texture
             if (res.IsImageResource == true)
             {
                 // Unhide the picture box if we have a picture selected
                 mainPictureBox.Visible = true;
-
-                // TODO: Implement generic texture interface
-                mainPictureBox.Image = res.GetWrappedObject<TMXFile>().GetBitmap();
-            }
-            else
-            {
-                // If we don't have a texture selected then keep it invisible
-                mainPictureBox.Visible = false;
+                mainPictureBox.Image = ((ITextureFile)res.WrappedObject).GetBitmap();
             }
 
-            res.InitializeCustomPropertyGrid();
+            //res.InitializeCustomPropertyGrid();
         }
 
         private void MainTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -145,8 +143,8 @@ namespace Amicitia
         private void InitializeMainForm()
         {
             Instance = this;
-            this.DragDrop += MainForm_DragDrop;
-            this.DragEnter += MainForm_DragEnter;
+            DragDrop += MainForm_DragDrop;
+            DragEnter += MainForm_DragEnter;
             mainTreeView.AfterSelect += MainTreeView_AfterSelect;
             mainTreeView.KeyDown += MainTreeView_KeyDown;
             mainTreeView.AfterLabelEdit += MainTreeView_AfterLabelEdit;
@@ -164,7 +162,7 @@ namespace Amicitia
             // Move up
             if (keys.HasFlagFast(Keys.Up))
             {
-                if (res.IsMoveable)
+                if (res.CanMove)
                 {
                     res.MoveUp(this, EventArgs.Empty);
                 }
@@ -173,7 +171,7 @@ namespace Amicitia
             // Move down
             else if (keys.HasFlagFast(Keys.Down))
             {
-                if (res.IsMoveable)
+                if (res.CanMove)
                 {
                     res.MoveDown(this, EventArgs.Empty);
                 }
@@ -182,13 +180,16 @@ namespace Amicitia
             // Delete
             else if (keys.HasFlagFast(Keys.Delete))
             {
-                res.Delete(this, EventArgs.Empty);
+                if (res.CanDelete)
+                {
+                    res.Delete(this, EventArgs.Empty);
+                }
             }
 
             // Replace
             else if (keys.HasFlagFast(Keys.R))
             {
-                if (res.IsReplaceable)
+                if (res.CanReplace)
                 {
                     res.Replace(this, EventArgs.Empty);
                 }
@@ -197,7 +198,7 @@ namespace Amicitia
             // Rename
             else if (keys.HasFlagFast(Keys.E))
             {
-                if (res.IsRenameable)
+                if (res.CanRename)
                 {
                     res.Export(this, EventArgs.Empty);
                 }
@@ -218,7 +219,6 @@ namespace Amicitia
             if (mainPictureBox.Visible == true)
             {
                 mainPictureBox.Visible = false;
-                mainPictureBox.Image.Dispose();
             }
 
             // Clear nodes as we don't want multiple hierarchies

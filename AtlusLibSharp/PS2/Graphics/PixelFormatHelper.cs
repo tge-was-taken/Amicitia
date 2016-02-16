@@ -2,9 +2,171 @@
 {
     using System.IO;
     using System.Drawing;
+    using System;
 
     public static class PixelFormatHelper
     {
+        public delegate void ReadPixelColorDelegate(BinaryReader reader, int width, int height, out Color[] colorArray);
+
+        public delegate void ReadPixelIndicesDelegate(BinaryReader reader, int width, int height, out byte[] indicesArray);
+
+        public static int GetPaletteDimension(PixelFormat imageFmt)
+        {
+            int paletteWH = 16;
+
+            if (imageFmt == PixelFormat.PSMT4 ||
+                imageFmt == PixelFormat.PSMT4HH ||
+                imageFmt == PixelFormat.PSMT4HL)
+                paletteWH = 4;
+
+            return paletteWH;
+        }
+
+        public static int GetPixelFormatDepth(PixelFormat fmt)
+        {
+            switch (fmt)
+            {
+                case PixelFormat.PSMCT32:
+                case PixelFormat.PSMZ32:
+                case PixelFormat.PSMZ24:
+                    return 32;
+                case PixelFormat.PSMCT24:
+                    return 24;
+                case PixelFormat.PSMCT16:
+                case PixelFormat.PSMCT16S:
+                case PixelFormat.PSMZ16:
+                case PixelFormat.PSMZ16S:
+                    return 16;
+                case PixelFormat.PSMT8:
+                case PixelFormat.PSMT8H:
+                    return 8;
+                case PixelFormat.PSMT4:
+                case PixelFormat.PSMT4HL:
+                case PixelFormat.PSMT4HH:
+                    return 4;
+
+                default:
+                    throw new ArgumentException("Not a valid pixel format");
+            }
+        }
+
+        public static int GetIndexedColorCount(PixelFormat fmt)
+        {
+            switch (fmt)
+            {
+                case PixelFormat.PSMT8:
+                case PixelFormat.PSMT8H:
+                    return 256;
+                case PixelFormat.PSMT4:
+                case PixelFormat.PSMT4HL:
+                case PixelFormat.PSMT4HH:
+                    return 16;
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+        public static int GetTexelDataSize(PixelFormat fmt, int width, int height)
+        {
+            switch (fmt)
+            {
+                case PixelFormat.PSMCT32:
+                case PixelFormat.PSMCT24:
+                case PixelFormat.PSMZ32:
+                case PixelFormat.PSMZ24:
+                    return (width * height) * 4;
+
+                case PixelFormat.PSMCT16:
+                case PixelFormat.PSMCT16S:
+                case PixelFormat.PSMZ16:
+                case PixelFormat.PSMZ16S:
+                    return (width * height) * 2;
+
+                case PixelFormat.PSMT8:
+                case PixelFormat.PSMT8H:
+                    return (width * height) * 1;
+
+                case PixelFormat.PSMT4:
+                case PixelFormat.PSMT4HL:
+                case PixelFormat.PSMT4HH:
+                    return (width * height) / 2;
+
+                default:
+                    throw new ArgumentException("Not a valid pixel format");
+            }
+        }
+
+        public static ReadPixelColorDelegate GetReadPixelColorDelegate(PixelFormat fmt)
+        {
+            switch (fmt)
+            {
+                case PixelFormat.PSMCT32:
+                case PixelFormat.PSMZ32:
+                    return ReadPSMCT32;
+                case PixelFormat.PSMZ24:
+                case PixelFormat.PSMCT24:
+                    return ReadPSMCT24;
+                case PixelFormat.PSMCT16:
+                case PixelFormat.PSMZ16:
+                    return ReadPSMCT16;
+                case PixelFormat.PSMZ16S:
+                case PixelFormat.PSMCT16S:
+                    return ReadPSMCT16S;
+
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+        public static ReadPixelIndicesDelegate GetReadPixelIndicesDelegate(PixelFormat fmt)
+        {
+            switch (fmt)
+            {
+                case PixelFormat.PSMT8:
+                case PixelFormat.PSMT8H:
+                    return ReadPSMT8;
+                case PixelFormat.PSMT4:
+                case PixelFormat.PSMT4HL:
+                case PixelFormat.PSMT4HH:
+                    return ReadPSMT4;
+
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+        public static void ReadPixelData<T>(PixelFormat fmt, BinaryReader reader, int width, int height, out T[] array)
+        {
+            if (IsIndexedPixelFormat(fmt))
+            {
+                ReadPixelIndicesDelegate readPixelIndices = GetReadPixelIndicesDelegate(fmt);
+                byte[] pixelIndices;
+                readPixelIndices(reader, width, height, out pixelIndices);
+                array = pixelIndices as T[];
+            }
+            else
+            {
+                ReadPixelColorDelegate readPixels = GetReadPixelColorDelegate(fmt);
+                Color[] pixels;
+                readPixels(reader, width, height, out pixels);
+                array = pixels as T[];
+            }
+        }
+
+        public static bool IsIndexedPixelFormat(PixelFormat fmt)
+        {
+            switch (fmt)
+            {
+                case PixelFormat.PSMT8:
+                case PixelFormat.PSMT4:
+                case PixelFormat.PSMT8H:
+                case PixelFormat.PSMT4HL:
+                case PixelFormat.PSMT4HH:
+                    return true;
+            }
+            return false;
+        }
+
         public static void ReadPSMCT32(BinaryReader reader, int width, int height, out Color[] colorArray)
         {
             colorArray = new Color[height * width];

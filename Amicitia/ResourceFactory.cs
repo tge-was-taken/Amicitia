@@ -1,12 +1,15 @@
 ﻿namespace Amicitia
 {
-    using AtlusLibSharp.Common;
-    using AtlusLibSharp.Common.FileSystem.Archives;
-    using AtlusLibSharp.Persona3.FileSystem.Archives;
-    using AtlusLibSharp.Persona3.RenderWare;
-    using AtlusLibSharp.SMT3.Graphics;
+    using AtlusLibSharp.FileSystems.BVP;
+    using AtlusLibSharp.Graphics.RenderWare;
     using ResourceWrappers;
     using System.IO;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
+    using AtlusLibSharp.Graphics.SPR;
+    using AtlusLibSharp.Graphics.TMX;
+    using AtlusLibSharp.Graphics.TGA;
+    using AtlusLibSharp.IO;
 
     internal static class ResourceFactory
     {
@@ -24,11 +27,22 @@
         {
             switch (SupportedFileHandler.GetType(supportedFileIndex))
             {
-                case SupportedFileType.PAKToolFile:
-                    return new PAKToolFileWrapper(text, new PAKToolFile(stream));
+                // Archive formats
+                case SupportedFileType.BVPArchiveFile:
+                    return new BVPArchiveFileWrapper(text, new BVPFile(stream, false));
 
-                case SupportedFileType.TMXFile:
-                    return new TMXFileWrapper(text, TMXFile.LoadFrom(stream, false));
+                case SupportedFileType.ListArchiveFile:
+                    return new ListArchiveFileWrapper(text, new ListArchiveFile(stream));
+
+                case SupportedFileType.PAKToolFile:
+                    return new PAKToolFileWrapper(text, new PAKToolArchiveFile(stream));
+
+                // Texture formats
+                case SupportedFileType.RWTextureDictionary:
+                    return new RWTextureDictionaryWrapper(text, (RWTextureDictionary)RWNode.LoadFromStream(stream));
+
+                case SupportedFileType.RWTextureNative:
+                    return new RWTextureNativeWrapper((RWTextureNative)RWNode.LoadFromStream(stream));
 
                 case SupportedFileType.SPRFile:
                     return new SPRFileWrapper(text, SPRFile.LoadFrom(stream, false));
@@ -36,12 +50,13 @@
                 case SupportedFileType.SPR4File:
                     return new SPR4FileWrapper(text, SPR4File.LoadFrom(stream, false));
 
-                case SupportedFileType.BVPArchiveFile:
-                    return new BVPArchiveFileWrapper(text, new BVPArchiveFile(stream));
+                case SupportedFileType.TMXFile:
+                    return new TMXFileWrapper(text, TMXFile.Load(stream, false));
 
-                case SupportedFileType.ListArchiveFile:
-                    return new ListArchiveFileWrapper(text, new ListArchiveFile(stream));
+                case SupportedFileType.TGAFile:
+                    return new TGAFileWrapper(text, new TGAFile(stream));
 
+                // Model formats
                 case SupportedFileType.RMDScene:
                     return new RMDSceneWrapper(text, new RMDScene(stream, false));
 

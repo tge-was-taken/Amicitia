@@ -2,7 +2,7 @@
 {
     using System;
     using System.IO;
-    using Common.Utilities;
+    using AtlusLibSharp.Utilities;
 
     /// <summary>
     /// <para>This register specifies the transmission direction in the transmission between buffers, and activates transmission.</para>
@@ -12,13 +12,13 @@
     {
         private ulong _rawData;
 
-        public TRXDIRTransmissionDirection TransmissionDirection
+        public PS2TRXDIRTransmissionDirection TransmissionDirection
         {
-            get { return (TRXDIRTransmissionDirection)BitHelper.GetBits(_rawData, 2, 0); }
+            get { return (PS2TRXDIRTransmissionDirection)BitHelper.GetBits(_rawData, 2, 0); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 2, (ulong)value, 0); }
         }
 
-        public TRXDIRRegister(TRXDIRTransmissionDirection transDirection)
+        public TRXDIRRegister(PS2TRXDIRTransmissionDirection transDirection)
         {
             TransmissionDirection = transDirection;
         }

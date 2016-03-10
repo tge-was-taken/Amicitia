@@ -2,7 +2,7 @@
 
 namespace AtlusLibSharp.PS2.Graphics.Registers
 {
-    using Common.Utilities;
+    using AtlusLibSharp.Utilities;
     using System.IO;
 
     public enum TEX1LODCalculationMethod
@@ -61,18 +61,18 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// <summary>
         /// Filter when Texture is Expanded (LOD &lt; 0)
         /// </summary>
-        public FilterMode MipMaxFilter
+        public PS2FilterMode MipMaxFilter
         {
-            get { return (FilterMode)BitHelper.GetBits(_rawData, 1, 5); }
+            get { return (PS2FilterMode)BitHelper.GetBits(_rawData, 1, 5); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 1, (ulong)value, 5); }
         }
 
         /// <summary>
         /// Filter when Texture is Reduced (LOD >= 0)
         /// </summary>
-        public FilterMode MipMinFilter
+        public PS2FilterMode MipMinFilter
         {
-            get { return (FilterMode)BitHelper.GetBits(_rawData, 3, 6); }
+            get { return (PS2FilterMode)BitHelper.GetBits(_rawData, 3, 6); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 3, (ulong)value, 6); }
         }
 
@@ -109,8 +109,8 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         {
             LodCalculationMethod = TEX1LODCalculationMethod.Formula;
             MaxMipLevel = 0;
-            MipMaxFilter = FilterMode.None;
-            MipMinFilter = FilterMode.Nearest;
+            MipMaxFilter = PS2FilterMode.None;
+            MipMinFilter = PS2FilterMode.Nearest;
             MipTexBaseAddressSpecification = TEX1BaseAddressSpecification.UseSpecified;
             MipL = 0;
             MipK = 0;

@@ -1,10 +1,10 @@
-﻿using AtlusLibSharp.Common.FileSystem.Archives;
-using AtlusLibSharp.Persona3.FileSystem.Archives;
-using System;
-using System.IO;
-
-namespace archiveconvert
+﻿namespace archiveconvert
 {
+    using System;
+    using System.IO;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
+
     class Program
     {
         static void Main(string[] args)
@@ -30,15 +30,15 @@ namespace archiveconvert
                     arc.Entries[i] = entry;
                 }
 
-                PAKToolFile pak = PAKToolFile.Create(arc);
+                PAKToolArchiveFile pak = PAKToolArchiveFile.Create(arc);
                 pak.Save(args[0] + ".pak");
             }
-            else if (PAKToolFile.VerifyFileType(args[0]))
+            else if (PAKToolArchiveFile.VerifyFileType(args[0]))
             {
-                PAKToolFile pak = new PAKToolFile(args[0]);
+                PAKToolArchiveFile pak = new PAKToolArchiveFile(args[0]);
                 for (int i = 0; i < pak.EntryCount; i++)
                 {
-                    PAKToolFileEntry entry = pak.Entries[i];
+                    PAKToolArchiveEntry entry = pak.Entries[i];
                     ConvertEntry(ref entry);
                     pak.Entries[i] = entry;
                 }
@@ -66,26 +66,26 @@ namespace archiveconvert
                         subArc.Entries[i] = subEntry;
                     }
 
-                    entry = new ListArchiveFileEntry(entry.Name, PAKToolFile.Create(subArc).GetBytes());
+                    entry = new ListArchiveFileEntry(entry.Name, PAKToolArchiveFile.Create(subArc).GetBytes());
                 }
             }
         }
 
-        static void ConvertEntry(ref PAKToolFileEntry entry)
+        static void ConvertEntry(ref PAKToolArchiveEntry entry)
         {
             using (MemoryStream mStream = new MemoryStream(entry.Data))
             {
-                if (PAKToolFile.VerifyFileType(mStream))
+                if (PAKToolArchiveFile.VerifyFileType(mStream))
                 {
-                    PAKToolFile subPak = new PAKToolFile(mStream);
+                    PAKToolArchiveFile subPak = new PAKToolArchiveFile(mStream);
                     for (int i = 0; i < subPak.EntryCount; i++)
                     {
-                        PAKToolFileEntry subEntry = subPak.Entries[i];
+                        PAKToolArchiveEntry subEntry = subPak.Entries[i];
                         ConvertEntry(ref subEntry);
                         subPak.Entries[i] = subEntry;
                     }
 
-                    entry = new PAKToolFileEntry(entry.Name, ListArchiveFile.Create(subPak).GetBytes());
+                    entry = new PAKToolArchiveEntry(entry.Name, ListArchiveFile.Create(subPak).GetBytes());
                 }
             }
         }

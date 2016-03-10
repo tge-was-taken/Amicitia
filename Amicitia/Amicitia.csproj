@@ -34,7 +34,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Build\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -44,7 +44,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Build\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -80,11 +80,11 @@
     <Compile Include="ResourceProperty.cs" />
     <Compile Include="ResourceWrappers\BVPArchiveWrapper.cs" />
     <Compile Include="ResourceWrappers\ListArchiveFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\PNGFileWrapper.cs" />
     <Compile Include="ResourceWrappers\RMD\RMDSceneWrapper.cs" />
     <Compile Include="ResourceWrappers\RMD\RWTextureDictionaryWrapper.cs" />
     <Compile Include="ResourceWrappers\RMD\RWTextureNativeWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPR4FileTexturesWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPR\SPR4FileWrapper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,10 +97,12 @@
     <Compile Include="ResourceWrappers\PAKToolFileWrapper.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapper.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapperHideProperties.cs" />
+    <Compile Include="ResourceWrappers\SPR\SPR4FileWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRKeyFrameListWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRKeyFrameWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRFileTexturesWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPRFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\TGAFileWrapper.cs" />
     <Compile Include="ResourceWrappers\TMXFileWrapper.cs" />
     <Compile Include="SupportedFileHandler.cs" />
     <Compile Include="SupportedFileInfo.cs" />
@@ -154,7 +156,9 @@
       <Name>AtlusLibSharp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ModelViewer\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

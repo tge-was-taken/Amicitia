@@ -1,14 +1,15 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.SMT3.Graphics;
+    using AtlusLibSharp.Graphics.SPR;
+    using System.Collections.Generic;
 
     internal class SPRKeyFrameListWrapper : ResourceWrapper
     {
-        public SPRKeyFrameListWrapper(string text, SPRKeyFrame[] keyFrames) : base(text, keyFrames) { }
+        public SPRKeyFrameListWrapper(string text, List<SPRKeyFrame> keyFrames) : base(text, keyFrames) { }
 
-        protected internal new SPRKeyFrame[] WrappedObject
+        protected internal new List<SPRKeyFrame> WrappedObject
         {
-            get { return (SPRKeyFrame[])base.WrappedObject; }
+            get { return (List<SPRKeyFrame>)base.WrappedObject; }
             set { base.WrappedObject = value; }
         }
 
@@ -39,11 +40,11 @@
 
         protected internal override void RebuildWrappedObject()
         {
-            WrappedObject = new SPRKeyFrame[Nodes.Count];
+            WrappedObject = new List<SPRKeyFrame>(Nodes.Count);
 
             for (int i = 0; i < Nodes.Count; i++)
             {
-                WrappedObject[i] = ((SPRKeyFrameWrapper)Nodes[i]).WrappedObject;
+                WrappedObject.Add(((SPRKeyFrameWrapper)Nodes[i]).WrappedObject);
             }
         }
 

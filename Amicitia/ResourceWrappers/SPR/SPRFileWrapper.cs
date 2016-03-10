@@ -4,7 +4,7 @@ namespace Amicitia.ResourceWrappers
 {
     using System;
     using System.Windows.Forms;
-    using AtlusLibSharp.SMT3.Graphics;
+    using AtlusLibSharp.Graphics.SPR;
 
     internal class SPRFileWrapper : ResourceWrapper
     {
@@ -90,7 +90,7 @@ namespace Amicitia.ResourceWrappers
             TexturesWrapper.RebuildWrappedObject();
 
             // set the wrapped object
-            WrappedObject = new SPRFile(KeyFramesWrapper.WrappedObject, TexturesWrapper.WrappedObject);
+            WrappedObject = new SPRFile(TexturesWrapper.WrappedObject, KeyFramesWrapper.WrappedObject);
         }
 
         protected internal override void InitializeWrapper()

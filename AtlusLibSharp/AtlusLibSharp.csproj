@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Build\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -48,12 +48,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Build\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Release\AtlusLibSharp.XML</DocumentationFile>
+    <DocumentationFile>..\Build\Release\AtlusLibSharp.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -75,122 +75,152 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\BinaryFileBase.cs" />
-    <Compile Include="Common\FileSystem\Archives\PAKToolFileEntry.cs" />
-    <Compile Include="Common\FileSystem\Archives\PAKToolFile.cs" />
-    <Compile Include="Common\FileSystem\Archives\ListArchiveFile.cs" />
-    <Compile Include="Common\FileSystem\Archives\ListArchiveFileEntry.cs" />
-    <Compile Include="Common\FileSystem\Archives\IArchive.cs" />
-    <Compile Include="Common\ITextureFile.cs" />
-    <Compile Include="Persona3\FileSystem\Archives\BVPArchive.cs" />
-    <Compile Include="Persona3\FileSystem\Archives\BVPArchiveEntry.cs" />
-    <Compile Include="Persona3\FileSystem\CRIWare\CVMDirectoryListing.cs" />
-    <Compile Include="Persona3\FileSystem\CRIWare\CVMDirectoryListingEntry.cs" />
-    <Compile Include="Persona3\FileSystem\CRIWare\CVMExecutableListing.cs" />
-    <Compile Include="Persona3\FileSystem\CRIWare\CVMFile.cs" />
-    <Compile Include="Persona3\FileSystem\CRIWare\ISODirectoryRecord.cs" />
-    <Compile Include="Persona3\RenderWare\RMDAnimationSet.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RMDAnimationSetCount.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RMDAnimationSetPlaceholder.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RMDAnimationSetReference.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RMDAnimationSetTerminator.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RMDFrameLinkList.cs" />
-    <Compile Include="Persona3\RenderWare\RWAtomic.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWAtomicStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWBoundingInfo.cs" />
-    <Compile Include="Persona3\RenderWare\RWClump.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWClumpStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWEnum.cs" />
-    <Compile Include="Persona3\RenderWare\RWExtension.cs" />
-    <Compile Include="Persona3\RenderWare\RWFrame.cs" />
-    <Compile Include="Persona3\RenderWare\RWFrameList.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWFrameListStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWGeometry.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWGeometryList.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWGeometryListStruct.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWGeometryStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWHierarchyAnimNode.cs" />
-    <Compile Include="Persona3\RenderWare\RWHierarchyAnimPlugin.cs" />
-    <Compile Include="Persona3\RenderWare\RWMaterial.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWMaterialList.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWMaterialListStruct.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWMaterialStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWNode.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWNodeFactory.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWRaster.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWRasterData.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWRasterInfo.cs" />
-    <Compile Include="Persona3\RenderWare\RMDScene.cs" />
-    <Compile Include="Persona3\RenderWare\RWSkinPlugin.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWSkyMipMapValue.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWString.cs" />
-    <Compile Include="Persona3\RenderWare\RWTextureDictionary.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWTextureDictionaryStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWTextureNative.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWTextureNativeStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWTextureReference.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWTextureReferenceStruct.cs" />
-    <Compile Include="Persona3\RenderWare\RWTriangle.cs" />
-    <Compile Include="Persona3\RenderWare\RWUVAnimationDictionary.cs" />
-    <Compile Include="Persona3\RenderWare\Internal\RWUVAnimationDictionaryStruct.cs" />
-    <Compile Include="PS2\Graphics\GIF\GIFTag.cs" />
+    <Compile Include="FileSystems\IArchiveEntry.cs" />
+    <Compile Include="Compression\ICompression.cs" />
+    <Compile Include="FileSystems\ISO\Enums.cs" />
+    <Compile Include="Graphics\TGA\TGAEncoding.cs" />
+    <Compile Include="Graphics\TMX\TMXWrapMode.cs" />
+    <Compile Include="IO\BinaryFileBase.cs" />
+    <Compile Include="FileSystems\PAKToolArchive\PAKToolArchiveEntry.cs" />
+    <Compile Include="FileSystems\PAKToolArchive\PAKToolArchiveFile.cs" />
+    <Compile Include="FileSystems\ListArchive\ListArchiveFile.cs" />
+    <Compile Include="FileSystems\ListArchive\ListArchiveFileEntry.cs" />
+    <Compile Include="FileSystems\IArchive.cs" />
+    <Compile Include="IO\GenericBinaryFile.cs" />
+    <Compile Include="Graphics\TGA\TGAFile.cs" />
+    <Compile Include="Graphics\ITextureFile.cs" />
+    <Compile Include="IO\IWriteable.cs" />
+    <Compile Include="Tables\MessageTableBase.cs" />
+    <Compile Include="Tables\ModelTableBase.cs" />
+    <Compile Include="Tables\Persona4\P4MessageTable.cs" />
+    <Compile Include="Tables\Persona4\P4ModelTable.cs" />
+    <Compile Include="Tables\Persona4\P4TableConstants.cs" />
+    <Compile Include="Tables\Persona4\P4ModelTablePartyModelProperties.cs" />
+    <Compile Include="Tables\TableBase.cs" />
+    <Compile Include="Tables\Persona4\P4ModelTableAnimationProperties.cs" />
+    <Compile Include="PS2\ELF\ELFEnums.cs" />
+    <Compile Include="PS2\ELF\ELFFile.cs" />
+    <Compile Include="FileSystems\BVP\BVPFile.cs" />
+    <Compile Include="FileSystems\BVP\BVPEntry.cs" />
+    <Compile Include="FileSystems\CVM\CVMDirectoryListing.cs" />
+    <Compile Include="FileSystems\CVM\CVMDirectoryListingEntry.cs" />
+    <Compile Include="FileSystems\CVM\CVMExecutableListing.cs" />
+    <Compile Include="FileSystems\CVM\CVMFile.cs" />
+    <Compile Include="FileSystems\ISO\ISODirectoryRecord.cs" />
+    <Compile Include="Graphics\RenderWare\RMDAnimationSet.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationSetCount.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationSetPlaceholder.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationSetReference.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationSetTerminator.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RMDFrameLinkList.cs" />
+    <Compile Include="Graphics\RenderWare\RWAtomic.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWAtomicStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWBoundingInfo.cs" />
+    <Compile Include="Graphics\RenderWare\RWClump.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWClumpStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWEnum.cs" />
+    <Compile Include="Graphics\RenderWare\RWExtension.cs" />
+    <Compile Include="Graphics\RenderWare\RWFrame.cs" />
+    <Compile Include="Graphics\RenderWare\RWFrameList.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWFrameListStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWGeometry.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWGeometryList.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWGeometryListStruct.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWGeometryStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWHierarchyAnimNode.cs" />
+    <Compile Include="Graphics\RenderWare\RWHierarchyAnimPlugin.cs" />
+    <Compile Include="Graphics\RenderWare\RWMaterial.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWMaterialList.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWMaterialListStruct.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWMaterialStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWNode.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWNodeFactory.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWRaster.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWRasterData.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWRasterInfo.cs" />
+    <Compile Include="Graphics\RenderWare\RMDScene.cs" />
+    <Compile Include="Graphics\RenderWare\RWSkinPlugin.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWSkyMipMapValue.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWString.cs" />
+    <Compile Include="Graphics\RenderWare\RWTextureDictionary.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWTextureDictionaryStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWTextureNative.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWTextureNativeStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWTextureReference.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWTextureReferenceStruct.cs" />
+    <Compile Include="Graphics\RenderWare\RWTriangle.cs" />
+    <Compile Include="Graphics\RenderWare\RWUVAnimationDictionary.cs" />
+    <Compile Include="Graphics\RenderWare\Internal\RWUVAnimationDictionaryStruct.cs" />
+    <Compile Include="PS2\ELF\ELFHeader.cs" />
+    <Compile Include="PS2\ELF\ELFProgramHeader.cs" />
+    <Compile Include="PS2\ELF\ELFSection.cs" />
+    <Compile Include="PS2\ELF\ELFSectionHeader.cs" />
+    <Compile Include="PS2\ELF\ELFSegment.cs" />
+    <Compile Include="PS2\Graphics\Interfaces\GIF\GIFTag.cs" />
     <Compile Include="PS2\Graphics\Registers\MipTBPRegister.cs" />
     <Compile Include="PS2\Graphics\Registers\Tex0Register.cs" />
     <Compile Include="PS2\Graphics\Registers\Tex1Register.cs" />
     <Compile Include="PS2\Graphics\Registers\TRXDIRRegister.cs" />
     <Compile Include="PS2\Graphics\Registers\TRXPOSRegister.cs" />
     <Compile Include="PS2\Graphics\Registers\TRXREGRegister.cs" />
-    <Compile Include="PS2\Graphics\StandardImageHeader.cs" />
-    <Compile Include="SMT3\Animation\ABAnimation.cs" />
-    <Compile Include="SMT3\Animation\ABFile.cs" />
-    <Compile Include="SMT3\Animation\ABKey.cs" />
-    <Compile Include="SMT3\Animation\ABKeyInfo.cs" />
-    <Compile Include="SMT3\Animation\ABKeyType.cs" />
-    <Compile Include="SMT3\FileSystem\DDTFile.cs" />
-    <Compile Include="SMT3\Graphics\SPR4File.cs" />
-    <Compile Include="SMT3\Graphics\SPRFile.cs" />
-    <Compile Include="SMT3\Graphics\SPRKeyFrame.cs" />
-    <Compile Include="SMT3\Graphics\TBFile.cs" />
-    <Compile Include="SMT3\Graphics\TMXFile.cs" />
-    <Compile Include="SMT3\Scripting\BFFile.cs" />
-    <Compile Include="SMT3\Scripting\BMDDialog.cs" />
-    <Compile Include="SMT3\Scripting\BMDDialogToken.cs" />
-    <Compile Include="SMT3\Scripting\BMDDialogTokenType.cs" />
-    <Compile Include="SMT3\Scripting\BMDFile.cs" />
-    <Compile Include="SMT3\Scripting\BMDMessage.cs" />
-    <Compile Include="SMT3\Scripting\BMDMessageFactory.cs" />
-    <Compile Include="SMT3\Scripting\BMDRegularMessage.cs" />
-    <Compile Include="SMT3\Scripting\BMDSelectionMessage.cs" />
-    <Compile Include="SMT3\Scripting\TypeTableEntry.cs" />
-    <Compile Include="SMT3\AddressRelocationTableCompression.cs" />
-    <Compile Include="Common\Utilities\AlignmentHelper.cs" />
-    <Compile Include="Common\Utilities\BinaryIOExtension.cs" />
-    <Compile Include="Common\Utilities\BitHelper.cs" />
-    <Compile Include="Common\Utilities\BitmapHelper.cs" />
-    <Compile Include="Common\Utilities\EnumExtension.cs" />
-    <Compile Include="Common\Utilities\ICollectionExtension.cs" />
-    <Compile Include="Common\Utilities\IListExtension.cs" />
-    <Compile Include="Common\Utilities\MatrixExtension.cs" />
-    <Compile Include="Common\Utilities\MeshUtilities.cs" />
+    <Compile Include="PS2\Graphics\PS2StandardImageHeader.cs" />
+    <Compile Include="Graphics\MT\ABAnimation.cs" />
+    <Compile Include="Graphics\MT\ABFile.cs" />
+    <Compile Include="Graphics\MT\ABKey.cs" />
+    <Compile Include="Graphics\MT\ABKeyInfo.cs" />
+    <Compile Include="Graphics\MT\ABKeyType.cs" />
+    <Compile Include="FileSystems\DDT\DDTFile.cs" />
+    <Compile Include="Graphics\SPR\SPR4File.cs" />
+    <Compile Include="Graphics\SPR\SPRFile.cs" />
+    <Compile Include="Graphics\SPR\SPRKeyFrame.cs" />
+    <Compile Include="Graphics\TXP\TBFile.cs" />
+    <Compile Include="Graphics\TMX\TMXFile.cs" />
+    <Compile Include="Scripting\BFDisassembler.cs" />
+    <Compile Include="Scripting\BFFile.cs" />
+    <Compile Include="Scripting\BFCodeLabel.cs" />
+    <Compile Include="Scripting\BFInstruction.cs" />
+    <Compile Include="Scripting\BFOpcode.cs" />
+    <Compile Include="Scripting\BFAssembler.cs" />
+    <Compile Include="Scripting\BMDCompiler.cs" />
+    <Compile Include="Scripting\BMDDecompiler.cs" />
+    <Compile Include="Scripting\BMDDialog.cs" />
+    <Compile Include="Scripting\BMDDialogToken.cs" />
+    <Compile Include="Scripting\BMDFile.cs" />
+    <Compile Include="Scripting\BMDMessage.cs" />
+    <Compile Include="Scripting\BMDDialogFactory.cs" />
+    <Compile Include="Scripting\BMDStandardMessage.cs" />
+    <Compile Include="Scripting\BMDSelectionMessage.cs" />
+    <Compile Include="Scripting\BFCallNativeType.cs" />
+    <Compile Include="Scripting\TypeTableEntry.cs" />
+    <Compile Include="Compression\PointerRelocationTableCompression.cs" />
+    <Compile Include="Utilities\AlignmentHelper.cs" />
+    <Compile Include="Utilities\BinaryIOExtension.cs" />
+    <Compile Include="Utilities\BitHelper.cs" />
+    <Compile Include="Utilities\BitmapHelper.cs" />
+    <Compile Include="Utilities\EnumExtension.cs" />
+    <Compile Include="Utilities\ICollectionExtension.cs" />
+    <Compile Include="Utilities\IListExtension.cs" />
+    <Compile Include="Utilities\MatrixExtension.cs" />
+    <Compile Include="Utilities\MeshUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PS2\Graphics\Enum.cs" />
-    <Compile Include="PS2\Graphics\PixelFormatHelper.cs" />
-    <Compile Include="PS2\Graphics\VIF\VIFPacket.cs" />
-    <Compile Include="PS2\Graphics\VIF\VIFCodeEvaluator.cs" />
-    <Compile Include="PS2\Graphics\VIF\VIFTag.cs" />
-    <Compile Include="PS2\Graphics\VIF\VIFUnpack.cs" />
-    <Compile Include="Common\Utilities\StreamExtension.cs" />
-    <Compile Include="WuQuantizer\Box.cs" />
-    <Compile Include="WuQuantizer\ColorData.cs" />
-    <Compile Include="WuQuantizer\CubeCut.cs" />
-    <Compile Include="WuQuantizer\IWuQuantizer.cs" />
-    <Compile Include="WuQuantizer\Lookup.cs" />
-    <Compile Include="WuQuantizer\LookupData.cs" />
-    <Compile Include="WuQuantizer\Pixel.cs" />
-    <Compile Include="WuQuantizer\QuantizationException.cs" />
-    <Compile Include="WuQuantizer\QuantizedPalette.cs" />
-    <Compile Include="WuQuantizer\WuQuantizer.cs" />
-    <Compile Include="WuQuantizer\WuQuantizerBase.cs" />
+    <Compile Include="PS2\Graphics\Enums.cs" />
+    <Compile Include="PS2\Graphics\PS2PixelFormatHelper.cs" />
+    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFPacket.cs" />
+    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFCodeEvaluator.cs" />
+    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFTag.cs" />
+    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFUnpack.cs" />
+    <Compile Include="Utilities\StreamExtension.cs" />
+    <Compile Include="Utilities\WuQuantizer\Box.cs" />
+    <Compile Include="Utilities\WuQuantizer\ColorData.cs" />
+    <Compile Include="Utilities\WuQuantizer\CubeCut.cs" />
+    <Compile Include="Utilities\WuQuantizer\IWuQuantizer.cs" />
+    <Compile Include="Utilities\WuQuantizer\Lookup.cs" />
+    <Compile Include="Utilities\WuQuantizer\LookupData.cs" />
+    <Compile Include="Utilities\WuQuantizer\Pixel.cs" />
+    <Compile Include="Utilities\WuQuantizer\QuantizationException.cs" />
+    <Compile Include="Utilities\WuQuantizer\QuantizedPalette.cs" />
+    <Compile Include="Utilities\WuQuantizer\WuQuantizer.cs" />
+    <Compile Include="Utilities\WuQuantizer\WuQuantizerBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -208,6 +238,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Graphics\MD\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AssimpNet.3.3.1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.1\build\AssimpNet.targets')" />

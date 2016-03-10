@@ -3,7 +3,7 @@ using System.IO;
 
 namespace AtlusLibSharp.PS2.Graphics.Registers
 {
-    using Common.Utilities;
+    using AtlusLibSharp.Utilities;
 
     /// <summary>
     /// <para>This register specifies the size of the rectangular area, where the transmission between buffers is implemented, in units of pixels.</para>

@@ -2,13 +2,14 @@
 using System.Windows.Forms;
 using System.IO;
 using Amicitia.ResourceWrappers;
-using AtlusLibSharp.Common.Utilities;
-using AtlusLibSharp.Common;
+using AtlusLibSharp.Utilities;
+using AtlusLibSharp.Graphics;
 
 namespace Amicitia
 {
     public partial class MainForm : Form
     {
+        //private static Rectangle _lastMainTreeViewSize;
         private static MainForm _instance;
 
         internal static MainForm Instance
@@ -142,17 +143,63 @@ namespace Amicitia
         // Initializer
         private void InitializeMainForm()
         {
+            // this
             Instance = this;
             DragDrop += MainForm_DragDrop;
             DragEnter += MainForm_DragEnter;
+            //MouseMove += MainForm_MouseMove;
+            //_lastMainTreeViewSize = mainTreeView.Bounds;
+
+            // mainTreeView
             mainTreeView.AfterSelect += MainTreeView_AfterSelect;
             mainTreeView.KeyDown += MainTreeView_KeyDown;
             mainTreeView.AfterLabelEdit += MainTreeView_AfterLabelEdit;
             mainTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+            //mainTreeView.SizeChanged += MainTreeView_SizeChanged;
+            
+            // mainPictureBox
             mainPictureBox.Visible = false;
+
+            // mainPropertGrid
             mainPropertyGrid.ShowCustomProperties = true;
             mainPropertyGrid.PropertySort = PropertySort.NoSort;
         }
+
+        /*
+        private void MainForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.X == mainPictureBox.Location.X + mainPictureBox.Size.Width)
+            {
+                Cursor.Current = Cursors.SizeWE;
+            }
+        }
+
+        private void MainTreeView_SizeChanged(object sender, EventArgs e)
+        {
+            float widthDiff = mainTreeView.Bounds.Width - _lastMainTreeViewSize.Width;
+
+            MoveDockedObject(mainPictureBox, (int)widthDiff * 2, 0);
+            MoveDockedObject(mainPropertyGrid, (int)widthDiff * 2, 0);
+
+            if (mainPictureBox.Bounds.IntersectsWith(mainTreeView.Bounds) || mainPropertyGrid.Bounds.IntersectsWith(mainTreeView.Bounds))
+            {
+                
+                MoveDockedObject(mainPictureBox, -2, 0);
+                MoveDockedObject(mainPropertyGrid, -2, 0);
+                
+            }
+
+            _lastMainTreeViewSize = mainTreeView.Bounds;
+        }
+
+        private void MoveDockedObject(Control control, int width, int height)
+        {
+            Rectangle old = control.Bounds;
+            old.X += width;
+            old.Y += height;
+            control.Bounds = old;
+        }
+        */
 
         // Handlers
         private void HandleTreeViewCtrlShortcuts(Keys keys)
@@ -160,7 +207,7 @@ namespace Amicitia
             ResourceWrapper res = (ResourceWrapper)mainTreeView.SelectedNode;
 
             // Move up
-            if (keys.HasFlagFast(Keys.Up))
+            if (keys.HasFlagUnchecked(Keys.Up))
             {
                 if (res.CanMove)
                 {
@@ -169,7 +216,7 @@ namespace Amicitia
             }
 
             // Move down
-            else if (keys.HasFlagFast(Keys.Down))
+            else if (keys.HasFlagUnchecked(Keys.Down))
             {
                 if (res.CanMove)
                 {
@@ -178,7 +225,7 @@ namespace Amicitia
             }
 
             // Delete
-            else if (keys.HasFlagFast(Keys.Delete))
+            else if (keys.HasFlagUnchecked(Keys.Delete))
             {
                 if (res.CanDelete)
                 {
@@ -187,7 +234,7 @@ namespace Amicitia
             }
 
             // Replace
-            else if (keys.HasFlagFast(Keys.R))
+            else if (keys.HasFlagUnchecked(Keys.R))
             {
                 if (res.CanReplace)
                 {
@@ -196,7 +243,7 @@ namespace Amicitia
             }
 
             // Rename
-            else if (keys.HasFlagFast(Keys.E))
+            else if (keys.HasFlagUnchecked(Keys.E))
             {
                 if (res.CanRename)
                 {

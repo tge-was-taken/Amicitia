@@ -16,18 +16,26 @@
         }
     }
 
-    internal enum SupportedFileType : int
+    internal enum SupportedFileType
     {
+        // Default placeholder
         Default,
+
+        // Archive formats
+        BVPArchiveFile,
+        ListArchiveFile,
         PAKToolFile,
-        TMXFile,
+
+        // Texture formats
+        RWTextureDictionary,
+        RWTextureNative,
         PNGFile,
         SPRFile,
         SPR4File,
-        BVPArchiveFile,
-        ListArchiveFile,
-        RMDScene,
-        RWTextureDictionary,
-        RWTextureNative
+        TMXFile,
+        TGAFile,
+
+        // Model formats
+        RMDScene
     }
 }

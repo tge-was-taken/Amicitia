@@ -1,6 +1,6 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.Persona3.RenderWare;
+    using AtlusLibSharp.Graphics.RenderWare;
     using System.Windows.Forms;
     using Utilities;
     using System;

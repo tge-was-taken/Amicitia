@@ -3,7 +3,7 @@ using System.IO;
 
 namespace AtlusLibSharp.PS2.Graphics.Registers
 {
-    using Common.Utilities;
+    using AtlusLibSharp.Utilities;
 
     public enum TEX0CLUTBufferLoadControl
     {
@@ -65,9 +65,9 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
             set { BitHelper.ClearAndSetBits(ref _rawData, 6, value, 14); }
         }
 
-        public PixelFormat TexturePixelFormat
+        public PS2PixelFormat TexturePixelFormat
         {
-            get { return (PixelFormat)BitHelper.GetBits(_rawData, 6, 20); }
+            get { return (PS2PixelFormat)BitHelper.GetBits(_rawData, 6, 20); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 6, (ulong)value, 20); }
         }
 
@@ -89,15 +89,15 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
             set { BitHelper.ClearAndSetBits(ref _rawData, 4, (ulong)Math.Log(value, 2), 30); }
         }
 
-        public ColorComponent TextureColorComponent
+        public PS2ColorComponent TextureColorComponent
         {
-            get { return (ColorComponent)BitHelper.GetBits(_rawData, 1, 34); }
+            get { return (PS2ColorComponent)BitHelper.GetBits(_rawData, 1, 34); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 1, (ulong)value, 34); }
         }
 
-        public TextureFunction TextureFunction
+        public PS2TextureFunction TextureFunction
         {
-            get { return (TextureFunction)BitHelper.GetBits(_rawData, 2, 35); }
+            get { return (PS2TextureFunction)BitHelper.GetBits(_rawData, 2, 35); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 2, (ulong)value, 35); }
         }
 
@@ -110,15 +110,15 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
             set { BitHelper.ClearAndSetBits(ref _rawData, 14, value, 37); }
         } 
 
-        public PixelFormat CLUTPixelFormat
+        public PS2PixelFormat CLUTPixelFormat
         {
-            get { return (PixelFormat)BitHelper.GetBits(_rawData, 4, 51); }
+            get { return (PS2PixelFormat)BitHelper.GetBits(_rawData, 4, 51); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 4, (ulong)value, 51); }
         }
 
-        public CLUTStorageMode CLUTStorageMode
+        public PS2CLUTStorageMode CLUTStorageMode
         {
-            get { return (CLUTStorageMode)BitHelper.GetBits(_rawData, 1, 55); }
+            get { return (PS2CLUTStorageMode)BitHelper.GetBits(_rawData, 1, 55); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 1, (ulong)value, 55); }
         }
 
@@ -141,16 +141,16 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
 
         public Tex0Register()
         {
-            TextureColorComponent = ColorComponent.RGBA;
-            TextureFunction = TextureFunction.Modulate;
-            CLUTPixelFormat = PixelFormat.PSMCT32;
-            CLUTStorageMode = CLUTStorageMode.CSM1;
+            TextureColorComponent = PS2ColorComponent.RGBA;
+            TextureFunction = PS2TextureFunction.Modulate;
+            CLUTPixelFormat = PS2PixelFormat.PSMCT32;
+            CLUTStorageMode = PS2CLUTStorageMode.CSM1;
             CLUTEntryOffset = 0;
             CLUTBufferLoadControl = TEX0CLUTBufferLoadControl.Load;
         }
 
         public Tex0Register(
-            PixelFormat txFmt, 
+            PS2PixelFormat txFmt, 
             int txWidth, int txHeight)
             : this()
         {
@@ -165,19 +165,23 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
             _rawData = reader.ReadUInt64();
         }
 
-        internal static int GetBufferWidth(int width, PixelFormat pixelFormat)
+        internal static int GetBufferWidth(int width, PS2PixelFormat pixelFormat)
         {
             int divisor;
 
             switch (pixelFormat)
             {
-                case PixelFormat.PSMT8:
-                case PixelFormat.PSMT8H:
+                case PS2PixelFormat.PSMCT32:
+                case PS2PixelFormat.PSMCT24:
+                    divisor = 256; // this might be wrong
+                    break;
+                case PS2PixelFormat.PSMT8:
+                case PS2PixelFormat.PSMT8H:
                     divisor = 64;
                     break;
-                case PixelFormat.PSMT4:
-                case PixelFormat.PSMT4HL:
-                case PixelFormat.PSMT4HH:
+                case PS2PixelFormat.PSMT4:
+                case PS2PixelFormat.PSMT4HL:
+                case PS2PixelFormat.PSMT4HH:
                     divisor = 32; // because every pixel only takes up half a texel
                     break;
                 default:

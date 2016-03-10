@@ -2,7 +2,7 @@
 {
     using System;
     using System.IO;
-    using Common.Utilities;
+    using AtlusLibSharp.Utilities;
 
     public class MipTBPRegister
     {

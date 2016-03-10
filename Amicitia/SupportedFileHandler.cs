@@ -6,21 +6,25 @@
     using System.Linq;
     using System.Reflection;
 
-    using AtlusLibSharp.Common.FileSystem.Archives;
-    using AtlusLibSharp.Persona3.FileSystem.Archives;
-    using AtlusLibSharp.SMT3.Graphics;
-    using AtlusLibSharp.Persona3.RenderWare;
+    using AtlusLibSharp.FileSystems.BVP;
+    using AtlusLibSharp.Graphics.RenderWare;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
+    using AtlusLibSharp.Graphics.TMX;
+    using AtlusLibSharp.Graphics.SPR;
+    using AtlusLibSharp.Graphics.TGA;
 
     internal static class SupportedFileHandler
     {
         private static readonly SupportedFileInfo[] _supportedFiles = new SupportedFileInfo[]
         {
-            // Non-openable formats
+            // Export only formats
             new SupportedFileInfo("Portable Network Graphics",          SupportedFileType.PNGFile,              true,  ".png"),
+            new SupportedFileInfo("Truevision TARGA",                   SupportedFileType.TGAFile,              true,  ".tga"),
 
             // Archive formats
-            new SupportedFileInfo("Atlus Generic Archive",              SupportedFileType.PAKToolFile,          false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack"),
-            new SupportedFileInfo("Atlus Generic List Archive",         SupportedFileType.ListArchiveFile,      false, ".arc", ".bin", ".pak", ".pac"),
+            new SupportedFileInfo("Atlus Generic Archive",              SupportedFileType.PAKToolFile,          false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se"),
+            new SupportedFileInfo("Atlus Generic List Archive",         SupportedFileType.ListArchiveFile,      false, ".arc", ".bin", ".pak", ".pac", ".abin", ".se", ".pse"),
             new SupportedFileInfo("Persona 3/4 Battle Voice Package",   SupportedFileType.BVPArchiveFile,       false, ".bvp"),
 
             // Texture (container) formats
@@ -36,15 +40,21 @@
 
         private static readonly Dictionary<SupportedFileType, Type> _supportedFileTypeEnumToType = new Dictionary<SupportedFileType, Type>()
         {
-            { SupportedFileType.PAKToolFile,            typeof(PAKToolFile) },
-            { SupportedFileType.BVPArchiveFile,         typeof(BVPArchiveFile) },
+            // Archive formats
+            { SupportedFileType.BVPArchiveFile,         typeof(BVPFile) },
             { SupportedFileType.ListArchiveFile,        typeof(ListArchiveFile) },
-            { SupportedFileType.TMXFile,                typeof(TMXFile) },
+            { SupportedFileType.PAKToolFile,            typeof(PAKToolArchiveFile) },
+
+            // Texture formats
+            { SupportedFileType.RWTextureDictionary,    typeof(RWTextureDictionary) },
+            { SupportedFileType.RWTextureNative,        typeof(RWTextureNative) },
             { SupportedFileType.SPRFile,                typeof(SPRFile) },
             { SupportedFileType.SPR4File,               typeof(SPR4File) },
+            { SupportedFileType.TMXFile,                typeof(TMXFile) },
+            { SupportedFileType.TGAFile,                typeof(TGAFile) },
+
+            // Model formats
             { SupportedFileType.RMDScene,               typeof(RMDScene) },
-            { SupportedFileType.RWTextureDictionary,    typeof(RWTextureDictionary) },
-            { SupportedFileType.RWTextureNative,        typeof(RWTextureNative) }
         };
 
         private static readonly string _fileFilter;

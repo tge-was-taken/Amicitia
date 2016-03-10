@@ -1,10 +1,10 @@
-﻿using AtlusLibSharp.Common.FileSystem.Archives;
-using AtlusLibSharp.Persona3.FileSystem.Archives;
-using System;
-using System.IO;
-
-namespace arctool
+﻿namespace arctool
 {
+    using System;
+    using System.IO;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
+
     class Program
     {
         static void Main(string[] args)
@@ -25,7 +25,7 @@ namespace arctool
                 if (!ListArchiveFile.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper arc file!");
-                    if (PAKToolFile.VerifyFileType(args[0]))
+                    if (PAKToolArchiveFile.VerifyFileType(args[0]))
                     {
                         Console.WriteLine("Detected format: regular .bin/.pac/.pak archive.");
                     }

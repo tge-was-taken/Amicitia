@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using AtlusLibSharp.Persona3.RenderWare;
+using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
 
 namespace Amicitia.ResourceWrappers
@@ -27,19 +27,19 @@ namespace Amicitia.ResourceWrappers
             get { return WrappedObject.PlatformID; }
         }
 
-        public FilterMode FilterMode
+        public PS2FilterMode FilterMode
         {
             get { return WrappedObject.FilterMode; }
             set { WrappedObject.FilterMode = value; }
         }
 
-        public AddressingMode WrapModeX
+        public PS2AddressingMode WrapModeX
         {
             get { return WrappedObject.HorrizontalAddressingMode; }
             set { WrappedObject.HorrizontalAddressingMode = value; }
         }
 
-        public AddressingMode WrapModeY
+        public PS2AddressingMode WrapModeY
         {
             get { return WrappedObject.VerticalAddressingMode; }
             set { WrappedObject.VerticalAddressingMode = value; }
@@ -60,7 +60,7 @@ namespace Amicitia.ResourceWrappers
             get { return WrappedObject.Depth; }
         }
 
-        public PixelFormat PixelFormat
+        public PS2PixelFormat PixelFormat
         {
             get { return WrappedObject.Tex0Register.TexturePixelFormat; }
         }
@@ -129,8 +129,10 @@ namespace Amicitia.ResourceWrappers
                     return;
                 }
 
+#if !DEBUG
                 try
                 {
+#endif
                     switch (FileFilterTypes[openFileDlg.FilterIndex - 1])
                     {
                         case SupportedFileType.RWTextureNative:
@@ -141,11 +143,13 @@ namespace Amicitia.ResourceWrappers
                             WrappedObject = new RWTextureNative(openFileDlg.FileName, WrappedObject.Tex0Register.TexturePixelFormat);
                             break;
                     }
+#if !DEBUG
                 }
                 catch (Exception exception)
                 {
                     MessageBox.Show(exception.Message, "Error occured.");
                 }
+#endif
 
                 // re-init wrapper
                 InitializeWrapper();

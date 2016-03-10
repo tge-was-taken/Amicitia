@@ -3,7 +3,8 @@
     using System.IO;
     using System;
     using System.Windows.Forms;
-    using AtlusLibSharp.Common.FileSystem.Archives;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
 
     internal class PAKToolFileWrapper : ResourceWrapper
     {
@@ -12,7 +13,7 @@
             SupportedFileType.PAKToolFile, SupportedFileType.ListArchiveFile
         };
 
-        public PAKToolFileWrapper(string text, PAKToolFile bin) : base(text, bin) { }
+        public PAKToolFileWrapper(string text, PAKToolArchiveFile bin) : base(text, bin) { }
 
         public SupportedFileType FileType
         {
@@ -24,9 +25,9 @@
             get { return Nodes.Count; }
         }
 
-        protected internal new PAKToolFile WrappedObject
+        protected internal new PAKToolArchiveFile WrappedObject
         {
-            get { return (PAKToolFile)base.WrappedObject; }
+            get { return (PAKToolArchiveFile)base.WrappedObject; }
             set { base.WrappedObject = value; }
         }
 
@@ -45,10 +46,10 @@
                 switch (FileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.PAKToolFile:
-                        WrappedObject = new PAKToolFile(openFileDlg.FileName);
+                        WrappedObject = new PAKToolArchiveFile(openFileDlg.FileName);
                         break;
                     case SupportedFileType.ListArchiveFile:
-                        WrappedObject = PAKToolFile.Create(new ListArchiveFile(openFileDlg.FileName));
+                        WrappedObject = PAKToolArchiveFile.Create(new ListArchiveFile(openFileDlg.FileName));
                         break;
                 }
 
@@ -90,14 +91,14 @@
             foreach (ResourceWrapper node in Nodes)
             {
                 node.RebuildWrappedObject();
-                WrappedObject.Entries.Add(new PAKToolFileEntry(node.Text, node.GetBytes()));
+                WrappedObject.Entries.Add(new PAKToolArchiveEntry(node.Text, node.GetBytes()));
             }
         }
 
         protected internal override void InitializeWrapper()
         {
             Nodes.Clear();
-            foreach (PAKToolFileEntry entry in WrappedObject.Entries)
+            foreach (PAKToolArchiveEntry entry in WrappedObject.Entries)
             {
                 Nodes.Add(ResourceFactory.GetResource(entry.Name, new MemoryStream(entry.Data)));
             }

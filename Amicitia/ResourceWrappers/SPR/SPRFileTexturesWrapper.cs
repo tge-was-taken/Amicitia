@@ -1,14 +1,15 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.SMT3.Graphics;
+    using AtlusLibSharp.Graphics.TMX;
+    using System.Collections.Generic;
 
     internal class SPRFileTexturesWrapper : ResourceWrapper
     {
-        public SPRFileTexturesWrapper(string text, TMXFile[] textures) : base(text, textures) { }
+        public SPRFileTexturesWrapper(string text, List<TMXFile> textures) : base(text, textures) { }
 
-        protected internal new TMXFile[] WrappedObject
+        protected internal new List<TMXFile> WrappedObject
         {
-            get { return (TMXFile[])base.WrappedObject; }
+            get { return (List<TMXFile>)base.WrappedObject; }
             set { base.WrappedObject = value; }
         }
 
@@ -39,7 +40,7 @@
 
         protected internal override void RebuildWrappedObject()
         {
-            WrappedObject = new TMXFile[Nodes.Count];
+            WrappedObject = new List<TMXFile>(Nodes.Count);
             for (int i = 0; i < Nodes.Count; i++)
             {
                 // rebuild the data
@@ -47,7 +48,7 @@
                 node.RebuildWrappedObject();
 
                 // set the wrapped object
-                WrappedObject[i] = node.WrappedObject;
+                WrappedObject.Add(node.WrappedObject);
             }
         }
 

@@ -3,7 +3,8 @@
     using System.IO;
     using System;
     using System.Windows.Forms;
-    using AtlusLibSharp.Common.FileSystem.Archives;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
 
     internal class ListArchiveFileWrapper : ResourceWrapper
     {
@@ -55,7 +56,7 @@
                         WrappedObject = new ListArchiveFile(openFileDlg.FileName);
                         break;
                     case SupportedFileType.PAKToolFile:
-                        WrappedObject = ListArchiveFile.Create(new PAKToolFile(openFileDlg.FileName));
+                        WrappedObject = ListArchiveFile.Create(new PAKToolArchiveFile(openFileDlg.FileName));
                         break;
                 }
 
@@ -85,7 +86,7 @@
                         WrappedObject.Save(saveFileDlg.FileName);
                         break;
                     case SupportedFileType.PAKToolFile:
-                        PAKToolFile.Create(WrappedObject).Save(saveFileDlg.FileName);
+                        PAKToolArchiveFile.Create(WrappedObject).Save(saveFileDlg.FileName);
                         break;
                 }
             }

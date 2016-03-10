@@ -3,7 +3,7 @@
     using System.IO;
     using System;
     using System.Windows.Forms;
-    using AtlusLibSharp.Persona3.FileSystem.Archives;
+    using AtlusLibSharp.FileSystems.BVP;
 
     internal class BVPArchiveFileWrapper : ResourceWrapper
     {
@@ -12,7 +12,7 @@
             SupportedFileType.BVPArchiveFile
         };
 
-        public BVPArchiveFileWrapper(string text, BVPArchiveFile arc) : base(text, arc) { }
+        public BVPArchiveFileWrapper(string text, BVPFile arc) : base(text, arc) { }
 
         public SupportedFileType FileType
         {
@@ -24,9 +24,9 @@
             get { return Nodes.Count; }
         }
 
-        protected internal new BVPArchiveFile WrappedObject
+        protected internal new BVPFile WrappedObject
         {
-            get { return (BVPArchiveFile)base.WrappedObject; }
+            get { return (BVPFile)base.WrappedObject; }
             set { base.WrappedObject = value; }
         }
 
@@ -45,7 +45,7 @@
                 switch (FileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.BVPArchiveFile:
-                        WrappedObject = new BVPArchiveFile(openFileDlg.FileName);
+                        WrappedObject = new BVPFile(openFileDlg.FileName);
                         break;
                 }
 
@@ -84,7 +84,7 @@
             foreach (ResourceWrapper node in Nodes)
             {
                 node.RebuildWrappedObject();
-                WrappedObject.Entries.Add(new BVPArchiveEntry(node.GetBytes(), node.GetPropertyValue<int>("Flag")));
+                WrappedObject.Entries.Add(new BVPEntry(node.GetBytes(), node.GetPropertyValue<int>("Flag")));
             }
         }
 
@@ -93,7 +93,7 @@
             Nodes.Clear();
 
             int idx = -1;
-            foreach (BVPArchiveEntry entry in WrappedObject.Entries)
+            foreach (BVPEntry entry in WrappedObject.Entries)
             {
                 ++idx;
                 ResourceWrapper res = ResourceFactory.GetResource("Entry" + idx + ".bmd", new MemoryStream(entry.Data));

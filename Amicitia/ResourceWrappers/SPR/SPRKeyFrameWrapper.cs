@@ -1,10 +1,16 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.SMT3.Graphics;
+    using AtlusLibSharp.Graphics.SPR;
 
     internal class SPRKeyFrameWrapper : ResourceWrapper
     {
         public SPRKeyFrameWrapper(string text, SPRKeyFrame keyFrame) : base(text, keyFrame) { }
+
+        public SPRKeyFrameWrapper()
+            : base(string.Empty, null)
+        {
+
+        }
 
         protected internal new SPRKeyFrame WrappedObject
         {

@@ -2,8 +2,8 @@
 {
     using System;
     using System.Windows.Forms;
-    using AtlusLibSharp.Common;
     using System.ComponentModel;
+    using AtlusLibSharp.IO;
 
     internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
     {
@@ -21,7 +21,6 @@
             InitializeContextMenuStrip();
             InitializeWrapper();
         }
-
 
         // TODO: Actually implement PropertyChanged on the properties
 

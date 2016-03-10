@@ -1,4 +1,4 @@
-﻿using AtlusLibSharp.SMT3.Scripting;
+﻿using AtlusLibSharp.Scripting;
 using System;
 using System.IO;
 
@@ -8,6 +8,7 @@ namespace bftool
     {
         static void Main(string[] args)
         {
+            /*
             if (args.Length == 0)
             {
                 Console.WriteLine("No input specified.");
@@ -21,9 +22,9 @@ namespace bftool
 
             if (args[0].EndsWith(".BF", StringComparison.InvariantCultureIgnoreCase))
             {
-                BFFile bf = BFFile.LoadFrom(args[0]);
+                BFFile bf = BFFile.LoadFromFile(args[0]);
                 string baseName = Path.GetFileNameWithoutExtension(args[0]);
-                bf.Extract(Path.GetDirectoryName(baseName) + baseName + "\\" + baseName);
+                //bf.Extract(Path.GetDirectoryName(baseName) + baseName + "\\" + baseName);
             }
             else if (args[0].EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -42,6 +43,7 @@ namespace bftool
 
                 bf.Save(args[0].Replace(".XML", ".BF"));
             }
+            */
         }
     }
 }

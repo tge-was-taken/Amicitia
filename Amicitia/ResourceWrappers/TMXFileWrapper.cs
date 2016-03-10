@@ -3,8 +3,8 @@
     using System;
     using System.Windows.Forms;
     using System.ComponentModel;
-    using AtlusLibSharp.SMT3.Graphics;
     using AtlusLibSharp.PS2.Graphics;
+    using AtlusLibSharp.Graphics.TMX;
 
     internal class TMXFileWrapper : ResourceWrapper
     {
@@ -36,7 +36,7 @@
         }
 
         [Category("Texture info")]
-        public PixelFormat PixelFormat
+        public PS2PixelFormat PixelFormat
         {
             get { return WrappedObject.PixelFormat; }
         }
@@ -54,7 +54,7 @@
         }
 
         [Category("Texture info")]
-        public PixelFormat PaletteFormat
+        public PS2PixelFormat PaletteFormat
         {
             get { return WrappedObject.PaletteFormat; }
         }
@@ -161,7 +161,7 @@
                 switch (FileFilterTypes[openFileDlg.FilterIndex-1])
                 {
                     case SupportedFileType.TMXFile:
-                        WrappedObject = TMXFile.LoadFrom(openFileDlg.FileName);
+                        WrappedObject = TMXFile.Load(openFileDlg.FileName);
                         break;
                     case SupportedFileType.PNGFile:
                         WrappedObject = new TMXFile(

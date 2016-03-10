@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,7 +47,7 @@
             this.fileToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(648, 24);
+            this.mainMenuStrip.Size = new System.Drawing.Size(779, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "menuStrip1";
             // 
@@ -76,21 +77,23 @@
             // mainTreeView
             // 
             this.mainTreeView.AllowDrop = true;
-            this.mainTreeView.Dock = System.Windows.Forms.DockStyle.Left;
-            this.mainTreeView.Location = new System.Drawing.Point(0, 24);
+            this.mainTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.mainTreeView.Location = new System.Drawing.Point(12, 24);
+            this.mainTreeView.MaximumSize = new System.Drawing.Size(400, 900);
             this.mainTreeView.Name = "mainTreeView";
-            this.mainTreeView.Size = new System.Drawing.Size(266, 497);
+            this.mainTreeView.Size = new System.Drawing.Size(300, 551);
             this.mainTreeView.TabIndex = 1;
             // 
             // mainPropertyGrid
             // 
-            this.mainPropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.mainPropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.mainPropertyGrid.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             // 
             // 
             // 
-            this.mainPropertyGrid.DocCommentDescription.Location = new System.Drawing.Point(0, 0);
+            this.mainPropertyGrid.DocCommentDescription.Location = new System.Drawing.Point(3, 18);
             this.mainPropertyGrid.DocCommentDescription.Name = "";
             this.mainPropertyGrid.DocCommentDescription.Size = new System.Drawing.Size(0, 52);
             this.mainPropertyGrid.DocCommentDescription.TabIndex = 1;
@@ -98,30 +101,38 @@
             // 
             // 
             // 
-            this.mainPropertyGrid.DocCommentTitle.Location = new System.Drawing.Point(0, 0);
+            this.mainPropertyGrid.DocCommentTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.mainPropertyGrid.DocCommentTitle.Location = new System.Drawing.Point(3, 3);
             this.mainPropertyGrid.DocCommentTitle.Name = "";
             this.mainPropertyGrid.DocCommentTitle.Size = new System.Drawing.Size(0, 0);
             this.mainPropertyGrid.DocCommentTitle.TabIndex = 0;
+            this.mainPropertyGrid.DrawFlatToolbar = true;
             this.mainPropertyGrid.HelpVisible = false;
-            this.mainPropertyGrid.Location = new System.Drawing.Point(273, 0);
+            this.mainPropertyGrid.Location = new System.Drawing.Point(319, 0);
+            this.mainPropertyGrid.Margin = new System.Windows.Forms.Padding(1, 3, 3, 3);
             this.mainPropertyGrid.Name = "mainPropertyGrid";
-            this.mainPropertyGrid.Size = new System.Drawing.Size(375, 267);
+            this.mainPropertyGrid.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.mainPropertyGrid.Size = new System.Drawing.Size(448, 277);
             this.mainPropertyGrid.TabIndex = 2;
             // 
             // 
             // 
             this.mainPropertyGrid.ToolStrip.Location = new System.Drawing.Point(0, 0);
             this.mainPropertyGrid.ToolStrip.Name = "";
-            this.mainPropertyGrid.ToolStrip.Size = new System.Drawing.Size(375, 25);
+            this.mainPropertyGrid.ToolStrip.Size = new System.Drawing.Size(448, 25);
             this.mainPropertyGrid.ToolStrip.TabIndex = 1;
             // 
             // mainPictureBox
             // 
-            this.mainPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.mainPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mainPictureBox.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.mainPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.mainPictureBox.Enabled = false;
-            this.mainPictureBox.Location = new System.Drawing.Point(273, 273);
+            this.mainPictureBox.Location = new System.Drawing.Point(318, 283);
             this.mainPictureBox.Name = "mainPictureBox";
-            this.mainPictureBox.Size = new System.Drawing.Size(375, 248);
+            this.mainPictureBox.Size = new System.Drawing.Size(449, 292);
             this.mainPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.mainPictureBox.TabIndex = 3;
             this.mainPictureBox.TabStop = false;
@@ -131,14 +142,16 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(648, 521);
+            this.ClientSize = new System.Drawing.Size(779, 587);
             this.Controls.Add(this.mainPictureBox);
             this.Controls.Add(this.mainPropertyGrid);
             this.Controls.Add(this.mainTreeView);
             this.Controls.Add(this.mainMenuStrip);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenuStrip;
-            this.Name = "MainForm";   
-            this.Text = Program.TitleString;
+            this.MinimumSize = new System.Drawing.Size(662, 569);
+            this.Name = "MainForm";
+            this.Text = "Amicitia 16/2/2016";
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).EndInit();

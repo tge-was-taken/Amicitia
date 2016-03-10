@@ -4,8 +4,7 @@ namespace Amicitia.ResourceWrappers
 {
     using System;
     using System.Windows.Forms;
-    using AtlusLibSharp.SMT3.Graphics;
-    using AtlusLibSharp.Common;
+    using AtlusLibSharp.Graphics.SPR;
 
     internal class SPR4FileWrapper : ResourceWrapper
     {
@@ -91,7 +90,7 @@ namespace Amicitia.ResourceWrappers
             TexturesWrapper.RebuildWrappedObject();
 
             // create a new spr using the rebuilt data
-            WrappedObject = new SPR4File(KeyFramesWrapper.WrappedObject, Array.ConvertAll(TexturesWrapper.WrappedObject, o => o.GetBytes()));
+            WrappedObject = new SPR4File(TexturesWrapper.WrappedObject, KeyFramesWrapper.WrappedObject);
         }
 
         protected internal override void InitializeWrapper()
@@ -99,7 +98,7 @@ namespace Amicitia.ResourceWrappers
             Nodes.Clear();
 
             KeyFramesWrapper = new SPRKeyFrameListWrapper("KeyFrames", WrappedObject.KeyFrames);
-            TexturesWrapper = new SPR4TexturesWrapper("Textures", Array.ConvertAll(WrappedObject.TGATextures, o => new GenericBinaryFile(o)));
+            TexturesWrapper = new SPR4TexturesWrapper("Textures", WrappedObject.Textures);
 
             Nodes.Add(KeyFramesWrapper, TexturesWrapper);
 

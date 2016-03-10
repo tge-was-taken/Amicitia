@@ -1,14 +1,15 @@
-﻿using AtlusLibSharp.Common;
+﻿using AtlusLibSharp.Graphics.TGA;
+using System.Collections.Generic;
 
 namespace Amicitia.ResourceWrappers
 {
     internal class SPR4TexturesWrapper : ResourceWrapper
     {
-        public SPR4TexturesWrapper(string text, GenericBinaryFile[] textures) : base(text, textures) { }
+        public SPR4TexturesWrapper(string text, List<TGAFile> textures) : base(text, textures) { }
 
-        protected internal new GenericBinaryFile[] WrappedObject
+        protected internal new List<TGAFile> WrappedObject
         {
-            get { return (GenericBinaryFile[])base.WrappedObject; }
+            get { return (List<TGAFile>)base.WrappedObject; }
             set { base.WrappedObject = value; }
         }
 
@@ -39,16 +40,16 @@ namespace Amicitia.ResourceWrappers
 
         protected internal override void RebuildWrappedObject()
         {
-            WrappedObject = new GenericBinaryFile[Nodes.Count];
+            WrappedObject = new List<TGAFile>();
 
             for (int i = 0; i < Nodes.Count; i++)
             {
                 // rebuild before getting the data
-                ResourceWrapper node = (ResourceWrapper)Nodes[i];
+                TGAFileWrapper node = (TGAFileWrapper)Nodes[i];
                 node.RebuildWrappedObject();
 
                 // set the wrapped object
-                WrappedObject[i] = new GenericBinaryFile(node.GetBytes());
+                WrappedObject.Add(node.WrappedObject);
             }
         }
 
@@ -56,14 +57,12 @@ namespace Amicitia.ResourceWrappers
         {
             Nodes.Clear();
 
-            int index = -1;
-            foreach (GenericBinaryFile texture in WrappedObject)
+            int index = 0;
+            foreach (TGAFile texture in WrappedObject)
             {
-                ++index;
+                string name = "Texture" + (index++) + ".tga";
 
-                string name = "Texture" + index + ".tga";
-
-                Nodes.Add(new ResourceWrapper(name, texture));
+                Nodes.Add(new TGAFileWrapper(name, texture));
             }
 
             if (IsInitialized)

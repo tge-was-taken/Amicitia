@@ -1,4 +1,4 @@
-﻿using AtlusLibSharp.Persona3.FileSystem.Archives;
+﻿using AtlusLibSharp.FileSystems.BVP;
 using System;
 using System.IO;
 
@@ -21,12 +21,12 @@ namespace bvptool
 
             if (args[0].EndsWith(".BVP", StringComparison.InvariantCultureIgnoreCase))
             {
-                BVPArchiveFile bvp = new BVPArchiveFile(args[0]);
+                BVPFile bvp = new BVPFile(args[0]);
                 bvp.Extract(Path.GetFileNameWithoutExtension(args[0]));
             }
             else if (!Path.HasExtension(args[0]))
             {
-                BVPArchiveFile bvp = BVPArchiveFile.Create(args[0]);
+                BVPFile bvp = BVPFile.Create(args[0]);
                 bvp.Save(Path.GetFileName(args[0]) + ".BVP");
             }
         }

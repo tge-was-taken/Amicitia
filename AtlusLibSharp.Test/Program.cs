@@ -1,17 +1,59 @@
 ﻿namespace AtlusLibSharp.Test
 {
-    using System.Collections.Generic;
-    using Persona3.RenderWare;
-    using Common.Utilities;
-    using Common.FileSystem.Archives;
-    using System.Drawing;
+    using Scripting;
 
     class Program
     {
         static void Main(string[] args)
         {
             SetCulture();
+
+            BMDFile bmd = new BMDFile(@"C:\Users\TGE\Downloads\Shin Megami Tensei Persona 3 FES [USA - English - PS2DVD]\CVM_DATA\HELP\DATMYTH.BMD");
+            BMDDecompiler.Decompile(bmd, @"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\HELP\DATMYTH.msg");
+            BMDScriptParser.CompileScript(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\HELP\DATMYTH.msg");
+
+                    
+//            BFFile bf;
+//#if !DEBUG
+//            try
+//            {
+//#endif
+//            bf = BFFile.AssembleFromBFASM(args[0] /*, new BMDFile(Path.GetFileNameWithoutExtension(args[0])+".bmd")*/ );
+//#if !DEBUG
+//            }
+//            catch (BFASMParserException e)
+//            {
+//                Console.WriteLine("Couldn't parse file. {0}", e.Message);
+//                Console.ReadKey();
+//                return;
+//            }
+//#endif
+
+//            bf.Save(Path.GetFileNameWithoutExtension(args[0]) + "_new.bf");
+                     
             
+            /*
+            var bf = new BFFile(args[0]);
+            bf.ExportDisassembly(Path.ChangeExtension(args[0], "bfasm"));
+            */
+
+            /*
+            var messageTable = new MessageTable(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_BTL\BATTLE\MSG.TBL");
+            messageTable.WriteToTextFile(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_BTL\BATTLE\MSG.TXT");
+            */
+
+            /*
+            var bf2 = new BFFile(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_BTL\BATTLE\AICALC.BF");
+
+            bf2.DisassembleToText(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_BTL\BATTLE\AICALC.scrasm");
+            */
+
+            /*
+            TGAFile tga = new TGAFile(new Bitmap(@"C:\Users\TGE\Desktop\ponyloaf_punished.png"), TGAEncoding.IndexedRLE);
+            tga.Save(@"C:\Users\TGE\Desktop\ponyloaf_punished.tga");
+            */
+
+            /*
             PAKToolFile pac = new PAKToolFile(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\MODEL\PACK\BC001.PAC");
             RMDScene scene = new RMDScene(pac.Entries.Find(entry => entry.Name.Contains(".RMD")).Data);
 

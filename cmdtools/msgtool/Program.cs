@@ -1,4 +1,4 @@
-﻿using AtlusLibSharp.SMT3.Scripting;
+﻿using AtlusLibSharp.Scripting;
 using System;
 using System.IO;
 
@@ -21,7 +21,7 @@ namespace msgtool
 
             if (args[0].EndsWith(".BMD", StringComparison.InvariantCultureIgnoreCase))
             {
-                BMDFile msg = BMDFile.LoadFrom(args[0]);
+                BMDFile msg = new BMDFile(args[0]);
 
                 if (msg == null)
                 {
@@ -30,7 +30,7 @@ namespace msgtool
                     return;
                 }
 
-                msg.SaveXml(args[0] + ".XML");
+                //msg.SaveXml(args[0] + ".XML");
             }
             else if (args[0].EndsWith(".XML", StringComparison.InvariantCultureIgnoreCase))
             {

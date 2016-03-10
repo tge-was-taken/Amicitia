@@ -1,5 +1,5 @@
 ﻿using System;
-using AtlusLibSharp.Persona3.RenderWare;
+using AtlusLibSharp.Graphics.RenderWare;
 using System.Windows.Forms;
 using System.IO;
 
@@ -59,7 +59,7 @@ namespace Amicitia.ResourceWrappers
         {
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
-                openFileDlg.FileName = Path.GetFileNameWithoutExtension(Parent.Text) + ".txd";
+                openFileDlg.FileName = Parent != null ? Path.GetFileNameWithoutExtension(Parent.Text) + ".txd" : Text;
                 openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
@@ -90,7 +90,7 @@ namespace Amicitia.ResourceWrappers
         {
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
-                saveFileDlg.FileName = Path.GetFileNameWithoutExtension(Parent.Text) + ".txd";
+                saveFileDlg.FileName = Parent != null ? Path.GetFileNameWithoutExtension(Parent.Text) + ".txd" : Text;
                 saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
@@ -137,7 +137,7 @@ namespace Amicitia.ResourceWrappers
                             break;
 
                         case SupportedFileType.PNGFile:
-                            WrappedObject.Textures.Add(new RWTextureNative(openFileDlg.FileName, AtlusLibSharp.PS2.Graphics.PixelFormat.PSMT8));
+                            WrappedObject.Textures.Add(new RWTextureNative(openFileDlg.FileName, AtlusLibSharp.PS2.Graphics.PS2PixelFormat.PSMT8));
                             break;
                     }
                 }

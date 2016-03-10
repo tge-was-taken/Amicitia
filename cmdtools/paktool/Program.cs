@@ -1,10 +1,10 @@
-﻿using AtlusLibSharp.Common.FileSystem.Archives;
-using AtlusLibSharp.Persona3.FileSystem.Archives;
-using System;
-using System.IO;
-
-namespace paktool
+﻿namespace paktool
 {
+    using System;
+    using System.IO;
+    using AtlusLibSharp.FileSystems.ListArchive;
+    using AtlusLibSharp.FileSystems.PAKToolArchive;
+
     class Program
     {
         static void Main(string[] args)
@@ -22,7 +22,7 @@ namespace paktool
 
             if (Path.HasExtension(args[0]))
             {
-                if (!PAKToolFile.VerifyFileType(args[0]))
+                if (!PAKToolArchiveFile.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper pak file!");
                     if (ListArchiveFile.VerifyFileType(args[0]))
@@ -32,7 +32,7 @@ namespace paktool
                     return;
                 }
 
-                PAKToolFile pak = new PAKToolFile(args[0]);
+                PAKToolArchiveFile pak = new PAKToolArchiveFile(args[0]);
                 string path = Path.GetFileNameWithoutExtension(args[0]);
                 Directory.CreateDirectory(path);
                 for (int i = 0; i < pak.EntryCount; i++)
@@ -42,7 +42,7 @@ namespace paktool
             }
             else if (!Path.HasExtension(args[0]))
             {
-                PAKToolFile pak = PAKToolFile.Create(args[0]);
+                PAKToolArchiveFile pak = PAKToolArchiveFile.Create(args[0]);
                 pak.Save(Path.GetFileName(args[0]) + ".PAK");
             }
         }

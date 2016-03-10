@@ -2,7 +2,7 @@
 
 namespace AtlusLibSharp.PS2.Graphics.Registers
 {
-    using Common.Utilities;
+    using AtlusLibSharp.Utilities;
     using System.IO;
 
     /// <summary>
@@ -51,16 +51,16 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// <summary>
         /// Pixel Transmission Order (Enabled only in Local -> Local Transmission.)
         /// </summary>
-        public TRXPOSPixelTransmissionOrder PixelTransmissionOrder
+        public PS2TRXPOSPixelTransmissionOrder PixelTransmissionOrder
         {
-            get { return (TRXPOSPixelTransmissionOrder)BitHelper.GetBits(_rawData, 2, 59); }
+            get { return (PS2TRXPOSPixelTransmissionOrder)BitHelper.GetBits(_rawData, 2, 59); }
             set { BitHelper.ClearAndSetBits(ref _rawData, 2, (ulong)value, 59); }
         }
 
         public TRXPOSRegister(
             ulong srcRecX, ulong srcRecY, 
             ulong dstRecX, ulong dstRecY, 
-            TRXPOSPixelTransmissionOrder pixelTransOrder)
+            PS2TRXPOSPixelTransmissionOrder pixelTransOrder)
         {
             SourceRectangleX = srcRecX;
             SourceRectangleY = srcRecY;

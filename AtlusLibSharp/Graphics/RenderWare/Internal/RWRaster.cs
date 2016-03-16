@@ -70,7 +70,7 @@
         /// <summary>
         /// Initializer only to be called by <see cref="RWNodeFactory"/>.
         /// </summary>
-        internal RWRaster(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWRaster(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             _rasterInfo = RWNodeFactory.GetNode<RWRasterInfo>(this, reader);
@@ -80,7 +80,7 @@
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             _rasterInfo.InternalWrite(writer);

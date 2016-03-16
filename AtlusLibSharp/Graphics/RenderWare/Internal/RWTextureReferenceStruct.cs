@@ -67,7 +67,7 @@
             HasMipMaps = hasMipMaps;
         }
 
-        internal RWTextureReferenceStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWTextureReferenceStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             _flags = reader.ReadUInt32();
@@ -76,7 +76,7 @@
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             writer.Write(_flags);

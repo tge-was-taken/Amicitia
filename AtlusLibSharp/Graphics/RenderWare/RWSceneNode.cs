@@ -77,11 +77,17 @@
             }
         }
 
+        /// <summary>
+        /// Gets if the scene node has bone metadata.
+        /// </summary>
         public bool HasBoneMetadata
         {
             get { return _boneMetadata != null; }
         }
 
+        /// <summary>
+        /// Gets the bone metadata of this scene node. Returns null if not present.
+        /// </summary>
         public RWSceneNodeBoneMetadata BoneMetadata
         {
             get { return _boneMetadata; }

@@ -18,7 +18,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             Children = new List<RWNode>();
         }
 
-        internal RWExtension(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWExtension(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             long end = reader.BaseStream.Position + header.Size;

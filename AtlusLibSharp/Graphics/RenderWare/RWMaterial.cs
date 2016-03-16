@@ -106,7 +106,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// </summary>
         /// <param name="header"></param>
         /// <param name="reader"></param>
-        internal RWMaterial(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMaterial(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWMaterialStruct>(this, reader);
@@ -120,7 +120,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             // Update the IsTextured bool in the struct

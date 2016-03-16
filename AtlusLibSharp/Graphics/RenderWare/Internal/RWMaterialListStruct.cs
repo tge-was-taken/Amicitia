@@ -20,7 +20,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             get { return _matReferences; }
         }
 
-        internal RWMaterialListStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMaterialListStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             _matCount = reader.ReadInt32();
@@ -43,7 +43,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             writer.Write(_matCount);

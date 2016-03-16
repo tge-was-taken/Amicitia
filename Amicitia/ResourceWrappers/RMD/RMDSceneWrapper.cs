@@ -110,7 +110,7 @@
             foreach (ResourceWrapper wrapper in FrameLinkListNode.Nodes)
             {
                 wrapper.RebuildWrappedObject();
-                WrappedObject.FrameLinks.Add(
+                WrappedObject.NodeLinks.Add(
                     new RMDNodeLink((wrapper.WrappedObject as GenericBinaryFile).GetBytes()));
             }
 
@@ -148,7 +148,7 @@
             }
 
             int frameLinkIndex = 0;
-            foreach (RMDNodeLink frameLink in WrappedObject.FrameLinks)
+            foreach (RMDNodeLink frameLink in WrappedObject.NodeLinks)
             {
                 FrameLinkListNode.Nodes.Add(
                     new ResourceWrapper(

@@ -22,7 +22,7 @@
         /// <summary>
         /// Initializer only to be called in <see cref="RWNodeFactory"/>.
         /// </summary>
-        internal RWString(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWString(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             Value = reader.ReadCString((int)Size);
@@ -42,7 +42,7 @@
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             writer.WriteCString(Value);

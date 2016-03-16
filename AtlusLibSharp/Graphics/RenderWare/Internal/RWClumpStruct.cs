@@ -24,7 +24,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             get { return _cameraCount; }
         }
 
-        internal RWSceneStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             _drawCallCount = reader.ReadInt32();
@@ -33,7 +33,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         }
 
         internal RWSceneStruct(RWScene scene)
-            : base(new RWNodeFactory.RWNodeProcHeader { Parent = scene, Type = RWNodeType.Struct, Version = ExportVersion })
+            : base(new RWNodeFactory.RWNodeInfo { Parent = scene, Type = RWNodeType.Struct, Version = ExportVersion })
         {
             _drawCallCount = scene.DrawCalls.Count;
             _lightCount = 0;

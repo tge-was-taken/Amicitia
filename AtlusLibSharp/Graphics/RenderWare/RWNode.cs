@@ -119,7 +119,7 @@
         /// <summary>
         /// Initializer only to be called by <see cref="RWNodeFactory"/>.
         /// </summary>
-        internal RWNode(RWNodeFactory.RWNodeProcHeader header)
+        internal RWNode(RWNodeFactory.RWNodeInfo header)
         {
             _type = header.Type;
             _size = header.Size;
@@ -131,7 +131,7 @@
         /// <summary>
         /// Initializer only to be called by <see cref="RWNodeFactory"/>.
         /// </summary>
-        internal RWNode(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWNode(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
         {
             _type = header.Type;
             _size = header.Size;
@@ -203,7 +203,7 @@
         /// <summary>
         /// Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal virtual void InternalWriteInnerData(BinaryWriter writer)
         {
             writer.Write(_data);

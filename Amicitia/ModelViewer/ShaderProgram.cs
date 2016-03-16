@@ -36,7 +36,7 @@ namespace Amicitia.ModelViewer
             int fs = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(fs, fSource);
             GL.CompileShader(fs);
-            Check(vs, false);
+            Check(fs, false);
 
             // link the shaders together and bind the prog
             _id = GL.CreateProgram();

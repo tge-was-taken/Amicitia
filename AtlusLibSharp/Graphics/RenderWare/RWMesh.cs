@@ -160,6 +160,41 @@
             get { return _materialList.Materials; }
         }
 
+        /************************************/
+        /* RWExtension forwarded properties */
+        /************************************/
+
+        /// <summary>
+        /// Gets the mesh material split data.
+        /// </summary>
+        public RWMeshMaterialSplitData MaterialSplitData
+        {
+            get
+            {
+                int matSplitIdx = _extension.Children.FindIndex(n => n.Type == RWNodeType.MeshMaterialSplitList);
+                if (matSplitIdx != -1)
+                {
+                    return (RWMeshMaterialSplitData)_extension.Children[matSplitIdx];
+                }
+                else
+                {
+                    return new RWMeshMaterialSplitData(this, RWPrimitiveType.TriangleStrip, _extension);
+                }
+            }
+            internal set
+            {
+                int matSplitIdx = _extension.Children.FindIndex(n => n.Type == RWNodeType.MeshMaterialSplitList);
+                if (matSplitIdx != -1)
+                {
+                    _extension.Children[matSplitIdx] = value;
+                }
+                else
+                {
+                    value.Parent = _extension;
+                }
+            }
+        }
+
         /// <summary>
         /// Gets the extension nodes of the mesh.
         /// </summary>
@@ -177,7 +212,7 @@
         /// <summary>
         /// Initializer only to be called <see cref="RWNodeFactory"/>
         /// </summary>
-        internal RWMesh(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMesh(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWMeshStruct>(this, reader);
@@ -268,7 +303,7 @@
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             _struct.InternalWrite(writer);

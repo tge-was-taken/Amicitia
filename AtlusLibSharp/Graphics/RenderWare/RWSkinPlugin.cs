@@ -101,7 +101,7 @@
         // I can currently just copy and paste the one from the original file
         // But knowing how to calculate it would be a lot easier
 
-        internal RWSkinPlugin(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader, RWMesh rwGeometry)
+        internal RWSkinPlugin(RWNodeFactory.RWNodeInfo header, BinaryReader reader, RWMesh rwGeometry)
             : base(header)
         {
             int numVertices = rwGeometry.VertexCount;
@@ -217,7 +217,7 @@
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             writer.Write(_numBones);

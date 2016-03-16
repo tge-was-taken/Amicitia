@@ -19,7 +19,7 @@
         Animation                   = 0x0000001B,
         TextureDictionary           = 0x00000016,
         UVAnimationDictionary       = 0x0000002B,
-        StripMeshPlugin             = 0x0000050E,
+        MeshMaterialSplitList             = 0x0000050E,
         SkyMipMapValue              = 0x00000110,
         SkinPlugin                  = 0x00000116,
         SceneNodeBoneMetadata         = 0x0000011E,

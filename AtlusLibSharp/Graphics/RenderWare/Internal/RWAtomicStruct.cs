@@ -42,7 +42,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _flag2 = flag2;
         }
 
-        internal RWDrawCallStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWDrawCallStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             _frameIndex = reader.ReadInt32();

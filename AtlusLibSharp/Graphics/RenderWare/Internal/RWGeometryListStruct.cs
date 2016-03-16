@@ -12,7 +12,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             internal set { _geometryCount = value; }
         }
 
-        internal RWGeometryListStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWGeometryListStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             _geometryCount = reader.ReadInt32();

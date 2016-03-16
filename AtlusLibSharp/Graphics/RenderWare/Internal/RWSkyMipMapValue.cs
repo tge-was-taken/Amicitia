@@ -11,7 +11,7 @@
 
         public RWSkyMipMapValue() : base(RWNodeType.SkyMipMapValue) { }
 
-        internal RWSkyMipMapValue(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSkyMipMapValue(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             int skyMipMapValue = reader.ReadInt32();

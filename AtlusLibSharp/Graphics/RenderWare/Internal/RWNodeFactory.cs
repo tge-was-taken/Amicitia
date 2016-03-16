@@ -9,7 +9,7 @@
     /// </summary>
     internal static class RWNodeFactory
     {
-        internal struct RWNodeProcHeader
+        internal struct RWNodeInfo
         {
             public RWNodeType Type;
             public uint Size;
@@ -25,7 +25,7 @@
 
         internal static RWNode GetNode(RWNode parent, BinaryReader reader)
         {
-            RWNodeProcHeader header = new RWNodeProcHeader
+            RWNodeInfo header = new RWNodeInfo
             {
                 Type = (RWNodeType)reader.ReadUInt32(),
                 Size = reader.ReadUInt32(),
@@ -83,8 +83,8 @@
                 case RWNodeType.UVAnimationDictionary:
                     return new RWUVAnimationDictionary(header, reader);
 
-                //case RWType.StripMeshPlugin:
-                //    return new RWStripMeshPlugin(header, reader);
+                case RWNodeType.MeshMaterialSplitList:
+                    return new RWMeshMaterialSplitData(header, reader);
 
                 case RWNodeType.SkyMipMapValue:
                     return new RWSkyMipMapValue(header, reader);
@@ -136,7 +136,7 @@
             }
         }
 
-        private static RWNode GetStructNode(RWNodeProcHeader header, BinaryReader reader)
+        private static RWNode GetStructNode(RWNodeInfo header, BinaryReader reader)
         {
             switch (header.Parent.Type)
             {
@@ -182,7 +182,7 @@
             }
         }
 
-        private static RWNode GetStructNodeParentIsTextureNative(RWNodeProcHeader header, BinaryReader reader)
+        private static RWNode GetStructNodeParentIsTextureNative(RWNodeInfo header, BinaryReader reader)
         {
             RWTextureNative txn = header.Parent as RWTextureNative;
 
@@ -205,7 +205,7 @@
             }
         }
 
-        private static RWNode GetStructNodeParentIsStruct(RWNodeProcHeader header, BinaryReader reader)
+        private static RWNode GetStructNodeParentIsStruct(RWNodeInfo header, BinaryReader reader)
         {
             RWNode grandParent = header.Parent.Parent;
 
@@ -224,7 +224,7 @@
         }
 
         // award for longest method name goes to...
-        private static RWNode GetStructNodeParentIsStructGrandParentIsTextureNative(RWNodeProcHeader header, BinaryReader reader)
+        private static RWNode GetStructNodeParentIsStructGrandParentIsTextureNative(RWNodeInfo header, BinaryReader reader)
         {
             RWRaster raster = header.Parent as RWRaster;
 

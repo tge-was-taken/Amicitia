@@ -38,7 +38,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _struct = new RWGeometryListStruct(this);
         }
 
-        internal RWMeshList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMeshList(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWGeometryListStruct>(this, reader);

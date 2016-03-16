@@ -27,7 +27,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _sceneNodes = frames.ToList();
         }
 
-        internal RWSceneNodeListStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneNodeListStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             int frameCount = reader.ReadInt32();

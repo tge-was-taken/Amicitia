@@ -49,7 +49,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _extensionNodes = extensions;
         }
 
-        internal RWSceneNodeList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneNodeList(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWSceneNodeListStruct>(this, reader);

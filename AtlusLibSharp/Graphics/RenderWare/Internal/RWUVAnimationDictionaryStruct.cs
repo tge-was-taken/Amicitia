@@ -18,7 +18,7 @@
             _numUVAnims = uvAnimationCount;
         }
 
-        internal RWUVAnimationDictionaryStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWUVAnimationDictionaryStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
             : base(header)
         {
             _numUVAnims = reader.ReadInt32();

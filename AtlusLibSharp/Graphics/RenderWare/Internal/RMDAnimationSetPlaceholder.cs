@@ -17,12 +17,12 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// <summary>
         /// Initializer only to be called in <see cref="RWNodeFactory"/>.
         /// </summary>
-        internal RMDAnimationSetPlaceholder(RWNodeFactory.RWNodeProcHeader header) : base(header) { }
+        internal RMDAnimationSetPlaceholder(RWNodeFactory.RWNodeInfo header) : base(header) { }
 
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer) { }
     }
 }

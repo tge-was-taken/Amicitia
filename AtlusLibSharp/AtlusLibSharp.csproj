@@ -78,6 +78,7 @@
     <Compile Include="FileSystems\IArchiveEntry.cs" />
     <Compile Include="Compression\ICompression.cs" />
     <Compile Include="FileSystems\ISO\Enums.cs" />
+    <Compile Include="Graphics\RenderWare\RWMeshMaterialSplitData.cs" />
     <Compile Include="Graphics\TGA\TGAEncoding.cs" />
     <Compile Include="Graphics\TMX\TMXWrapMode.cs" />
     <Compile Include="IO\BinaryFileBase.cs" />
@@ -209,6 +210,7 @@
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFCodeEvaluator.cs" />
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFTag.cs" />
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFUnpack.cs" />
+    <Compile Include="Utilities\NvTriStrip\NvTriStrip.cs" />
     <Compile Include="Utilities\OpenTKVector3Extension.cs" />
     <Compile Include="Utilities\StreamExtension.cs" />
     <Compile Include="Utilities\WuQuantizer\Box.cs" />

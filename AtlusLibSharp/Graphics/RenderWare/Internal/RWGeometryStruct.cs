@@ -138,7 +138,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _nativeFlag = RWGeometryNativeFlag.Default;
         }
 
-        internal RWMeshStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMeshStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
         : base(header)
         {
             _geoFlags = (RWGeometryFlags)reader.ReadUInt16();

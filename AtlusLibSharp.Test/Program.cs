@@ -1,5 +1,6 @@
 ﻿namespace AtlusLibSharp.Test
 {
+    using Graphics.RenderWare;
     using Scripting;
 
     class Program
@@ -8,30 +9,35 @@
         {
             SetCulture();
 
+            /*
             BMDFile bmd = new BMDFile(@"C:\Users\TGE\Downloads\Shin Megami Tensei Persona 3 FES [USA - English - PS2DVD]\CVM_DATA\HELP\DATMYTH.BMD");
             BMDDecompiler.Decompile(bmd, @"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\HELP\DATMYTH.msg");
             BMDScriptParser.CompileScript(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\HELP\DATMYTH.msg");
+            */
 
-                    
-//            BFFile bf;
-//#if !DEBUG
-//            try
-//            {
-//#endif
-//            bf = BFFile.AssembleFromBFASM(args[0] /*, new BMDFile(Path.GetFileNameWithoutExtension(args[0])+".bmd")*/ );
-//#if !DEBUG
-//            }
-//            catch (BFASMParserException e)
-//            {
-//                Console.WriteLine("Couldn't parse file. {0}", e.Message);
-//                Console.ReadKey();
-//                return;
-//            }
-//#endif
+            RMDScene rmd = new RMDScene(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\bc001.RMD");
+            var split = new RWMeshMaterialSplitData(rmd.Scenes[0].Meshes[4], RWPrimitiveType.TriangleStrip);
+            var split2 = new RWMeshMaterialSplitData(rmd.Scenes[0].Meshes[4], RWPrimitiveType.TriangleList);
 
-//            bf.Save(Path.GetFileNameWithoutExtension(args[0]) + "_new.bf");
-                     
-            
+            //            BFFile bf;
+            //#if !DEBUG
+            //            try
+            //            {
+            //#endif
+            //            bf = BFFile.AssembleFromBFASM(args[0] /*, new BMDFile(Path.GetFileNameWithoutExtension(args[0])+".bmd")*/ );
+            //#if !DEBUG
+            //            }
+            //            catch (BFASMParserException e)
+            //            {
+            //                Console.WriteLine("Couldn't parse file. {0}", e.Message);
+            //                Console.ReadKey();
+            //                return;
+            //            }
+            //#endif
+
+            //            bf.Save(Path.GetFileNameWithoutExtension(args[0]) + "_new.bf");
+
+
             /*
             var bf = new BFFile(args[0]);
             bf.ExportDisassembly(Path.ChangeExtension(args[0], "bfasm"));

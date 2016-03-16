@@ -83,7 +83,7 @@
             _rootInfo = rootInfo;
         }
 
-        internal RWSceneNodeBoneMetadata(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneNodeBoneMetadata(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
                 : base(header)
         {
             int version = reader.ReadInt32();

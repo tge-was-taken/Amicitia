@@ -15,6 +15,14 @@
         private List<RWNode> _miscNodes;
 
         /// <summary>
+        /// Gets if the scene has a texture dictionary. If this is false then the texture dictionary is set to null.
+        /// </summary>
+        public bool HasTextureDictionary
+        {
+            get { return _textureDictionary != null; }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="RWTextureDictionary"/> in the scene. Can be set to null.
         /// </summary>
         public RWTextureDictionary TextureDictionary
@@ -42,7 +50,7 @@
         /// <summary>
         /// Gets the number of <see cref="RMDNodeLink"/> in the scene.
         /// </summary>
-        public int FrameLinkCount
+        public int NodeLinkCount
         {
             get { return _nodeLinks.Count; }
         }
@@ -50,7 +58,7 @@
         /// <summary>
         /// Gets the list of <see cref="RMDNodeLink"/> used for attaching dummies to the nodes in the scene. 
         /// </summary>
-        public List<RMDNodeLink> FrameLinks
+        public List<RMDNodeLink> NodeLinks
         {
             get { return _nodeLinks; }
             set { _nodeLinks = value; }
@@ -162,7 +170,7 @@
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>
-        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             // Create and write the animation set count node (if there are any animation sets
@@ -191,7 +199,7 @@
             }
 
             // Aaaand the attach frame list (well, only if there are any entries in the list)
-            if (FrameLinkCount > 0)
+            if (NodeLinkCount > 0)
             {
                 // Create a new frame link list and write it.
                 RMDFrameLinkList frameLink = new RMDFrameLinkList(_nodeLinks);

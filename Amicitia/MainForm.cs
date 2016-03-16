@@ -4,6 +4,10 @@ using System.IO;
 using Amicitia.ResourceWrappers;
 using AtlusLibSharp.Utilities;
 using AtlusLibSharp.Graphics;
+using OpenTK;
+using System.Runtime.InteropServices;
+using Amicitia.ModelViewer;
+using AtlusLibSharp.Graphics.RenderWare;
 
 namespace Amicitia
 {
@@ -11,6 +15,11 @@ namespace Amicitia
     {
         //private static Rectangle _lastMainTreeViewSize;
         private static MainForm _instance;
+        private ModelViewer.ModelViewer viewer;
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
 
         internal static MainForm Instance
         {
@@ -48,6 +57,9 @@ namespace Amicitia
         {
             InitializeComponent();
             InitializeMainForm();
+#if DEBUG
+            AllocConsole();
+#endif
         }
 
         // Events
@@ -86,13 +98,27 @@ namespace Amicitia
         {
             // hide the picture box
             mainPictureBox.Visible = false;
-
+            viewer.DeleteScene();
+            glControl1.Visible = false;
             ResourceWrapper res = mainTreeView.SelectedNode as ResourceWrapper;
             mainPropertyGrid.SelectedObject = res;
 
             if (res == null)
                 return;
 
+            if(res.IsModelResource == true)
+            {
+                try
+                {
+                    viewer.LoadScene((res as ResourceWrapper).WrappedObject as RMDScene);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    throw;
+                }
+                glControl1.Visible = true;
+            }
             // Check if the resource is a texture
             if (res.IsImageResource == true)
             {
@@ -254,6 +280,7 @@ namespace Amicitia
 
         private void HandleFileOpenFromPath(string filePath)
         {
+            if (viewer.IsSceneReady == true) viewer.DeleteScene();
             // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
             int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(filePath);
 
@@ -294,12 +321,43 @@ namespace Amicitia
             }
 #endif
 
-            mainTreeView.BeginUpdate();
+                mainTreeView.BeginUpdate();
 
             mainTreeView.Nodes.Add(treeNode);
             mainTreeView.SelectedNode = mainTreeView.TopNode;
 
             mainTreeView.EndUpdate();
+        }
+
+        private void mainPictureBox_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void glControl1_Load(object sender, EventArgs e)
+        {
+            glControl1.Visible = false;
+            viewer = new ModelViewer.ModelViewer(glControl1);
+        }
+
+        private void mainTreeView_AfterSelect_1(object sender, TreeViewEventArgs e)
+        {
+
+        }
+
+        private void mainMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            viewer.DisposeViewer();
         }
     }
 }

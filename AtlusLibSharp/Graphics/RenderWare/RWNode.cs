@@ -11,7 +11,7 @@
     public class RWNode : BinaryFileBase
     {
         private const uint HEADER_SIZE = 12;
-        private RWType _type;
+        private RWNodeType _type;
         private uint _rawVersion;
         private RWNode _parent;
         private List<RWNode> _children;
@@ -31,7 +31,7 @@
         /// <summary>
         /// Gets the RenderWare node type.
         /// </summary>
-        public RWType Type
+        public RWNodeType Type
         {
             get { return _type; }
         }
@@ -97,7 +97,7 @@
         /// <summary>
         /// Initialize a RenderWare node using the given RenderWare node type.
         /// </summary>
-        protected RWNode(RWType type)
+        protected RWNode(RWNodeType type)
         {
             _type = type;
             _size = 0;
@@ -108,7 +108,7 @@
         /// <summary>
         /// Initialize a RenderWare node using the given RenderWare node type and parent node.
         /// </summary>
-        protected RWNode(RWType type, RWNode parent)
+        protected RWNode(RWNodeType type, RWNode parent)
         {
             _type = type;
             _size = 0;
@@ -141,7 +141,7 @@
 
             switch (_type)
             {
-                case RWType.RMDParticleList:
+                case RWNodeType.RMDParticleList:
                     reader.AlignPosition(16);
                     break;
             }
@@ -152,7 +152,7 @@
         /// </summary>
         /// <param name="path">Path to the RenderWare file to load.</param>
         /// <returns>RenderWare node loaded from the path.</returns>
-        public static RWNode LoadFromFile(string path)
+        public static RWNode Load(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
                 return RWNodeFactory.GetNode(null, reader);
@@ -164,10 +164,15 @@
         /// <param name="path">Path to the RenderWare file to load.</param>
         /// <param name="leaveOpen">Option to keep the stream open after reading instead of disposing it.</param>
         /// <returns>RenderWare node loaded from the path.</returns>
-        public static RWNode LoadFromStream(Stream stream, bool leaveOpen = false)
+        public static RWNode Load(Stream stream, bool leaveOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveOpen))
                 return RWNodeFactory.GetNode(null, reader);
+        }
+
+        public static RWNode Load(byte[] data)
+        {
+            return Load(new MemoryStream(data), false);
         }
 
         /// <summary>

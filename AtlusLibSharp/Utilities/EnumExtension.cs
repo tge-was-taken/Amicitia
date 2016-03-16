@@ -14,11 +14,11 @@
         /// <param name="thisEnum">The current <see cref="Enum"/> instance.</param>
         /// <param name="value">The <see cref="Enum"/> used in the query.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasFlagUnchecked(this Enum thisEnum, Enum value)
+        public unsafe static bool HasFlagUnchecked(this Enum thisEnum, Enum value)
         {
             long thisEnumValue = Convert.ToInt64(thisEnum);
             long valueEnumValue = Convert.ToInt64(value);
-            return ((long)thisEnumValue & (long)valueEnumValue) == valueEnumValue;
+            return (thisEnumValue & valueEnumValue) == valueEnumValue;
         }
     }
 }

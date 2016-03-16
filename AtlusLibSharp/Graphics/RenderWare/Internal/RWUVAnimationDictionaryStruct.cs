@@ -13,7 +13,7 @@
         }
 
         public RWUVAnimationDictionaryStruct(int uvAnimationCount, RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             _numUVAnims = uvAnimationCount;
         }

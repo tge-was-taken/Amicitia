@@ -3,7 +3,7 @@
     using OpenTK;
     using System;
     using System.IO;
-    using AtlusLibSharp.Utilities;
+    using Utilities;
 
     /// <summary>
     /// Represents a RenderWare bounding sphere used for collision and culling calculations.

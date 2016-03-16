@@ -36,7 +36,7 @@
         /// <param name="uvAnimations">The list of uv animations to initialize the uv animation dictionary with.</param>
         /// <param name="parent">The parent of the uv animation dictionary node. Value is null if not specified.</param>
         public RWUVAnimationDictionary(IList<RWNode> uvAnimations, RWNode parent = null)
-            : base(RWType.UVAnimationDictionary, parent)
+            : base(RWNodeType.UVAnimationDictionary, parent)
         {
             _uvAnimations = uvAnimations.ToList();
         }
@@ -46,7 +46,7 @@
         /// </summary>
         /// <param name="parent">The parent of the uv animation dictionary node. Value is null if not specified.</param>
         public RWUVAnimationDictionary(RWNode parent = null)
-            : base(RWType.UVAnimationDictionary, parent)
+            : base(RWNodeType.UVAnimationDictionary, parent)
         {
             _uvAnimations = new List<RWNode>();
         }

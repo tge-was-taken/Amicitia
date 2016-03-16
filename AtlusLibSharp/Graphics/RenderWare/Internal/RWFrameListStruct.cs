@@ -4,51 +4,47 @@ using System.Linq;
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    internal class RWFrameListStruct : RWNode
+    internal class RWSceneNodeListStruct : RWNode
     {
         // Fields
-        private List<RWFrame> _frames;
+        private List<RWSceneNode> _sceneNodes;
 
         // Properties
-        public int FrameCount
+        public int SceneNodeCount
         {
-            get { return _frames.Count; }
+            get { return _sceneNodes.Count; }
         }
 
-        public List<RWFrame> Frames
+        public List<RWSceneNode> SceneNodes
         {
-            get { return _frames; }
-            private set
-            {
-                _frames = value;
-            }
+            get { return _sceneNodes; }
         }
 
         // Constructors
-        public RWFrameListStruct(IList<RWFrame> frames)
-            : base(RWType.Struct)
+        public RWSceneNodeListStruct(IList<RWSceneNode> frames)
+            : base(RWNodeType.Struct)
         {
-            Frames = frames.ToList();
+            _sceneNodes = frames.ToList();
         }
 
-        internal RWFrameListStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneNodeListStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
             int frameCount = reader.ReadInt32();
-            _frames = new List<RWFrame>(frameCount);
+            _sceneNodes = new List<RWSceneNode>(frameCount);
 
             for (int i = 0; i < frameCount; i++)
             {
-                _frames.Add(new RWFrame(reader, i, _frames));
+                _sceneNodes.Add(new RWSceneNode(reader, _sceneNodes));
             }
         }
 
         // Methods
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
-            writer.Write(FrameCount);
-            for (int i = 0; i < FrameCount; i++)
-                _frames[i].InternalWrite(writer);
+            writer.Write(SceneNodeCount);
+            for (int i = 0; i < SceneNodeCount; i++)
+                _sceneNodes[i].InternalWrite(writer, _sceneNodes);
         }
     }
 }

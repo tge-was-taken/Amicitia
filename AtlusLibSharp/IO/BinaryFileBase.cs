@@ -30,6 +30,13 @@
             return bytes;
         }
 
+        public MemoryStream GetMemoryStream()
+        {
+            MemoryStream mStream = new MemoryStream();
+            Save(mStream);
+            return mStream;
+        }
+
         internal abstract void InternalWrite(BinaryWriter writer);
 
         void IWriteable.InternalWrite(BinaryWriter writer)

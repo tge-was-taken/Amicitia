@@ -30,7 +30,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         }
 
         internal RWMaterialListStruct(RWMaterialList list)
-            : base(RWType.Struct, list)
+            : base(RWNodeType.Struct, list)
         {
             _matCount = list.Materials.Length;
             _matReferences = new int[_matCount];

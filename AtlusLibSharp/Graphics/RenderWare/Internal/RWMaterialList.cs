@@ -31,7 +31,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         }
 
         public RWMaterialList(IList<string> textureNames)
-            : base(RWType.MaterialList)
+            : base(RWNodeType.MaterialList)
         {
             _materials = new RWMaterial[textureNames.Count];
 

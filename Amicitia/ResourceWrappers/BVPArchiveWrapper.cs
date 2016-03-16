@@ -92,11 +92,10 @@
         {
             Nodes.Clear();
 
-            int idx = -1;
+            int idx = 0;
             foreach (BVPEntry entry in WrappedObject.Entries)
             {
-                ++idx;
-                ResourceWrapper res = ResourceFactory.GetResource("Entry" + idx + ".bmd", new MemoryStream(entry.Data));
+                ResourceWrapper res = ResourceFactory.GetResource(string.Format("Entry{0}.bmd", idx++), new MemoryStream(entry.Data));
 
                 // TODO: this thing doesn't even show up on the property grid
                 res.ResourceProperties = new ResourceProperty[] { new ResourceProperty("Flag", entry.Flag) };

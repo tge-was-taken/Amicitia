@@ -2,7 +2,7 @@
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    public struct RWHierarchyAnimNode
+    public struct RWBoneHierarchyNode
     {
         private int _nameID;
         private int _hIndex;
@@ -23,14 +23,14 @@ namespace AtlusLibSharp.Graphics.RenderWare
             get { return _flag; }
         }
 
-        public RWHierarchyAnimNode(int frameNameID, int hierarchyIndex, RWHierarchyNodeFlag flag)
+        public RWBoneHierarchyNode(int boneNameID, int hierarchyIndex, RWHierarchyNodeFlag flag)
         {
-            _nameID = frameNameID;
+            _nameID = boneNameID;
             _hIndex = hierarchyIndex;
             _flag = flag;
         }
 
-        internal RWHierarchyAnimNode(BinaryReader reader)
+        internal RWBoneHierarchyNode(BinaryReader reader)
         {
             _nameID = reader.ReadInt32();
             _hIndex = reader.ReadInt32();

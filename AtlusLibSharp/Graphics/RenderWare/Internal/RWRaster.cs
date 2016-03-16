@@ -44,7 +44,7 @@
         /// <param name="pixelFormat">Pixel format to encode the bitmap to.</param>
         /// <param name="parent">Parent of this <see cref="RWRaster"/> node. Value is null if not specified.</param>
         public RWRaster(Bitmap bitmap, PS2.Graphics.PS2PixelFormat pixelFormat, RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             Info = new RWRasterInfo(bitmap.Width, bitmap.Height, pixelFormat);
             Data = new RWRasterData(bitmap, pixelFormat);
@@ -61,7 +61,7 @@
         /// <param name="parent">Parent of this <see cref="RWRaster"/> node. Value is null if not specified.</param>
         public RWRaster(int width, int height, Color[] palette, byte[] indices, 
             PS2.Graphics.PS2PixelFormat pixelFormat, RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             Info = new RWRasterInfo(width, height, pixelFormat);
             Data = new RWRasterData(palette, indices, pixelFormat);

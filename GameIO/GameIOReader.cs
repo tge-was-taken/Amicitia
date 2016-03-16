@@ -53,12 +53,9 @@
                 return value;
             else
             {
-                unsafe
-                {
-                    byte[] bytes = BitConverter.GetBytes(value);
-                    Array.Reverse(bytes);
-                    return BitConverter.ToDouble(bytes, 0);
-                }
+                byte[] bytes = BitConverter.GetBytes(value);
+                Array.Reverse(bytes);
+                return BitConverter.ToDouble(bytes, 0);
             }
         }
 

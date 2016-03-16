@@ -11,7 +11,7 @@
     {
         internal struct RWNodeProcHeader
         {
-            public RWType Type;
+            public RWNodeType Type;
             public uint Size;
             public uint Version;
             public RWNode Parent;
@@ -27,7 +27,7 @@
         {
             RWNodeProcHeader header = new RWNodeProcHeader
             {
-                Type = (RWType)reader.ReadUInt32(),
+                Type = (RWNodeType)reader.ReadUInt32(),
                 Size = reader.ReadUInt32(),
                 Version = reader.ReadUInt32(),
                 Parent = parent
@@ -35,65 +35,65 @@
 
             switch (header.Type)
             {
-                case RWType.Struct:
+                case RWNodeType.Struct:
                     return GetStructNode(header, reader);
 
-                case RWType.String:
+                case RWNodeType.String:
                     return new RWString(header, reader);
 
-                case RWType.Extension:
+                case RWNodeType.Extension:
                     return new RWExtension(header, reader);
 
-                case RWType.TextureReference:
+                case RWNodeType.TextureReference:
                     return new RWTextureReference(header, reader);
 
-                case RWType.Material:
+                case RWNodeType.Material:
                     return new RWMaterial(header, reader);
 
-                case RWType.MaterialList:
+                case RWNodeType.MaterialList:
                     return new RWMaterialList(header, reader);
 
                 //case RWType.World:
                 //    return new RWWorld(header, reader);
 
-                case RWType.FrameList:
-                    return new RWFrameList(header, reader);
+                case RWNodeType.FrameList:
+                    return new RWSceneNodeList(header, reader);
 
-                case RWType.Geometry:
-                    return new RWGeometry(header, reader);
+                case RWNodeType.Geometry:
+                    return new RWMesh(header, reader);
 
-                case RWType.Clump:
-                    return new RWClump(header, reader);
+                case RWNodeType.Scene:
+                    return new RWScene(header, reader);
 
-                case RWType.Atomic:
-                    return new RWAtomic(header, reader);
+                case RWNodeType.DrawCall:
+                    return new RWDrawCall(header, reader);
 
-                case RWType.TextureNative:
+                case RWNodeType.TextureNative:
                     return new RWTextureNative(header, reader);
 
-                case RWType.GeometryList:
-                    return new RWGeometryList(header, reader);
+                case RWNodeType.GeometryList:
+                    return new RWMeshList(header, reader);
 
                 //case RWType.Animation:
                 //    return new RWAnimation(header, reader);
 
-                case RWType.TextureDictionary:
+                case RWNodeType.TextureDictionary:
                     return new RWTextureDictionary(header, reader);
 
-                case RWType.UVAnimationDictionary:
+                case RWNodeType.UVAnimationDictionary:
                     return new RWUVAnimationDictionary(header, reader);
 
                 //case RWType.StripMeshPlugin:
                 //    return new RWStripMeshPlugin(header, reader);
 
-                case RWType.SkyMipMapValue:
+                case RWNodeType.SkyMipMapValue:
                     return new RWSkyMipMapValue(header, reader);
 
-                case RWType.SkinPlugin:
-                    return new RWSkinPlugin(header, reader, parent.Parent as RWGeometry);
+                case RWNodeType.SkinPlugin:
+                    return new RWSkinPlugin(header, reader, parent.Parent as RWMesh);
 
-                case RWType.HierarchyAnimPlugin:
-                    return new RWHierarchyAnimPlugin(header, reader);
+                case RWNodeType.SceneNodeBoneMetadata:
+                    return new RWSceneNodeBoneMetadata(header, reader);
 
                 //case RWType.UserDataPlugin:
                 //    return new RWUserDataPlugin(header, reader);
@@ -101,25 +101,28 @@
                 //case RWType.Maestro2D:
                 //    return new RWMaestro2D(header, reader);
 
-                case RWType.RMDAnimationSetPlaceholder:
+                case RWNodeType.RMDAnimationSet:
+                    return new RMDAnimationSet(header, reader);
+
+                case RWNodeType.RMDAnimationSetPlaceholder:
                     return new RMDAnimationSetPlaceholder(header);
 
-                case RWType.RMDAnimationSetRedirect:
+                case RWNodeType.RMDAnimationSetRedirect:
                     return new RMDAnimationSetRedirect(header, reader);
 
-                case RWType.RMDAnimationSetTerminator:
+                case RWNodeType.RMDAnimationSetTerminator:
                     return new RMDAnimationSetTerminator(header);
 
                 //case RWType.RMDTransformOverride:
                 //    return new RMDTransformOverride(header, reader);
 
-                case RWType.RMDFrameLinkList:
+                case RWNodeType.RMDFrameLinkList:
                     return new RMDFrameLinkList(header, reader);
 
                 //case RWType.RMDVisibilityAnim:
                 //    return new RMDVisibilityAnim(header, reader);
 
-                case RWType.RMDAnimationSetCount:
+                case RWNodeType.RMDAnimationSetCount:
                     return new RMDAnimationSetCount(header, reader);
 
                 //case RWType.RMDParticleList:
@@ -137,40 +140,40 @@
         {
             switch (header.Parent.Type)
             {
-                case RWType.Clump:
-                    return new RWClumpStruct(header, reader);
+                case RWNodeType.Scene:
+                    return new RWSceneStruct(header, reader);
 
-                case RWType.FrameList:
-                    return new RWFrameListStruct(header, reader);
+                case RWNodeType.FrameList:
+                    return new RWSceneNodeListStruct(header, reader);
 
-                case RWType.GeometryList:
+                case RWNodeType.GeometryList:
                     return new RWGeometryListStruct(header, reader);
 
-                case RWType.Geometry:
-                    return new RWGeometryStruct(header, reader);
+                case RWNodeType.Geometry:
+                    return new RWMeshStruct(header, reader);
 
-                case RWType.Material:
+                case RWNodeType.Material:
                     return new RWMaterialStruct(header, reader);
 
-                case RWType.MaterialList:
+                case RWNodeType.MaterialList:
                     return new RWMaterialListStruct(header, reader);
 
-                case RWType.TextureReference:
+                case RWNodeType.TextureReference:
                     return new RWTextureReferenceStruct(header, reader);
 
-                case RWType.Atomic:
-                    return new RWAtomicStruct(header, reader);
+                case RWNodeType.DrawCall:
+                    return new RWDrawCallStruct(header, reader);
 
-                case RWType.TextureDictionary:
+                case RWNodeType.TextureDictionary:
                     return new RWTextureDictionaryStruct(header, reader);
 
-                case RWType.TextureNative:
+                case RWNodeType.TextureNative:
                     return GetStructNodeParentIsTextureNative(header, reader);
 
-                case RWType.Struct:
+                case RWNodeType.Struct:
                     return GetStructNodeParentIsStruct(header, reader);
 
-                case RWType.UVAnimationDictionary:
+                case RWNodeType.UVAnimationDictionary:
                     return new RWUVAnimationDictionaryStruct(header, reader);
 
                 default:
@@ -212,7 +215,7 @@
 
             switch (grandParent.Type)
             {
-                case RWType.TextureNative:
+                case RWNodeType.TextureNative:
                     return GetStructNodeParentIsStructGrandParentIsTextureNative(header, reader);
 
                 default:

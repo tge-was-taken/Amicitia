@@ -4,33 +4,33 @@
     using System.IO;
 
     /// <summary>
-    /// Encapsulates a RenderWare Atomic (draw call) and all of its corresponding data structures.
+    /// Encapsulates a RenderWare draw call and all of its corresponding data structures.
     /// </summary>
-    public class RWAtomic : RWNode
+    public class RWDrawCall : RWNode
     {
-        private RWAtomicStruct _struct;
+        private RWDrawCallStruct _struct;
         private RWExtension _extension;
 
         /// <summary>
-        /// Gets or sets the index of the <see cref="RWFrame"/> (bone) to assign to this Atomic. 
+        /// Gets or sets the index of the <see cref="RWSceneNode"/> to assign to this draw call. 
         /// </summary>
-        public int FrameIndex
+        public int NodeIndex
         {
             get { return _struct.FrameIndex; }
             set { _struct.FrameIndex = value; }
         }
 
         /// <summary>
-        /// Gets or sets the index of the <see cref="RWGeometry"/> to assign to this Atomic.
+        /// Gets or sets the index of the <see cref="RWMesh"/> to assign to this draw call.
         /// </summary>
-        public int GeometryIndex
+        public int MeshIndex
         {
             get { return _struct.GeometryIndex; }
             set { _struct.GeometryIndex = value; }
         }
 
         /// <summary>
-        /// Gets or sets the Flag1 value for this Atomic.
+        /// Gets or sets the Flag1 value for this draw call.
         /// </summary>
         public int Flag1
         {
@@ -39,7 +39,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the Flag2 value for this Atomic.
+        /// Gets or sets the Flag2 value for this draw call.
         /// </summary>
         public int Flag2
         {
@@ -48,7 +48,7 @@
         }
 
         /// <summary>
-        /// Gets the extension nodes for this Atomic.
+        /// Gets the extension nodes for this draw call.
         /// </summary>
         public List<RWNode> Extensions
         {
@@ -56,22 +56,22 @@
         }
 
         /// <summary>
-        /// Initialize a new empty <see cref="RWAtomic"/> instance.
+        /// Initialize a new empty <see cref="RWDrawCall"/> instance.
         /// </summary>
-        public RWAtomic()
-            : base(RWType.Atomic)
+        public RWDrawCall()
+            : base(RWNodeType.DrawCall)
         {
-            _struct = new RWAtomicStruct(0, 0, 0, 0, this);
+            _struct = new RWDrawCallStruct(0, 0, 0, 0, this);
             _extension = new RWExtension(this);
         }
 
         /// <summary>
         /// Initializer only to be called in <see cref="RWNodeFactory"/>.
         /// </summary>
-        internal RWAtomic(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWDrawCall(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
-            _struct = RWNodeFactory.GetNode<RWAtomicStruct>(this, reader);
+            _struct = RWNodeFactory.GetNode<RWDrawCallStruct>(this, reader);
             _extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
         }
 

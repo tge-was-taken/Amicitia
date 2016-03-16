@@ -82,7 +82,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// Initializes a RenderWare material instance with default properties.
         /// </summary>
         public RWMaterial(RWNode parent = null)
-            : base(RWType.Material, parent)
+            : base(RWNodeType.Material, parent)
         {
             _struct = new RWMaterialStruct(this);
             _struct.IsTextured = false;

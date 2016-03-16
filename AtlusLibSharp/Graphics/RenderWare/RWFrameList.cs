@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    public class RWFrameList : RWNode
+    internal class RWSceneNodeList : RWNode
     {
         // Fields
-        private RWFrameListStruct _struct;
+        private RWSceneNodeListStruct _struct;
         private List<RWExtension> _extensionNodes;
-        private RWHierarchyAnimPlugin _root;
+        private RWSceneNode _root;
 
-        public RWHierarchyAnimPlugin HierarchyAnimRoot
+        public RWSceneNode AnimationRootNode
         {
             get
             {
@@ -26,42 +26,50 @@ namespace AtlusLibSharp.Graphics.RenderWare
         }
 
         // Properties
-        public List<RWFrame> Frames
+        public List<RWSceneNode> SceneNodes
         {
-            get { return _struct.Frames; }
+            get { return _struct.SceneNodes; }
         }
 
-        public int FrameCount
+        public int SceneNodeCount
         {
-            get { return _struct.FrameCount; }
+            get { return _struct.SceneNodeCount; }
         }
 
-        internal List<RWExtension> Extensions
+        public List<RWExtension> Extensions
         {
             get { return _extensionNodes; }
         }
 
         // Constructors
-        internal RWFrameList(IList<RWFrame> frames, List<RWExtension> extensions)
-            : base(RWType.FrameList)
+        public RWSceneNodeList(IList<RWSceneNode> frames, List<RWExtension> extensions)
+            : base(RWNodeType.FrameList)
         {
-            _struct = new RWFrameListStruct(frames);
+            _struct = new RWSceneNodeListStruct(frames);
             _extensionNodes = extensions;
         }
 
-        internal RWFrameList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneNodeList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
-            _struct = RWNodeFactory.GetNode<RWFrameListStruct>(this, reader);
-            _extensionNodes = new List<RWExtension>(_struct.FrameCount);
-            for (int i = 0; i < _struct.FrameCount; i++)
+            _struct = RWNodeFactory.GetNode<RWSceneNodeListStruct>(this, reader);
+            _extensionNodes = new List<RWExtension>(_struct.SceneNodeCount);
+
+            for (int i = 0; i < _struct.SceneNodeCount; i++)
+            {
                 _extensionNodes.Add(RWNodeFactory.GetNode<RWExtension>(this, reader));
+
+                if (_extensionNodes[i].Children != null && _extensionNodes[i].Children.Count > 0)
+                {
+                    _struct.SceneNodes[i].BoneMetadata = _extensionNodes[i].Children[0] as RWSceneNodeBoneMetadata;
+                }
+            }
         }
 
         // Public methods
-        public RWFrame GetFrameByHierarchyIndex(int hierarchyIndex)
+        public RWSceneNode GetFrameByHierarchyIndex(int hierarchyIndex)
         {
-            return _struct.Frames[ConvertHierarchyIndexToFrameIndex(hierarchyIndex)];
+            return _struct.SceneNodes[ConvertHierarchyIndexToFrameIndex(hierarchyIndex)];
         }
 
         public int GetFrameIndexByNameID(int nameID)
@@ -74,9 +82,9 @@ namespace AtlusLibSharp.Graphics.RenderWare
                 if (ext.Children == null || ext.Children.Count == 0)
                     continue;
 
-                foreach (RWHierarchyAnimPlugin plug in ext.Children)
+                foreach (RWSceneNodeBoneMetadata plug in ext.Children)
                 {
-                    if (plug.FrameNameID == nameID)
+                    if (plug.BoneNameID == nameID)
                         return frameIdx;
                 }
             }
@@ -85,11 +93,10 @@ namespace AtlusLibSharp.Graphics.RenderWare
 
         public int GetHierarchyIndexByNameID(int nameID)
         {
-            RWHierarchyAnimPlugin root = GetRoot();
-            foreach (RWHierarchyAnimNode node in root.Nodes)
+            foreach (RWBoneHierarchyNode node in AnimationRootNode.BoneMetadata.RootInfo.HierarchyNodes)
             {
                 if (node.FrameNameID == nameID)
-                    return (int)node.HierarchyIndex;
+                    return node.HierarchyIndex;
             }
             return -1;
         }
@@ -98,11 +105,10 @@ namespace AtlusLibSharp.Graphics.RenderWare
         {
             int name = -1;
 
-            RWHierarchyAnimPlugin root = GetRoot();
-            foreach (RWHierarchyAnimNode node in root.Nodes)
+            foreach (RWBoneHierarchyNode node in AnimationRootNode.BoneMetadata.RootInfo.HierarchyNodes)
             {
                 if (node.HierarchyIndex == hierarchyIndex)
-                    name = (int)node.FrameNameID;
+                    name = node.FrameNameID;
             }
 
             if (name == -1)
@@ -116,30 +122,30 @@ namespace AtlusLibSharp.Graphics.RenderWare
                 if (ext.Children == null)
                     continue;
 
-                foreach (RWHierarchyAnimPlugin plug in ext.Children)
+                foreach (RWSceneNodeBoneMetadata plug in ext.Children)
                 {
-                    if (plug.FrameNameID == name)
-                        return (int)frameIndex;
+                    if (plug.BoneNameID == name)
+                        return frameIndex;
                 }
             }
             return -1;
         }
 
-        public List<RWFrame> GetDepthFirstTree()
+        public List<RWSceneNode> GetDepthFirstTree()
         {
-            List<RWFrame> list = new List<RWFrame>(_struct.FrameCount);
+            List<RWSceneNode> list = new List<RWSceneNode>(_struct.SceneNodeCount);
             int nodeIndex = 1; // Index starts at 1 because the first bone is always skipped
-            while (nodeIndex != _struct.FrameCount)
+            while (nodeIndex != _struct.SceneNodeCount)
             {
-                DepthFirstTraversal(_struct.Frames[nodeIndex], ref list, ref nodeIndex);
+                DepthFirstTraversal(_struct.SceneNodes[nodeIndex], ref list, ref nodeIndex);
             }
             return list;
         }
 
-        public List<RWFrame> GetBreadthFirstTree()
+        public List<RWSceneNode> GetBreadthFirstTree()
         {
-            List<RWFrame> newTree = new List<RWFrame>(_struct.FrameCount);
-            List<RWFrame> rootBones = _struct.Frames.FindAll(frame => frame.ParentIndex == -1).ToList();
+            List<RWSceneNode> newTree = new List<RWSceneNode>(_struct.SceneNodeCount);
+            List<RWSceneNode> rootBones = _struct.SceneNodes.FindAll(frame => frame.Parent == null).ToList();
             BreadthFirstTraversal(ref newTree, rootBones);
             return newTree;
         }
@@ -148,12 +154,12 @@ namespace AtlusLibSharp.Graphics.RenderWare
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             _struct.InternalWrite(writer);
-            for (int i = 0; i < _struct.FrameCount; i++)
+            for (int i = 0; i < _struct.SceneNodeCount; i++)
                 _extensionNodes[i].InternalWrite(writer);
         }
 
         // Private methods
-        private static void DepthFirstTraversal(RWFrame frame, ref List<RWFrame> list, ref int nIndex)
+        private static void DepthFirstTraversal(RWSceneNode frame, ref List<RWSceneNode> list, ref int nIndex)
         {
             list.Add(frame);
             nIndex++;
@@ -165,31 +171,25 @@ namespace AtlusLibSharp.Graphics.RenderWare
             }
         }
 
-        private static void BreadthFirstTraversal(ref List<RWFrame> newTree, List<RWFrame> children)
+        private static void BreadthFirstTraversal(ref List<RWSceneNode> newTree, List<RWSceneNode> children)
         {
-            foreach (RWFrame child in children)
+            foreach (RWSceneNode child in children)
             {
                 newTree.Add(child);
             }
 
-            foreach (RWFrame child in children)
+            foreach (RWSceneNode child in children)
             {
                 BreadthFirstTraversal(ref newTree, child.Children);
             }
         }
 
-        private RWHierarchyAnimPlugin GetRoot()
+        private RWSceneNode GetRoot()
         {
-            foreach (RWExtension ext in _extensionNodes)
+            foreach (RWSceneNode node in _struct.SceneNodes)
             {
-                if (ext.Children == null || ext.Children.Count == 0)
-                    continue;
-
-                foreach (RWHierarchyAnimPlugin plug in ext.Children)
-                {
-                    if (plug.NodeCount != 0)
-                        return plug;
-                }
+                if (node.HasBoneMetadata && node.BoneMetadata.IsRootBone)
+                    return node;
             }
 
             return null;

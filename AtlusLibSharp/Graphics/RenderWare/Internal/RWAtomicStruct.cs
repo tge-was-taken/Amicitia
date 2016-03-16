@@ -2,7 +2,7 @@
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    internal class RWAtomicStruct : RWNode
+    internal class RWDrawCallStruct : RWNode
     {
         private int _frameIndex;
         private int _geometryIndex;
@@ -33,8 +33,8 @@ namespace AtlusLibSharp.Graphics.RenderWare
             set { _flag2 = value; }
         }
 
-        public RWAtomicStruct(int frameIndex, int geometryIndex, int flag1, int flag2, RWNode parent = null)
-            : base(RWType.Struct, parent)
+        public RWDrawCallStruct(int frameIndex, int geometryIndex, int flag1, int flag2, RWNode parent = null)
+            : base(RWNodeType.Struct, parent)
         {
             _frameIndex = frameIndex;
             _geometryIndex = geometryIndex;
@@ -42,7 +42,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _flag2 = flag2;
         }
 
-        internal RWAtomicStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWDrawCallStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
             : base(header)
         {
             _frameIndex = reader.ReadInt32();

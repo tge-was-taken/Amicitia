@@ -46,7 +46,7 @@
         #endregion Properties
 
         public RWTextureReferenceStruct(RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             FilterMode = PS2FilterMode.Linear;
             HorizontalAdressingMode = PS2AddressingMode.Wrap;
@@ -59,7 +59,7 @@
             PS2AddressingMode horizontalAddrMode, PS2AddressingMode verticalAddrMode, 
             bool hasMipMaps,
             RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             FilterMode = filterMode;
             HorizontalAdressingMode = horizontalAddrMode;

@@ -37,6 +37,8 @@
             this.mainTreeView = new System.Windows.Forms.TreeView();
             this.mainPropertyGrid = new PropertyGridEx.PropertyGridEx();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.glControl1 = new OpenTK.GLControl();
             this.mainMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).BeginInit();
             this.SuspendLayout();
@@ -50,6 +52,7 @@
             this.mainMenuStrip.Size = new System.Drawing.Size(779, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "menuStrip1";
+            this.mainMenuStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.mainMenuStrip_ItemClicked);
             // 
             // fileToolStripMenuItem
             // 
@@ -84,6 +87,7 @@
             this.mainTreeView.Name = "mainTreeView";
             this.mainTreeView.Size = new System.Drawing.Size(300, 551);
             this.mainTreeView.TabIndex = 1;
+            this.mainTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mainTreeView_AfterSelect_1);
             // 
             // mainPropertyGrid
             // 
@@ -136,6 +140,20 @@
             this.mainPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.mainPictureBox.TabIndex = 3;
             this.mainPictureBox.TabStop = false;
+            this.mainPictureBox.Click += new System.EventHandler(this.mainPictureBox_Click);
+            // 
+            // glControl1
+            // 
+            this.glControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.glControl1.BackColor = System.Drawing.Color.Black;
+            this.glControl1.Location = new System.Drawing.Point(318, 283);
+            this.glControl1.Name = "glControl1";
+            this.glControl1.Size = new System.Drawing.Size(448, 292);
+            this.glControl1.TabIndex = 4;
+            this.glControl1.VSync = false;
+            this.glControl1.Load += new System.EventHandler(this.glControl1_Load);
             // 
             // MainForm
             // 
@@ -143,6 +161,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(779, 587);
+            this.Controls.Add(this.glControl1);
             this.Controls.Add(this.mainPictureBox);
             this.Controls.Add(this.mainPropertyGrid);
             this.Controls.Add(this.mainTreeView);
@@ -152,6 +171,8 @@
             this.MinimumSize = new System.Drawing.Size(662, 569);
             this.Name = "MainForm";
             this.Text = "Amicitia 16/2/2016";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).EndInit();
@@ -169,6 +190,8 @@
         private PropertyGridEx.PropertyGridEx mainPropertyGrid;
         private System.Windows.Forms.PictureBox mainPictureBox;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private OpenTK.GLControl glControl1;
     }
 }
 

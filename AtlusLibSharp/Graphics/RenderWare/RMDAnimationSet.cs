@@ -25,7 +25,7 @@
         /// <param name="animationNodes"><see cref="List{T}"/> of <see cref="RWNode"/> to initialize the animation node set with.</param>
         /// <param name="parent">The parent of the new <see cref="RMDAnimationSet"/>. Value is null if not specified.</param>
         public RMDAnimationSet(List<RWNode> animationNodes, RWNode parent = null)
-            : base(RWType.RMDAnimationSet, parent)
+            : base(RWNodeType.RMDAnimationSet, parent)
         {
             _animationNodes = animationNodes;
 
@@ -42,18 +42,12 @@
             : base(header)
         {
             _animationNodes = new List<RWNode>();
-            while (true)
-            {
-                RWNode node = RWNodeFactory.GetNode(this, reader);
 
-                if (node.Type == RWType.RMDAnimationSetTerminator)
-                {
-                    break;
-                }
-                else
-                {
-                    _animationNodes.Add(node);
-                }
+            var node = RWNodeFactory.GetNode(this, reader);
+            while (node.Type != RWNodeType.RMDAnimationSetTerminator)
+            {
+                _animationNodes.Add(node);
+                node = RWNodeFactory.GetNode(this, reader);
             }
         }
 

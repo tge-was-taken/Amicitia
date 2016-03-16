@@ -2,6 +2,7 @@
 using AtlusLibSharp.Graphics.RenderWare;
 using System.Windows.Forms;
 using System.IO;
+using AtlusLibSharp.PS2.Graphics;
 
 namespace Amicitia.ResourceWrappers
 {
@@ -77,7 +78,7 @@ namespace Amicitia.ResourceWrappers
                 switch (FileFilterTypes[openFileDlg.FilterIndex - 1])
                 {
                     case SupportedFileType.RWTextureDictionary:
-                        WrappedObject = (RWTextureDictionary)RWNode.LoadFromFile(openFileDlg.FileName);
+                        WrappedObject = (RWTextureDictionary)RWNode.Load(openFileDlg.FileName);
                         break;
                 }
 
@@ -133,11 +134,11 @@ namespace Amicitia.ResourceWrappers
                     switch (RWTextureNativeWrapper.FileFilterTypes[openFileDlg.FilterIndex - 1])
                     {
                         case SupportedFileType.RWTextureNative:
-                            WrappedObject.Textures.Add((RWTextureNative)RWNode.LoadFromFile(openFileDlg.FileName));
+                            WrappedObject.Textures.Add((RWTextureNative)RWNode.Load(openFileDlg.FileName));
                             break;
 
                         case SupportedFileType.PNGFile:
-                            WrappedObject.Textures.Add(new RWTextureNative(openFileDlg.FileName, AtlusLibSharp.PS2.Graphics.PS2PixelFormat.PSMT8));
+                            WrappedObject.Textures.Add(new RWTextureNative(openFileDlg.FileName, PS2PixelFormat.PSMT8));
                             break;
                     }
                 }

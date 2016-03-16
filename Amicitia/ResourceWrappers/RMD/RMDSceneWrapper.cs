@@ -4,6 +4,8 @@
     using System.Windows.Forms;
     using Utilities;
     using System;
+    using AtlusLibSharp.IO;
+    using System.IO;
 
     internal class RMDSceneWrapper : ResourceWrapper
     {
@@ -26,18 +28,22 @@
 
         protected internal RWTextureDictionaryWrapper TextureDictionaryWrapper { get; set; }
 
-        protected internal TreeNode ClumpListWrapper { get; set; }
+        protected internal TreeNode SceneListNode { get; set; }
 
-        protected internal TreeNode FrameLinkListWrapper { get; set; }
+        protected internal TreeNode FrameLinkListNode { get; set; }
 
-        protected internal TreeNode AnimationSetListWrapper { get; set; }
+        protected internal TreeNode AnimationSetListNode { get; set; }
 
-        protected internal TreeNode MiscNodeListWrapper { get; set; }
+        protected internal TreeNode MiscNodeListNode { get; set; }
+
+        protected internal override bool IsModelResource
+        {
+            get { return true; }
+        }
 
         public RMDSceneWrapper(string text, RMDScene rmd)
             : base(text, rmd)
         {
-
         }
 
         public override void Export(object sender, EventArgs e)
@@ -95,28 +101,31 @@
             TextureDictionaryWrapper.RebuildWrappedObject();
             WrappedObject.TextureDictionary = TextureDictionaryWrapper.WrappedObject as RWTextureDictionary;
 
-            foreach (ResourceWrapper wrapper in ClumpListWrapper.Nodes)
+            foreach (RWSceneWrapper wrapper in SceneListNode.Nodes)
             {
                 wrapper.RebuildWrappedObject();
-                WrappedObject.Clumps.Add(wrapper.WrappedObject as RWClump);
+                WrappedObject.Scenes.Add(wrapper.WrappedObject);
             }
 
-            foreach (ResourceWrapper wrapper in FrameLinkListWrapper.Nodes)
+            foreach (ResourceWrapper wrapper in FrameLinkListNode.Nodes)
             {
                 wrapper.RebuildWrappedObject();
-                WrappedObject.FrameLinks.Add(wrapper.WrappedObject as RMDFrameLink);
+                WrappedObject.FrameLinks.Add(
+                    new RMDNodeLink((wrapper.WrappedObject as GenericBinaryFile).GetBytes()));
             }
 
-            foreach (ResourceWrapper wrapper in AnimationSetListWrapper.Nodes)
+            foreach (ResourceWrapper wrapper in AnimationSetListNode.Nodes)
             {
                 wrapper.RebuildWrappedObject();
-                WrappedObject.AnimationSets.Add(wrapper.WrappedObject as RMDAnimationSet);
+                WrappedObject.AnimationSets.Add(
+                    RWNode.Load((wrapper.WrappedObject as GenericBinaryFile).GetBytes()) as RMDAnimationSet);
             }
 
-            foreach (ResourceWrapper wrapper in MiscNodeListWrapper.Nodes)
+            foreach (ResourceWrapper wrapper in MiscNodeListNode.Nodes)
             {
                 wrapper.RebuildWrappedObject();
-                WrappedObject.MiscNodes.Add(wrapper.WrappedObject as RWNode);
+                WrappedObject.MiscNodes.Add(
+                    RWNode.Load((wrapper.WrappedObject as GenericBinaryFile).GetBytes()));
             }
         }
 
@@ -124,36 +133,48 @@
         {
             Nodes.Clear();
             TextureDictionaryWrapper = new RWTextureDictionaryWrapper("Textures", WrappedObject.TextureDictionary ?? new RWTextureDictionary());
-            ClumpListWrapper = new TreeNode("Models");
-            FrameLinkListWrapper = new TreeNode("Frame Links");
-            AnimationSetListWrapper = new TreeNode("Animation sets");
-            MiscNodeListWrapper = new TreeNode("Misc Nodes");
+            SceneListNode = new TreeNode("Scenes");
+            FrameLinkListNode = new TreeNode("Frame Links");
+            AnimationSetListNode = new TreeNode("Animation sets");
+            MiscNodeListNode = new TreeNode("Misc Nodes");
 
-            int clumpIndex = 0;
-            foreach (RWClump clump in WrappedObject.Clumps)
+            int sceneIndex = 0;
+            foreach (RWScene scene in WrappedObject.Scenes)
             {
-                ClumpListWrapper.Nodes.Add(new ResourceWrapper("Model[" + clumpIndex++ + "]", clump));
+                SceneListNode.Nodes.Add(
+                    new RWSceneWrapper(
+                        string.Format("Scene[{0}]", sceneIndex++), 
+                        scene));
             }
 
             int frameLinkIndex = 0;
-            foreach (RMDFrameLink frameLink in WrappedObject.FrameLinks)
+            foreach (RMDNodeLink frameLink in WrappedObject.FrameLinks)
             {
-                FrameLinkListWrapper.Nodes.Add(new ResourceWrapper("FrameLink[" + frameLinkIndex++ + "]", frameLink));
+                FrameLinkListNode.Nodes.Add(
+                    new ResourceWrapper(
+                        string.Format("FrameLink[{0}]", (frameLinkIndex++).ToString("00")),
+                        new GenericBinaryFile(frameLink.GetBytes())));
             }
 
             int animSetIndex = 0;
             foreach (RMDAnimationSet animSet in WrappedObject.AnimationSets)
             {
-                AnimationSetListWrapper.Nodes.Add(new ResourceWrapper("AnimationSet[" + (animSetIndex++).ToString("00") + "]", animSet));
+                AnimationSetListNode.Nodes.Add(
+                    new ResourceWrapper(
+                        string.Format("AnimationSet[{0}]", (animSetIndex++).ToString("00")),
+                        new GenericBinaryFile(animSet.GetBytes())));
             }
 
             int miscNodeIndex = 0;
             foreach (RWNode miscNode in WrappedObject.MiscNodes)
             {
-                MiscNodeListWrapper.Nodes.Add(new ResourceWrapper(miscNode.Type.ToString() + "[" + miscNodeIndex++ + "]", miscNode));
+                MiscNodeListNode.Nodes.Add(
+                    new ResourceWrapper(
+                        string.Format("{0}[{1}]", miscNode.Type.ToString(), miscNodeIndex++),
+                        new GenericBinaryFile(miscNode.GetBytes())));
             }
 
-            Nodes.Add(TextureDictionaryWrapper, ClumpListWrapper, FrameLinkListWrapper, AnimationSetListWrapper, MiscNodeListWrapper);
+            Nodes.Add(TextureDictionaryWrapper, SceneListNode, FrameLinkListNode, AnimationSetListNode, MiscNodeListNode);
         }
     }
 }

@@ -18,7 +18,7 @@
         }
 
         internal RWTextureDictionaryStruct(RWTextureDictionary texDictionary)
-            : base(RWType.Struct, texDictionary)
+            : base(RWNodeType.Struct, texDictionary)
         {
             TextureCount = (ushort)texDictionary.TextureCount;
             DeviceID = texDictionary.DeviceID;

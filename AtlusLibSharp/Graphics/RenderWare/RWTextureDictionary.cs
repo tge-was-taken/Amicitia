@@ -93,7 +93,7 @@
         /// </summary>
         /// <param name="textures"><see cref="IList{T}"/>containing texture nodes to initialize the dictionary with.</param> 
         public RWTextureDictionary(IList<RWTextureNative> textures)
-            : base(RWType.TextureDictionary)
+            : base(RWNodeType.TextureDictionary)
         {
             Textures = textures.ToList();
             _extension = new RWExtension(this);
@@ -104,7 +104,7 @@
         /// Initialize a new empty <see cref="RWTextureDictionary"/> instance.
         /// </summary>
         public RWTextureDictionary()
-            : base(RWType.TextureDictionary)
+            : base(RWNodeType.TextureDictionary)
         {
             _struct = new RWTextureDictionaryStruct(this);
             _textures = new List<RWTextureNative>();

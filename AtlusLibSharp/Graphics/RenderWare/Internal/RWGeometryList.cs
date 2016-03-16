@@ -4,17 +4,17 @@ using System.Linq;
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    internal class RWGeometryList : RWNode
+    internal class RWMeshList : RWNode
     {
         private RWGeometryListStruct _struct;
-        private List<RWGeometry> _geometryList;
+        private List<RWMesh> _geometryList;
 
         public int GeometryCount
         {
             get { return _geometryList.Count; }
         }
 
-        public List<RWGeometry> GeometryList
+        public List<RWMesh> Meshes
         {
             get { return _geometryList; }
             set
@@ -31,22 +31,22 @@ namespace AtlusLibSharp.Graphics.RenderWare
             }
         }
 
-        public RWGeometryList(IList<RWGeometry> geoList, RWNode parent = null)
-            : base(RWType.GeometryList, parent)
+        public RWMeshList(IList<RWMesh> geoList, RWNode parent = null)
+            : base(RWNodeType.GeometryList, parent)
         {
-            GeometryList = geoList.ToList();
+            Meshes = geoList.ToList();
             _struct = new RWGeometryListStruct(this);
         }
 
-        internal RWGeometryList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMeshList(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
             _struct = RWNodeFactory.GetNode<RWGeometryListStruct>(this, reader);
-            _geometryList = new List<RWGeometry>(_struct.GeometryCount);
+            _geometryList = new List<RWMesh>(_struct.GeometryCount);
 
             for (int i = 0; i < _struct.GeometryCount; i++)
             {
-                _geometryList.Add(RWNodeFactory.GetNode<RWGeometry>(this, reader));
+                _geometryList.Add(RWNodeFactory.GetNode<RWMesh>(this, reader));
             }
         }
 

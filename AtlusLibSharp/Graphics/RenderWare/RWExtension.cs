@@ -7,13 +7,13 @@ namespace AtlusLibSharp.Graphics.RenderWare
     internal class RWExtension : RWNode
     {
         public RWExtension(params RWNode[] plugins)
-            : base(RWType.Extension)
+            : base(RWNodeType.Extension)
         {
             Children = plugins.ToList();
         }
 
         public RWExtension(RWNode parent = null)
-            : base(RWType.Extension, parent)
+            : base(RWNodeType.Extension, parent)
         {
             Children = new List<RWNode>();
         }

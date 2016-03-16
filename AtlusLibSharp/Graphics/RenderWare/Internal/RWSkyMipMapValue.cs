@@ -9,7 +9,7 @@
     {
         internal const int SKY_MIPMAP_VALUE = 0x00000FC0;
 
-        public RWSkyMipMapValue() : base(RWType.SkyMipMapValue) { }
+        public RWSkyMipMapValue() : base(RWNodeType.SkyMipMapValue) { }
 
         internal RWSkyMipMapValue(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
             : base(header)

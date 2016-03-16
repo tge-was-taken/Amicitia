@@ -22,7 +22,7 @@
         /// Initialize a new instance of <see cref="RMDAnimationSetRedirect"/> using a given animation set index.
         /// </summary>
         /// <param name="referencedAnimationSetIndex">The index of the animation set redirected to by this <see cref="RMDAnimationSetRedirect"/>.</param>
-        public RMDAnimationSetRedirect(short referencedAnimationSetIndex) : base(RWType.RMDAnimationSetRedirect)
+        public RMDAnimationSetRedirect(short referencedAnimationSetIndex) : base(RWNodeType.RMDAnimationSetRedirect)
         {
             _animationSetRedirectIndex = referencedAnimationSetIndex;
         }

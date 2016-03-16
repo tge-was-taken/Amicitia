@@ -63,7 +63,7 @@
         /// <param name="bitmap">Bitmap to be encoded using the given pixel format.</param>
         /// <param name="pixelFormat">The pixel format the bitmap will be encoded to and stored in the texture data.</param>
         public RWRasterData(Bitmap bitmap, PS2PixelFormat pixelFormat)
-            : base(RWType.Struct)
+            : base(RWNodeType.Struct)
         {
             if (PS2PixelFormatHelper.IsIndexedPixelFormat(pixelFormat))
             {
@@ -84,7 +84,7 @@
         /// <param name="indices">Per-Pixel indices into the palette colors of the texture.</param>
         /// <param name="pixelFormat">PS2 pixel format of the given texture data.</param>
         public RWRasterData(Color[] palette, byte[] indices, PS2PixelFormat pixelFormat)
-            : base(RWType.Struct)
+            : base(RWNodeType.Struct)
         {
             _indices = indices;
             _palette = palette;

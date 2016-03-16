@@ -222,7 +222,7 @@
         /// <param name="bitmap">Source bitmap used to encode.</param>
         /// <param name="pixelFormat">PS2 Pixel format to encode the bitmap to.</param>
         public RWTextureNative(string name, Bitmap bitmap, PS2PixelFormat pixelFormat)
-            : base(RWType.TextureNative)
+            : base(RWNodeType.TextureNative)
         {
             if (bitmap.Width % 2 != 0 || bitmap.Height % 2 != 0)
             {
@@ -252,7 +252,7 @@
         /// <param name="indices">Texture pixel indices into the palette.</param>
         /// <param name="pixelFormat">PS2 Pixel format to encode the bitmap to.</param>
         public RWTextureNative(string name, int width, int height, Color[] palette, byte[] indices, PS2PixelFormat pixelFormat)
-            : base(RWType.TextureNative)
+            : base(RWNodeType.TextureNative)
         {
             if (width % 2 != 0 || height % 2 != 0)
             {

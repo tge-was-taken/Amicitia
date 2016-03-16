@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
-    public enum RWType : uint
+    public enum RWNodeType : uint
     {
         None                        = 0x00000000,
         Struct                      = 0x00000001,
@@ -12,8 +12,8 @@
         World                       = 0x0000000B, // found in some map files
         FrameList                   = 0x0000000E,
         Geometry                    = 0x0000000F,
-        Clump                       = 0x00000010,
-        Atomic                      = 0x00000014,
+        Scene                       = 0x00000010,
+        DrawCall                    = 0x00000014,
         TextureNative               = 0x00000015,
         GeometryList                = 0x0000001A,
         Animation                   = 0x0000001B,
@@ -22,7 +22,7 @@
         StripMeshPlugin             = 0x0000050E,
         SkyMipMapValue              = 0x00000110,
         SkinPlugin                  = 0x00000116,
-        HierarchyAnimPlugin         = 0x0000011E,
+        SceneNodeBoneMetadata         = 0x0000011E,
         UserDataPlugin              = 0x0000011F,
         Maestro2D                   = 0x000001B1, // ???
         RMDAnimationSetPlaceholder  = 0xF0F00001,
@@ -36,9 +36,8 @@
         RMDParticleAnimation        = 0xF0F000E1,
 
         // Reserved for internal use
-        // 474952 > 524947 = "RIG" ;)
-        RMDScene                    = 0x47495200,
-        RMDAnimationSet             = 0x47495201
+        RMDScene                    = 'R' << 8 | 'I' << 16 | 'G' << 24 | 0x00,
+        RMDAnimationSet             = 'R' << 8 | 'I' << 16 | 'G' << 24 | 0x01,
     }
 
     public enum RWGeometryFlags : ushort
@@ -61,7 +60,7 @@
         GeometryNativeInstance = 0x02
     }
 
-    public enum RWHierarchyAnimFlag : uint
+    public enum RWRootBoneFlags : uint
     {
         SubHierarchy = 0x1,
         NoMatrices = 0x2,
@@ -88,10 +87,10 @@
 
     public enum RWPlatformID : uint
     {
-        XBOX = 0x5,
-        D3D8 = 0x8,
-        D3D9 = 0x9,
-        PS2 = 0x325350
+        XBOX = 0x05,
+        D3D8 = 0x08,
+        D3D9 = 0x09,
+        PS2 = 'P' | 'S' << 8 | '2' << 16 | 0x00 << 24
     }
 
     public enum RWRasterFormats : uint

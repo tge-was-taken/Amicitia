@@ -39,10 +39,10 @@
 
                 // Texture formats
                 case SupportedFileType.RWTextureDictionary:
-                    return new RWTextureDictionaryWrapper(text, (RWTextureDictionary)RWNode.LoadFromStream(stream));
+                    return new RWTextureDictionaryWrapper(text, (RWTextureDictionary)RWNode.Load(stream));
 
                 case SupportedFileType.RWTextureNative:
-                    return new RWTextureNativeWrapper((RWTextureNative)RWNode.LoadFromStream(stream));
+                    return new RWTextureNativeWrapper((RWTextureNative)RWNode.Load(stream));
 
                 case SupportedFileType.SPRFile:
                     return new SPRFileWrapper(text, SPRFile.LoadFrom(stream, false));

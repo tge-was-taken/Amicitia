@@ -13,7 +13,7 @@
         /// Initialize a new instance of <see cref="RMDAnimationSetCount"/> using a given number of animations sets.
         /// </summary>
         /// <param name="animationSetCount">The number of animation sets in the <see cref="RMDScene"/>.</param>
-        public RMDAnimationSetCount(short animationSetCount) : base(RWType.RMDAnimationSetCount)
+        public RMDAnimationSetCount(short animationSetCount) : base(RWNodeType.RMDAnimationSetCount)
         {
             _animationSetCount = animationSetCount;
         }

@@ -57,8 +57,16 @@
     <StartupObject>Amicitia.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AssimpNet, Version=3.3.1.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AssimpNet.3.3.1\lib\net45\AssimpNet.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.1.1.2225.0\lib\net20\OpenTK.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.GLControl.1.1.1589.5942\lib\NET40\OpenTK.GLControl.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PropertyGridEx">
@@ -77,11 +85,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModelViewer\ModelViewer.cs" />
+    <Compile Include="ModelViewer\ShaderProgram.cs" />
     <Compile Include="ResourceProperty.cs" />
     <Compile Include="ResourceWrappers\BVPArchiveWrapper.cs" />
     <Compile Include="ResourceWrappers\ListArchiveFileWrapper.cs" />
     <Compile Include="ResourceWrappers\PNGFileWrapper.cs" />
     <Compile Include="ResourceWrappers\RMD\RMDSceneWrapper.cs" />
+    <Compile Include="ResourceWrappers\RMD\RWSceneWrapper.cs" />
     <Compile Include="ResourceWrappers\RMD\RWTextureDictionaryWrapper.cs" />
     <Compile Include="ResourceWrappers\RMD\RWTextureNativeWrapper.cs" />
     <Compile Include="ResourceWrappers\SPR\SPR4FileTexturesWrapper.cs" />
@@ -131,12 +142,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="shader.vs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Igoricon.ico" />
+    <EmbeddedResource Include="shader.fs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -156,9 +169,7 @@
       <Name>AtlusLibSharp</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ModelViewer\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

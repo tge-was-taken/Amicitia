@@ -136,7 +136,7 @@ namespace Amicitia.ResourceWrappers
                     switch (FileFilterTypes[openFileDlg.FilterIndex - 1])
                     {
                         case SupportedFileType.RWTextureNative:
-                            WrappedObject = (RWTextureNative)RWNode.LoadFromFile(openFileDlg.FileName);
+                            WrappedObject = (RWTextureNative)RWNode.Load(openFileDlg.FileName);
                             break;
 
                         case SupportedFileType.PNGFile:

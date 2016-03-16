@@ -8,7 +8,6 @@
     internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
     {
         private object _wrappedObject;
-        private Type _wrappedType;
         private bool _isInitialized;
         private ResourceProperty[] _resProperties;
 
@@ -16,7 +15,6 @@
             : base(text)
         {
             _wrappedObject = wrappedObject;
-            _wrappedType = wrappedObject.GetType();
             _resProperties = properties;
             InitializeContextMenuStrip();
             InitializeWrapper();
@@ -42,11 +40,6 @@
         }
 
         // Common Wrapper properties
-
-        protected internal Type WrappedType
-        {
-            get { return _wrappedType; }
-        }
 
         protected internal virtual object WrappedObject
         {
@@ -128,9 +121,17 @@
         }
 
         /// <summary>
-        /// Indicates if this wrapped object implements the <see cref="ITextureFile"/> interface.
+        /// Indicates if this wrapped object implements the <see cref="ITextureFile"/> interface. Default is false.
         /// </summary>
         protected internal virtual bool IsImageResource
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Indicates if this wrapped object is a model resource. Default is false.
+        /// </summary>
+        protected internal virtual bool IsModelResource
         {
             get { return false; }
         }

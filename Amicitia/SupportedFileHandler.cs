@@ -21,6 +21,7 @@
             // Export only formats
             new SupportedFileInfo("Portable Network Graphics",          SupportedFileType.PNGFile,              true,  ".png"),
             new SupportedFileInfo("Truevision TARGA",                   SupportedFileType.TGAFile,              true,  ".tga"),
+            new SupportedFileInfo("COLLADA DAE",                        SupportedFileType.DAEFile,              true,  ".dae"),
 
             // Archive formats
             new SupportedFileInfo("Atlus Generic Archive",              SupportedFileType.PAKToolFile,          false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se"),
@@ -29,13 +30,14 @@
 
             // Texture (container) formats
             new SupportedFileInfo("Atlus PS2 Texture",                  SupportedFileType.TMXFile,              false, ".tmx"),
-            new SupportedFileInfo("Atlus PS2 Sprite Container",         SupportedFileType.SPRFile,              false, ".spr"),
+            new SupportedFileInfo("Atlus TMX Sprite Container",         SupportedFileType.SPRFile,              false, ".spr"),
             new SupportedFileInfo("Atlus TGA Sprite Container",         SupportedFileType.SPR4File,             false, ".spr4"),
             new SupportedFileInfo("RenderWare PS2 Texture Container",   SupportedFileType.RWTextureDictionary,  false, ".txd"),
             new SupportedFileInfo("RenderWare PS2 Texture",             SupportedFileType.RWTextureNative,      false, ".txn"),
 
             // Model formats
-            new SupportedFileInfo("RenderWare Model",                   SupportedFileType.RMDScene,             false, ".rmd", ".rws", ".dff")
+            new SupportedFileInfo("Atlus RenderWare Scene Container",   SupportedFileType.RMDScene,             false, ".rmd", ".rws"),
+            new SupportedFileInfo("RenderWare Scene",                   SupportedFileType.RWScene,              false, ".dff")
         };
 
         private static readonly Dictionary<SupportedFileType, Type> _supportedFileTypeEnumToType = new Dictionary<SupportedFileType, Type>()
@@ -55,6 +57,7 @@
 
             // Model formats
             { SupportedFileType.RMDScene,               typeof(RMDScene) },
+            { SupportedFileType.RWScene,                typeof(RWScene) },
         };
 
         private static readonly string _fileFilter;

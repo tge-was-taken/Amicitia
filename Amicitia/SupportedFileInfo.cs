@@ -36,6 +36,8 @@
         TGAFile,
 
         // Model formats
-        RMDScene
+        RMDScene,
+        RWScene,
+        DAEFile
     }
 }

@@ -57,7 +57,7 @@
         /// Initialize RenderWare material data with default properties.
         /// </summary>
         public RWMaterialStruct(RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             Color = Color.White;
             IsTextured = true;

@@ -5,13 +5,14 @@
     using System.IO;
     using OpenTK;
     using AtlusLibSharp.Utilities;
+    using IO;
 
     /// <summary>
-    /// Represents a RenderWare node structure containing a list of <see cref="RMDFrameLink"/> used for attaching objects to frames.
+    /// Represents a RenderWare node structure containing a list of <see cref="RMDNodeLink"/> used for attaching objects to frames.
     /// </summary>
     internal class RMDFrameLinkList : RWNode
     {
-        private List<RMDFrameLink> _frameLinks;
+        private List<RMDNodeLink> _frameLinks;
 
         /// <summary>
         /// Gets the number of frame links in the <see cref="RMDFrameLinkList"/>.
@@ -24,7 +25,7 @@
         /// <summary>
         /// Gets the list of frame links in the <see cref="RMDFrameLinkList"/>.
         /// </summary>
-        public List<RMDFrameLink> FrameLinks
+        public List<RMDNodeLink> FrameLinks
         {
             get { return _frameLinks; }
         }
@@ -33,8 +34,8 @@
         /// Initialize a new <see cref="RMDFrameLinkList"/> instance using a list of frame links.
         /// </summary>
         /// <param name="frameLinks"></param>
-        public RMDFrameLinkList(IList<RMDFrameLink> frameLinks)
-            : base(RWType.RMDFrameLinkList)
+        public RMDFrameLinkList(IList<RMDNodeLink> frameLinks)
+            : base(RWNodeType.RMDFrameLinkList)
         {
             _frameLinks = frameLinks.ToList();
         }
@@ -44,9 +45,9 @@
         /// </summary>
         /// <param name="frameLinks"></param>
         public RMDFrameLinkList()
-            : base(RWType.RMDFrameLinkList)
+            : base(RWNodeType.RMDFrameLinkList)
         {
-            _frameLinks = new List<RMDFrameLink>();
+            _frameLinks = new List<RMDNodeLink>();
         }
 
         /// <summary>
@@ -57,11 +58,11 @@
         {
             short numAttachFrames = reader.ReadInt16();
 
-            _frameLinks = new List<RMDFrameLink>(numAttachFrames);
+            _frameLinks = new List<RMDNodeLink>(numAttachFrames);
 
             for (int i = 0; i < numAttachFrames; i++)
             {
-                _frameLinks.Add(new RMDFrameLink(reader));
+                _frameLinks.Add(new RMDNodeLink(reader));
             }
         }
 
@@ -73,7 +74,7 @@
         {
             writer.Write((short)FrameLinkCount);
 
-            foreach (RMDFrameLink attachFrame in _frameLinks)
+            foreach (RMDNodeLink attachFrame in _frameLinks)
             {
                 attachFrame.InternalWrite(writer);
             }
@@ -84,7 +85,7 @@
     /// Used to eg. attach weapons to frames by specifying which frame on the source model attaches to a frame on the weapon model.
     /// <para>It also provides a matrix pivot point for the weapon (or any other object) to orient itself around.</para>
     /// </summary>
-    public class RMDFrameLink
+    public class RMDNodeLink : BinaryFileBase
     {
         private int _frameANameID;
         private int _frameBNameID;
@@ -112,20 +113,38 @@
         }
 
         /// <summary>
-        /// Initialize a new empty <see cref="RMDFrameLink"/> instance.
+        /// Initialize a new empty <see cref="RMDNodeLink"/> instance.
         /// </summary>
-        public RMDFrameLink()
+        public RMDNodeLink()
         {
             _frameANameID = 0;
             _frameBNameID = 0;
             _matrix = Matrix4.Identity;
         }
 
+        public RMDNodeLink(byte[] data)
+            : this(new MemoryStream(data))
+        {
+        }
+
+        public RMDNodeLink(Stream stream)
+        {
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                InternalRead(reader);
+            }
+        }
+
         /// <summary>
-        /// Initialize a <see cref="RMDFrameLink"/> by reading the data from a <see cref="Stream"/> using a <see cref="BinaryReader"/>.
+        /// Initialize a <see cref="RMDNodeLink"/> by reading the data from a <see cref="Stream"/> using a <see cref="BinaryReader"/>.
         /// </summary>
         /// <param name="reader">The <see cref="BinaryReader"/> used to read the data from the <see cref="Stream"/>.</param>
-        internal RMDFrameLink(BinaryReader reader)
+        internal RMDNodeLink(BinaryReader reader)
+        {
+            InternalRead(reader);
+        }
+
+        internal void InternalRead(BinaryReader reader)
         {
             _frameANameID = reader.ReadInt32();
             _frameBNameID = reader.ReadInt32();
@@ -133,10 +152,10 @@
         }
 
         /// <summary>
-        /// Write the <see cref="RMDFrameLink"/> instance to the stream using a <see cref="BinaryWriter"/>.
+        /// Write the <see cref="RMDNodeLink"/> instance to the stream using a <see cref="BinaryWriter"/>.
         /// </summary>
         /// <param name="writer">The <see cref="BinaryWriter"/> used to write to the stream.</param>
-        internal void InternalWrite(BinaryWriter writer)
+        internal override void InternalWrite(BinaryWriter writer)
         {
             writer.Write(_frameANameID);
             writer.Write(_frameBNameID);

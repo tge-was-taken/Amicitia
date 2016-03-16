@@ -7,10 +7,12 @@ using System.Linq;
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    using AtlusLibSharp.Utilities;
+    using Utilities;
 
-    internal class RWGeometryStruct : RWNode
+    internal class RWMeshStruct : RWNode
     {
+        private const int SUPPORTED_MORPH_COUNT = 1;
+
         private RWGeometryFlags _geoFlags;
         private RWGeometryNativeFlag _nativeFlag;
         private Color[] _clrArray;
@@ -99,11 +101,11 @@ namespace AtlusLibSharp.Graphics.RenderWare
         // 1. Implement support for multiple texture coords for newly generated models
         // Priority isn't very high and requires some changes to how the optimizer works
 
-        public RWGeometryStruct(
+        public RWMeshStruct(
             Vector3[] vertexPositions, Vector3[] vertexNormals, short[] triangleMaterialIDs,
             Vector2[][] textureCoordinateSets, Color[] vertexColors,
             ref byte[][] skinBoneIndices, ref float[][] skinBoneWeights)
-            : base(RWType.Struct)
+            : base(RWNodeType.Struct)
         {
             _geoFlags =
                 RWGeometryFlags.HasVertices   |
@@ -136,7 +138,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _nativeFlag = RWGeometryNativeFlag.Default;
         }
 
-        internal RWGeometryStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMeshStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
         : base(header)
         {
             _geoFlags = (RWGeometryFlags)reader.ReadUInt16();
@@ -146,9 +148,9 @@ namespace AtlusLibSharp.Graphics.RenderWare
             int numVerts = reader.ReadInt32();
             int numMorphTargets = reader.ReadInt32();
 
-            if (numMorphTargets != 1)
+            if (numMorphTargets != SUPPORTED_MORPH_COUNT)
             {
-                throw new NotImplementedException("Morph targets are not implemented");
+                throw new NotImplementedException("More than 1 morph target are not implemented");
             }
 
             if (_geoFlags.HasFlagUnchecked(RWGeometryFlags.HasColors))
@@ -193,7 +195,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             writer.Write((byte)_nativeFlag);
             writer.Write(TriangleCount);
             writer.Write(VertexCount);
-            writer.Write(1); // morph target count
+            writer.Write(SUPPORTED_MORPH_COUNT);
 
             if (_geoFlags.HasFlagUnchecked(RWGeometryFlags.HasColors))
             {
@@ -307,7 +309,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
                         }
                         else
                         {
-                            isMatch = true; // in case everything breaks, remove this line
+                            isMatch = false; // in case everything breaks, remove this line
                             continue;
                         }
 
@@ -396,6 +398,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
                         tri[triVtxOffset] = (ushort)(uniqueVtxIndex + 1);
                     }
                 }
+
                 newTriangles.Add(tri);
 
                 if (vtxIndex % 256 == 0)

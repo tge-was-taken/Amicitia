@@ -52,11 +52,10 @@
         {
             Nodes.Clear();
 
-            int index = -1;
+            int index = 0;
             foreach (SPRKeyFrame keyFrame in WrappedObject)
             {
-                ++index;
-                Nodes.Add(new SPRKeyFrameWrapper("KeyFrame" + index, keyFrame));
+                Nodes.Add(new SPRKeyFrameWrapper(string.Format("KeyFrame{0}", index++), keyFrame));
             }
 
             if (IsInitialized)

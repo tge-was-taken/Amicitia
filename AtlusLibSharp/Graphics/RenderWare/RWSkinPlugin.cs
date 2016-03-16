@@ -1,10 +1,8 @@
-﻿using OpenTK;
-using System.Collections.Generic;
-using System.IO;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
-    using AtlusLibSharp.Utilities;
+    using System.IO;
+    using OpenTK;
+    using Utilities;
 
     // This class needs some major refactoring
     public class RWSkinPlugin : RWNode
@@ -103,7 +101,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         // I can currently just copy and paste the one from the original file
         // But knowing how to calculate it would be a lot easier
 
-        internal RWSkinPlugin(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader, RWGeometry rwGeometry)
+        internal RWSkinPlugin(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader, RWMesh rwGeometry)
             : base(header)
         {
             int numVertices = rwGeometry.VertexCount;
@@ -158,63 +156,63 @@ namespace AtlusLibSharp.Graphics.RenderWare
                 _materialSplitUsedBoneInfo[i] = new MaterialSplitUsedBoneInfo { UsedBoneHierarchyIndex = reader.ReadByte(), Unknown = reader.ReadByte() };
         }
 
-        public RWSkinPlugin(RWFrameList rwFrameList, RWGeometry rwGeometry, byte[][] skinBoneIndices, float[][] skinBoneWeights)
-            : base(RWType.SkinPlugin)
-        {
-            RWHierarchyAnimPlugin root = rwFrameList.HierarchyAnimRoot;
-            _numBones = (byte)root.NodeCount;
+        //public RWSkinPlugin(RWSceneNodeList rwFrameList, RWMesh rwGeometry, byte[][] skinBoneIndices, float[][] skinBoneWeights)
+        //    : base(RWNodeType.SkinPlugin)
+        //{
+        //    RWSceneNodeBoneMetadata root = rwFrameList.HierarchyAnimRoot;
+        //    _numBones = (byte)root.BoneHierarchyNodeCount;
 
-            List<byte> usedBoneList = new List<byte>();
-            _numWeightPerVertex = 0;
+        //    List<byte> usedBoneList = new List<byte>();
+        //    _numWeightPerVertex = 0;
 
-            for (int i = 0; i < skinBoneIndices.Length; i++)
-            {
-                double wSum = 0.0f;
-                int wUsed = 0;
-                for (int j = 0; j < 4; j++)
-                {
-                    if (skinBoneWeights[i][j] != 0.0f)
-                    {
-                        ++wUsed;
-                        wSum += skinBoneWeights[i][j];
-                        //skinBoneIndices[i][j] = (byte)(DFSFrameList.FindIndex(f => f.Index == skinBoneIndices[i][j]));
+        //    for (int i = 0; i < skinBoneIndices.Length; i++)
+        //    {
+        //        double wSum = 0.0f;
+        //        int wUsed = 0;
+        //        for (int j = 0; j < 4; j++)
+        //        {
+        //            if (skinBoneWeights[i][j] != 0.0f)
+        //            {
+        //                ++wUsed;
+        //                wSum += skinBoneWeights[i][j];
+        //                //skinBoneIndices[i][j] = (byte)(DFSFrameList.FindIndex(f => f.Index == skinBoneIndices[i][j]));
 
-                        if (!usedBoneList.Contains(skinBoneIndices[i][j]))
-                            usedBoneList.Add(skinBoneIndices[i][j]);
-                    }
-                }
-                if (wSum < 1.0f)
-                {
-                    double wRemainder = 1.0f - wSum;
-                    wRemainder /= wUsed;
-                    for (int j = 0; j < wUsed; j++)
-                        skinBoneWeights[i][j] += (float)wRemainder;
-                }
-                if (wUsed > MaxWeightCountPerVertex)
-                    _numWeightPerVertex = (byte)wUsed;
-            }
+        //                if (!usedBoneList.Contains(skinBoneIndices[i][j]))
+        //                    usedBoneList.Add(skinBoneIndices[i][j]);
+        //            }
+        //        }
+        //        if (wSum < 1.0f)
+        //        {
+        //            double wRemainder = 1.0f - wSum;
+        //            wRemainder /= wUsed;
+        //            for (int j = 0; j < wUsed; j++)
+        //                skinBoneWeights[i][j] += (float)wRemainder;
+        //        }
+        //        if (wUsed > MaxWeightCountPerVertex)
+        //            _numWeightPerVertex = (byte)wUsed;
+        //    }
 
-            _numUsedBones = (byte)usedBoneList.Count;
-            _unused = 0;
-            _usedBoneIndices = usedBoneList.ToArray();
-            _skinBoneIndices = skinBoneIndices;
-            _skinBoneWeights = skinBoneWeights;
+        //    _numUsedBones = (byte)usedBoneList.Count;
+        //    _unused = 0;
+        //    _usedBoneIndices = usedBoneList.ToArray();
+        //    _skinBoneIndices = skinBoneIndices;
+        //    _skinBoneWeights = skinBoneWeights;
 
-            _inverseBoneMatrices = new Matrix4[BoneCount];
-            for (int i = 0; i < BoneCount; i++)
-            {
-                InverseBoneMatrices[i] = 
-                    (rwFrameList.GetFrameByHierarchyIndex(root.Nodes[i].HierarchyIndex).LocalMatrix * 
-                     rwFrameList.Frames[2].WorldMatrix)
-                     .Inverted(); // Get the atomic root frame world matrix
-            }
+        //    _inverseBoneMatrices = new Matrix4[BoneCount];
+        //    for (int i = 0; i < BoneCount; i++)
+        //    {
+        //        InverseBoneMatrices[i] = 
+        //            (rwFrameList.GetFrameByHierarchyIndex(root.Nodes[i].HierarchyIndex).Transform * 
+        //             rwFrameList.SceneNodes[2].WorldTransform)
+        //             .Inverted(); // Get the drawCall root frame world matrix
+        //    }
 
-            /*
-            BoneLimit = 64;
-            MaterialSplitCount = (uint)rwGeometry.MaterialList.Struct.materialCount;
-            MaterialSplitUsedBones = UsedBoneCount;
-            */
-        }
+        //    /*
+        //    BoneLimit = 64;
+        //    MaterialSplitCount = (uint)rwGeometry.MaterialList.Struct.materialCount;
+        //    MaterialSplitUsedBones = UsedBoneCount;
+        //    */
+        //}
 
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.

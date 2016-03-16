@@ -98,7 +98,7 @@
         /// <param name="refTextureName">Name of the referenced texture.</param>
         /// <param name="parent">Parent of the texture reference node. Value is null if not specified.</param>
         public RWTextureReference(string refTextureName, RWNode parent = null)
-            : base(RWType.TextureReference, parent)
+            : base(RWNodeType.TextureReference, parent)
         {
             // Create a struct with default values
             _struct = new RWTextureReferenceStruct(this);

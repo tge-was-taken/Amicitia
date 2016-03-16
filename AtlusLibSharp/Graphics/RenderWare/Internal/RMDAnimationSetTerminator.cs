@@ -11,7 +11,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// <summary>
         /// Initializes a new <see cref="RMDAnimationSetTerminator"/>.
         /// </summary>
-        public RMDAnimationSetTerminator() : base(RWType.RMDAnimationSetTerminator) { }
+        public RMDAnimationSetTerminator() : base(RWNodeType.RMDAnimationSetTerminator) { }
 
         /// <summary>
         /// Initializer only to be called in <see cref="RWNodeFactory"/>.

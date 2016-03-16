@@ -18,10 +18,10 @@ namespace AtlusLibSharp.Graphics.RenderWare
             _geometryCount = reader.ReadInt32();
         }
 
-        internal RWGeometryListStruct(RWGeometryList list)
-            : base(RWType.Struct, list)
+        internal RWGeometryListStruct(RWMeshList list)
+            : base(RWNodeType.Struct, list)
         {
-            _geometryCount = list.GeometryList.Count;
+            _geometryCount = list.Meshes.Count;
         }
 
         protected internal override void InternalWriteInnerData(BinaryWriter writer)

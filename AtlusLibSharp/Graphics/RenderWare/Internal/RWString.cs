@@ -34,7 +34,7 @@
         /// <param name="value">String value to initialize the string node with.</param>
         /// <param name="parent">Parent of the string node. Value is null if not specified.</param>
         public RWString(string value, RWNode parent = null)
-            : base(RWType.String, parent)
+            : base(RWNodeType.String, parent)
         {
             Value = value;
         }

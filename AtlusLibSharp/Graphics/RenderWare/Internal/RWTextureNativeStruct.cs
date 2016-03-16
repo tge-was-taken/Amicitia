@@ -42,7 +42,7 @@
 
         // Constructors
         public RWTextureNativeStruct(RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             _platformID = RWPlatformID.PS2;
             FilterMode = PS2FilterMode.Linear;
@@ -54,7 +54,7 @@
             RWPlatformID rwPlatformID, PS2FilterMode filterMode, 
             PS2AddressingMode horizontalAddrMode, PS2AddressingMode verticalAddrMode,
             RWNode parent = null)
-            : base(RWType.Struct, parent)
+            : base(RWNodeType.Struct, parent)
         {
             _platformID = rwPlatformID;
             FilterMode = filterMode;

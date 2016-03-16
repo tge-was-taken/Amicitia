@@ -6,22 +6,22 @@
     using System.IO;
 
     /// <summary>
-    /// Encapsulates a RenderWare geometry mesh and all of its corresponding data structures.
+    /// Encapsulates a RenderWare mesh and all of its corresponding data structures.
     /// </summary>
-    public class RWGeometry : RWNode
+    public class RWMesh : RWNode
     {
-        private RWGeometryStruct _struct;
+        private RWMeshStruct _struct;
         private RWMaterialList _materialList;
         private RWExtension _extension;
 
         #region Properties
 
         /*****************************************/
-        /* RWGeometryStruct forwarded properties */
+        /* RWMeshStruct forwarded properties */
         /*****************************************/
 
         /// <summary>
-        /// Gets if the geometry contains any vertices.
+        /// Gets if the mesh contains any vertices.
         /// </summary>
         public bool HasVertices
         {
@@ -29,7 +29,7 @@
         }
 
         /// <summary>
-        /// Gets if the geometry contains any vertex normals.
+        /// Gets if the mesh contains any vertex normals.
         /// </summary>
         public bool HasNormals
         {
@@ -37,7 +37,7 @@
         }
 
         /// <summary>
-        /// Gets if the geometry contains any vertex colors.
+        /// Gets if the mesh contains any vertex colors.
         /// </summary>
         public bool HasColors
         {
@@ -45,7 +45,7 @@
         }
 
         /// <summary>
-        /// Gets if the geometry contains any vertex texture coordinates.
+        /// Gets if the mesh contains any vertex texture coordinates.
         /// </summary>
         public bool HasTexCoords
         {
@@ -53,7 +53,7 @@
         }
 
         /// <summary>
-        /// Gets the <see cref="RWGeometryFlags"/> of the geometry.
+        /// Gets the <see cref="RWGeometryFlags"/> of the mesh.
         /// </summary>
         public RWGeometryFlags Flags
         {
@@ -61,7 +61,7 @@
         }
 
         /// <summary>
-        /// Gets the number of texture coordinate channels in the geometry.
+        /// Gets the number of texture coordinate channels in the mesh.
         /// </summary>
         public int TextureCoordinateChannelCount
         {
@@ -69,7 +69,7 @@
         }
 
         /// <summary>
-        /// Gets the <see cref="RWGeometryNativeFlag"/> of the geometry.
+        /// Gets the <see cref="RWGeometryNativeFlag"/> of the mesh.
         /// </summary>
         public RWGeometryNativeFlag NativeFlag
         {
@@ -77,7 +77,7 @@
         }
 
         /// <summary>
-        /// Gets the number of triangles in the geometry.
+        /// Gets the number of triangles in the mesh.
         /// </summary>
         public int TriangleCount
         {
@@ -85,7 +85,7 @@
         }
 
         /// <summary>
-        /// Gets the number of vertices in the geometry.
+        /// Gets the number of vertices in the mesh.
         /// </summary>
         public int VertexCount
         {
@@ -93,7 +93,7 @@
         }
 
         /// <summary>
-        /// Gets the array of vertex colors in the geometry.
+        /// Gets the array of vertex colors in the mesh.
         /// </summary>
         public Color[] Colors
         {
@@ -101,7 +101,7 @@
         }
 
         /// <summary>
-        /// Gets the array of texture coordinate channels in the geometry.
+        /// Gets the array of texture coordinate channels in the mesh.
         /// </summary>
         public Vector2[][] TextureCoordinateChannels
         {
@@ -109,7 +109,7 @@
         }
 
         /// <summary>
-        /// Gets the array of triangles in the geometry.
+        /// Gets the array of triangles in the mesh.
         /// </summary>
         public RWTriangle[] Triangles
         {
@@ -117,7 +117,7 @@
         }
 
         /// <summary>
-        /// Gets the bounding sphere of the geometry.
+        /// Gets the bounding sphere of the mesh.
         /// </summary>
         public RWBoundingSphere BoundingSphere
         {
@@ -125,7 +125,7 @@
         }
 
         /// <summary>
-        /// Gets the array of vertices in the geometry.
+        /// Gets the array of vertices in the mesh.
         /// </summary>
         public Vector3[] Vertices
         {
@@ -133,7 +133,7 @@
         }
 
         /// <summary>
-        /// Gets the array of vertex normals in the geometry.
+        /// Gets the array of vertex normals in the mesh.
         /// </summary>
         public Vector3[] Normals
         {
@@ -145,7 +145,7 @@
         /***************************************/
 
         /// <summary>
-        /// Gets the number of materials in the geometry.
+        /// Gets the number of materials in the mesh.
         /// </summary>
         public int MaterialCount
         {
@@ -153,7 +153,7 @@
         }
 
         /// <summary>
-        /// Gets the array of materials in the geometry.
+        /// Gets the array of materials in the mesh.
         /// </summary>
         public RWMaterial[] Materials
         {
@@ -161,7 +161,7 @@
         }
 
         /// <summary>
-        /// Gets the extension nodes of the geometry.
+        /// Gets the extension nodes of the mesh.
         /// </summary>
         public List<RWNode> ExtensionNodes
         {
@@ -177,16 +177,16 @@
         /// <summary>
         /// Initializer only to be called <see cref="RWNodeFactory"/>
         /// </summary>
-        internal RWGeometry(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWMesh(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
                 : base(header)
         {
-            _struct = RWNodeFactory.GetNode<RWGeometryStruct>(this, reader);
+            _struct = RWNodeFactory.GetNode<RWMeshStruct>(this, reader);
             _materialList = RWNodeFactory.GetNode<RWMaterialList>(this, reader);
             _extension = RWNodeFactory.GetNode<RWExtension>(this, reader);
         }
 
         /*
-        public static RWGeometry FromSMD(RWClump refClump, string filename)
+        public static RWGeometry FromSMD(RWScene refScene, string filename)
         {
             SMDFile smd = new SMDFile(filename);
             Vector3[] pos = new Vector3[smd.Triangles.Count * 3];
@@ -210,8 +210,8 @@
                     ++vIdx;
                     pos[vIdx] = smdVtx.Position;
                     nrm[vIdx] = smdVtx.Normal;
-                    //pos[vIdx] = Vector3.Transform(smdVtx.Position, refClump.FrameList.Struct.Frames[2].WorldMatrix.Inverted());
-                    //nrm[vIdx] = Vector3.TransformNormal(smdVtx.Normal, refClump.FrameList.Struct.Frames[2].WorldMatrix.Inverted());
+                    //pos[vIdx] = Vector3.Transform(smdVtx.Position, refScene.FrameList.Struct.Frames[2].WorldMatrix.Inverted());
+                    //nrm[vIdx] = Vector3.TransformNormal(smdVtx.Normal, refScene.FrameList.Struct.Frames[2].WorldMatrix.Inverted());
                     uv[vIdx] = new Vector2(smdVtx.UV.X, smdVtx.UV.Y);
                     skinBoneIndices[vIdx] = new byte[4];
                     skinBoneWeights[vIdx] = new float[4];
@@ -231,7 +231,7 @@
                             break;
 
                         uint boneNameID = uint.Parse(smd.Nodes[smdVtx.Links[i].BoneID].NodeName);
-                        skinBoneIndices[vIdx][i] = (byte)refClump.FrameList.GetHierarchyIndexByNameID(boneNameID);
+                        skinBoneIndices[vIdx][i] = (byte)refScene.FrameList.GetHierarchyIndexByNameID(boneNameID);
                         skinBoneWeights[vIdx][i] = smdVtx.Links[i].Weight;
                         weightSum += smdVtx.Links[i].Weight;
                     }
@@ -257,7 +257,7 @@
                 MaterialList = new RWMaterialList(textureList.ToArray()),
             };
 
-            RWSkinPlugin skin = new RWSkinPlugin(refClump.FrameList, geometry, skinBoneIndices, skinBoneWeights);
+            RWSkinPlugin skin = new RWSkinPlugin(refScene.FrameList, geometry, skinBoneIndices, skinBoneWeights);
 
             geometry.Extension = new RWExtension(skin);
 

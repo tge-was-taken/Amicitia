@@ -1,16 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    internal class RWClumpStruct : RWNode
+    internal class RWSceneStruct : RWNode
     {
-        private int _atomicCount;
+        private int _drawCallCount;
         private int _lightCount;
         private int _cameraCount;
 
-        public int AtomicCount
+        public int DrawCallCount
         {
-            get { return _atomicCount; }
+            get { return _drawCallCount; }
         }
 
         public int LightCount
@@ -23,30 +24,25 @@ namespace AtlusLibSharp.Graphics.RenderWare
             get { return _cameraCount; }
         }
 
-        internal RWClumpStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
+        internal RWSceneStruct(RWNodeFactory.RWNodeProcHeader header, BinaryReader reader)
             : base(header)
         {
-            _atomicCount = reader.ReadInt32();
-            _lightCount = reader.ReadInt32(); // unused
-            _cameraCount = reader.ReadInt32(); // unused
-
-            if (_lightCount != 0 || _cameraCount != 0)
-            {
-                throw new InvalidDataException("Light or camera count is not set to 0");
-            }
+            _drawCallCount = reader.ReadInt32();
+            _lightCount = reader.ReadInt32(); 
+            _cameraCount = reader.ReadInt32();
         }
 
-        internal RWClumpStruct(RWClump clump)
-            : base(new RWNodeFactory.RWNodeProcHeader { Parent = clump, Type = RWType.Struct, Version = ExportVersion })
+        internal RWSceneStruct(RWScene scene)
+            : base(new RWNodeFactory.RWNodeProcHeader { Parent = scene, Type = RWNodeType.Struct, Version = ExportVersion })
         {
-            _atomicCount = clump.Atomics.Count;
+            _drawCallCount = scene.DrawCalls.Count;
             _lightCount = 0;
             _cameraCount = 0;
         }
 
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
-            writer.Write(_atomicCount);
+            writer.Write(_drawCallCount);
             writer.Write(_lightCount);
             writer.Write(_cameraCount);
         }

@@ -93,7 +93,7 @@
         /// <param name="height"></param>
         /// <param name="pixelFormat">PS2 pixel format of the given texture data.</param>
         public RWRasterInfo(int width, int height, PS2PixelFormat pixelFormat)
-            : base(RWType.Struct)
+            : base(RWNodeType.Struct)
         {
             CreateRasterInfo(width, height, pixelFormat);
         }

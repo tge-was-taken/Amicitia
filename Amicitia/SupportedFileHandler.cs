@@ -19,14 +19,16 @@
         private static readonly SupportedFileInfo[] _supportedFiles = new SupportedFileInfo[]
         {
             // Export only formats
+            new SupportedFileInfo("Raw data",                           SupportedFileType.Resource,             false, ".*"),
             new SupportedFileInfo("Portable Network Graphics",          SupportedFileType.PNGFile,              true,  ".png"),
             new SupportedFileInfo("Truevision TARGA",                   SupportedFileType.TGAFile,              true,  ".tga"),
             new SupportedFileInfo("COLLADA DAE",                        SupportedFileType.DAEFile,              true,  ".dae"),
 
             // Archive formats
-            new SupportedFileInfo("Atlus Generic Archive",              SupportedFileType.PAKToolFile,          false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se"),
+            new SupportedFileInfo("Atlus Generic Archive",              SupportedFileType.PAKToolArchiveFile,          false, ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se"),
             new SupportedFileInfo("Atlus Generic List Archive",         SupportedFileType.ListArchiveFile,      false, ".arc", ".bin", ".pak", ".pac", ".abin", ".se", ".pse"),
             new SupportedFileInfo("Persona 3/4 Battle Voice Package",   SupportedFileType.BVPArchiveFile,       false, ".bvp"),
+            new SupportedFileInfo("Atlus Vita Resource Container",      SupportedFileType.AMDFile,              false, ".amd"),
 
             // Texture (container) formats
             new SupportedFileInfo("Atlus PS2 Texture",                  SupportedFileType.TMXFile,              false, ".tmx"),
@@ -45,7 +47,7 @@
             // Archive formats
             { SupportedFileType.BVPArchiveFile,         typeof(BVPFile) },
             { SupportedFileType.ListArchiveFile,        typeof(ListArchiveFile) },
-            { SupportedFileType.PAKToolFile,            typeof(PAKToolArchiveFile) },
+            { SupportedFileType.PAKToolArchiveFile,            typeof(PAKToolArchiveFile) },
 
             // Texture formats
             { SupportedFileType.RWTextureDictionary,    typeof(RWTextureDictionary) },
@@ -77,7 +79,7 @@
         {
             if (index == -1)
             {
-                return SupportedFileType.Default;
+                return SupportedFileType.Resource;
             }
             else
             {

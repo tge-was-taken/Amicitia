@@ -102,7 +102,7 @@
             get { return _keyFrames; }
         }
 
-        public static SPR4File LoadFrom(string path)
+        public static SPR4File Load(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path), System.Text.Encoding.Default, true))
                 return new SPR4File(reader);

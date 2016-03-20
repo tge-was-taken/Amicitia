@@ -3,24 +3,76 @@
     using System;
     using System.Windows.Forms;
     using System.ComponentModel;
+    using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Collections.Generic;
     using AtlusLibSharp.IO;
 
     internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
     {
-        private object _wrappedObject;
-        private bool _isInitialized;
-        private ResourceProperty[] _resProperties;
+        /*******************/
+        /* Private members */
+        /*******************/
 
-        public ResourceWrapper(string text, object wrappedObject, params ResourceProperty[] properties)
-            : base(text)
+        // wrapped object storage
+        protected internal object m_wrappedObject;
+        protected internal SupportedFileType m_wrappedFileType;
+
+        // wrapper states
+        protected internal bool m_isInitialized = false;
+
+        // wrapped object states
+        protected internal bool m_isDirty = false;
+        protected internal bool m_isImage = false;
+        protected internal bool m_isModel = false;
+
+        // context menu states
+        protected internal bool m_canExport = true;
+        protected internal bool m_canReplace = true;
+        protected internal bool m_canMove = true;
+        protected internal bool m_canRename = true;
+        protected internal bool m_canDelete = true;
+        protected internal bool m_canAdd = false;
+        protected internal bool m_canEncode = false;
+
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
-            _wrappedObject = wrappedObject;
-            _resProperties = properties;
-            InitializeContextMenuStrip();
-            InitializeWrapper();
+           SupportedFileType.Resource
+        };
+
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+        public static readonly Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            { SupportedFileType.Resource, (x, y) => x.WrappedObject = new GenericBinaryFile(y) }
+        };
+
+        public static readonly Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            { SupportedFileType.Resource, (x, y) => (x.WrappedObject as BinaryFileBase).Save(y) }
+        };
+
+        /***********************************/
+        /* Import / export virtual methods */
+        /***********************************/
+        protected virtual Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
         }
 
-        // TODO: Actually implement PropertyChanged on the properties
+        protected virtual Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        {
+            return ExportDelegates;
+        }
+
+        protected virtual SupportedFileType[] GetSupportedFileTypes()
+        {
+            return FileFilterTypes;
+        }
 
         /// <summary>
         /// Fired when a property in this class changes.
@@ -28,115 +80,177 @@
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Triggers the property changed event for a specific property.
+        /// Creates a new generic resource wrapper.
         /// </summary>
-        /// <param name="propertyName">The name of the property that has changed.</param>
-        public void NotifyPropertyChanged(string propertyName)
+        /// <param name="text">Node text to display on the tree view.</param>
+        /// <param name="wrappedObject">The object to store in the wrapper.</param>
+        /// <param name="type">The <see cref="SupportedFileType"/> of the wrapped object.</param>
+        /// <param name="suppressContextMenuInit">Sets if the call to initialize the context menu strip will be supressed (use if context menu states are set in the constructor).</param>
+        public ResourceWrapper(string text, object wrappedObject, SupportedFileType type, bool suppressContextMenuInit)
+            : base(text)
         {
-            if (PropertyChanged != null)
+            m_wrappedFileType = type;
+            m_wrappedObject = wrappedObject;
+       
+            if (!suppressContextMenuInit)
+                InitializeContextMenuStrip();
+
+            InitializeWrapper();
+        }
+
+        /// <summary>
+        /// Creates a new generic resource wrapper.
+        /// </summary>
+        /// <param name="text">Node text to display on the tree view.</param>
+        /// <param name="wrappedObject">The object to store in the wrapper.</param>
+        public ResourceWrapper(string text, object wrappedObject)
+            : this(text, wrappedObject, SupportedFileType.Resource, false)
+        {
+        }
+
+        /***************************/
+        /* Wrapper node properties */
+        /***************************/
+
+        /// <summary>
+        /// Gets or sets the wrapped object.
+        /// </summary>
+        [Browsable(false)]
+        public virtual object WrappedObject
+        {
+            get
             {
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return m_wrappedObject;
             }
-        }
-
-        // Common Wrapper properties
-
-        protected internal virtual object WrappedObject
-        {
-            get { return _wrappedObject; }
-            set { _wrappedObject = value; }
-        }
-
-        protected internal ResourceProperty[] ResourceProperties
-        {
-            get { return _resProperties; }
             set
             {
-                _resProperties = value;
+                SetProperty(ref m_wrappedObject, value);
             }
         }
 
-        protected internal bool IsInitialized
-        {
-            get { return _isInitialized; }
-            set { _isInitialized = value; }
-        }
-
-        // Context menu bools
-
         /// <summary>
-        /// Determines whether the Export context menu option is visible for this wrapper. Default is true.
+        /// Gets if the wrapper node has been initialized.
         /// </summary>
-        protected internal virtual bool CanExport
+        [Browsable(false)]
+        public bool IsInitialized
         {
-            get { return true; }
+            get { return m_isInitialized; }
         }
 
         /// <summary>
-        /// Determines whether the Replace context menu option is visible for this wrapper. Default is true.
+        /// Gets the <see cref="SupportedFileType"/> of the wrapped object.
         /// </summary>
-        protected internal virtual bool CanReplace
+        public SupportedFileType FileType
         {
-            get { return true; }
+            get { return m_wrappedFileType; }
         }
 
         /// <summary>
-        /// Determines whether the Move Up / Move Up context menu option are visible for this wrapper. Default is true.
+        /// Gets if the wrapped object was modified and needs to be rebuilt.
         /// </summary>
-        protected internal virtual bool CanMove
+#if DEBUG
+        [Browsable(true)]
+#else
+        [Browsable(false)]
+#endif
+        public bool IsDirty
         {
-            get { return true; }
+            get { return m_isDirty; }
+            set { SetProperty(ref m_isDirty, value); }
+        }
+
+        /**********************/
+        /* Context menu bools */
+        /**********************/
+
+        /// <summary>
+        /// Gets if the Export context menu option is visible for this wrapper. Default is true.
+        /// </summary>
+        [Browsable(false)]
+        public bool CanExport
+        {
+            get { return m_canExport; }
         }
 
         /// <summary>
-        /// Determines whether the Rename context menu option is visible for this wrapper. Default is true.
+        /// Gets if the Replace context menu option is visible for this wrapper. Default is true.
         /// </summary>
-        protected internal virtual bool CanRename
+        [Browsable(false)]
+        public bool CanReplace
         {
-            get { return true; }
+            get { return m_canReplace; }
         }
 
         /// <summary>
-        /// Determines whether the Delete context menu option is visible for this wrapper. Default is true.
+        /// Gets if the Move Up and Move Up context menu option are visible for this wrapper. Default is true.
         /// </summary>
-        protected internal virtual bool CanDelete
+        [Browsable(false)]
+        public bool CanMove
         {
-            get { return true; }
+            get { return m_canMove; }
         }
 
         /// <summary>
-        /// Determines whether the Add context menu option is visible for this wrapper. Default is false.
+        /// Gets if the Rename context menu option is visible for this wrapper. Default is true.
         /// </summary>
-        protected internal virtual bool CanAdd
+        [Browsable(false)]
+        public bool CanRename
         {
-            get { return false; }
+            get { return m_canRename; }
         }
 
         /// <summary>
-        /// Determines whether the Encode context menu option is visible for this wrapper. Default is false.
+        /// Gets if the Delete context menu option is visible for this wrapper. Default is true.
         /// </summary>
-        protected internal virtual bool CanEncode
+        [Browsable(false)]
+        public bool CanDelete
         {
-            get { return false; }
+            get { return m_canDelete; }
         }
 
         /// <summary>
-        /// Indicates if this wrapped object implements the <see cref="ITextureFile"/> interface. Default is false.
+        /// Gets if the Add context menu option is visible for this wrapper. Default is false.
         /// </summary>
-        protected internal virtual bool IsImageResource
+        [Browsable(false)]
+        public bool CanAdd
         {
-            get { return false; }
+            get { return m_canAdd; }
         }
 
         /// <summary>
-        /// Indicates if this wrapped object is a model resource. Default is false.
+        /// Gets if the Encode context menu option is visible for this wrapper. Default is false.
         /// </summary>
-        protected internal virtual bool IsModelResource
+        [Browsable(false)]
+        public bool CanEncode
         {
-            get { return false; }
+            get { return m_canEncode; }
         }
 
-        // Context menu handlers
+        /// <summary>
+        /// Gets if this wrapped object implements the <see cref="ITextureFile"/> interface. Default is false.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsImageResource
+        {
+            get { return m_isImage; }
+        }
+
+        /// <summary>
+        /// Gets if this wrapped object is a model resource. Default is false.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsModelResource
+        {
+            get { return m_isModel; }
+        }
+
+        /************************/
+        /* Context menu actions */
+        /************************/
+
+        /// <summary>
+        /// Move the wrapper node up in the tree (if possible).
+        /// </summary>
         public void MoveUp(object sender, EventArgs e)
         {
             TreeNode parent = Parent;
@@ -161,6 +275,9 @@
             TreeView.SelectedNode = this;
         }
 
+        /// <summary>
+        /// Move the wrapper node down in the tree (if possible).
+        /// </summary>
         public void MoveDown(object sender, EventArgs e)
         {
             TreeNode parent = Parent;
@@ -185,144 +302,235 @@
             TreeView.SelectedNode = this;
         }
 
+        /// <summary>
+        /// Deletes the wrapper node from the tree.
+        /// </summary>
         public void Delete(object sender, EventArgs e)
         {
             Remove();
         }
 
+        /// <summary>
+        /// Renames the wrapper node in the tree.
+        /// </summary>
         public void Rename(object sender, EventArgs e)
         {
             TreeView.LabelEdit = true;
-            BeginEdit();
-            // Editing is ended in the TreeView AfterLabelEdit event
+            BeginEdit(); // EndEdit() is called in the TreeView AfterLabelEdit event
         }
 
-        public virtual void Export(object sender, EventArgs e)
+        /// <summary>
+        /// Opens up the file export dialog for exporting this wrapper node.
+        /// </summary>
+        public void Export(object sender, EventArgs e)
         {
             using (SaveFileDialog saveFileDlg = new SaveFileDialog())
             {
+                var delegates = GetExportDelegates();
+                var fileTypes = GetSupportedFileTypes();
+
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = "All files (*.*)|*.*";
+                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(fileTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                // rebuild data before export
-                RebuildWrappedObject();
+                // rebuild if dirty before export
+                if (m_isDirty)
+                {
+                    RebuildWrappedObject();
+                }
 
-                (WrappedObject as BinaryFileBase).Save(saveFileDlg.FileName);
+                delegates[fileTypes[saveFileDlg.FilterIndex - 1]].Invoke(this, saveFileDlg.FileName);
             }
         }
 
-        public virtual void Replace(object sender, EventArgs e)
+        /// <summary>
+        /// Opens up the file open dialog and replaces the wrapper node with the opened file.
+        /// </summary>
+        public void Replace(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
+                var delegates = GetImportDelegates();
+                var fileTypes = GetSupportedFileTypes();
+
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = "All files (*.*)|*.*";
+                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(fileTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                WrappedObject = new GenericBinaryFile(openFileDlg.FileName);
+                // get the delegate
+                delegates[fileTypes[openFileDlg.FilterIndex-1]].Invoke(this, openFileDlg.FileName);
 
                 // re-init
                 InitializeWrapper();
+
+                // set it to not dirty, the delegate will have invoked the property change for the wrapped object
+                // so the parents have already been informed about the replacement
+                m_isDirty = false;
             }
         }
 
+        /// <summary>
+        /// Opens up the file open dialog and adds the opened file to the wrapper node's collection.
+        /// </summary>
         public virtual void Add(object sender, EventArgs e) { }
 
+        /// <summary>
+        /// Opens up the encoder dialog for this wrapper node.
+        /// </summary>
         public virtual void Encode(object sender, EventArgs e) { }
 
-        // Other methods
-        public byte[] GetBytes()
+        /// <summary>
+        /// Rebuilds the data of the wrapped object.
+        /// </summary>
+        internal virtual void RebuildWrappedObject()
         {
-            return (WrappedObject as BinaryFileBase).GetBytes();
+            m_isDirty = false;
         }
 
-        public ResourceProperty GetProperty(string name)
+        /// <summary>
+        /// Initializes the wrapper.
+        /// </summary>
+        internal virtual void InitializeWrapper()
         {
-            return Array.Find(_resProperties, item => item.Name == name);
-        }
-
-        public T GetPropertyValue<T>(string name)
-        {
-            return GetProperty(name).GetValue<T>();
-        }
-
-        protected internal virtual void RebuildWrappedObject() { }
-
-        protected internal virtual void InitializeCustomPropertyGrid()
-        {
-            MainForm.Instance.MainPropertyGrid.Item.Clear();
-            foreach (ResourceProperty property in ResourceProperties)
-            {
-                MainForm.Instance.MainPropertyGrid.Item.Add(property.Name, property.Value, false, "", "", true);
-            }
-            MainForm.Instance.MainPropertyGrid.Refresh();
-        }
-
-        protected internal virtual void InitializeWrapper()
-        {
-            if (IsInitialized)
+            if (m_isInitialized)
             {
                 MainForm.Instance.UpdateReferences();
             }
             else
             {
-                IsInitialized = true;
+                m_isInitialized = true;
             }
         }
 
-        private void InitializeContextMenuStrip()
+        /***********************/
+        /* Convienence methods */
+        /***********************/
+
+        /// <summary>
+        /// Gets the data of the wrapped object in a byte array.
+        /// </summary>
+        public byte[] GetBytes()
+        {
+            return (WrappedObject as BinaryFileBase).GetBytes();
+        }
+
+        /// <summary>
+        /// Gets the data of the wrapped object in a memory stream.
+        /// </summary>
+        public MemoryStream GetMemoryStream()
+        {
+            return (WrappedObject as BinaryFileBase).GetMemoryStream();
+        }
+
+        /**********************************/
+        /* Property get/set event methods */
+        /**********************************/
+
+        /// <summary>
+        /// Triggers the property changed event for a specific property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that has changed.</param>
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            // everything's alll dirty now
+            m_isDirty = true;
+            SetParentsToDirty(this);
+        }
+
+        private void SetParentsToDirty(TreeNode node)
+        {
+            if (node.Parent == null)
+                return;
+
+            if (node.Parent is ResourceWrapper)
+                (node.Parent as ResourceWrapper).m_isDirty = true; // don't use the property as it's unnecessary
+
+            SetParentsToDirty(node.Parent);
+        }
+
+        /// <summary>
+        /// Sets a property if it is not equal to the current value and fires the <see cref="OnPropertyChanged"/> event.
+        /// </summary>
+        protected void SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (Equals(property, value))
+                return;
+
+            property = value;
+            OnPropertyChanged(propertyName);
+        }
+
+        /// <summary>
+        /// Sets a property if it is not equal to the current value and fires the <see cref="OnPropertyChanged"/> event.
+        /// </summary>
+        protected void SetProperty<T>(object instance, T value, [CallerMemberName] string propertyName = null)
+        {
+            var prop = instance.GetType().GetProperty(propertyName);
+
+            if (Equals(prop.GetValue(instance, null), value))
+                return;
+
+            prop.SetValue(instance, value);
+            OnPropertyChanged(propertyName);
+        }
+
+        /// <summary>
+        /// Initializes the context menu strip using the boolean context menu properties.
+        /// </summary>
+        protected internal void InitializeContextMenuStrip()
         {
             ContextMenuStrip = new ContextMenuStrip();
 
-            if (CanExport)
+            if (m_canExport)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Export", null, Export, Keys.Control | Keys.E));
             }
 
-            if (CanReplace)
+            if (m_canReplace)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Replace", null, Replace, Keys.Control | Keys.R));
-                if (!CanAdd)
+                if (!m_canAdd)
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (CanAdd)
+            if (m_canAdd)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Add", null, Add, Keys.Control | Keys.A));
-                if (CanMove)
+                if (m_canMove)
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (CanMove)
+            if (m_canMove)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Up", null, MoveUp, Keys.Control | Keys.Up));
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Down", null, MoveDown, Keys.Control | Keys.Down));
             }
 
-            if (CanRename)
+            if (m_canRename)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Re&name", null, Rename, Keys.Control | Keys.N));
-                if (!CanEncode && CanDelete)
+                if (!m_canEncode && m_canDelete)
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (CanEncode)
+            if (m_canEncode)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("Encode", null, Encode, Keys.Control | Keys.N));
-                if (CanDelete)
+                if (m_canDelete)
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (CanDelete)
+            if (m_canDelete)
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Delete", null, Delete, Keys.Control | Keys.Delete));
             }

@@ -2,82 +2,72 @@
 {
     using AtlusLibSharp.Graphics.TMX;
     using System.Collections.Generic;
+    using System.ComponentModel;
 
     internal class SPRFileTexturesWrapper : ResourceWrapper
     {
-        public SPRFileTexturesWrapper(string text, List<TMXFile> textures) : base(text, textures) { }
-
-        protected internal new List<TMXFile> WrappedObject
+        /***************/
+        /* Constructor */
+        /***************/
+        public SPRFileTexturesWrapper(string text, List<TMXFile> textures) 
+            : base(text, textures, SupportedFileType.Resource, true)
         {
-            get { return (List<TMXFile>)base.WrappedObject; }
-            set { base.WrappedObject = value; }
+            m_canExport = false;
+            m_canMove = false;
+            m_canRename = false;
+            m_canReplace = false;
+            m_canDelete = false;
+            InitializeContextMenuStrip();
         }
 
-        protected internal override bool CanExport
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new List<TMXFile> WrappedObject
         {
-            get { return false; }
-        }
-
-        protected internal override bool CanMove
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanRename
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanReplace
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanDelete
-        {
-            get { return false; }
-        }
-
-        protected internal override void RebuildWrappedObject()
-        {
-            WrappedObject = new List<TMXFile>(Nodes.Count);
-            for (int i = 0; i < Nodes.Count; i++)
+            get
             {
-                // rebuild the data
-                TMXFileWrapper node = (TMXFileWrapper)Nodes[i];
-                node.RebuildWrappedObject();
-
-                // set the wrapped object
-                WrappedObject.Add(node.WrappedObject);
+                return (List<TMXFile>)m_wrappedObject;
+            }
+            set
+            {
+                m_wrappedObject = value;
             }
         }
 
-        protected internal override void InitializeWrapper()
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
+        {
+            var list = new List<TMXFile>(Nodes.Count);
+            foreach (TMXFileWrapper node in Nodes)
+            {
+                list.Add(node.WrappedObject);
+            }
+
+            m_wrappedObject = list;
+            m_isDirty = false;
+        }
+
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
 
-            int index = -1;
+            int index = 0;
             foreach (TMXFile texture in WrappedObject)
             {
-                ++index;
-
-                string name = "Texture" + index;
+                string name = "Texture" + index++;
                 if (!string.IsNullOrEmpty(texture.UserComment))
                 {
-                    name = texture.UserComment + ".tmx";
+                    name = texture.UserComment;
                 }
 
                 Nodes.Add(new TMXFileWrapper(name, texture));
             }
 
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

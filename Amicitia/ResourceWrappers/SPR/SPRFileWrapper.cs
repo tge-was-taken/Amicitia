@@ -1,25 +1,87 @@
-﻿using Amicitia.Utilities;
-
-namespace Amicitia.ResourceWrappers
+﻿namespace Amicitia.ResourceWrappers
 {
     using System;
-    using System.Windows.Forms;
+    using Utilities;
     using AtlusLibSharp.Graphics.SPR;
+    using System.ComponentModel;
+    using System.Collections.Generic;
 
     internal class SPRFileWrapper : ResourceWrapper
     {
-        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
             SupportedFileType.SPRFile
         };
 
-        public SPRFileWrapper(string text, SPRFile spr) : base(text, spr) { }
-
-        protected internal new SPRFile WrappedObject
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
-            get { return (SPRFile)base.WrappedObject; }
-            set { base.WrappedObject = value; }
+            {
+                SupportedFileType.SPRFile, (res, path) =>
+                res.WrappedObject = SPRFile.Load(path)
+            }
+        };
+
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            {
+                SupportedFileType.SPRFile, (res, path) =>
+                (res as SPRFileWrapper).WrappedObject.Save(path)
+            }
+        };
+
+        /************************************/
+        /* Import / export method overrides */
+        /************************************/
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
         }
+
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        {
+            return ExportDelegates;
+        }
+
+        protected override SupportedFileType[] GetSupportedFileTypes()
+        {
+            return FileFilterTypes;
+        }
+
+        /***************/
+        /* Constructor */
+        /***************/
+        public SPRFileWrapper(string text, SPRFile spr) 
+            : base(text, spr, SupportedFileType.SPRFile, false)
+        {
+        }
+
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new SPRFile WrappedObject
+        {
+            get
+            {
+                return (SPRFile)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(ref m_wrappedObject, true);
+            }
+        }
+
+        [Browsable(false)]
+        public SPRKeyFrameListWrapper KeyFramesWrapper { get; private set; }
+
+        [Browsable(false)]
+        public SPRFileTexturesWrapper TexturesWrapper { get; private set; }
 
         public int KeyFrameCount
         {
@@ -31,85 +93,25 @@ namespace Amicitia.ResourceWrappers
             get { return TexturesWrapper.Nodes.Count; }
         }
 
-        internal SPRKeyFrameListWrapper KeyFramesWrapper { get; private set; }
-
-        internal SPRFileTexturesWrapper TexturesWrapper { get; private set; }
-
-        public override void Export(object sender, EventArgs e)
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
         {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
-            {
-                saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (saveFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                // rebuild wrapped object before export
-                RebuildWrappedObject();
-
-                switch (FileFilterTypes[saveFileDlg.FilterIndex-1])
-                {
-                    case SupportedFileType.SPRFile:
-                        WrappedObject.Save(saveFileDlg.FileName);
-                        break;
-                }
-            }
+            m_wrappedObject = new SPRFile(TexturesWrapper.WrappedObject, KeyFramesWrapper.WrappedObject);
+            m_isDirty = false;
         }
 
-        public override void Replace(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
-            {
-                openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (openFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                switch (FileFilterTypes[openFileDlg.FilterIndex-1])
-                {
-                    case SupportedFileType.SPRFile:
-                        WrappedObject = SPRFile.LoadFrom(openFileDlg.FileName);
-                        break;
-                }
-
-                // re-init
-                InitializeWrapper();
-            }
-        }
-
-        protected internal override void RebuildWrappedObject()
-        {
-            // rebuild the data
-            KeyFramesWrapper.RebuildWrappedObject();
-            TexturesWrapper.RebuildWrappedObject();
-
-            // set the wrapped object
-            WrappedObject = new SPRFile(TexturesWrapper.WrappedObject, KeyFramesWrapper.WrappedObject);
-        }
-
-        protected internal override void InitializeWrapper()
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
 
-            KeyFramesWrapper = new SPRKeyFrameListWrapper("KeyFrames", WrappedObject.KeyFrames);
+            KeyFramesWrapper = new SPRKeyFrameListWrapper("Keyframes", WrappedObject.KeyFrames);
             TexturesWrapper = new SPRFileTexturesWrapper("Textures", WrappedObject.Textures);
 
             Nodes.Add(KeyFramesWrapper, TexturesWrapper);
 
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

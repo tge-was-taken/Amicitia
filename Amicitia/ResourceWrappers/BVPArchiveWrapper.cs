@@ -2,21 +2,79 @@
 {
     using System.IO;
     using System;
-    using System.Windows.Forms;
     using AtlusLibSharp.FileSystems.BVP;
+    using System.ComponentModel;
+    using System.Collections.Generic;
 
-    internal class BVPArchiveFileWrapper : ResourceWrapper
+    internal class BVPFileWrapper : ResourceWrapper
     {
-        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
             SupportedFileType.BVPArchiveFile
         };
 
-        public BVPArchiveFileWrapper(string text, BVPFile arc) : base(text, arc) { }
-
-        public SupportedFileType FileType
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+       public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
-            get { return SupportedFileType.BVPArchiveFile; }
+            {
+                SupportedFileType.BVPArchiveFile, (res, path) =>
+                res.WrappedObject = new BVPFile(path)
+            }
+        };
+
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            {
+                SupportedFileType.BVPArchiveFile, (res, path) =>
+                (res as BVPFileWrapper).WrappedObject.Save(path)
+            }
+        };
+
+        /************************************/
+        /* Import / export method overrides */
+        /************************************/
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
+        }
+
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        {
+            return ExportDelegates;
+        }
+
+        protected override SupportedFileType[] GetSupportedFileTypes()
+        {
+            return FileFilterTypes;
+        }
+
+        /***************/
+        /* Constructor */
+        /***************/
+        public BVPFileWrapper(string text, BVPFile arc) 
+            : base(text, arc, SupportedFileType.BVPArchiveFile, false)
+        {
+        }
+
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new BVPFile WrappedObject
+        {
+            get
+            {
+                return (BVPFile)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(ref m_wrappedObject, value);
+            }
         }
 
         public int EntryCount
@@ -24,92 +82,28 @@
             get { return Nodes.Count; }
         }
 
-        protected internal new BVPFile WrappedObject
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
         {
-            get { return (BVPFile)base.WrappedObject; }
-            set { base.WrappedObject = value; }
-        }
-
-        public override void Replace(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
-            {
-                openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (openFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                switch (FileFilterTypes[openFileDlg.FilterIndex-1])
-                {
-                    case SupportedFileType.BVPArchiveFile:
-                        WrappedObject = new BVPFile(openFileDlg.FileName);
-                        break;
-                }
-
-                // Reinitialize
-                InitializeWrapper();
-            }
-        }
-
-        public override void Export(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
-            {
-                saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (saveFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                // Rebuild the wrapper before export
-                RebuildWrappedObject();
-
-                switch (FileFilterTypes[saveFileDlg.FilterIndex-1])
-                {
-                    case SupportedFileType.BVPArchiveFile:
-                        WrappedObject.Save(saveFileDlg.FileName);
-                        break;
-                }
-            }
-        }
-
-        protected internal override void RebuildWrappedObject()
-        {
-            WrappedObject.Entries.Clear();
+            var archive = new BVPFile();
             foreach (ResourceWrapper node in Nodes)
-            {
-                node.RebuildWrappedObject();
-                WrappedObject.Entries.Add(new BVPEntry(node.GetBytes(), node.GetPropertyValue<int>("Flag")));
-            }
+                archive.Entries.Add(new BVPEntry(node.GetBytes()));
+
+            m_wrappedObject = archive;
+            m_isDirty = false;
         }
 
-        protected internal override void InitializeWrapper()
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
 
             int idx = 0;
             foreach (BVPEntry entry in WrappedObject.Entries)
-            {
-                ResourceWrapper res = ResourceFactory.GetResource(string.Format("Entry{0}.bmd", idx++), new MemoryStream(entry.Data));
+                Nodes.Add(ResourceFactory.GetResource(string.Format("MessageData{0}", idx++), new MemoryStream(entry.Data)));
 
-                // TODO: this thing doesn't even show up on the property grid
-                res.ResourceProperties = new ResourceProperty[] { new ResourceProperty("Flag", entry.Flag) };
-                Nodes.Add(res); ;
-            }
-
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

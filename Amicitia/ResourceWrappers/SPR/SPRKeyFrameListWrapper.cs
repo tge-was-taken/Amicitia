@@ -2,70 +2,67 @@
 {
     using AtlusLibSharp.Graphics.SPR;
     using System.Collections.Generic;
+    using System.ComponentModel;
 
     internal class SPRKeyFrameListWrapper : ResourceWrapper
     {
-        public SPRKeyFrameListWrapper(string text, List<SPRKeyFrame> keyFrames) : base(text, keyFrames) { }
-
-        protected internal new List<SPRKeyFrame> WrappedObject
+        /***************/
+        /* Constructor */
+        /***************/
+        public SPRKeyFrameListWrapper(string text, List<SPRKeyFrame> keyFrames) 
+            : base(text, keyFrames, SupportedFileType.Resource, true)
         {
-            get { return (List<SPRKeyFrame>)base.WrappedObject; }
-            set { base.WrappedObject = value; }
+            m_canExport = false;
+            m_canMove = false;
+            m_canRename = false;
+            m_canReplace = false;
+            m_canDelete = false;
+            InitializeContextMenuStrip();
         }
 
-        protected internal override bool CanExport
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new List<SPRKeyFrame> WrappedObject
         {
-            get { return false; }
+            get
+            {
+                return (List<SPRKeyFrame>)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(ref m_wrappedObject, value);
+            }
         }
 
-        protected internal override bool CanMove
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
         {
-            get { return false; }
-        }
-
-        protected internal override bool CanRename
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanReplace
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanDelete
-        {
-            get { return false; }
-        }
-
-        protected internal override void RebuildWrappedObject()
-        {
-            WrappedObject = new List<SPRKeyFrame>(Nodes.Count);
+            var list = new List<SPRKeyFrame>(Nodes.Count);
 
             for (int i = 0; i < Nodes.Count; i++)
             {
                 WrappedObject.Add(((SPRKeyFrameWrapper)Nodes[i]).WrappedObject);
             }
+
+            m_wrappedObject = list;
+            m_isDirty = false;
         }
 
-        protected internal override void InitializeWrapper()
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
 
             int index = 0;
             foreach (SPRKeyFrame keyFrame in WrappedObject)
             {
-                Nodes.Add(new SPRKeyFrameWrapper(string.Format("KeyFrame{0}", index++), keyFrame));
+                Nodes.Add(new SPRKeyFrameWrapper(string.Format("KeyFrameData[{0}]", index++), keyFrame));
             }
 
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

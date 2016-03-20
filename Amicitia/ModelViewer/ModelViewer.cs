@@ -8,19 +8,21 @@ using OpenTK.Graphics.OpenGL4;
 using AtlusLibSharp.Utilities;
 using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Amicitia.ModelViewer
 {
     public struct GPUModel
     {
         public int vbo;
-        public int ibo;
+        public int[] ibo;
         public int vc;
-        public int ic;
-        public string tid;
-        public Color color;
-
-        public GPUModel(int vbo, int ibo, int vc, int ic, string tid, Color color)
+        public int[] ic;
+        public string[] tid;
+        public Color[] color;
+        public bool strip;
+        public GPUModel(int vbo, int[] ibo, int vc, int[] ic, string[] tid, Color[] color, bool strip)
         {
             this.vbo = vbo;
             this.ibo = ibo;
@@ -28,6 +30,7 @@ namespace Amicitia.ModelViewer
             this.ic = ic;
             this.tid = tid;
             this.color = color;
+            this.strip = strip;
         }
     }
 
@@ -144,7 +147,7 @@ namespace Amicitia.ModelViewer
         public Camera()
         {
             // default settings
-            _position = new Vector3(0.0f, 0.0f, 0.0f);
+            _position = new Vector3(-20.0f, -20.0f, -20.0f);
             _forward = new Vector3(0, 0, 1);
             _up = new Vector3(0, 1, 0);
         }
@@ -211,19 +214,32 @@ namespace Amicitia.ModelViewer
 
     public class ModelViewer
     {
-        private bool _ready;
-        private bool _sceneready;
-        private GLControl _viewerCtrl;
-        private List<GPUModel> _models;
-        private Dictionary<string, int> _texLookup;
-        private ShaderProgram _shaderProg;
-        private int _currentGPUModelID;
-        private int _currentTextureID;
-        private Matrix4 _transform;
-        private Camera _camera;
-        private Vector3 _tp;
-        private Vector3 _tr;
-        private float _flo = 0;
+        private static bool _ready;
+        private static bool _sceneready;
+        private static GLControl _viewerCtrl;
+        private static List<GPUModel> _models;
+        private static Dictionary<string, int> _texLookup;
+        private static ShaderProgram _shaderProg;
+        private static int _currentGPUModelID;
+        private static int _currentTextureID;
+        private static Matrix4 _transform;
+        private static Camera _camera;
+        private static Vector3 _tp;
+        private static Vector3 _tr;
+        private static float _flo = 0;
+        private static Color _bgColor;
+        private static bool focused;
+
+        public Color BGColor
+        {
+            get { return _bgColor; }
+            set
+            {
+                _bgColor = value;
+                GL.ClearColor(_bgColor);
+                _viewerCtrl.Invalidate();
+            }
+        }
 
         public bool IsSceneReady
         {
@@ -241,17 +257,84 @@ namespace Amicitia.ModelViewer
             GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
+            
             _viewerCtrl.Paint += ModelViewerPaint;
             _viewerCtrl.Resize += ModelViewerResize;
+            _viewerCtrl.Enter += (object sender, EventArgs e) => { focused = true; };
+            _viewerCtrl.Leave += (object sender, EventArgs e) => { focused = false; };
+            
+
             _tp = new Vector3();
             _tr = new Vector3();
-            _viewerCtrl.KeyPress += ModelViewerKeyPress;
             _ready = true;
             GL.Viewport(0, 0, controller.Width, controller.Height);
         }
 
+        private void Input()
+        {
+            const float MOVE_SPEED = 0.007f;
+            if (_sceneready)
+            {
+                if (focused)
+                {
+                    Vector3 oldpos = _camera.Position;
+
+                    if (Program.GetAsyncKeyState(Keys.W) != 0)
+                    {
+                        _camera.Position += _camera.Forward * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
+                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
+                    }
+                    else if (Program.GetAsyncKeyState(Keys.S) != 0)
+                    {
+                        _camera.Position -= _camera.Forward * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y, tp.Z - 10f);
+                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
+                    }
+                    else if (Program.GetAsyncKeyState(Keys.D) != 0)
+                    {
+                        _camera.Position -= Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
+                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
+                    }
+                    else if (Program.GetAsyncKeyState(Keys.A) != 0)
+                    {
+                        _camera.Position += Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
+                    }
+                    else if (Program.GetAsyncKeyState(Keys.Q) != 0)
+                    {
+                        _camera.Position += new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
+                    }
+                    else if (Program.GetAsyncKeyState(Keys.E) != 0)
+                    {
+                        _camera.Position -= new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
+                    }
+
+                    if (_camera.Position.IsNaN())
+                    {
+                        if (!oldpos.IsNaN())
+                        {
+                            _camera.Position = oldpos; //prevents the camera from dying
+                        }
+                        else
+                        {
+                            // shouldn't really happen
+                            _camera.Position = new Vector3();
+                        }
+                    }
+
+                    if (Program.GetAsyncKeyState(Keys.None) == 0)
+                    {
+                        _viewerCtrl.Invalidate();
+                    }
+                }
+            }
+        }
+
         public void LoadScene(RMDScene rmdScene)
         {
+
+            _camera = new Camera();
             // set up shader program
             _shaderProg = new ShaderProgram("shader");
             _shaderProg.AddUniform("proj");
@@ -259,9 +342,9 @@ namespace Amicitia.ModelViewer
             _shaderProg.AddUniform("tran");
             _shaderProg.AddUniform("diffuse");
             _shaderProg.AddUniform("diffuseColor");
+            _shaderProg.AddUniform("isTextured"); //used like a bool but is actually an int because of glsl design limitations ¬~¬
             _shaderProg.Bind();
 
-            _camera = new Camera();
             _transform = Matrix4.CreateTranslation(new Vector3(-10, 0, -200)) * Matrix4.CreateFromQuaternion(Quaternion.FromEulerAngles(20, 0, 0)) * Matrix4.CreateScale(new Vector3(1.0f, 1.0f, 1.0f));
 
             Console.WriteLine("loading scene");
@@ -301,9 +384,11 @@ namespace Amicitia.ModelViewer
             Vector3 extentMin = new Vector3(999999, 999999, 999999);
             Vector3 extentMax = new Vector3(-999999, -999999, -999999);
 
+
             int clumpIdx = 0;
             foreach (RWScene rwScene in rmdScene.Scenes)
             {
+                Console.WriteLine("geometry count: {0}", rwScene.MeshCount);
                 Console.WriteLine("processing clump: {0}", clumpIdx++);
 
                 int drawCallIdx = 0;
@@ -315,10 +400,11 @@ namespace Amicitia.ModelViewer
 
                     var geom = rwScene.Meshes[drawCall.MeshIndex];
                     var frame = rwScene.Nodes[drawCall.NodeIndex];
-
+                    Console.WriteLine(geom.MaterialSplitData.MaterialSplitCount);
+                    Console.WriteLine(geom.MaterialSplitData.PrimitiveType);
                     Vertex[] vertices = new Vertex[geom.VertexCount];
-                    ushort[] indices = new ushort[geom.TriangleCount * 3];
-
+                    int[][] allIndices = new int[geom.MaterialSplitData.MaterialSplitCount][];
+                    int[] allIndicesCount = new int[geom.MaterialSplitData.MaterialSplitCount];
                     // remap the vertices
                     for (int i = 0; i < geom.VertexCount; i++)
                     {
@@ -348,15 +434,11 @@ namespace Amicitia.ModelViewer
                         vertices[i] = new Vertex(pos, nrm, tcd, col);
                     }
 
-                    // remap the triangle indices
-                    int triPointIdx = 0;
-                    for (int i = 0; i < geom.TriangleCount; i++)
+                    for (int i = 0; i < geom.MaterialSplitData.MaterialSplitCount; i++)
                     {
-                        indices[triPointIdx++] = geom.Triangles[i].A;
-                        indices[triPointIdx++] = geom.Triangles[i].B;
-                        indices[triPointIdx++] = geom.Triangles[i].C;
+                        allIndices[i] = geom.MaterialSplitData.MaterialSplits[i].Indices;
+                        allIndicesCount[i] = geom.MaterialSplitData.MaterialSplits[i].IndexCount;
                     }
-
                     Console.WriteLine("tex channels: " + geom.TextureCoordinateChannelCount);
                     Console.WriteLine("num materials: " + geom.MaterialCount);
 
@@ -369,10 +451,13 @@ namespace Amicitia.ModelViewer
                     GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 12 * vertices.Length, vertices, BufferUsageHint.StaticDraw);
 
                     // setup the ibo
-                    int ibo = GL.GenBuffer();
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
-                    GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(ushort) * indices.Length, indices, BufferUsageHint.StaticDraw);
-
+                    int[] ibo = new int[allIndices.Length];
+                    GL.GenBuffers(allIndices.Length, ibo);
+                    for (int i = 0; i < ibo.Length; i++)
+                    {
+                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo[i]);
+                        GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * allIndices[i].Length, allIndices[i], BufferUsageHint.StaticDraw);
+                    }
                     // setup the vertex attribs
                     GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, sizeof(float) * 12, 0);
                     GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, sizeof(float) * 12, (sizeof(float) * 3));
@@ -380,13 +465,16 @@ namespace Amicitia.ModelViewer
                     GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, sizeof(float) * 12, (sizeof(float) * 8));
 
                     // get the mesh color from the material
-                    Color color = geom.MaterialCount > 0 ? geom.Materials[0].Color : Color.White;
-
                     // get the texture name if there's a texture assigned
-                    string texname = geom.MaterialCount > 0 && geom.Materials[0].IsTextured ? geom.Materials[0].TextureReference.ReferencedTextureName : string.Empty;
-
+                    string[] texname = new string[geom.MaterialSplitData.MaterialSplitCount];
+                    Color[] colors = new Color[geom.MaterialSplitData.MaterialSplitCount];
+                    for (int i = 0; i < texname.Length; i++)
+                    {
+                        texname[i] = geom.MaterialCount > 0 && geom.Materials[geom.MaterialSplitData.MaterialSplits[i].MaterialIndex].IsTextured ? geom.Materials[geom.MaterialSplitData.MaterialSplits[i].MaterialIndex].TextureReference.ReferencedTextureName : string.Empty;
+                        colors[i] = geom.MaterialCount > 0 ? geom.Materials[geom.MaterialSplitData.MaterialSplits[i].MaterialIndex].Color : Color.White;
+                    }
                     // add the render model to the list
-                    _models.Add(new GPUModel(vbo, ibo, geom.VertexCount, geom.TriangleCount * 3, texname, color));
+                    _models.Add(new GPUModel(vbo, ibo, geom.VertexCount, allIndicesCount, texname, colors, geom.MaterialSplitData.PrimitiveType == RWPrimitiveType.TriangleStrip));
                 }
             }
 
@@ -396,14 +484,16 @@ namespace Amicitia.ModelViewer
             //_camera.Position = extentCenter;
 
             // everything's processed, the scene is ready to be rendered
+
             _sceneready = true;
+            Program.loopFunctions.Add(Input);
         }
 
         public void DeleteScene()
         {
             if (!_sceneready)
                 return;
-
+            Program.loopFunctions.Remove(Input);
             Console.WriteLine("deleting scene");
             EndBind();
             Console.WriteLine("unbind models");
@@ -425,8 +515,8 @@ namespace Amicitia.ModelViewer
                 if(_models[i].vbo != 0)
                     GL.DeleteBuffer(_models[i].vbo);
 
-                if(_models[i].ibo != 0)
-                    GL.DeleteBuffer(_models[i].ibo);
+                if(_models[i].ibo[0] != 0)
+                    GL.DeleteBuffers(_models[0].ibo.Length, _models[i].ibo);
             }
 
             _models.Clear();
@@ -451,7 +541,6 @@ namespace Amicitia.ModelViewer
         private void BeginBind(GPUModel data)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, data.vbo);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.ibo);
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
@@ -464,7 +553,22 @@ namespace Amicitia.ModelViewer
 
         private void SubBind(GPUModel data)
         {
-            GL.DrawElements(BeginMode.Triangles, data.ic, DrawElementsType.UnsignedShort, 0);
+            for (int i = 0; i < data.ibo.Length; i++)
+            {
+                _shaderProg.SetUniform("diffuseColor", data.color[i]);
+                if (data.tid[i] != string.Empty)
+                {
+                    _shaderProg.SetUniform("isTextured", 1);
+                    int texIdx;
+                    bool texPresent = _texLookup.TryGetValue(data.tid[i], out texIdx);
+
+                    if (texPresent)
+                        FullTexBind(texIdx);
+                }
+                else _shaderProg.SetUniform("isTextured", 0);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.ibo[i]);
+                GL.DrawElements(data.strip ? BeginMode.TriangleStrip : BeginMode.Triangles, data.ic[i], DrawElementsType.UnsignedInt, 0);
+            }
         }
 
         private void EndBind()
@@ -481,16 +585,8 @@ namespace Amicitia.ModelViewer
         {
             if (data.vbo != 0)
             {
-                if (data.tid != string.Empty)
-                {
-                    int texIdx;
-                    bool texPresent = _texLookup.TryGetValue(data.tid, out texIdx);
+                
 
-                    if (texPresent)
-                        FullTexBind(texIdx);
-                }
-
-                _shaderProg.SetUniform("diffuseColor", data.color);
 
                 if (_currentGPUModelID != data.vbo)
                 {
@@ -548,69 +644,6 @@ namespace Amicitia.ModelViewer
             }
 
             _viewerCtrl.SwapBuffers();
-        }
-
-        private void ModelViewerKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
-        {
-            if (!_ready || !_sceneready)
-                return;
-
-            Vector3 oldpos = _camera.Position;
-
-            bool doInvalidate = true;
-            const float MOVE_SPEED = 7f;
-
-            if (e.KeyChar == 'w')
-            {
-                _camera.Position += _camera.Forward * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
-            }
-            else if (e.KeyChar == 's')
-            {
-                _camera.Position -= _camera.Forward * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y, tp.Z - 10f);
-            }
-            else if (e.KeyChar == 'd')
-            {
-                _camera.Position -= Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
-            }
-            else if (e.KeyChar == 'a')
-            {
-                _camera.Position += Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-            }
-            else if (e.KeyChar == 'q')
-            {
-                _camera.Position += new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-            }
-            else if (e.KeyChar == 'e')
-            {
-                _camera.Position -= new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-            }
-            else
-            {
-                doInvalidate = false;
-            }
-
-            // invalidate only if an input was handled
-            if (doInvalidate)
-            {
-                _viewerCtrl.Invalidate();
-            }
-
-            if (_camera.Position.IsNaN())
-            {
-                if (!oldpos.IsNaN())
-                {
-                    _camera.Position = oldpos; //prevents the camera from dying
-                }
-                else
-                {
-                    // shouldn't really happen
-                    _camera.Position = new Vector3();
-                }
-            }
-
-            _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
-
-            Console.WriteLine(_camera.Position);
         }
     }
 }

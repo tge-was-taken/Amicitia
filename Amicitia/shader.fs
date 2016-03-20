@@ -12,9 +12,15 @@ in Data
 
 uniform sampler2D diffuse;
 uniform vec4 diffuseColor;
+uniform int isTextured;
 
 void main()
 {
-  if(texture2D(diffuse, id.tex).a < .1) discard;
-  outColor = (texture2D(diffuse, id.tex)*diffuseColor*clamp(dot(-vec3(0, 0, 1), id.nrm), 0.0, 1.0));
+  vec4 color = vec4(1, 1, 1, 1);
+  if(isTextured)
+  {
+    if(texture2D(diffuse, id.tex).a < .3) discard;
+    color = texture2D(diffuse, id.tex);
+  }
+  outColor = vec4((color*diffuseColor*clamp(dot(-vec3(0, 0, 1), id.nrm), 0.0, 1.0)).rgb, color.a);
 }

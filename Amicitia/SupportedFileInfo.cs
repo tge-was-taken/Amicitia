@@ -18,13 +18,14 @@
 
     internal enum SupportedFileType
     {
-        // Default placeholder
-        Default,
+        // Default
+        Resource = 0,
 
         // Archive formats
         BVPArchiveFile,
         ListArchiveFile,
-        PAKToolFile,
+        PAKToolArchiveFile,
+        AMDFile,
 
         // Texture formats
         RWTextureDictionary,

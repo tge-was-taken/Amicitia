@@ -10,6 +10,7 @@
     using AtlusLibSharp.Graphics.TMX;
     using AtlusLibSharp.Graphics.TGA;
     using AtlusLibSharp.IO;
+    using AtlusLibSharp.FileSystems.AMD;
 
     internal static class ResourceFactory
     {
@@ -29,13 +30,16 @@
             {
                 // Archive formats
                 case SupportedFileType.BVPArchiveFile:
-                    return new BVPArchiveFileWrapper(text, new BVPFile(stream, false));
+                    return new BVPFileWrapper(text, new BVPFile(stream, false));
 
                 case SupportedFileType.ListArchiveFile:
                     return new ListArchiveFileWrapper(text, new ListArchiveFile(stream));
 
-                case SupportedFileType.PAKToolFile:
+                case SupportedFileType.PAKToolArchiveFile:
                     return new PAKToolFileWrapper(text, new PAKToolArchiveFile(stream));
+
+                case SupportedFileType.AMDFile:
+                    return new AMDFileWrapper(text, new AMDFile(stream));
 
                 // Texture formats
                 case SupportedFileType.RWTextureDictionary:

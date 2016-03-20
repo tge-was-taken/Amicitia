@@ -144,7 +144,7 @@
         }
 
         // Public Methods
-        public static SPRFile LoadFrom(string path)
+        public static SPRFile Load(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path), System.Text.Encoding.Default, true))
                 return new SPRFile(reader);

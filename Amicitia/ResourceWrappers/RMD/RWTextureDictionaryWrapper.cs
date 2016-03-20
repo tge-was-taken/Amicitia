@@ -3,21 +3,85 @@ using AtlusLibSharp.Graphics.RenderWare;
 using System.Windows.Forms;
 using System.IO;
 using AtlusLibSharp.PS2.Graphics;
+using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Amicitia.ResourceWrappers
 {
     internal class RWTextureDictionaryWrapper : ResourceWrapper
     {
-        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
             SupportedFileType.RWTextureDictionary
         };
 
-        public RWTextureDictionaryWrapper(string text, RWTextureDictionary textureDictionary) : base(text, textureDictionary) { }
-
-        public SupportedFileType FileType
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
-            get { return SupportedFileType.RWTextureDictionary; }
+            {
+                SupportedFileType.RWTextureDictionary, (res, path) =>
+                res.WrappedObject = RWNode.Load(path)
+            }
+        };
+
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            {
+                SupportedFileType.RWTextureDictionary, (res, path) =>
+                (res as RWTextureDictionaryWrapper).WrappedObject.Save(path)
+            }
+        };
+
+        /************************************/
+        /* Import / export method overrides */
+        /************************************/
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
+        }
+
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        {
+            return ExportDelegates;
+        }
+
+        protected override SupportedFileType[] GetSupportedFileTypes()
+        {
+            return FileFilterTypes;
+        }
+
+        /***************/
+        /* Constructor */
+        /***************/
+        public RWTextureDictionaryWrapper(string text, RWTextureDictionary textureDictionary) 
+            : base(text, textureDictionary, SupportedFileType.RWTextureDictionary, true)
+        {
+            m_canMove = false;
+            m_canRename = false;
+            m_canDelete = false;
+            m_canAdd = true;
+            InitializeContextMenuStrip();
+        }
+
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new RWTextureDictionary WrappedObject
+        {
+            get
+            {
+                return (RWTextureDictionary)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(ref m_wrappedObject, value);
+            }
         }
 
         public RWDeviceID DeviceID
@@ -30,87 +94,9 @@ namespace Amicitia.ResourceWrappers
             get { return Nodes.Count; }
         }
 
-        protected internal new RWTextureDictionary WrappedObject
-        {
-            get { return (RWTextureDictionary)base.WrappedObject; }
-            set { base.WrappedObject = value; }
-        }
-
-        protected internal override bool CanMove
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanRename
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanDelete
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanAdd
-        {
-            get { return true; }
-        }
-
-        public override void Replace(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
-            {
-                openFileDlg.FileName = Parent != null ? Path.GetFileNameWithoutExtension(Parent.Text) + ".txd" : Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (openFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
-                switch (FileFilterTypes[openFileDlg.FilterIndex - 1])
-                {
-                    case SupportedFileType.RWTextureDictionary:
-                        WrappedObject = (RWTextureDictionary)RWNode.Load(openFileDlg.FileName);
-                        break;
-                }
-
-                // re-init the wrapper
-                InitializeWrapper();
-            }
-        }
-
-        public override void Export(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
-            {
-                saveFileDlg.FileName = Parent != null ? Path.GetFileNameWithoutExtension(Parent.Text) + ".txd" : Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (saveFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                // rebuild wrapped object before export
-                RebuildWrappedObject();
-
-                switch (FileFilterTypes[saveFileDlg.FilterIndex - 1])
-                {
-                    case SupportedFileType.RWTextureDictionary:
-                        WrappedObject.Save(saveFileDlg.FileName);
-                        break;
-                }
-            }
-        }
-
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
         public override void Add(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
@@ -147,26 +133,28 @@ namespace Amicitia.ResourceWrappers
                     MessageBox.Show(exception.Message, "Error occured.");
                 }
 
+                IsDirty = true;
+
                 // re-init the wrapper
                 InitializeWrapper();
             }
         }
 
-        protected internal override void RebuildWrappedObject()
+        internal override void RebuildWrappedObject()
         {
-            WrappedObject.Textures.Clear();
-            for (int i = 0; i < Nodes.Count; i++)
+            var txd = new RWTextureDictionary();
+            foreach (RWTextureNativeWrapper node in Nodes)
             {
-                // rebuild the data
-                RWTextureNativeWrapper node = (RWTextureNativeWrapper)Nodes[i];
-                node.RebuildWrappedObject();
-
-                // set the wrapped object
-                WrappedObject.Textures.Add(node.WrappedObject);
+                if (node.IsDirty)
+                    node.RebuildWrappedObject();
+                txd.Textures.Add(node.WrappedObject);
             }
+
+            m_wrappedObject = txd;
+            m_isDirty = false;
         }
 
-        protected internal override void InitializeWrapper()
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
 
@@ -175,14 +163,7 @@ namespace Amicitia.ResourceWrappers
                 Nodes.Add(new RWTextureNativeWrapper(texture));
             }
 
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

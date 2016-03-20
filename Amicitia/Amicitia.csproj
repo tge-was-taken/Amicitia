@@ -69,9 +69,6 @@
       <HintPath>..\packages\OpenTK.GLControl.1.1.1589.5942\lib\NET40\OpenTK.GLControl.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PropertyGridEx">
-      <HintPath>..\Dependencies\PropertyGridEx.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -88,6 +85,7 @@
     <Compile Include="ModelViewer\ModelViewer.cs" />
     <Compile Include="ModelViewer\ShaderProgram.cs" />
     <Compile Include="ResourceProperty.cs" />
+    <Compile Include="ResourceWrappers\AMDFileWrapper.cs" />
     <Compile Include="ResourceWrappers\BVPArchiveWrapper.cs" />
     <Compile Include="ResourceWrappers\ListArchiveFileWrapper.cs" />
     <Compile Include="ResourceWrappers\PNGFileWrapper.cs" />
@@ -149,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Igoricon.ico" />
+    <Compile Include="ResourceWrappers\WrapperTemplate.cs" />
     <EmbeddedResource Include="shader.fs" />
   </ItemGroup>
   <ItemGroup>

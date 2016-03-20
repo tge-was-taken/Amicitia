@@ -1,42 +1,42 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
     using AtlusLibSharp.Graphics.SPR;
+    using System.ComponentModel;
 
     internal class SPRKeyFrameWrapper : ResourceWrapper
     {
-        public SPRKeyFrameWrapper(string text, SPRKeyFrame keyFrame) : base(text, keyFrame) { }
-
-        public SPRKeyFrameWrapper()
-            : base(string.Empty, null)
+        /***************/
+        /* Constructor */
+        /***************/
+        public SPRKeyFrameWrapper(string text, SPRKeyFrame keyFrame) 
+            : base(text, keyFrame, SupportedFileType.Resource, true)
         {
-
+            m_canExport = false;
+            m_canRename = false;
+            m_canReplace = false;
+            InitializeContextMenuStrip();
         }
 
-        protected internal new SPRKeyFrame WrappedObject
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new SPRKeyFrame WrappedObject
         {
-            get { return (SPRKeyFrame)base.WrappedObject; }
-            set { base.WrappedObject = value; }
+            get
+            {
+                return (SPRKeyFrame)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(m_wrappedObject, value);
+            }
         }
 
         public string Comment
         {
             get { return WrappedObject.Comment; }
-            set { WrappedObject.Comment = value; }
-        }
-
-        protected internal override bool CanExport
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanRename
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanReplace
-        {
-            get { return false; }
+            set { SetProperty(WrappedObject, value); }
         }
     }
 }

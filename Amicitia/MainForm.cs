@@ -8,6 +8,7 @@ using OpenTK;
 using System.Runtime.InteropServices;
 using Amicitia.ModelViewer;
 using AtlusLibSharp.Graphics.RenderWare;
+using System.Drawing;
 
 namespace Amicitia
 {
@@ -43,7 +44,7 @@ namespace Amicitia
             get { return mainTreeView; }
         }
 
-        internal PropertyGridEx.PropertyGridEx MainPropertyGrid
+        internal PropertyGrid MainPropertyGrid
         {
             get { return mainPropertyGrid; }
         }
@@ -101,6 +102,7 @@ namespace Amicitia
             viewer.DeleteScene();
             glControl1.Visible = false;
             ResourceWrapper res = mainTreeView.SelectedNode as ResourceWrapper;
+
             mainPropertyGrid.SelectedObject = res;
 
             if (res == null)
@@ -186,8 +188,7 @@ namespace Amicitia
             // mainPictureBox
             mainPictureBox.Visible = false;
 
-            // mainPropertGrid
-            mainPropertyGrid.ShowCustomProperties = true;
+            // mainPropertyGrid
             mainPropertyGrid.PropertySort = PropertySort.NoSort;
         }
 
@@ -358,6 +359,37 @@ namespace Amicitia
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             viewer.DisposeViewer();
+        }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form options = new Form();
+            Label colorlab = new Label();
+            Label more = new Label();
+            Button picker = new Button();
+            options.Text = "Options";
+            more.Text = "Stay tuned...";
+            more.Location = new Point(16, 80);
+            more.ForeColor = Color.Gray;
+            more.Font = new Font(more.Font, FontStyle.Italic);
+            picker.Text = "...";
+            picker.Location = new System.Drawing.Point(140, 16);
+            picker.Width /= 3;
+            picker.Click += (object s, EventArgs ev) =>
+            {
+                ColorDialog d = new ColorDialog();
+                d.Color = viewer.BGColor;
+                d.ShowDialog(options);
+                viewer.BGColor = d.Color;
+            };
+            colorlab.Text = "Model viewer bg color";
+            colorlab.Location = new System.Drawing.Point(16, 20);
+            colorlab.Width = 200;
+            options.Size = new System.Drawing.Size(512, 256);
+            options.Controls.Add(picker);
+            options.Controls.Add(colorlab);
+            options.Controls.Add(more);
+            options.ShowDialog(this);
         }
     }
 }

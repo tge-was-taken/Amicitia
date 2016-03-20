@@ -19,5 +19,18 @@ namespace AtlusLibSharp.Utilities
             else
                 return false;
         }
+
+        public static Assimp.Vector3D ToAssimpVector3D(this OpenTK.Vector3 value)
+        {
+            return new Assimp.Vector3D(value.X, value.Y, value.Z);
+        }
+    }
+
+    public static class OpenTKVector2Extension
+    {
+        public static Assimp.Vector3D ToAssimpVector3D(this OpenTK.Vector2 value, float z)
+        {
+            return new Assimp.Vector3D(value.X, value.Y, z);
+        }
     }
 }

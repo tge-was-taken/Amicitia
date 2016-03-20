@@ -35,11 +35,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonaModManager", "Person
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameIO", "GameIO\GameIO.csproj", "{79B9BCD9-F180-4A23-8F00-7367DA38B109}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{05A366BC-3929-4627-9CE4-6A5F4D22D3C6}"
-	ProjectSection(SolutionItems) = preProject
-		Dependencies\NvTriStrip.dll = Dependencies\NvTriStrip.dll
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

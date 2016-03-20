@@ -29,7 +29,7 @@
                 if (_struct != null)
                     return _struct.DeviceID;
                 else
-                    return RWDeviceID.Default;
+                    return RWDeviceID.PS2;
             }
         }
 

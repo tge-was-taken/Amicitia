@@ -1,22 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Amicitia
 {
+    public delegate void Loop();
     internal static class Program
     {
         public static Assembly Assembly = Assembly.GetExecutingAssembly();
         public static string Name = Assembly.GetName().Name;
         public static string Version = Assembly.GetName().Version.ToString();
         public static DateTime BuildTime = Assembly.GetLinkerTime();
+        public static List<Loop> loopFunctions;
+
+        // increment these
+        public static int VersionMajor = 0;
+        public static int VersionMinor = 3;
 
 #if DEBUG
-        public static string TitleString = string.Format("Amicitia {0}/{1}/{2} [DEBUG]", BuildTime.Day, BuildTime.Month, BuildTime.Year);
+        public static string TitleString = string.Format("Amicitia v{0}.{1} [DEBUG]", VersionMajor, VersionMinor);
 #else
-        public static string TitleString = string.Format("Amicitia {0}/{1}/{2}", BuildTime.Day, BuildTime.Month, BuildTime.Year);
+        public static string TitleString = string.Format("Amicitia v{0}.{1}", VersionMajor, VersionMinor);
 #endif
+
+        [DllImport("user32.dll")]
+        public static extern short GetAsyncKeyState(Keys vKey);
 
         /// <summary>
         /// The main entry point for the application.
@@ -24,9 +35,25 @@ namespace Amicitia
         [STAThread]
         static void Main()
         {
+            loopFunctions = new List<Loop>();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            //Application.Run(new MainForm()); //classical way of doing forms but we want to make a message pump
+            //oh boy here we go
+            MainForm form = new MainForm();
+            bool running = true;
+            form.FormClosed += (object sender, FormClosedEventArgs e) => { running = false; };
+            form.Show();
+            do
+            {
+                Application.DoEvents();
+
+                if(loopFunctions.Count > 0)
+                    foreach (Loop func in loopFunctions)
+                        func();
+
+                //System.Threading.Thread.Sleep(1);
+            } while (running);
         }
     }
 

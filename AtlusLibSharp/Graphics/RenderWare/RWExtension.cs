@@ -28,6 +28,16 @@ namespace AtlusLibSharp.Graphics.RenderWare
             }
         }
 
+        internal bool TryGetExtensionIndexOfType(RWNodeType type, out int index)
+        {
+            index = Children.FindIndex(n => n.Type == type);
+
+            if (index != -1)
+                return true;
+            else
+                return false;
+        }
+
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
             if (Children == null)

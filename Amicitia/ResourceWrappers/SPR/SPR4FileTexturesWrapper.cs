@@ -1,78 +1,68 @@
-﻿using AtlusLibSharp.Graphics.TGA;
-using System.Collections.Generic;
-
-namespace Amicitia.ResourceWrappers
+﻿namespace Amicitia.ResourceWrappers
 {
-    internal class SPR4TexturesWrapper : ResourceWrapper
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using AtlusLibSharp.Graphics.TGA;
+
+    internal class SPR4FileTexturesWrapper : ResourceWrapper
     {
-        public SPR4TexturesWrapper(string text, List<TGAFile> textures) : base(text, textures) { }
-
-        protected internal new List<TGAFile> WrappedObject
+        /***************/
+        /* Constructor */
+        /***************/
+        public SPR4FileTexturesWrapper(string text, List<TGAFile> textures) 
+            : base(text, textures, SupportedFileType.Resource, true)
         {
-            get { return (List<TGAFile>)base.WrappedObject; }
-            set { base.WrappedObject = value; }
+            m_canExport = false;
+            m_canMove = false;
+            m_canRename = false;
+            m_canReplace = false;
+            m_canDelete = false;
+            InitializeContextMenuStrip();
         }
 
-        protected internal override bool CanExport
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new List<TGAFile> WrappedObject
         {
-            get { return false; }
-        }
-
-        protected internal override bool CanMove
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanRename
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanReplace
-        {
-            get { return false; }
-        }
-
-        protected internal override bool CanDelete
-        {
-            get { return false; }
-        }
-
-        protected internal override void RebuildWrappedObject()
-        {
-            WrappedObject = new List<TGAFile>();
-
-            for (int i = 0; i < Nodes.Count; i++)
+            get
             {
-                // rebuild before getting the data
-                TGAFileWrapper node = (TGAFileWrapper)Nodes[i];
-                node.RebuildWrappedObject();
-
-                // set the wrapped object
-                WrappedObject.Add(node.WrappedObject);
+                return (List<TGAFile>)m_wrappedObject;
+            }
+            set
+            {
+                m_wrappedObject = value;
             }
         }
 
-        protected internal override void InitializeWrapper()
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
+        {
+            var list = new List<TGAFile>(Nodes.Count);
+            foreach (TGAFileWrapper node in Nodes)
+            {
+                list.Add(node.WrappedObject);
+            }
+
+            m_wrappedObject = list;
+            m_isDirty = false;
+        }
+
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
 
             int index = 0;
             foreach (TGAFile texture in WrappedObject)
             {
-                string name = "Texture" + (index++) + ".tga";
-
+                string name = string.Format("Texture[{0}]", index++);
                 Nodes.Add(new TGAFileWrapper(name, texture));
             }
 
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

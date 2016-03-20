@@ -1,158 +1,219 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
-    using AtlusLibSharp.Graphics.RenderWare;
-    using System.Windows.Forms;
-    using Utilities;
     using System;
+    using System.ComponentModel;
+    using System.Collections.Generic;
+    using System.Windows.Forms;
     using AtlusLibSharp.IO;
-    using System.IO;
+    using AtlusLibSharp.Graphics.RenderWare;
+    using Utilities;
 
     internal class RMDSceneWrapper : ResourceWrapper
     {
-        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        /*******************/
+        /* Private members */
+        /*******************/
+        private RWTextureDictionaryWrapper m_texturesNode;
+        private TreeNode m_sceneListNode;
+        private TreeNode m_nodeLinkListNode;
+        private TreeNode m_animSetListNode;
+        private TreeNode m_miscNodeListNode;
+
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
             SupportedFileType.RMDScene
         };
 
-        public SupportedFileType FileType
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
-            get { return SupportedFileType.RMDScene; }
+            {
+                SupportedFileType.RMDScene, (res, path) =>
+                res.WrappedObject = new RMDScene(path)
+            }
+        };
+
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            {
+                SupportedFileType.RMDScene, (res, path) =>
+                (res as RMDSceneWrapper).WrappedObject.Save(path)
+            },
+        };
+
+        /************************************/
+        /* Import / export method overrides */
+        /************************************/
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
         }
 
-        protected internal new RMDScene WrappedObject
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
         {
-            get { return (RMDScene)base.WrappedObject; }
-
-            set { base.WrappedObject = value; }
+            return ExportDelegates;
         }
 
-        protected internal RWTextureDictionaryWrapper TextureDictionaryWrapper { get; set; }
-
-        protected internal TreeNode SceneListNode { get; set; }
-
-        protected internal TreeNode FrameLinkListNode { get; set; }
-
-        protected internal TreeNode AnimationSetListNode { get; set; }
-
-        protected internal TreeNode MiscNodeListNode { get; set; }
-
-        protected internal override bool IsModelResource
+        protected override SupportedFileType[] GetSupportedFileTypes()
         {
-            get { return true; }
+            return FileFilterTypes;
         }
 
+        /***************/
+        /* Constructor */
+        /***************/
         public RMDSceneWrapper(string text, RMDScene rmd)
-            : base(text, rmd)
+            : base(text, rmd, SupportedFileType.RMDScene, false)
         {
+            m_isModel = true;
         }
 
-        public override void Export(object sender, EventArgs e)
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new RMDScene WrappedObject
         {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
+            get
             {
-                saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
+                return (RMDScene)m_wrappedObject; }
 
-                if (saveFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                // rebuild before export
-                RebuildWrappedObject();
-
-                switch (FileFilterTypes[saveFileDlg.FilterIndex - 1])
-                {
-                    case SupportedFileType.RMDScene:
-                        WrappedObject.Save(saveFileDlg.FileName);
-                        break;
-                }
+            set
+            {
+                SetProperty(ref m_wrappedObject, value);
             }
         }
 
-        public override void Replace(object sender, EventArgs e)
+        [Browsable(false)]
+        public RWTextureDictionaryWrapper TexturesNode
         {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
+            get { return m_texturesNode; }
+            set
             {
-                openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (openFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                switch (FileFilterTypes[openFileDlg.FilterIndex - 1])
-                {
-                    case SupportedFileType.RMDScene:
-                        WrappedObject = new RMDScene(openFileDlg.FileName);
-                        break;
-                }
-
-                // re-init wrapper
-                InitializeWrapper();
+                SetProperty(ref m_texturesNode, value);
             }
         }
 
-        protected internal override void RebuildWrappedObject()
+        [Browsable(false)]
+        public TreeNode SceneListNode
         {
-            WrappedObject.Clear();
+            get { return m_sceneListNode; }
+            set
+            {
+                SetProperty(ref m_sceneListNode, value);
+            }
+        }
 
-            TextureDictionaryWrapper.RebuildWrappedObject();
-            WrappedObject.TextureDictionary = TextureDictionaryWrapper.WrappedObject as RWTextureDictionary;
+        [Browsable(false)]
+        public TreeNode NodeLinkListNode
+        {
+            get { return m_nodeLinkListNode; }
+            set
+            {
+                SetProperty(ref m_nodeLinkListNode, value);
+            }
+        }
+
+        [Browsable(false)]
+        public TreeNode AnimationSetListNode
+        {
+            get { return m_animSetListNode; }
+            set
+            {
+                SetProperty(ref m_animSetListNode, value);
+            }
+        }
+
+        [Browsable(false)]
+        public TreeNode MiscNodeListNode
+        {
+            get { return m_miscNodeListNode; }
+            set
+            {
+                SetProperty(ref m_miscNodeListNode, value);
+            }
+        }
+
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
+        {
+            var scene = new RMDScene();
+
+            if (TexturesNode.IsDirty)
+                TexturesNode.RebuildWrappedObject();
+
+            scene.TextureDictionary = TexturesNode.WrappedObject;
 
             foreach (RWSceneWrapper wrapper in SceneListNode.Nodes)
             {
-                wrapper.RebuildWrappedObject();
-                WrappedObject.Scenes.Add(wrapper.WrappedObject);
+                if (wrapper.IsDirty)
+                    wrapper.RebuildWrappedObject();
+
+                scene.Scenes.Add(wrapper.WrappedObject);
             }
 
-            foreach (ResourceWrapper wrapper in FrameLinkListNode.Nodes)
+            foreach (ResourceWrapper wrapper in NodeLinkListNode.Nodes)
             {
-                wrapper.RebuildWrappedObject();
-                WrappedObject.NodeLinks.Add(
+                if (wrapper.IsDirty)
+                    wrapper.RebuildWrappedObject();
+
+                scene.NodeLinks.Add(
                     new RMDNodeLink((wrapper.WrappedObject as GenericBinaryFile).GetBytes()));
             }
 
             foreach (ResourceWrapper wrapper in AnimationSetListNode.Nodes)
             {
-                wrapper.RebuildWrappedObject();
-                WrappedObject.AnimationSets.Add(
+                if (wrapper.IsDirty)
+                    wrapper.RebuildWrappedObject();
+
+                scene.AnimationSets.Add(
                     RWNode.Load((wrapper.WrappedObject as GenericBinaryFile).GetBytes()) as RMDAnimationSet);
             }
 
             foreach (ResourceWrapper wrapper in MiscNodeListNode.Nodes)
             {
-                wrapper.RebuildWrappedObject();
-                WrappedObject.MiscNodes.Add(
+                if (wrapper.IsDirty)
+                    wrapper.RebuildWrappedObject();
+
+                scene.MiscNodes.Add(
                     RWNode.Load((wrapper.WrappedObject as GenericBinaryFile).GetBytes()));
             }
+
+            m_wrappedObject = scene;
+            m_isDirty = false;
         }
 
-        protected internal override void InitializeWrapper()
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
-            TextureDictionaryWrapper = new RWTextureDictionaryWrapper("Textures", WrappedObject.TextureDictionary ?? new RWTextureDictionary());
+            TexturesNode = new RWTextureDictionaryWrapper("Textures", WrappedObject.TextureDictionary ?? new RWTextureDictionary());
             SceneListNode = new TreeNode("Scenes");
-            FrameLinkListNode = new TreeNode("Frame Links");
-            AnimationSetListNode = new TreeNode("Animation sets");
-            MiscNodeListNode = new TreeNode("Misc Nodes");
+            NodeLinkListNode = new TreeNode("NodeLinks");
+            AnimationSetListNode = new TreeNode("AnimationSets");
+            MiscNodeListNode = new TreeNode("MiscData");
 
             int sceneIndex = 0;
             foreach (RWScene scene in WrappedObject.Scenes)
             {
                 SceneListNode.Nodes.Add(
                     new RWSceneWrapper(
-                        string.Format("Scene[{0}]", sceneIndex++), 
+                        string.Format("SceneData[{0}]", sceneIndex++), 
                         scene));
             }
 
-            int frameLinkIndex = 0;
+            int nodeLinkIndex = 0;
             foreach (RMDNodeLink frameLink in WrappedObject.NodeLinks)
             {
-                FrameLinkListNode.Nodes.Add(
+                NodeLinkListNode.Nodes.Add(
                     new ResourceWrapper(
-                        string.Format("FrameLink[{0}]", (frameLinkIndex++).ToString("00")),
+                        string.Format("NodeLinkData[{0}]", (nodeLinkIndex++).ToString("00")),
                         new GenericBinaryFile(frameLink.GetBytes())));
             }
 
@@ -170,11 +231,11 @@
             {
                 MiscNodeListNode.Nodes.Add(
                     new ResourceWrapper(
-                        string.Format("{0}[{1}]", miscNode.Type.ToString(), miscNodeIndex++),
+                        string.Format("MiscData[{0}][{1}]", miscNode.Type.ToString(), miscNodeIndex++),
                         new GenericBinaryFile(miscNode.GetBytes())));
             }
 
-            Nodes.Add(TextureDictionaryWrapper, SceneListNode, FrameLinkListNode, AnimationSetListNode, MiscNodeListNode);
+            Nodes.Add(TexturesNode, SceneListNode, NodeLinkListNode, AnimationSetListNode, MiscNodeListNode);
         }
     }
 }

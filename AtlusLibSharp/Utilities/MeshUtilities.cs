@@ -4,7 +4,7 @@
     using System;
     using System.Collections.Generic;
 
-    internal static class MeshUtilities
+    public static class MeshUtilities
     {
         public static Vector3[] CalculateAverageNormals<T>(IList<IList<T>> triangleIndices, IList<Vector3> positions)
         {
@@ -40,6 +40,36 @@
             }
 
             return normals;
+        }
+
+        public static int[] ToTriangleList(int[] triangleStrips, bool flip = true)
+        {
+            List<int> triangles = new List<int>();
+            int numTris = triangleStrips.Length - 2;
+
+            int fa = triangleStrips[0];
+            int fb = triangleStrips[1];
+            int fc = 0;
+
+            for (int i = 2; i < numTris; i++)
+            {
+                fc = triangleStrips[i];
+                flip = !flip;
+
+                // check if tri is degenerate
+                if ((fa != fb) && (fb != fc) && (fc != fa))
+                {
+                    if (flip)
+                        triangles.AddRange(fa, fb, fc);
+                    else
+                        triangles.AddRange(fa, fc, fb);
+                }
+
+                fa = fb;
+                fb = fc;
+            }
+
+            return triangles.ToArray();
         }
     }
 }

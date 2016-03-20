@@ -113,7 +113,7 @@
             _type = type;
             _size = 0;
             _rawVersion = ExportVersion;
-            _parent = parent;
+            Parent = parent;
         }
 
         /// <summary>

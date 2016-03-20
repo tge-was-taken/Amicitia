@@ -17,7 +17,7 @@
 
         public static Assimp.Matrix4x4 ToAssimpMatrix4x4(this OpenTK.Matrix4 mtx)
         {
-            Assimp.Matrix4x4 outMtx = Assimp.Matrix4x4.Identity;
+            Assimp.Matrix4x4 outMtx = new Assimp.Matrix4x4();
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)

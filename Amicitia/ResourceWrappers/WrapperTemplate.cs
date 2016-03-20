@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-
+﻿#if FALSE
 namespace Amicitia.ResourceWrappers
 {
-    // TODO: make this into a generic Bitmap wrapper
-    internal class PNGFileWrapper : ResourceWrapper
+    using System.IO;
+    using System;
+    using System.ComponentModel;
+    using System.Collections.Generic;
+
+    internal class ResourceClassNameWrapper : ResourceWrapper
     {
         /*********************/
         /* File filter types */
         /*********************/
         public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
-            SupportedFileType.PNGFile
+            SupportedFileType.ResourceClassName
         };
 
         /*****************************************/
@@ -22,17 +22,17 @@ namespace Amicitia.ResourceWrappers
        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
             {
-                SupportedFileType.PNGFile, (res, path) =>
-                res.WrappedObject = new Bitmap(path)
+                SupportedFileType.ResourceClassName, (res, path) =>
+                res.WrappedObject = new ResourceClassName(path)
             }
         };
 
         public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
             {
-                SupportedFileType.PNGFile, (res, path) =>
-                (res as PNGFileWrapper).WrappedObject.Save(path, System.Drawing.Imaging.ImageFormat.Png)
-            }
+                SupportedFileType.ResourceClassName, (res, path) =>
+                (res as ResourceClassNameWrapper).WrappedObject.Save(path)
+            },
         };
 
         /************************************/
@@ -56,36 +56,36 @@ namespace Amicitia.ResourceWrappers
         /***************/
         /* Constructor */
         /***************/
-        public PNGFileWrapper(string text, Bitmap bitmap) 
-            : base(text, bitmap, SupportedFileType.PNGFile, false)
+        public ResourceClassName(string text, ResourceClassName res) 
+            : base(text, res, SupportedFileType.ResourceClassName, false /* set to true if context menu states were modified */ )
         {
-            m_isImage = true;
+			// set additional states here
         }
 
         /*****************************/
         /* Wrapped object properties */
         /*****************************/
         [Browsable(false)]
-        public new Bitmap WrappedObject
+        public new ResourceClassName WrappedObject
         {
-            get
-            {
-                return (Bitmap)m_wrappedObject;
-            }
-            set
-            {
-                SetProperty(ref m_wrappedObject, value);
-            }
+            get { return (ResourceClassName)m_wrappedObject; }
+            set { SetProperty(ref m_wrappedObject, value); }
         }
 
-        public int Width
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
         {
-            get { return WrappedObject.Width; }
+			/* your code here */
         }
 
-        public int Height
+        internal override void InitializeWrapper()
         {
-            get { return WrappedObject.Height; }
+			/* your code here */
+
+            base.InitializeWrapper();
         }
     }
 }
+#endif

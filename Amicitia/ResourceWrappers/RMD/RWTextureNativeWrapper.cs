@@ -1,25 +1,89 @@
-﻿using System;
-using System.Windows.Forms;
-using AtlusLibSharp.Graphics.RenderWare;
-using AtlusLibSharp.PS2.Graphics;
-
-namespace Amicitia.ResourceWrappers
+﻿namespace Amicitia.ResourceWrappers
 {
+    using System;
+    using System.ComponentModel;
+    using System.Collections.Generic;
+    using AtlusLibSharp.Graphics.RenderWare;
+    using AtlusLibSharp.PS2.Graphics;
+
     internal class RWTextureNativeWrapper : ResourceWrapper
     {
-        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
             SupportedFileType.RWTextureNative, SupportedFileType.PNGFile
         };
 
-        public RWTextureNativeWrapper(RWTextureNative textureNative) 
-            : base(textureNative.Name, textureNative)
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
+            {
+                SupportedFileType.RWTextureNative, (res, path) =>
+                res.WrappedObject = RWNode.Load(path)
+            },
+            {
+                SupportedFileType.PNGFile, (res, path) =>
+                res.WrappedObject = new RWTextureNative(path, (res as RWTextureNativeWrapper).WrappedObject.Tex0Register.TexturePixelFormat)
+            }
+        };
+
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            {
+                SupportedFileType.RWTextureNative, (res, path) =>
+                (res as RWTextureNativeWrapper).WrappedObject.Save(path)
+            },
+            {
+                SupportedFileType.PNGFile, (res, path) =>
+                (res as RWTextureNativeWrapper).WrappedObject.GetBitmap().Save(path, System.Drawing.Imaging.ImageFormat.Png)
+            }
+        };
+
+        /************************************/
+        /* Import / export method overrides */
+        /************************************/
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
         }
 
-        public SupportedFileType FileType
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
         {
-            get { return SupportedFileType.RWTextureNative; }
+            return ExportDelegates;
+        }
+
+        protected override SupportedFileType[] GetSupportedFileTypes()
+        {
+            return FileFilterTypes;
+        }
+
+        /***************/
+        /* Constructor */
+        /***************/
+        public RWTextureNativeWrapper(RWTextureNative textureNative) 
+            : base(textureNative.Name, textureNative, SupportedFileType.RWTextureNative, false)
+        {
+            m_isImage = true;
+        }
+
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new RWTextureNative WrappedObject
+        {
+            get
+            {
+                return (RWTextureNative)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(ref m_wrappedObject, value);
+            }
         }
 
         public RWPlatformID PlatformID
@@ -30,19 +94,19 @@ namespace Amicitia.ResourceWrappers
         public PS2FilterMode FilterMode
         {
             get { return WrappedObject.FilterMode; }
-            set { WrappedObject.FilterMode = value; }
+            set { SetProperty(WrappedObject, value); }
         }
 
         public PS2AddressingMode WrapModeX
         {
             get { return WrappedObject.HorrizontalAddressingMode; }
-            set { WrappedObject.HorrizontalAddressingMode = value; }
+            set { SetProperty(WrappedObject, value); }
         }
 
         public PS2AddressingMode WrapModeY
         {
             get { return WrappedObject.VerticalAddressingMode; }
-            set { WrappedObject.VerticalAddressingMode = value; }
+            set { SetProperty(WrappedObject, value); }
         }
 
         public int Width
@@ -65,95 +129,13 @@ namespace Amicitia.ResourceWrappers
             get { return WrappedObject.Tex0Register.TexturePixelFormat; }
         }
 
-        protected internal new RWTextureNative WrappedObject
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
         {
-            get { return (RWTextureNative)base.WrappedObject; }
-            set { base.WrappedObject = value; }
-        }
-
-        protected internal override bool IsImageResource
-        {
-            get { return true; }
-        }
-
-        // TODO: Implement a texture encoder form.
-        /*
-        protected internal override bool CanEncode
-        {
-            get { return true; }
-        }
-        */
-
-        protected internal override void RebuildWrappedObject()
-        {
-            WrappedObject.Name = Text;
-        }
-
-        public override void Export(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
-            {
-                saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (saveFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                // rebuild before export
-                RebuildWrappedObject();
-
-                switch (FileFilterTypes[saveFileDlg.FilterIndex - 1])
-                {
-                    case SupportedFileType.RWTextureNative:
-                        WrappedObject.Save(saveFileDlg.FileName);
-                        break;
-
-                    case SupportedFileType.PNGFile:
-                        WrappedObject.GetBitmap().Save(saveFileDlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                        break;
-                }
-            }
-        }
-
-        public override void Replace(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
-            {
-                openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (openFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-#if !DEBUG
-                try
-                {
-#endif
-                    switch (FileFilterTypes[openFileDlg.FilterIndex - 1])
-                    {
-                        case SupportedFileType.RWTextureNative:
-                            WrappedObject = (RWTextureNative)RWNode.Load(openFileDlg.FileName);
-                            break;
-
-                        case SupportedFileType.PNGFile:
-                            WrappedObject = new RWTextureNative(openFileDlg.FileName, WrappedObject.Tex0Register.TexturePixelFormat);
-                            break;
-                    }
-#if !DEBUG
-                }
-                catch (Exception exception)
-                {
-                    MessageBox.Show(exception.Message, "Error occured.");
-                }
-#endif
-
-                // re-init wrapper
-                InitializeWrapper();
-            }
+            (m_wrappedObject as RWTextureNative).Name = Text;
+            m_isDirty = false;
         }
     }
 }

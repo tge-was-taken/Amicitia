@@ -1,19 +1,20 @@
 ﻿namespace Amicitia.ResourceWrappers
 {
+    using System.IO;
     using System;
     using System.ComponentModel;
-    using System.Windows.Forms;
-    using AtlusLibSharp.Graphics.TGA;
     using System.Collections.Generic;
+    using AtlusLibSharp.FileSystems.AMD;
+    using AtlusLibSharp.IO;
 
-    internal class TGAFileWrapper : ResourceWrapper
+    internal class AMDFileWrapper : ResourceWrapper
     {
         /*********************/
         /* File filter types */
         /*********************/
         public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
-            SupportedFileType.TGAFile, SupportedFileType.PNGFile
+            SupportedFileType.AMDFile
         };
 
         /*****************************************/
@@ -22,25 +23,17 @@
        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
             {
-                SupportedFileType.TGAFile, (res, path) =>
-                res.WrappedObject = new TGAFile(path)
-            },
-            {
-                SupportedFileType.PNGFile, (res, path) =>
-                res.WrappedObject = new TGAFile(path, (res as TGAFileWrapper).WrappedObject.Encoding, (res as TGAFileWrapper).BitsPerPixel, (res as TGAFileWrapper).PaletteDepth)
+                SupportedFileType.AMDFile, (res, path) =>
+                res.WrappedObject = new AMDFile(path)
             }
         };
 
         public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
             {
-                SupportedFileType.TGAFile, (res, path) =>
-                (res as TGAFileWrapper).WrappedObject.Save(path)
+                SupportedFileType.AMDFile, (res, path) =>
+                (res as AMDFileWrapper).WrappedObject.Save(path)
             },
-            {
-                SupportedFileType.PNGFile, (res, path) =>
-                (res as TGAFileWrapper).WrappedObject.GetBitmap().Save(path, System.Drawing.Imaging.ImageFormat.Png)
-            }
         };
 
         /************************************/
@@ -64,56 +57,56 @@
         /***************/
         /* Constructor */
         /***************/
-        public TGAFileWrapper(string text, TGAFile tga) 
-            : base(text, tga, SupportedFileType.TGAFile, false)
+        public AMDFileWrapper(string text, AMDFile res) 
+            : base(text, res, SupportedFileType.AMDFile, true)
         {
-            m_isImage = true;
+            m_canExport = false;
+            m_canReplace = false;
+            InitializeContextMenuStrip();
         }
 
         /*****************************/
         /* Wrapped object properties */
         /*****************************/
         [Browsable(false)]
-        public new TGAFile WrappedObject
+        public new AMDFile WrappedObject
         {
-            get
+            get { return (AMDFile)m_wrappedObject; }
+            set { SetProperty(ref m_wrappedObject, value); }
+        }
+
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
+        {
+            var archive = new AMDFile();
+            foreach (ResourceWrapper node in Nodes)
             {
-                return (TGAFile)m_wrappedObject;
+                var chunk = node.WrappedObject as AMDChunk;
+                archive.Chunks.Add(chunk);
             }
-            set
+
+            m_wrappedObject = archive;
+            m_isDirty = false;
+        }
+
+        internal override void InitializeWrapper()
+        {
+            Nodes.Clear();
+
+            int idx = 0;
+            foreach (AMDChunk chunk in WrappedObject.Chunks)
             {
-                SetProperty(ref m_wrappedObject, value);
+                var wrap = new ResourceWrapper(string.Format("{0}[{1}]", chunk.Tag, idx++), new GenericBinaryFile(chunk.Data), SupportedFileType.Resource, true);
+                wrap.m_canReplace = false;
+                wrap.m_canRename = false;
+                wrap.InitializeContextMenuStrip();
+
+                Nodes.Add(wrap);
             }
-        }
 
-        public int Width
-        {
-            get { return WrappedObject.Width; }
-        }
-
-        public int Height
-        {
-            get { return WrappedObject.Height; }
-        }
-
-        public TGAEncoding PixelFormat
-        {
-            get { return WrappedObject.Encoding; }
-        }
-
-        public int BitsPerPixel
-        {
-            get { return WrappedObject.BitsPerPixel; }
-        }
-
-        public int PaletteDepth
-        {
-            get { return WrappedObject.PaletteDepth; }
-        }
-
-        public bool IsIndexed
-        {
-            get { return WrappedObject.IsIndexed; }
+            base.InitializeWrapper();
         }
     }
 }

@@ -64,6 +64,11 @@ namespace Amicitia.ModelViewer
             GL.UniformMatrix4(_uniforms[name], false, ref mat);
         }
 
+        public void SetUniform(string name, int b)
+        {
+            GL.Uniform1(_uniforms[name], b);
+        }
+
         public void SetUniform(string name, Vector3 vec)
         {
             GL.Uniform3(_uniforms[name], ref vec);

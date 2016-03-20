@@ -2,22 +2,88 @@
 {
     using System.IO;
     using System;
-    using System.Windows.Forms;
     using AtlusLibSharp.FileSystems.ListArchive;
     using AtlusLibSharp.FileSystems.PAKToolArchive;
+    using System.ComponentModel;
+    using System.Collections.Generic;
 
     internal class ListArchiveFileWrapper : ResourceWrapper
     {
-        protected internal static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        /*********************/
+        /* File filter types */
+        /*********************/
+        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
         {
-            SupportedFileType.ListArchiveFile, SupportedFileType.PAKToolFile
+            SupportedFileType.ListArchiveFile, SupportedFileType.PAKToolArchiveFile
         };
 
-        public ListArchiveFileWrapper(string text, ListArchiveFile arc) : base(text, arc) { }
-
-        public SupportedFileType FileType
+        /*****************************************/
+        /* Import / Export delegate dictionaries */
+        /*****************************************/
+       public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
         {
-            get { return SupportedFileType.ListArchiveFile; }
+            {
+                SupportedFileType.ListArchiveFile, (res, path) =>
+                res.WrappedObject = new ListArchiveFile(path)
+            },
+            {
+                SupportedFileType.PAKToolArchiveFile, (res, path) =>
+                res.WrappedObject = ListArchiveFile.Create(new PAKToolArchiveFile(path))
+            }
+        };
+
+        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        {
+            {
+                SupportedFileType.ListArchiveFile, (res, path) =>
+                (res as ListArchiveFileWrapper).WrappedObject.Save(path)
+            },
+            {
+                SupportedFileType.PAKToolArchiveFile, (res, path) =>
+                PAKToolArchiveFile.Create((res as ListArchiveFileWrapper).WrappedObject).Save(path)
+            }
+        };
+
+        /************************************/
+        /* Import / export method overrides */
+        /************************************/
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        {
+            return ImportDelegates;
+        }
+
+        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        {
+            return ExportDelegates;
+        }
+
+        protected override SupportedFileType[] GetSupportedFileTypes()
+        {
+            return FileFilterTypes;
+        }
+
+        /***************/
+        /* Constructor */
+        /***************/
+        public ListArchiveFileWrapper(string text, ListArchiveFile arc) 
+            : base(text, arc, SupportedFileType.ListArchiveFile, false)
+        {
+        }
+
+        /*****************************/
+        /* Wrapped object properties */
+        /*****************************/
+        [Browsable(false)]
+        public new ListArchiveFile WrappedObject
+        {
+            get
+            {
+                return (ListArchiveFile)m_wrappedObject;
+            }
+            set
+            {
+                SetProperty(ref m_wrappedObject, value);
+            }
         }
 
         public int EntryCount
@@ -25,84 +91,22 @@
             get { return Nodes.Count; }
         }
 
-        protected internal new ListArchiveFile WrappedObject
+        /*********************************/
+        /* Base wrapper method overrides */
+        /*********************************/
+        internal override void RebuildWrappedObject()
         {
-            get { return (ListArchiveFile)base.WrappedObject; }
-            set { base.WrappedObject = value; }
-        }
-
-        public override void Replace(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
-            {
-                openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (openFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
-
-                if (supportedFileIndex == -1)
-                {
-                    return;
-                }
-
-                switch (FileFilterTypes[openFileDlg.FilterIndex-1])
-                {
-                    case SupportedFileType.ListArchiveFile:
-                        WrappedObject = new ListArchiveFile(openFileDlg.FileName);
-                        break;
-                    case SupportedFileType.PAKToolFile:
-                        WrappedObject = ListArchiveFile.Create(new PAKToolArchiveFile(openFileDlg.FileName));
-                        break;
-                }
-
-                // re-init the wrapper
-                InitializeWrapper();
-            }
-        }
-
-        public override void Export(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
-            {
-                saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(FileFilterTypes);
-
-                if (saveFileDlg.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                // rebuild wrapped object before export
-                RebuildWrappedObject();
-
-                switch (FileFilterTypes[saveFileDlg.FilterIndex-1])
-                {
-                    case SupportedFileType.ListArchiveFile:
-                        WrappedObject.Save(saveFileDlg.FileName);
-                        break;
-                    case SupportedFileType.PAKToolFile:
-                        PAKToolArchiveFile.Create(WrappedObject).Save(saveFileDlg.FileName);
-                        break;
-                }
-            }
-        }
-
-        protected internal override void RebuildWrappedObject()
-        {
-            WrappedObject.Entries.Clear();
+            var archive = new ListArchiveFile();
             foreach (ResourceWrapper node in Nodes)
             {
-                node.RebuildWrappedObject();
-                WrappedObject.Entries.Add(new ListArchiveFileEntry(node.Text, node.GetBytes()));
+                archive.Entries.Add(new ListArchiveFileEntry(node.Text, node.GetMemoryStream()));
             }
+
+            m_wrappedObject = archive;
+            m_isDirty = false;
         }
 
-        protected internal override void InitializeWrapper()
+        internal override void InitializeWrapper()
         {
             Nodes.Clear();
             foreach (ListArchiveFileEntry entry in WrappedObject.Entries)
@@ -110,14 +114,7 @@
                 Nodes.Add(ResourceFactory.GetResource(entry.Name, new MemoryStream(entry.Data)));
             }
 
-            if (IsInitialized)
-            {
-                MainForm.Instance.UpdateReferences();
-            }
-            else
-            {
-                IsInitialized = true;
-            }
+            base.InitializeWrapper();
         }
     }
 }

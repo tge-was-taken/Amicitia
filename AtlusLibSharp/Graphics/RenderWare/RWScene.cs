@@ -124,62 +124,101 @@
 
         #endregion
 
+        private static void WalkChildren(RWSceneNode rwNode, Assimp.Node parent)
+        {
+            foreach (RWSceneNode child in rwNode.Children)
+            {
+                string name = child.BoneMetadata.BoneNameID.ToString();
+                Assimp.Node aiNode = new Assimp.Node(name, parent);
+            }
+        }
+
         public static Assimp.Scene ToAssimpScene(RWScene scene)
         {
             Assimp.Scene aiScene = new Assimp.Scene();
-            aiScene.RootNode = new Assimp.Node("RootNode");
 
-            int geoIdx = 0;
+            int drawCallIdx = 0;
+            int materialIdx = 0;
+            int totalSplitIdx = 0;
+            List<int> meshStartIndices = new List<int>();
             foreach (RWDrawCall drawCall in scene.DrawCalls)
             {
+                meshStartIndices.Add(totalSplitIdx);
                 var mesh = scene.Meshes[drawCall.MeshIndex];
-                Assimp.Mesh aiMesh = new Assimp.Mesh("Mesh" + (geoIdx++).ToString("00"), Assimp.PrimitiveType.Triangle);
+                var node = scene.Nodes[drawCall.NodeIndex];
 
-                aiMesh.MaterialIndex = 0;
-
-                foreach (RWTriangle tri in mesh.Triangles)
+                int splitIdx = 0;
+                foreach (RWMeshMaterialSplit split in mesh.MaterialSplitData.MaterialSplits)
                 {
-                    aiMesh.Faces.Add(new Assimp.Face(new int[] { tri.A, tri.B, tri.C }));
-                }
+                    Assimp.Mesh aiMesh = new Assimp.Mesh(Assimp.PrimitiveType.Triangle);
+                    aiMesh.Name = string.Format("DrawCall{0}_Split{1}", drawCallIdx.ToString("00"), splitIdx.ToString("00"));
+                    aiMesh.MaterialIndex = split.MaterialIndex + materialIdx;
 
-                foreach (OpenTK.Vector3 vertex in mesh.Vertices)
-                {
-                    aiMesh.Vertices.Add(new Assimp.Vector3D(vertex.X, vertex.Y, vertex.Z));
-                }
+                    // get split indices
+                    int[] indices = split.Indices;
+                    if (mesh.MaterialSplitData.PrimitiveType == RWPrimitiveType.TriangleStrip)
+                        indices = MeshUtilities.ToTriangleList(indices, true);
 
-                if (mesh.HasNormals)
-                {
-                    foreach (OpenTK.Vector3 normal in mesh.Normals)
+                    // pos & nrm
+                    for (int i = 0; i < indices.Length; i++)
                     {
-                        aiMesh.Normals.Add(new Assimp.Vector3D(normal.X, normal.Y, normal.Z));
-                    }
-                }
-
-                for (int i = 0; i < mesh.TextureCoordinateChannelCount; i++)
-                {
-                    List<Assimp.Vector3D> texCoordChannel = new List<Assimp.Vector3D>();
-
-                    foreach (OpenTK.Vector2 texCoord in mesh.TextureCoordinateChannels[i])
-                    {
-                        texCoordChannel.Add(new Assimp.Vector3D(texCoord.X, texCoord.Y, 0));
+                        if (mesh.HasVertices)
+                        {
+                            var vert = OpenTK.Vector3.Transform(mesh.Vertices[indices[i]], node.WorldTransform);
+                            aiMesh.Vertices.Add(vert.ToAssimpVector3D());
+                        }
+                        if (mesh.HasNormals)
+                        {
+                            var nrm = OpenTK.Vector3.TransformNormal(mesh.Normals[indices[i]], node.WorldTransform);
+                            aiMesh.Normals.Add(nrm.ToAssimpVector3D());
+                        }
                     }
 
-                    aiMesh.TextureCoordinateChannels[i] = texCoordChannel;
-                }
-
-                if (mesh.HasColors)
-                {
-                    List<Assimp.Color4D> vertColorChannel = new List<Assimp.Color4D>();
-
-                    foreach (Color color in mesh.Colors)
+                    // tex coords
+                    if (mesh.HasTexCoords)
                     {
-                        vertColorChannel.Add(new Assimp.Color4D(color.R * 255, color.G * 255, color.B * 255, color.A * 255));
+                        for (int i = 0; i < mesh.TextureCoordinateChannelCount; i++)
+                        {
+                            List<Assimp.Vector3D> texCoordChannel = new List<Assimp.Vector3D>();
+
+                            for (int j = 0; j < indices.Length; j++)
+                            {
+                                texCoordChannel.Add(mesh.TextureCoordinateChannels[i][indices[j]].ToAssimpVector3D(0));
+                            }
+
+                            aiMesh.TextureCoordinateChannels[i] = texCoordChannel;
+                        }
                     }
 
-                    aiMesh.VertexColorChannels[0] = vertColorChannel;
+                    // colors
+                    if (mesh.HasColors)
+                    {
+                        List<Assimp.Color4D> vertColorChannel = new List<Assimp.Color4D>();
+
+                        for (int i = 0; i < indices.Length; i++)
+                        {
+                            var color = mesh.Colors[indices[i]];
+                            vertColorChannel.Add(new Assimp.Color4D(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f));
+                        }
+
+                        aiMesh.VertexColorChannels[0] = vertColorChannel;
+                    }
+
+                    // generate temporary face indices
+                    int[] tempIndices = new int[aiMesh.VertexCount];
+                    for (int i = 0; i < aiMesh.VertexCount; i++)
+                        tempIndices[i] = i;
+
+                    aiMesh.SetIndices(tempIndices, 3);
+
+                    // add the mesh to the list
+                    aiScene.Meshes.Add(aiMesh);
+
+                    splitIdx++;
                 }
 
-                int materialIdx = 0;
+                totalSplitIdx += splitIdx;
+
                 foreach (RWMaterial mat in mesh.Materials)
                 {
                     Assimp.Material aiMaterial = new Assimp.Material();
@@ -193,17 +232,40 @@
                     aiScene.Materials.Add(aiMaterial);
                 }
 
-                aiScene.Meshes.Add(aiMesh);
+                drawCallIdx++;
             }
 
-            foreach (RWDrawCall drawCall in scene.DrawCalls)
+            // store node lookup
+            Dictionary<RWSceneNode, Assimp.Node> nodeLookup = new Dictionary<RWSceneNode, Assimp.Node>();
+
+            // first create the root node
+            var rootNode = new Assimp.Node("SceneRoot");
+            rootNode.Transform = scene.Nodes[0].Transform.ToAssimpMatrix4x4();
+            nodeLookup.Add(scene.Nodes[0], rootNode);
+
+            for (int i = 1; i < scene.Nodes.Count - 1; i++)
             {
-                Assimp.Node node = new Assimp.Node();
-                node.Name = aiScene.Meshes[drawCall.MeshIndex].Name;
-                node.MeshIndices.Add(drawCall.MeshIndex);
-                node.Transform = scene.Nodes[drawCall.NodeIndex].Transform.ToAssimpMatrix4x4();
-                aiScene.RootNode.Children.Add(node);
+                var node = scene.Nodes[i];
+                string name = node.BoneMetadata.BoneNameID.ToString();
+
+                var aiNode = new Assimp.Node(name);
+                aiNode.Transform = node.Transform.ToAssimpMatrix4x4();
+
+                // get the associated meshes for this node
+                var drawCalls = scene.DrawCalls.FindAll(dc => dc.NodeIndex == i);
+                foreach (var drawCall in drawCalls)
+                {
+                    for (int j = 0; j < scene.Meshes[drawCall.MeshIndex].MaterialCount; j++)
+                    {
+                        aiNode.MeshIndices.Add(meshStartIndices[scene.DrawCalls.IndexOf(drawCall)] + j);
+                    }
+                }
+
+                nodeLookup[node.Parent].Children.Add(aiNode);
+                nodeLookup.Add(node, aiNode);
             }
+
+            aiScene.RootNode = rootNode;
 
             return aiScene;
         }

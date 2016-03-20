@@ -3,7 +3,6 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using NvTriStrip;
 
     public enum RWPrimitiveType
     {
@@ -98,7 +97,18 @@
                 ushort[] matSplitIndices = matSplitsIndices[i].ToArray();
 
                 if (primType == RWPrimitiveType.TriangleStrip)
-                    matSplitIndices = NvTriStrip.GenerateStrips(matSplitIndices);
+                {
+                    ManagedNvTriStrip.PrimitiveGroup[] primitives = null;
+
+                    if (ManagedNvTriStrip.NvTriStripUtility.Stripify(matSplitIndices, ref primitives))
+                    {
+                        matSplitIndices = primitives[0].Indices;
+                    }
+                    else
+                    {
+                        throw new System.Exception("Failed to generate strips.");
+                    }
+                }
 
                 _splits[i] = new RWMeshMaterialSplit(i, matSplitIndices);
             }

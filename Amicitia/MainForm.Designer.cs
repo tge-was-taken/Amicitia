@@ -34,8 +34,9 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainTreeView = new System.Windows.Forms.TreeView();
-            this.mainPropertyGrid = new PropertyGridEx.PropertyGridEx();
+            this.mainPropertyGrid = new System.Windows.Forms.PropertyGrid();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.glControl1 = new OpenTK.GLControl();
@@ -46,7 +47,8 @@
             // mainMenuStrip
             // 
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.optionsToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Size = new System.Drawing.Size(779, 24);
@@ -77,6 +79,13 @@
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "Options";
+            this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
+            // 
             // mainTreeView
             // 
             this.mainTreeView.AllowDrop = true;
@@ -97,20 +106,9 @@
             // 
             // 
             // 
-            this.mainPropertyGrid.DocCommentDescription.Location = new System.Drawing.Point(3, 18);
-            this.mainPropertyGrid.DocCommentDescription.Name = "";
-            this.mainPropertyGrid.DocCommentDescription.Size = new System.Drawing.Size(0, 52);
-            this.mainPropertyGrid.DocCommentDescription.TabIndex = 1;
-            this.mainPropertyGrid.DocCommentImage = null;
             // 
             // 
             // 
-            this.mainPropertyGrid.DocCommentTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
-            this.mainPropertyGrid.DocCommentTitle.Location = new System.Drawing.Point(3, 3);
-            this.mainPropertyGrid.DocCommentTitle.Name = "";
-            this.mainPropertyGrid.DocCommentTitle.Size = new System.Drawing.Size(0, 0);
-            this.mainPropertyGrid.DocCommentTitle.TabIndex = 0;
-            this.mainPropertyGrid.DrawFlatToolbar = true;
             this.mainPropertyGrid.HelpVisible = false;
             this.mainPropertyGrid.Location = new System.Drawing.Point(319, 0);
             this.mainPropertyGrid.Margin = new System.Windows.Forms.Padding(1, 3, 3, 3);
@@ -121,10 +119,6 @@
             // 
             // 
             // 
-            this.mainPropertyGrid.ToolStrip.Location = new System.Drawing.Point(0, 0);
-            this.mainPropertyGrid.ToolStrip.Name = "";
-            this.mainPropertyGrid.ToolStrip.Size = new System.Drawing.Size(448, 25);
-            this.mainPropertyGrid.ToolStrip.TabIndex = 1;
             // 
             // mainPictureBox
             // 
@@ -187,11 +181,12 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.TreeView mainTreeView;
-        private PropertyGridEx.PropertyGridEx mainPropertyGrid;
+        private System.Windows.Forms.PropertyGrid mainPropertyGrid;
         private System.Windows.Forms.PictureBox mainPictureBox;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolTip toolTip1;
         private OpenTK.GLControl glControl1;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
     }
 }
 

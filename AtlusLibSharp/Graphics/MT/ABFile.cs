@@ -6,7 +6,6 @@
     using AtlusLibSharp.Utilities;
     using IO;
     using Compression;
-    using IO;
 
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
     internal struct MT00Header

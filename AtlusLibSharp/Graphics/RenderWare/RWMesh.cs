@@ -171,20 +171,21 @@
         {
             get
             {
-                int matSplitIdx = _extension.Children.FindIndex(n => n.Type == RWNodeType.MeshMaterialSplitList);
-                if (matSplitIdx != -1)
+                int matSplitIdx;
+                if (_extension.TryGetExtensionIndexOfType(RWNodeType.MeshMaterialSplitList, out matSplitIdx))
                 {
                     return (RWMeshMaterialSplitData)_extension.Children[matSplitIdx];
                 }
                 else
                 {
-                    return new RWMeshMaterialSplitData(this, RWPrimitiveType.TriangleStrip, _extension);
+                    var splitData = new RWMeshMaterialSplitData(this, RWPrimitiveType.TriangleStrip, _extension);
+                    return splitData;
                 }
             }
             internal set
             {
-                int matSplitIdx = _extension.Children.FindIndex(n => n.Type == RWNodeType.MeshMaterialSplitList);
-                if (matSplitIdx != -1)
+                int matSplitIdx;
+                if (_extension.TryGetExtensionIndexOfType(RWNodeType.MeshMaterialSplitList, out matSplitIdx))
                 {
                     _extension.Children[matSplitIdx] = value;
                 }

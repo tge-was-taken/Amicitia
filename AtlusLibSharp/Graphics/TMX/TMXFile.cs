@@ -237,6 +237,19 @@
                 return new TMXFile(reader);
         }
 
+        public Color[] GetPixels()
+        {
+            if (UsesPalette && Pixels == null)
+            {
+                Pixels = new Color[Width * Height];
+                for (int y = 0; y < Height; y++)
+                    for (int x = 0; x < Width; x++)
+                        Pixels[x + y * Width] = Palettes[0][PixelIndices[x + y * Width]];
+            }
+
+            return Pixels;
+        }
+
         public Bitmap GetBitmap()
         {
             return GetBitmap(0, -1);

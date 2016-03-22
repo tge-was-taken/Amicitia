@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Numerics;
     using System.Runtime.InteropServices;
     using System.Text;
 
@@ -93,14 +94,14 @@
             }
         }
 
-        public static void Write(this BinaryWriter writer, OpenTK.Vector3 value)
+        public static void Write(this BinaryWriter writer, Vector3 value)
         {
             writer.Write(value.X);
             writer.Write(value.Y);
             writer.Write(value.Z);
         }
 
-        public static void Write(this BinaryWriter writer, OpenTK.Vector3[] array)
+        public static void Write(this BinaryWriter writer, Vector3[] array)
         {
             for (int i = 0; i < array.Length; i++)
             {
@@ -108,13 +109,13 @@
             }
         }
 
-        public static void Write(this BinaryWriter writer, OpenTK.Vector2 value)
+        public static void Write(this BinaryWriter writer, Vector2 value)
         {
             writer.Write(value.X);
             writer.Write(value.Y);
         }
 
-        public static void Write(this BinaryWriter writer, OpenTK.Vector2[] array)
+        public static void Write(this BinaryWriter writer, Vector2[] array)
         {
             for (int i = 0; i < array.Length; i++)
             {
@@ -122,60 +123,27 @@
             }
         }
 
-        public static void Write(this BinaryWriter writer, OpenTK.Matrix3x4 value)
+        public static void Write(this BinaryWriter writer, Matrix4x4 value, bool asMatrix3x4)
         {
-            for (int i = 0; i < 3; i++)
+            const int numRow = 4;
+            int numElem = 4;
+            if (asMatrix3x4)
+                numElem--;
+
+            for (int i = 0; i < numRow; i++)
             {
-                for (int j = 0; j < 4; j++)
+                for (int j = 0; j < numElem; j++)
                 {
-                    writer.Write(value[i, j]);
+                    writer.Write(value.GetElementAt(i, j));
                 }
             }
         }
 
-        public static void Write(this BinaryWriter writer, OpenTK.Matrix3x4[] array)
+        public static void Write(this BinaryWriter writer, Matrix4x4[] array, bool asMatrix3x4)
         {
             for (int i = 0; i < array.Length; i++)
             {
-                writer.Write(array[i]);
-            }
-        }
-
-        public static void Write(this BinaryWriter writer, OpenTK.Matrix4x3 value)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    writer.Write(value[i, j]);
-                }
-            }
-        }
-
-        public static void Write(this BinaryWriter writer, OpenTK.Matrix4x3[] array)
-        {
-            for (int i = 0; i < array.Length; i++)
-            {
-                writer.Write(array[i]);
-            }
-        }
-
-        public static void Write(this BinaryWriter writer, OpenTK.Matrix4 value)
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    writer.Write(value[i, j]);
-                }
-            }
-        }
-
-        public static void Write(this BinaryWriter writer, OpenTK.Matrix4[] array)
-        {
-            for (int i = 0; i < array.Length; i++)
-            {
-                writer.Write(array[i]);
+                writer.Write(array[i], asMatrix3x4);
             }
         }
 
@@ -262,56 +230,31 @@
         // Read extensions
         public static System.Drawing.Color ReadColor(this BinaryReader reader)
         {
-            return System.Drawing.Color.FromArgb(reader.ReadInt32());
+            int color = reader.ReadInt32();
+            return System.Drawing.Color.FromArgb(color & 0xFF, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF);
+            //return System.Drawing.Color.FromArgb(reader.ReadInt32());
         }
 
-        public static OpenTK.Vector2 ReadVector2(this BinaryReader reader)
+        public static Vector2 ReadVector2(this BinaryReader reader)
         {
-            return new OpenTK.Vector2(reader.ReadSingle(), reader.ReadSingle());
+            return new Vector2(reader.ReadSingle(), reader.ReadSingle());
         }
 
-        public static OpenTK.Vector3 ReadVector3(this BinaryReader reader)
+        public static Vector3 ReadVector3(this BinaryReader reader)
         {
-            return new OpenTK.Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+            return new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
         }
 
-        public static OpenTK.Matrix3x4 ReadMatrix3x4(this BinaryReader reader)
+        public static Matrix4x4 ReadMatrix4x3(this BinaryReader reader)
         {
-            OpenTK.Matrix3x4 mtx = new OpenTK.Matrix3x4();
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    mtx[i, j] = reader.ReadSingle();
-                }
-            }
-            return mtx;
+            float[] val = reader.ReadFloatArray(4 * 3);
+            return new Matrix4x4(val[0], val[1], val[2], 0, val[3], val[4], val[5], 0, val[6], val[7], val[8], 0, val[9], val[10], val[11], 1);
         }
 
-        public static OpenTK.Matrix4x3 ReadMatrix4x3(this BinaryReader reader)
+        public static Matrix4x4 ReadMatrix4(this BinaryReader reader)
         {
-            OpenTK.Matrix4x3 mtx = new OpenTK.Matrix4x3();
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    mtx[i, j] = reader.ReadSingle();
-                }
-            }
-            return mtx;
-        }
-
-        public static OpenTK.Matrix4 ReadMatrix4(this BinaryReader reader)
-        {
-            OpenTK.Matrix4 mtx = new OpenTK.Matrix4();
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    mtx[i, j] = reader.ReadSingle();
-                }
-            }
-            return mtx;
+            float[] val = reader.ReadFloatArray(4 * 4);
+            return new Matrix4x4(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7], val[8], val[9], val[10], val[11], val[12], val[13], val[14], val[15]);
         }
 
         public static string ReadCString(this BinaryReader reader)
@@ -423,9 +366,9 @@
             return arr;
         }
 
-        public static OpenTK.Vector2[] ReadVector2Array(this BinaryReader reader, int count)
+        public static Vector2[] ReadVector2Array(this BinaryReader reader, int count)
         {
-            OpenTK.Vector2[] arr = new OpenTK.Vector2[count];
+            Vector2[] arr = new Vector2[count];
             for (int i = 0; i < count; i++)
             {
                 arr[i] = reader.ReadVector2();
@@ -434,9 +377,9 @@
             return arr;
         }
 
-        public static OpenTK.Vector3[] ReadVector3Array(this BinaryReader reader, int count)
+        public static Vector3[] ReadVector3Array(this BinaryReader reader, int count)
         {
-            OpenTK.Vector3[] arr = new OpenTK.Vector3[count];
+            Vector3[] arr = new Vector3[count];
             for (int i = 0; i < count; i++)
             {
                 arr[i] = reader.ReadVector3();
@@ -445,20 +388,9 @@
             return arr;
         }
 
-        public static OpenTK.Matrix3x4[] ReadMatrix3x4Array(this BinaryReader reader, int count)
+        public static Matrix4x4[] ReadMatrix4x3Array(this BinaryReader reader, int count)
         {
-            OpenTK.Matrix3x4[] arr = new OpenTK.Matrix3x4[count];
-            for (int i = 0; i < count; i++)
-            {
-                arr[i] = reader.ReadMatrix3x4();
-            }
-
-            return arr;
-        }
-
-        public static OpenTK.Matrix4x3[] ReadMatrix4x3Array(this BinaryReader reader, int count)
-        {
-            OpenTK.Matrix4x3[] arr = new OpenTK.Matrix4x3[count];
+            Matrix4x4[] arr = new Matrix4x4[count];
             for (int i = 0; i < count; i++)
             {
                 arr[i] = reader.ReadMatrix4x3();
@@ -467,9 +399,9 @@
             return arr;
         }
 
-        public static OpenTK.Matrix4[] ReadMatrix4Array(this BinaryReader reader, int count)
+        public static Matrix4x4[] ReadMatrix4Array(this BinaryReader reader, int count)
         {
-            OpenTK.Matrix4[] arr = new OpenTK.Matrix4[count];
+            Matrix4x4[] arr = new Matrix4x4[count];
             for (int i = 0; i < count; i++)
             {
                 arr[i] = reader.ReadMatrix4();

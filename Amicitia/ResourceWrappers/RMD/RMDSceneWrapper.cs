@@ -193,16 +193,16 @@
         internal override void InitializeWrapper()
         {
             Nodes.Clear();
-            TexturesNode = new RWTextureDictionaryWrapper("Textures", WrappedObject.TextureDictionary ?? new RWTextureDictionary());
-            SceneListNode = new TreeNode("Scenes");
-            NodeLinkListNode = new TreeNode("NodeLinks");
-            AnimationSetListNode = new TreeNode("AnimationSets");
-            MiscNodeListNode = new TreeNode("MiscData");
+            m_texturesNode = new RWTextureDictionaryWrapper("Textures", WrappedObject.TextureDictionary ?? new RWTextureDictionary());
+            m_sceneListNode = new TreeNode("Scenes");
+            m_nodeLinkListNode = new TreeNode("NodeLinks");
+            m_animSetListNode = new TreeNode("AnimationSets");
+            m_miscNodeListNode = new TreeNode("MiscData");
 
             int sceneIndex = 0;
             foreach (RWScene scene in WrappedObject.Scenes)
             {
-                SceneListNode.Nodes.Add(
+                m_sceneListNode.Nodes.Add(
                     new RWSceneWrapper(
                         string.Format("SceneData[{0}]", sceneIndex++), 
                         scene));
@@ -211,7 +211,7 @@
             int nodeLinkIndex = 0;
             foreach (RMDNodeLink frameLink in WrappedObject.NodeLinks)
             {
-                NodeLinkListNode.Nodes.Add(
+                m_nodeLinkListNode.Nodes.Add(
                     new ResourceWrapper(
                         string.Format("NodeLinkData[{0}]", (nodeLinkIndex++).ToString("00")),
                         new GenericBinaryFile(frameLink.GetBytes())));
@@ -220,7 +220,7 @@
             int animSetIndex = 0;
             foreach (RMDAnimationSet animSet in WrappedObject.AnimationSets)
             {
-                AnimationSetListNode.Nodes.Add(
+                m_animSetListNode.Nodes.Add(
                     new ResourceWrapper(
                         string.Format("AnimationSet[{0}]", (animSetIndex++).ToString("00")),
                         new GenericBinaryFile(animSet.GetBytes())));
@@ -229,13 +229,13 @@
             int miscNodeIndex = 0;
             foreach (RWNode miscNode in WrappedObject.MiscNodes)
             {
-                MiscNodeListNode.Nodes.Add(
+                m_miscNodeListNode.Nodes.Add(
                     new ResourceWrapper(
                         string.Format("MiscData[{0}][{1}]", miscNode.Type.ToString(), miscNodeIndex++),
                         new GenericBinaryFile(miscNode.GetBytes())));
             }
 
-            Nodes.Add(TexturesNode, SceneListNode, NodeLinkListNode, AnimationSetListNode, MiscNodeListNode);
+            Nodes.Add(m_texturesNode, m_sceneListNode, m_nodeLinkListNode, m_animSetListNode, m_miscNodeListNode);
         }
     }
 }

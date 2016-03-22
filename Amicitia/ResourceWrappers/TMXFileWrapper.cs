@@ -8,6 +8,7 @@
     using AtlusLibSharp.PS2.Graphics;
     using AtlusLibSharp.Graphics.TMX;
 
+    [Wrapper(typeof(TMXFile), "Atlus PS2 Texture", ".tmx")]
     internal class TMXFileWrapper : ResourceWrapper
     {
         /*********************/

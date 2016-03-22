@@ -2,6 +2,6 @@
 {
     internal class ELFSegment
     {
-        private ELFProgramHeader _header;
+        //private ELFProgramHeader _header;
     }
 }

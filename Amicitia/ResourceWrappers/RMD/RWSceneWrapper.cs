@@ -53,6 +53,13 @@ namespace Amicitia.ResourceWrappers
             ctx.ExportFile(RWScene.ToAssimpScene(scene), path, "collada");
         }
 
+        private static void ExportOBJFile(ResourceWrapper res, string path)
+        {
+            var scene = (res as RWSceneWrapper).WrappedObject;
+            var ctx = new Assimp.AssimpContext();
+            ctx.ExportFile(RWScene.ToAssimpScene(scene), path, "obj");
+        }
+
         /************************************/
         /* Import / export method overrides */
         /************************************/

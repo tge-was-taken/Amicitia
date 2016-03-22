@@ -1,16 +1,20 @@
-﻿namespace Amicitia
+﻿using System;
+
+namespace Amicitia
 {
     internal struct SupportedFileInfo
     {
         public string Description;
-        public SupportedFileType Type;
+        public SupportedFileType EnumType;
+        public Type ClassType;
         public bool ExportOnly;
         public string[] Extensions;
 
-        public SupportedFileInfo(string description, SupportedFileType type, bool exportOnly, params string[] extensions)
+        public SupportedFileInfo(string description, SupportedFileType type, Type classType, bool exportOnly, params string[] extensions)
         {
             Description = description;
-            Type = type;
+            EnumType = type;
+            ClassType = classType;
             ExportOnly = exportOnly;
             Extensions = extensions;
         }

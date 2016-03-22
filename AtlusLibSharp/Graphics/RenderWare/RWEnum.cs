@@ -19,10 +19,10 @@
         Animation                   = 0x0000001B,
         TextureDictionary           = 0x00000016,
         UVAnimationDictionary       = 0x0000002B,
-        MeshMaterialSplitList             = 0x0000050E,
+        MeshMaterialSplitList       = 0x0000050E,
         SkyMipMapValue              = 0x00000110,
         SkinPlugin                  = 0x00000116,
-        SceneNodeBoneMetadata         = 0x0000011E,
+        SceneNodeBoneMetadata       = 0x0000011E,
         UserDataPlugin              = 0x0000011F,
         Maestro2D                   = 0x000001B1, // ???
         RMDAnimationSetPlaceholder  = 0xF0F00001,
@@ -90,7 +90,7 @@
         XBOX = 0x05,
         D3D8 = 0x08,
         D3D9 = 0x09,
-        PS2 = 'P' | 'S' << 8 | '2' << 16 | 0x00 << 24
+        PS2 = 'P' | 'S' << 8 | '2' << 16
     }
 
     public enum RWRasterFormats : uint

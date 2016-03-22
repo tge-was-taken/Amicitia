@@ -6,5 +6,6 @@
     public interface ITextureFile
     {
         Bitmap GetBitmap();
+        Color[] GetPixels();
     }
 }

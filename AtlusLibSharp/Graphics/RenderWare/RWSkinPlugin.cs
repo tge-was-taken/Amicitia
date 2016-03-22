@@ -1,89 +1,91 @@
 ﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
     using System.IO;
-    using OpenTK;
+    using System.Numerics;
     using Utilities;
+    using System.Reflection;
+    using System;
 
     // This class needs some major refactoring
     public class RWSkinPlugin : RWNode
     {
-        private byte _numBones;
-        private byte _numUsedBones;
-        private byte _numWeightPerVertex;
-        private byte _unused;
-        private byte[] _usedBoneIndices;
-        private byte[][] _skinBoneIndices;
-        private float[][] _skinBoneWeights;
-        private Matrix4[] _inverseBoneMatrices;
-        private int _boneLimit;
-        private int _numMaterialSplit;
-        private int _materialSplitNumUsedBones;
-        private byte[] _boneRemapIndices;
-        private MaterialSplitSkinInfo[] _materialSplitSkinInfo;
-        private MaterialSplitUsedBoneInfo[] _materialSplitUsedBoneInfo;
+        private byte m_numBones;
+        private byte m_numUsedBones;
+        private byte m_numWeightPerVertex;
+        private byte m_unused;
+        private byte[] m_usedBoneIndices;
+        private byte[][] m_skinBoneIndices;
+        private float[][] m_skinBoneWeights;
+        private Matrix4x4[] m_inverseBoneMatrices;
+        private int m_boneLimit;
+        private int m_numMaterialSplit;
+        private int m_materialSplitNumUsedBones;
+        private byte[] m_boneRemapIndices;
+        private MaterialSplitSkinInfo[] m_materialSplitSkinInfo;
+        private MaterialSplitUsedBoneInfo[] m_materialSplitUsedBoneInfo;
 
         public byte BoneCount
         {
-            get { return _numBones; }
+            get { return m_numBones; }
         }
 
         public byte UsedBoneCount
         {
-            get { return _numUsedBones; }
+            get { return m_numUsedBones; }
         }
 
         public byte MaxWeightCountPerVertex
         {
-            get { return _numWeightPerVertex; }
+            get { return m_numWeightPerVertex; }
         }
 
         public byte[] UsedBoneIndices
         {
-            get { return _usedBoneIndices; }
+            get { return m_usedBoneIndices; }
         }
 
         public byte[][] SkinBoneIndices
         {
-            get { return _skinBoneIndices; }
+            get { return m_skinBoneIndices; }
         }
 
         public float[][] SkinBoneWeights
         {
-            get { return _skinBoneWeights; }
+            get { return m_skinBoneWeights; }
         }
 
-        public Matrix4[] InverseBoneMatrices
+        public Matrix4x4[] InverseBoneMatrices
         {
-            get { return _inverseBoneMatrices; }
+            get { return m_inverseBoneMatrices; }
         }
 
         public int BoneLimit
         {
-            get { return _boneLimit; }
+            get { return m_boneLimit; }
         }
 
         public int MaterialSplitCount
         {
-            get { return _numMaterialSplit; }
+            get { return m_numMaterialSplit; }
         }
         public int MaterialSplitTotalUsedBones
         {
-            get { return _materialSplitNumUsedBones; }
+            get { return m_materialSplitNumUsedBones; }
         }
 
         public byte[] BoneRemapIndices
         {
-            get { return _boneRemapIndices; }
+            get { return m_boneRemapIndices; }
         }
 
         public MaterialSplitSkinInfo[] MaterialSplitSkinInfo
         {
-            get { return _materialSplitSkinInfo; }
+            get { return m_materialSplitSkinInfo; }
         }
 
         public MaterialSplitUsedBoneInfo[] MaterialSplitUsedBoneInfo
         {
-            get { return _materialSplitUsedBoneInfo; }
+            get { return m_materialSplitUsedBoneInfo; }
         }
 
         // TODO:
@@ -106,54 +108,125 @@
         {
             int numVertices = rwGeometry.VertexCount;
 
-            _numBones = reader.ReadByte();
-            _numUsedBones = reader.ReadByte();
-            _numWeightPerVertex = reader.ReadByte();
-            _unused = reader.ReadByte();
+            m_numBones = reader.ReadByte();
+            m_numUsedBones = reader.ReadByte();
+            m_numWeightPerVertex = reader.ReadByte();
+            m_unused = reader.ReadByte();
 
-            _usedBoneIndices = reader.ReadBytes(_numUsedBones);
+            m_usedBoneIndices = reader.ReadBytes(m_numUsedBones);
 
-            _skinBoneIndices = new byte[numVertices][];
+            m_skinBoneIndices = new byte[numVertices][];
             for (int i = 0; i < numVertices; i++)
             {
-                _skinBoneIndices[i] = reader.ReadBytes(4);
+                m_skinBoneIndices[i] = reader.ReadBytes(4);
             }
 
-            _skinBoneWeights = new float[numVertices][];
+            m_skinBoneWeights = new float[numVertices][];
             for (int i = 0; i < numVertices; i++)
             {
-                _skinBoneWeights[i] = reader.ReadFloatArray(4);
+                m_skinBoneWeights[i] = reader.ReadFloatArray(4);
             }
 
-            _inverseBoneMatrices = new Matrix4[_numBones];
+            m_inverseBoneMatrices = new Matrix4x4[m_numBones];
             for (int i = 0; i < BoneCount; i++)
             {
-                Matrix4 mtx = Matrix4.Identity;
+                Matrix4x4 mtx = Matrix4x4.Identity;
 
                 mtx.M11 = reader.ReadSingle(); mtx.M12 = reader.ReadSingle(); mtx.M13 = reader.ReadSingle(); reader.BaseStream.Position += 4;
                 mtx.M21 = reader.ReadSingle(); mtx.M22 = reader.ReadSingle(); mtx.M23 = reader.ReadSingle(); reader.BaseStream.Position += 4;
                 mtx.M31 = reader.ReadSingle(); mtx.M32 = reader.ReadSingle(); mtx.M33 = reader.ReadSingle(); reader.BaseStream.Position += 4;
                 mtx.M41 = reader.ReadSingle(); mtx.M42 = reader.ReadSingle(); mtx.M43 = reader.ReadSingle(); reader.BaseStream.Position += 4;
 
-                _inverseBoneMatrices[i] = mtx;
+                m_inverseBoneMatrices[i] = mtx;
             }
 
-            _boneLimit = reader.ReadInt32();
-            _numMaterialSplit = reader.ReadInt32();
-            _materialSplitNumUsedBones = reader.ReadInt32();
+            m_boneLimit = reader.ReadInt32();
+            m_numMaterialSplit = reader.ReadInt32();
+            m_materialSplitNumUsedBones = reader.ReadInt32();
 
-            if (_numMaterialSplit < 1)
+            if (m_numMaterialSplit < 1)
                 return;
 
-            _boneRemapIndices = reader.ReadBytes(_numBones);
+            m_boneRemapIndices = reader.ReadBytes(m_numBones);
 
-            _materialSplitSkinInfo = new MaterialSplitSkinInfo[_numMaterialSplit];
-            for (int i = 0; i < _numMaterialSplit; i++)
-                _materialSplitSkinInfo[i] = new MaterialSplitSkinInfo { UsedBonesStartIndex = reader.ReadByte(), NumUsedBones = reader.ReadByte() };
+            m_materialSplitSkinInfo = new MaterialSplitSkinInfo[m_numMaterialSplit];
+            for (int i = 0; i < m_numMaterialSplit; i++)
+                m_materialSplitSkinInfo[i] = new MaterialSplitSkinInfo { UsedBonesStartIndex = reader.ReadByte(), NumUsedBones = reader.ReadByte() };
 
-            _materialSplitUsedBoneInfo = new MaterialSplitUsedBoneInfo[_materialSplitNumUsedBones];
-            for (int i = 0; i < _materialSplitNumUsedBones; i++)
-                _materialSplitUsedBoneInfo[i] = new MaterialSplitUsedBoneInfo { UsedBoneHierarchyIndex = reader.ReadByte(), Unknown = reader.ReadByte() };
+            m_materialSplitUsedBoneInfo = new MaterialSplitUsedBoneInfo[m_materialSplitNumUsedBones];
+            for (int i = 0; i < m_materialSplitNumUsedBones; i++)
+                m_materialSplitUsedBoneInfo[i] = new MaterialSplitUsedBoneInfo { UsedBoneHierarchyIndex = reader.ReadByte(), Unknown = reader.ReadByte() };
+
+            PrintInfo();
+        }
+
+        internal void PrintInfo()
+        {
+            int index = -1;
+            using (StreamWriter writer = File.CreateText(GetUniqueName(ref index)))
+            {
+                WriteField(writer, nameof(m_numBones));
+                WriteField(writer, nameof(m_numUsedBones));
+                WriteField(writer, nameof(m_numWeightPerVertex));
+                WriteField(writer, nameof(m_unused));
+                WriteFieldArray(writer, nameof(m_usedBoneIndices));
+                WriteFieldDoubleArray(writer, nameof(m_skinBoneIndices));
+                WriteFieldDoubleArray(writer, nameof(m_skinBoneWeights));
+                WriteFieldArray(writer, nameof(m_inverseBoneMatrices));
+                WriteField(writer, nameof(m_boneLimit));
+                WriteField(writer, nameof(m_numMaterialSplit));
+                WriteField(writer, nameof(m_materialSplitNumUsedBones));
+                WriteFieldArray(writer, nameof(m_boneRemapIndices));
+
+                WriteField(writer, nameof(m_materialSplitSkinInfo));
+                for (int i = 0; i < m_materialSplitSkinInfo.Length; i++)
+                {
+                    writer.WriteLine("{0} = {1}", "m_usedBonesStartIndex", m_materialSplitSkinInfo[i].UsedBonesStartIndex);
+                    writer.WriteLine("{0} = {1}", "m_numUsedBones", m_materialSplitSkinInfo[i].NumUsedBones);
+                }
+
+                WriteField(writer, nameof(m_materialSplitUsedBoneInfo));
+                for (int i = 0; i < m_materialSplitUsedBoneInfo.Length; i++)
+                {
+                    writer.WriteLine("{0} = {1}", "m_usedBoneHierarchyIndex", m_materialSplitUsedBoneInfo[i].UsedBoneHierarchyIndex);
+                    writer.WriteLine("{0} = {1}", "m_unknown", m_materialSplitUsedBoneInfo[i].Unknown);
+                }
+            }
+        }
+
+        private void WriteField(StreamWriter writer, string fieldName)
+        {
+            var field = GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            writer.WriteLine("{0} = {1}", fieldName, field.GetValue(this));
+        }
+
+        private void WriteFieldArray(StreamWriter writer, string fieldname)
+        {
+            WriteField(writer, fieldname);
+            var field = GetType().GetField(fieldname, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            dynamic array = field.GetValue(this);
+            for (int i = 0; i < array.Length; i++)
+                writer.WriteLine(array[i]);
+        }
+
+        private void WriteFieldDoubleArray(StreamWriter writer, string fieldname)
+        {
+            WriteField(writer, fieldname);
+            var field = GetType().GetField(fieldname, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            dynamic array = field.GetValue(this);
+            for (int i = 0; i < array.Length; i++)
+                for (int j = 0; j < array[i].Length; j++)
+                    writer.WriteLine(array[i][j]);
+        }
+
+        private string GetUniqueName(ref int index)
+        {
+            index++;
+            string str = string.Format("skinplugin_log_{0}.txt", index);
+            if (File.Exists(str))
+                return GetUniqueName(ref index);
+            else
+                return str;
         }
 
         //public RWSkinPlugin(RWSceneNodeList rwFrameList, RWMesh rwGeometry, byte[][] skinBoneIndices, float[][] skinBoneWeights)
@@ -220,11 +293,11 @@
         /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void InternalWriteInnerData(BinaryWriter writer)
         {
-            writer.Write(_numBones);
-            writer.Write(_numUsedBones);
-            writer.Write(_numWeightPerVertex);
-            writer.Write(_unused);
-            writer.Write(_usedBoneIndices);
+            writer.Write(m_numBones);
+            writer.Write(m_numUsedBones);
+            writer.Write(m_numWeightPerVertex);
+            writer.Write(m_unused);
+            writer.Write(m_usedBoneIndices);
 
             for (int i = 0; i < SkinBoneIndices.Length; i++)
             {
@@ -233,7 +306,7 @@
 
             for (int i = 0; i < SkinBoneWeights.Length; i++)
             {
-                writer.Write(_skinBoneWeights[i]);
+                writer.Write(m_skinBoneWeights[i]);
             }
 
             for (int i = 0; i < BoneCount; i++)
@@ -244,24 +317,24 @@
                 writer.Write(InverseBoneMatrices[i].M41); writer.Write(InverseBoneMatrices[i].M42); writer.Write(InverseBoneMatrices[i].M43); writer.Write(0);
             }
 
-            writer.Write(_boneLimit);
-            writer.Write(_numMaterialSplit);
-            writer.Write(_materialSplitNumUsedBones);
+            writer.Write(m_boneLimit);
+            writer.Write(m_numMaterialSplit);
+            writer.Write(m_materialSplitNumUsedBones);
 
-            if (_numMaterialSplit < 1)
+            if (m_numMaterialSplit < 1)
             {
                 return;
             }
 
-            writer.Write(_boneRemapIndices);
+            writer.Write(m_boneRemapIndices);
 
-            for (int i = 0; i < _numMaterialSplit; i++)
+            for (int i = 0; i < m_numMaterialSplit; i++)
             {
                 writer.Write(MaterialSplitSkinInfo[i].UsedBonesStartIndex);
                 writer.Write(MaterialSplitSkinInfo[i].NumUsedBones);
             }
 
-            for (int i = 0; i < _materialSplitNumUsedBones; i++)
+            for (int i = 0; i < m_materialSplitNumUsedBones; i++)
             {
                 writer.Write(MaterialSplitUsedBoneInfo[i].UsedBoneHierarchyIndex);
                 writer.Write(MaterialSplitUsedBoneInfo[i].Unknown);
@@ -269,13 +342,13 @@
         }
     }
 
-    public struct MaterialSplitSkinInfo
+    public class MaterialSplitSkinInfo
     {
         public byte UsedBonesStartIndex { get; set; }
         public byte NumUsedBones { get; set; }
     }
 
-    public struct MaterialSplitUsedBoneInfo
+    public class MaterialSplitUsedBoneInfo
     {
         public byte UsedBoneHierarchyIndex { get; set; }
         public byte Unknown { get; set; } // something related to num of influences?

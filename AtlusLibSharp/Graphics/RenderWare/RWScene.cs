@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Numerics;
 
     /// <summary>
     /// Encapsulates a RenderWare model scene containing meshes, draw calls, lights and cameras.
@@ -164,12 +165,12 @@
                     {
                         if (mesh.HasVertices)
                         {
-                            var vert = OpenTK.Vector3.Transform(mesh.Vertices[indices[i]], node.WorldTransform);
+                            var vert = Vector3.Transform(mesh.Vertices[indices[i]], node.WorldTransform);
                             aiMesh.Vertices.Add(vert.ToAssimpVector3D());
                         }
                         if (mesh.HasNormals)
                         {
-                            var nrm = OpenTK.Vector3.TransformNormal(mesh.Normals[indices[i]], node.WorldTransform);
+                            var nrm = Vector3.TransformNormal(mesh.Normals[indices[i]], node.WorldTransform);
                             aiMesh.Normals.Add(nrm.ToAssimpVector3D());
                         }
                     }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace AtlusLibSharp.Utilities
 {
-    public static class OpenTKVector3Extension
+    public static class Vector3Extension
     {
-        public static bool IsNaN(this OpenTK.Vector3 value)
+        public static bool IsNaN(this Vector3 value)
         {
             if (float.IsNaN(value.X))
                 return true;
@@ -20,15 +16,15 @@ namespace AtlusLibSharp.Utilities
                 return false;
         }
 
-        public static Assimp.Vector3D ToAssimpVector3D(this OpenTK.Vector3 value)
+        public static Assimp.Vector3D ToAssimpVector3D(this Vector3 value)
         {
             return new Assimp.Vector3D(value.X, value.Y, value.Z);
         }
     }
 
-    public static class OpenTKVector2Extension
+    public static class Vector2Extension
     {
-        public static Assimp.Vector3D ToAssimpVector3D(this OpenTK.Vector2 value, float z)
+        public static Assimp.Vector3D ToAssimpVector3D(this Vector2 value, float z)
         {
             return new Assimp.Vector3D(value.X, value.Y, z);
         }

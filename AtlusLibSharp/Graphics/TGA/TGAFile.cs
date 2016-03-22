@@ -236,6 +236,20 @@
             return _bitmap;
         }
 
+
+        public Color[] GetPixels()
+        {
+            if (IsIndexed && _pixels == null)
+            {
+                _pixels = new Color[_width * _height];
+                for (int y = 0; y < _height; y++)
+                    for (int x = 0; x < _width; x++)
+                        _pixels[x + y * _width] = _palette[_paletteIndices[x + y * _width]];
+            }
+
+            return _pixels;
+        }
+
         internal void InternalRead(BinaryReader reader)
         {
             _idLength = reader.ReadByte();

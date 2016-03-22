@@ -306,6 +306,19 @@
             return _bitmap;
         }
 
+        public Color[] GetPixels()
+        {
+            if (IsIndexed && _raster.Data.Pixels == null)
+            {
+                _raster.Data.Pixels = new Color[Width * Height];
+                for (int y = 0; y < Height; y++)
+                    for (int x = 0; x < Width; x++)
+                        _raster.Data.Pixels[x + y * Width] = Palette[PixelIndices[x + y * Width]];
+            }
+
+            return _raster.Data.Pixels;
+        }
+
         /// <summary>
         /// Inherited from <see cref="RWNode"/>. Writes the data beyond the header.
         /// </summary>

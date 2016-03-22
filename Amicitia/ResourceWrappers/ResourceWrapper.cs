@@ -8,6 +8,21 @@
     using System.Collections.Generic;
     using AtlusLibSharp.IO;
 
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+    internal sealed class WrapperAttribute : Attribute
+    {
+        private Type m_wrappedResourceType;
+        private string m_description;
+        private string m_filter;
+
+        // This is a positional argument
+        public WrapperAttribute(Type wrappedResourceType, string description, params string[] extensions)
+        {
+            m_wrappedResourceType = wrappedResourceType;
+        }
+    }
+
+    [Wrapper(typeof(BinaryFileBase), "Raw data", ".*")]
     internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
     {
         /*******************/
@@ -330,7 +345,7 @@
                 var fileTypes = GetSupportedFileTypes();
 
                 saveFileDlg.FileName = Text;
-                saveFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(fileTypes);
+                saveFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
@@ -358,7 +373,7 @@
                 var fileTypes = GetSupportedFileTypes();
 
                 openFileDlg.FileName = Text;
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(fileTypes);
+                openFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {

@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.Utilities
 {
-    using OpenTK;
+    using System.Numerics;
     using System;
     using System.Collections.Generic;
 
@@ -22,7 +22,7 @@
 
                 if (normal != Vector3.Zero)
                 {
-                    normal.Normalize();
+                    normal = Vector3.Normalize(normal);
                 }
 
                 // Store the face's normal for each of the vertices that make up the face.
@@ -35,7 +35,7 @@
             {
                 if (normals[i] != Vector3.Zero)
                 {
-                    normals[i].Normalize();
+                    normals[i] = Vector3.Normalize(normals[i]);
                 }
             }
 

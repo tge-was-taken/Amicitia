@@ -16,17 +16,17 @@
     {
         public static ResourceWrapper GetResource(string path)
         {
-            return GetResource(Path.GetFileName(path), new FileStream(path, FileMode.Open), SupportedFileHandler.GetSupportedFileIndex(path));
+            return GetResource(Path.GetFileName(path), new FileStream(path, FileMode.Open), SupportedFileManager.GetSupportedFileIndex(path));
         }
 
         public static ResourceWrapper GetResource(string text, Stream stream)
         {
-            return GetResource(text, stream, SupportedFileHandler.GetSupportedFileIndex(text, stream));
+            return GetResource(text, stream, SupportedFileManager.GetSupportedFileIndex(text, stream));
         }
 
         public static ResourceWrapper GetResource(string text, Stream stream, int supportedFileIndex)
         {
-            switch (SupportedFileHandler.GetType(supportedFileIndex))
+            switch (SupportedFileManager.GetType(supportedFileIndex))
             {
                 // Archive formats
                 case SupportedFileType.BVPArchiveFile:

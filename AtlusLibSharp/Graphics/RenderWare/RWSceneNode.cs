@@ -2,12 +2,12 @@
 {
     using System.IO;
     using System.Collections.Generic;
-    using OpenTK;
+    using System.Numerics;
     using Utilities;
 
     public class RWSceneNode
     {
-        private Matrix4 _transform;
+        private Matrix4x4 _transform;
         private RWSceneNode _parent;
         private int _userFlags;
         private List<RWSceneNode> _children;
@@ -16,7 +16,7 @@
         /// <summary>
         /// Gets the local transformation matrix of the scene node.
         /// </summary>
-        public Matrix4 Transform
+        public Matrix4x4 Transform
         {
             get { return _transform; }
             set
@@ -62,11 +62,11 @@
         /// <summary>
         /// Gets the world (absolute) transformation matrix of this scene node. This can be an expensive operation.
         /// </summary>
-        public Matrix4 WorldTransform
+        public Matrix4x4 WorldTransform
         {
             get
             {
-                Matrix4 tfm;
+                Matrix4x4 tfm;
 
                 if (_parent != null)
                     tfm = _transform * _parent.WorldTransform;
@@ -100,7 +100,7 @@
         /// <param name="transform">The local transformation matrix of the node.</param>
         /// <param name="parent">The parent node of the scene node.</param>
         /// <param name="userFlag">The user flag to set.</param>
-        public RWSceneNode(Matrix4 transform, RWSceneNode parent, int userFlag)
+        public RWSceneNode(Matrix4x4 transform, RWSceneNode parent, int userFlag)
         {
             _transform = transform;
             _userFlags = userFlag;
@@ -110,7 +110,7 @@
         // read from binary reader
         internal RWSceneNode(BinaryReader reader, List<RWSceneNode> frameList)
         {
-            _transform = reader.ReadMatrix4x3().ToMatrix4();
+            _transform = reader.ReadMatrix4x3();
             int parentIndex = reader.ReadInt32();
             _userFlags = reader.ReadInt32();
 
@@ -125,7 +125,7 @@
         // write with binary writer
         internal void InternalWrite(BinaryWriter writer, List<RWSceneNode> sceneNodeList)
         {
-            writer.Write(_transform.ToMatrix4x3());
+            writer.Write(_transform, true);
             writer.Write(sceneNodeList.IndexOf(Parent));
             writer.Write(_userFlags);
         }

@@ -98,6 +98,7 @@
 
                 if (primType == RWPrimitiveType.TriangleStrip)
                 {
+                    /*
                     ManagedNvTriStrip.PrimitiveGroup[] primitives = null;
 
                     if (ManagedNvTriStrip.NvTriStripUtility.Stripify(matSplitIndices, ref primitives))
@@ -107,6 +108,13 @@
                     else
                     {
                         throw new System.Exception("Failed to generate strips.");
+                    }
+                    */
+                    NvTriStripDotNet.PrimitiveGroup[] primitives;
+                    var tristripper = new NvTriStripDotNet.NvTriStrip();
+                    if (tristripper.GenerateStrips(matSplitIndices, out primitives))
+                    {
+                        matSplitIndices = primitives[0].indices.Cast<ushort>().ToArray();
                     }
                 }
 

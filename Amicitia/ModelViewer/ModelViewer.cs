@@ -8,8 +8,7 @@ using OpenTK.Graphics.OpenGL4;
 using AtlusLibSharp.Utilities;
 using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
-using System.Runtime.InteropServices;
-using System.Threading;
+using SN = System.Numerics;
 
 namespace Amicitia.ModelViewer
 {
@@ -95,7 +94,7 @@ namespace Amicitia.ModelViewer
             this.z = z;
         }
 
-        public BasicVec3(Vector3 v)
+        public BasicVec3(SN.Vector3 v)
         {
             x = v.X;
             y = v.Y;
@@ -113,7 +112,7 @@ namespace Amicitia.ModelViewer
             this.y = y;
         }
 
-        public BasicVec2(Vector2 v)
+        public BasicVec2(SN.Vector2 v)
         {
             x = v.X;
             y = v.Y;
@@ -147,7 +146,7 @@ namespace Amicitia.ModelViewer
         public Camera()
         {
             // default settings
-            _position = new Vector3(-20.0f, -20.0f, -20.0f);
+            _position = new Vector3(100, 100, 100);
             _forward = new Vector3(0, 0, 1);
             _up = new Vector3(0, 1, 0);
         }
@@ -225,7 +224,7 @@ namespace Amicitia.ModelViewer
         private static Matrix4 _transform;
         private static Camera _camera;
         private static Vector3 _tp;
-        private static Vector3 _tr;
+        private static Vector3 _cameraTarget;
         private static float _flo = 0;
         private static Color _bgColor;
         private static bool focused;
@@ -248,6 +247,7 @@ namespace Amicitia.ModelViewer
 
         public ModelViewer(GLControl controller)
         {
+            Console.WriteLine(GL.GetString(StringName.Version));
             _ready = _sceneready = false;
             _viewerCtrl = controller;
             _models = new List<GPUModel>();
@@ -265,14 +265,13 @@ namespace Amicitia.ModelViewer
             
 
             _tp = new Vector3();
-            _tr = new Vector3();
             _ready = true;
             GL.Viewport(0, 0, controller.Width, controller.Height);
         }
 
         private void Input()
         {
-            const float MOVE_SPEED = 0.007f;
+            const float MOVE_SPEED = 0.7f;
             if (_sceneready)
             {
                 if (focused)
@@ -282,37 +281,31 @@ namespace Amicitia.ModelViewer
                     if (Program.GetAsyncKeyState(Keys.W) != 0)
                     {
                         _camera.Position += _camera.Forward * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
-                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
                     }
                     else if (Program.GetAsyncKeyState(Keys.S) != 0)
                     {
                         _camera.Position -= _camera.Forward * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y, tp.Z - 10f);
-                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
                     }
                     else if (Program.GetAsyncKeyState(Keys.D) != 0)
                     {
                         _camera.Position -= Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; //tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
-                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
                     }
                     else if (Program.GetAsyncKeyState(Keys.A) != 0)
                     {
                         _camera.Position += Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
                     }
                     else if (Program.GetAsyncKeyState(Keys.Q) != 0)
                     {
                         _camera.Position += new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
                     }
                     else if (Program.GetAsyncKeyState(Keys.E) != 0)
                     {
                         _camera.Position -= new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-                        _camera.Forward = Vector3.Normalize(_tp - _camera.Position);
                     }
 
-                    if (_camera.Position.IsNaN())
+                    if (IsNaN(_camera.Position))
                     {
-                        if (!oldpos.IsNaN())
+                        if (!IsNaN(oldpos))
                         {
                             _camera.Position = oldpos; //prevents the camera from dying
                         }
@@ -322,6 +315,7 @@ namespace Amicitia.ModelViewer
                             _camera.Position = new Vector3();
                         }
                     }
+                    _camera.Forward = Vector3.Normalize(_cameraTarget - _camera.Position);
 
                     if (Program.GetAsyncKeyState(Keys.None) == 0)
                     {
@@ -329,6 +323,18 @@ namespace Amicitia.ModelViewer
                     }
                 }
             }
+        }
+
+        public static bool IsNaN(Vector3 value)
+        {
+            if (float.IsNaN(value.X))
+                return true;
+            else if (float.IsNaN(value.Y))
+                return true;
+            else if (float.IsNaN(value.Z))
+                return true;
+            else
+                return false;
         }
 
         public void LoadScene(RMDScene rmdScene)
@@ -344,8 +350,6 @@ namespace Amicitia.ModelViewer
             _shaderProg.AddUniform("diffuseColor");
             _shaderProg.AddUniform("isTextured"); //used like a bool but is actually an int because of glsl design limitations ¬~¬
             _shaderProg.Bind();
-
-            _transform = Matrix4.CreateTranslation(new Vector3(-10, 0, -200)) * Matrix4.CreateFromQuaternion(Quaternion.FromEulerAngles(20, 0, 0)) * Matrix4.CreateScale(new Vector3(1.0f, 1.0f, 1.0f));
 
             Console.WriteLine("loading scene");
             Console.WriteLine("num textures: {0} ", rmdScene.TextureDictionary != null ? rmdScene.TextureDictionary.TextureCount : 0);
@@ -381,10 +385,8 @@ namespace Amicitia.ModelViewer
                 }
             }
 
-            Vector3 extentMin = new Vector3(999999, 999999, 999999);
-            Vector3 extentMax = new Vector3(-999999, -999999, -999999);
-
-
+            float min_x = 0, min_y = 0, min_z = 0;
+            float max_x = 0, max_y = 0, max_z = 0;
             int clumpIdx = 0;
             foreach (RWScene rwScene in rmdScene.Scenes)
             {
@@ -395,34 +397,42 @@ namespace Amicitia.ModelViewer
                 foreach (RWDrawCall drawCall in rwScene.DrawCalls)
                 {
                     Console.WriteLine("processing draw call: {0}", drawCallIdx);
-                    Console.WriteLine("geo:{0}\t frame:{1}\t flag1:{2}\t flag2{3}\t", 
-                        drawCall.MeshIndex, drawCall.NodeIndex, drawCall.Flag1, drawCall.Flag2);
+                    Console.WriteLine("geo:{0}\t frame:{1}\t flag1:{2}\t flag2{3}\t", drawCall.MeshIndex, drawCall.NodeIndex, drawCall.Flag1, drawCall.Flag2);
 
                     var geom = rwScene.Meshes[drawCall.MeshIndex];
                     var frame = rwScene.Nodes[drawCall.NodeIndex];
+
                     Console.WriteLine(geom.MaterialSplitData.MaterialSplitCount);
                     Console.WriteLine(geom.MaterialSplitData.PrimitiveType);
+
                     Vertex[] vertices = new Vertex[geom.VertexCount];
                     int[][] allIndices = new int[geom.MaterialSplitData.MaterialSplitCount][];
                     int[] allIndicesCount = new int[geom.MaterialSplitData.MaterialSplitCount];
+                    int[] fullIndices = new int[geom.TriangleCount*3];
+
+                    for(int i = 0; i < geom.TriangleCount; i++)
+                    {
+                        fullIndices[i * 3 + 0] = geom.Triangles[i].A;
+                        fullIndices[i * 3 + 1] = geom.Triangles[i].B;
+                        fullIndices[i * 3 + 2] = geom.Triangles[i].C;
+                    }
+
                     // remap the vertices
                     for (int i = 0; i < geom.VertexCount; i++)
                     {
                         // get the vertex info
-                        var oldPos = geom.HasVertices ? Vector3.Transform(geom.Vertices[i], frame.WorldTransform) : new Vector3(0, 0, 0);
-                        var oldNrm = geom.HasNormals ? Vector3.TransformNormal(geom.Normals[i], frame.WorldTransform) : new Vector3(0, 0, 0);
-                        var oldTcd = geom.HasTexCoords ? geom.TextureCoordinateChannels[0][i] : new Vector2(0, 0);
+                        //var oldPos = geom.HasVertices ? Vector3.Transform(new Vector4(geom.Vertices[i], 1.0f), frame.WorldTransform).Xyz : new Vector3(0, 0, 0);
+                        var oldPos = geom.HasVertices ? SN.Vector3.Transform(geom.Vertices[i], frame.WorldTransform) : new SN.Vector3(0, 0, 0);
+                        var oldNrm = geom.HasNormals ? SN.Vector3.TransformNormal(geom.Normals[i], frame.WorldTransform) : new SN.Vector3(0, 0, 0);
+                        var oldTcd = geom.HasTexCoords ? geom.TextureCoordinateChannels[0][i] : new SN.Vector2(0, 0);
                         var oldCol = geom.HasColors ? geom.Colors[i] : Color.White;
 
-                        // min
-                        if (oldPos.X < extentMin.X) extentMin.X = oldPos.X;
-                        if (oldPos.Y < extentMin.Y) extentMin.Y = oldPos.Y;
-                        if (oldPos.Z < extentMin.Z) extentMin.Z = oldPos.Z;
-
-                        // max
-                        if (oldPos.X > extentMax.X) extentMax.X = oldPos.X;
-                        if (oldPos.X > extentMax.Y) extentMax.Y = oldPos.Y;
-                        if (oldPos.X > extentMax.Z) extentMax.Z = oldPos.Z;
+                        if (oldPos.X < min_x) min_x = oldPos.X;
+                        if (oldPos.X > max_x) max_x = oldPos.X;
+                        if (oldPos.Y < min_y) min_y = oldPos.Y;
+                        if (oldPos.Y > max_y) max_y = oldPos.Y;
+                        if (oldPos.Z < min_z) min_z = oldPos.Z;
+                        if (oldPos.Z > max_z) max_z = oldPos.Z;
 
                         // create basic vecs
                         var pos = new BasicVec3(oldPos);
@@ -477,23 +487,21 @@ namespace Amicitia.ModelViewer
                     _models.Add(new GPUModel(vbo, ibo, geom.VertexCount, allIndicesCount, texname, colors, geom.MaterialSplitData.PrimitiveType == RWPrimitiveType.TriangleStrip));
                 }
             }
-
-            Vector3 extentCenter = Vector3.Divide((extentMin + extentMax), 0.5f);
-
-            //_camera.Forward = Vector3.Divide(extentMin, 2f);
-            //_camera.Position = extentCenter;
-
+            _cameraTarget = new Vector3((min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2);
+            Console.WriteLine(_cameraTarget);
+            
             // everything's processed, the scene is ready to be rendered
 
             _sceneready = true;
-            Program.loopFunctions.Add(Input);
+            Program.LoopFunctions.Add(Input);
         }
 
         public void DeleteScene()
         {
             if (!_sceneready)
                 return;
-            Program.loopFunctions.Remove(Input);
+
+            Program.LoopFunctions.Remove(Input);
             Console.WriteLine("deleting scene");
             EndBind();
             Console.WriteLine("unbind models");
@@ -501,13 +509,16 @@ namespace Amicitia.ModelViewer
             Console.WriteLine("unbind textures");
             _currentTextureID = _currentGPUModelID = 0;
 
+            // death to the textures
+            int[] texIds = new int[_texLookup.Count];
+            _texLookup.Values.CopyTo(texIds, 0);
             for (int i = 0; i < _texLookup.Count; i++)
             {
                 Console.WriteLine("deleting texture: " + i);
-                GL.DeleteTexture(_texLookup.GetEnumerator().Current.Value);
-                _texLookup.GetEnumerator().MoveNext();
+                GL.DeleteTexture(texIds[i]);
             }
 
+            // death to models
             for (int i = 0; i < _models.Count; i++)
             {
                 Console.WriteLine("deleting model: " + i);
@@ -555,17 +566,26 @@ namespace Amicitia.ModelViewer
         {
             for (int i = 0; i < data.ibo.Length; i++)
             {
-                _shaderProg.SetUniform("diffuseColor", data.color[i]);
+                int isTextured = 0;
+
                 if (data.tid[i] != string.Empty)
                 {
-                    _shaderProg.SetUniform("isTextured", 1);
                     int texIdx;
                     bool texPresent = _texLookup.TryGetValue(data.tid[i], out texIdx);
 
                     if (texPresent)
+                    {
+                        isTextured = 1;
                         FullTexBind(texIdx);
+                    }
                 }
-                else _shaderProg.SetUniform("isTextured", 0);
+
+                // set shader vars
+                _shaderProg.SetUniform("diffuseColor", data.color[i]);
+                _shaderProg.SetUniform("isTextured", isTextured);
+
+                // bind model
+                GL.BindBuffer(BufferTarget.ArrayBuffer, data.vbo);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.ibo[i]);
                 GL.DrawElements(data.strip ? BeginMode.TriangleStrip : BeginMode.Triangles, data.ic[i], DrawElementsType.UnsignedInt, 0);
             }
@@ -583,35 +603,29 @@ namespace Amicitia.ModelViewer
 
         private void FullBind(GPUModel data) // for optimization
         {
-            if (data.vbo != 0)
+            if (data.vbo == 0)
+                return;
+
+            if (_currentGPUModelID != data.vbo)
             {
-                
-
-
-                if (_currentGPUModelID != data.vbo)
-                {
-                    EndBind();  // incase the previous was a SubBind
-                    BeginBind(data);
-                    SubBind(data);
-                    _currentGPUModelID = data.vbo;
-                }
-                else
-                {
-                    SubBind(data);
-                }
+                EndBind();  // incase the previous was a SubBind
+                BeginBind(data);
+                SubBind(data);
+                _currentGPUModelID = data.vbo;
+            }
+            else
+            {
+                SubBind(data);
             }
         }
 
         private void FullTexBind(int texture)
         {
-            if (texture != 0)
-            {
-                if (texture != _currentTextureID)
-                {
-                    GL.BindTexture(TextureTarget.Texture2D, texture);
-                    _currentTextureID = texture;
-                }
-            }
+            if (texture == 0 || texture == _currentTextureID)
+                return;
+
+            GL.BindTexture(TextureTarget.Texture2D, texture);
+            _currentTextureID = texture;
         }
 
         private void ModelViewerResize(object sender, EventArgs e)
@@ -635,7 +649,7 @@ namespace Amicitia.ModelViewer
             {
                 _shaderProg.Bind();
                 _camera.Bind(_shaderProg, _viewerCtrl);
-                _transform = Matrix4.CreateTranslation(_tp) * Matrix4.CreateFromQuaternion(Quaternion.FromEulerAngles(MathHelper.DegreesToRadians(90), 0, 0)) * Matrix4.CreateScale(new Vector3(1.0f, 1.0f, 1.0f));
+                _transform = Matrix4.CreateTranslation(_tp) * Matrix4.CreateFromQuaternion(Quaternion.FromEulerAngles(0, 0, 0)) * Matrix4.CreateScale(new Vector3(1.0f, 1.0f, 1.0f));
                 _shaderProg.SetUniform("tran", _transform);
 
                 if (_models.Count > 0)

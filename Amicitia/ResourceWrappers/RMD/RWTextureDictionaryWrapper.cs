@@ -101,14 +101,14 @@ namespace Amicitia.ResourceWrappers
         {
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
-                openFileDlg.Filter = SupportedFileHandler.GetFilteredFileFilter(RWTextureNativeWrapper.FileFilterTypes);
+                openFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(RWTextureNativeWrapper.FileFilterTypes);
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(openFileDlg.FileName);
+                int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(openFileDlg.FileName);
 
                 if (supportedFileIndex == -1)
                 {

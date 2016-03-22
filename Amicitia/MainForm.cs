@@ -113,6 +113,8 @@ namespace Amicitia
                 try
                 {
                     viewer.LoadScene((res as ResourceWrapper).WrappedObject as RMDScene);
+                    glControl1.Focus();
+                    glControl1.Invalidate();
                 }
                 catch (Exception ex)
                 {
@@ -142,7 +144,7 @@ namespace Amicitia
         {
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
-                openFileDlg.Filter = SupportedFileHandler.FileFilter;
+                openFileDlg.Filter = SupportedFileManager.FileFilter;
 
                 // Exit out if user didn't select a file
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
@@ -283,7 +285,7 @@ namespace Amicitia
         {
             if (viewer.IsSceneReady == true) viewer.DeleteScene();
             // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
-            int supportedFileIndex = SupportedFileHandler.GetSupportedFileIndex(filePath);
+            int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(filePath);
 
             if (supportedFileIndex == -1)
             {

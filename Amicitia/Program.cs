@@ -8,13 +8,15 @@ using System.Windows.Forms;
 namespace Amicitia
 {
     public delegate void Loop();
+
     internal static class Program
     {
         public static Assembly Assembly = Assembly.GetExecutingAssembly();
         public static string Name = Assembly.GetName().Name;
         public static string Version = Assembly.GetName().Version.ToString();
         public static DateTime BuildTime = Assembly.GetLinkerTime();
-        public static List<Loop> loopFunctions;
+        public static Type[] Types = Assembly.GetTypes();
+        public static List<Loop> LoopFunctions;
 
         // increment these
         public static int VersionMajor = 0;
@@ -35,7 +37,7 @@ namespace Amicitia
         [STAThread]
         static void Main()
         {
-            loopFunctions = new List<Loop>();
+            LoopFunctions = new List<Loop>();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new MainForm()); //classical way of doing forms but we want to make a message pump
@@ -48,8 +50,8 @@ namespace Amicitia
             {
                 Application.DoEvents();
 
-                if(loopFunctions.Count > 0)
-                    foreach (Loop func in loopFunctions)
+                if(LoopFunctions.Count > 0)
+                    foreach (Loop func in LoopFunctions)
                         func();
 
                 //System.Threading.Thread.Sleep(1);

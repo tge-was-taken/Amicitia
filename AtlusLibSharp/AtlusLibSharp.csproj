@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AtlusLibSharp</RootNamespace>
     <AssemblyName>AtlusLibSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -63,25 +63,20 @@
       <HintPath>..\packages\AssimpNet.3.3.1\lib\net45\AssimpNet.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ManagedNvTriStrip, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\ManagedNvTriStrip.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.1.1.2225.0\lib\net20\OpenTK.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="NvTriStripDotNET">
+      <HintPath>..\..\NvTriStrip.NET\NvTriStrip.NET\bin\Debug\NvTriStripDotNET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileSystems\AMD\AMDChunk.cs" />
     <Compile Include="FileSystems\AMD\AMDFile.cs" />
-    <Compile Include="Compression\ICompression.cs" />
     <Compile Include="FileSystems\ISO\Enums.cs" />
     <Compile Include="Graphics\RenderWare\RWMeshMaterialSplitData.cs" />
     <Compile Include="Graphics\TGA\TGAEncoding.cs" />
@@ -202,6 +197,7 @@
     <Compile Include="Utilities\BinaryIOExtension.cs" />
     <Compile Include="Utilities\BitHelper.cs" />
     <Compile Include="Utilities\BitmapHelper.cs" />
+    <Compile Include="Utilities\DictionaryExtension.cs" />
     <Compile Include="Utilities\EnumExtension.cs" />
     <Compile Include="Utilities\ICollectionExtension.cs" />
     <Compile Include="Utilities\IListExtension.cs" />
@@ -214,7 +210,7 @@
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFCodeEvaluator.cs" />
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFTag.cs" />
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFUnpack.cs" />
-    <Compile Include="Utilities\OpenTKVector3Extension.cs" />
+    <Compile Include="Utilities\Vector3Extension.cs" />
     <Compile Include="Utilities\StreamExtension.cs" />
     <Compile Include="Utilities\WuQuantizer\Box.cs" />
     <Compile Include="Utilities\WuQuantizer\ColorData.cs" />
@@ -247,7 +243,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Graphics\MD\" />
-    <Folder Include="Utilities\NvTriStrip\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AssimpNet.3.3.1\build\AssimpNet.targets" Condition="Exists('..\packages\AssimpNet.3.3.1\build\AssimpNet.targets')" />

@@ -3,8 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.IO;
-    using OpenTK;
-    using AtlusLibSharp.Utilities;
+    using System.Numerics;
+    using Utilities;
     using IO;
 
     /// <summary>
@@ -89,7 +89,7 @@
     {
         private int _frameANameID;
         private int _frameBNameID;
-        private Matrix4 _matrix;
+        private Matrix4x4 _matrix;
 
         public int FrameANameID
         {
@@ -106,7 +106,7 @@
         /// <summary>
         /// Gets or sets the matrix pivot point of the attachment link.
         /// </summary>
-        public Matrix4 Matrix
+        public Matrix4x4 Matrix
         {
             get { return _matrix; }
             set { _matrix = value; }
@@ -119,7 +119,7 @@
         {
             _frameANameID = 0;
             _frameBNameID = 0;
-            _matrix = Matrix4.Identity;
+            _matrix = Matrix4x4.Identity;
         }
 
         public RMDNodeLink(byte[] data)
@@ -159,7 +159,7 @@
         {
             writer.Write(_frameANameID);
             writer.Write(_frameBNameID);
-            writer.Write(_matrix);
+            writer.Write(_matrix, true);
         }
     }
 }

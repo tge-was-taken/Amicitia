@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
-    using OpenTK;
+    using System.Numerics;
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;

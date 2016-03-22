@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
-    using OpenTK;
+    using System.Numerics;
     using System;
     using System.IO;
     using Utilities;
@@ -84,7 +84,7 @@
             foreach (Vector3 vertex in vertices)
             {
                 Vector3 fromCentre = vertex - sphereCentre;
-                maxDistSq = Math.Max(maxDistSq, fromCentre.LengthSquared);
+                maxDistSq = Math.Max(maxDistSq, fromCentre.LengthSquared());
             }
 
             float sphereRadius = (float)Math.Sqrt(maxDistSq);

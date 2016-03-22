@@ -17,7 +17,7 @@ uniform int isTextured;
 void main()
 {
   vec4 color = vec4(1, 1, 1, 1);
-  if(isTextured)
+  if(isTextured != 0)
   {
     if(texture2D(diffuse, id.tex).a < .3) discard;
     color = texture2D(diffuse, id.tex);

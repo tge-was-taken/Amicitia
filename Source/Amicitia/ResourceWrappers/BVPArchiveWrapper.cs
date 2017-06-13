@@ -89,7 +89,14 @@
         {
             var archive = new BVPFile();
             foreach (ResourceWrapper node in Nodes)
+            {
+                if (node.IsDirty)
+                {
+                    node.RebuildWrappedObject();
+                }
+
                 archive.Entries.Add(new BVPEntry(node.GetBytes()));
+            }
 
             m_wrappedObject = archive;
             m_isDirty = false;

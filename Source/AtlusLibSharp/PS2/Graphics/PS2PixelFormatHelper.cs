@@ -22,12 +22,12 @@
 
         public static byte ConvertAlphaToPC(byte original)
         {
-            return (byte)(((float)original / 0x80) * 0xFF); // scale the alpha value between 0x00 to 0xFF
+            return (byte)((original / 128.0f) * 255);
         }
 
         public static byte ConvertAlphaToPS2(byte original)
         {
-            return (byte)(((float)original / 0xFF) * 0x80); //scale the alpha value between 0x00 to 0x80
+            return (byte)((original / 255.0f) * 128);
         }
 
         // helper methods to get info about the pixel format

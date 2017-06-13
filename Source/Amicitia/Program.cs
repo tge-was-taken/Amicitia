@@ -18,9 +18,9 @@ namespace Amicitia
         public static Type[] Types = Assembly.GetTypes();
         public static List<Loop> LoopFunctions;
 
-        // increment these
+        // increment VersionMinor each release
         public static int VersionMajor = 0;
-        public static int VersionMinor = 3;
+        public static int VersionMinor = 4;
 
 #if DEBUG
         public static string TitleString = string.Format("Amicitia v{0}.{1} [DEBUG]", VersionMajor, VersionMinor);

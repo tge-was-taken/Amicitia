@@ -230,9 +230,12 @@
         // Read extensions
         public static System.Drawing.Color ReadColor(this BinaryReader reader)
         {
-            int color = reader.ReadInt32();
-            return System.Drawing.Color.FromArgb(color & 0xFF, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF);
-            //return System.Drawing.Color.FromArgb(reader.ReadInt32());
+            uint color = reader.ReadUInt32();
+            return System.Drawing.Color.FromArgb(
+                (byte)(((color >> 24) & byte.MaxValue)),
+                (byte)(color & byte.MaxValue),
+                (byte)((color >> 8) & byte.MaxValue),
+                (byte)((color >> 16) & byte.MaxValue));
         }
 
         public static Vector2 ReadVector2(this BinaryReader reader)

@@ -1,7 +1,7 @@
-﻿using System.IO;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.IO;
+
     internal class RWDrawCallStruct : RWNode
     {
         private int _frameIndex;

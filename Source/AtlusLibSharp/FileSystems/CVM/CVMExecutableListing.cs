@@ -25,10 +25,12 @@ namespace AtlusLibSharp.FileSystems.CVM
 
         public void Update(CVMFile cvm)
         {
+            /*
             if (cvm.RootDirectory.SubEntries.Count != _rootDirectoryListing.SubEntries.Length)
             {
                 throw new System.Exception("Error: Number of files in CVM root directory does not match the number of files in the executable listing!");
             }
+            */
 
             _rootDirectoryListing.Update(cvm.RootDirectory);
         }

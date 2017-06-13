@@ -37,7 +37,7 @@
             }
         }
 
-        protected void WriteSection(BinaryWriter writer, Stream stream)
+        internal void WriteSection(BinaryWriter writer, Stream stream)
         {
             // write length
             writer.Write((uint)stream.Length);

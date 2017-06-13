@@ -23,10 +23,14 @@
 
         public virtual byte[] GetBytes()
         {
-            MemoryStream mStream = new MemoryStream();
-            Save(mStream);
-            byte[] bytes = mStream.ToArray();
-            mStream.Dispose();
+            byte[] bytes;
+
+            using (MemoryStream mStream = new MemoryStream())
+            {
+                Save(mStream);
+                bytes = mStream.ToArray();
+            }
+
             return bytes;
         }
 

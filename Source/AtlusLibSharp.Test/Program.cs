@@ -1,13 +1,25 @@
 ﻿namespace AtlusLibSharp.Test
 {
     using Graphics.RenderWare;
+    using OpenTK;
     using Scripting;
+    using AtlusLibSharp.FileSystems.CVM;
+    using System.IO;
+    using System.IO.MemoryMappedFiles;
+    using IO;
+    using FileSystems.PAKToolArchive;
 
     class Program
     {
         static void Main(string[] args)
         {
-            SetCulture();
+            //PAKToolArchiveFileUnsafe test = new PAKToolArchiveFileUnsafe(@"D:\Modding\Persona34\Persona4\CVM_DATA\MODEL\PACK\BC001.PAC");
+            //ACXFile acx = new ACXFile(@"D:\Modding\Persona34\Persona4\bc001.acx");
+            //CVMFileRewrite cvm = new CVMFileRewrite();
+            //cvm.Load(@"D:\Modding\Persona34\Persona4\DVDROOT\DATA.CVM");
+            //ReadMemoryMapped(@"D:\Modding\Persona34\Persona4\DVDROOT\DATA.CVM");
+
+            //SetCulture();
 
             /*
             BMDFile bmd = new BMDFile(@"C:\Users\TGE\Downloads\Shin Megami Tensei Persona 3 FES [USA - English - PS2DVD]\CVM_DATA\HELP\DATMYTH.BMD");
@@ -15,9 +27,11 @@
             BMDScriptParser.CompileScript(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\HELP\DATMYTH.msg");
             */
 
+            /*
             RMDScene rmd = new RMDScene(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\bc001.RMD");
             var split = new RWMeshMaterialSplitData(rmd.Scenes[0].Meshes[4], RWPrimitiveType.TriangleStrip);
             var split2 = new RWMeshMaterialSplitData(rmd.Scenes[0].Meshes[4], RWPrimitiveType.TriangleList);
+            */
 
             //            BFFile bf;
             //#if !DEBUG
@@ -261,5 +275,26 @@
         //        }
         //    }
         //}
+
+        private static void ReadMemoryMapped(string path)
+        {
+            FileInfo info = new FileInfo(path);
+            long fileLength = info.Length;
+
+            using (MemoryMappedFile mmapFile = MemoryMappedFile.CreateFromFile(path))
+            {
+                const int BLOCK_SIZE = 2048;
+                int numBlocks = (int)(fileLength / BLOCK_SIZE);
+                MemoryMappedViewAccessor accessor = null;
+
+                for (int blockIndex = 0; blockIndex < numBlocks; blockIndex++)
+                {
+                    using (accessor = mmapFile.CreateViewAccessor(blockIndex * BLOCK_SIZE, BLOCK_SIZE))
+                    {
+                        //System.Console.WriteLine("Block index: {0}", blockIndex);
+                    }
+                }
+            }
+        }
     }
 }

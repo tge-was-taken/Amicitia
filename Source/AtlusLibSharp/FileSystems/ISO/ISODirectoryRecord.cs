@@ -104,11 +104,7 @@
                     _subEntries.Add(record);
 
                     // Skip padding
-                    byte test = reader.ReadByte();
-                    while (test == 0 && reader.BaseStream.Position < posSubEntriesDataEnd)
-                    {
-                        test = reader.ReadByte();
-                    }
+                    while (reader.ReadByte() == 0 && reader.BaseStream.Position < posSubEntriesDataEnd);
 
                     // Break out of the loop if we've read to or past the end position
                     if (reader.BaseStream.Position >= posSubEntriesDataEnd)

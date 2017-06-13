@@ -1,5 +1,6 @@
 ﻿namespace AtlusLibSharp.Graphics
 {
+    using System;
     using System.Drawing;
 
     // TODO

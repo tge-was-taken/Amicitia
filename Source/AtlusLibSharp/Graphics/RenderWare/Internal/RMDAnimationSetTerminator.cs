@@ -1,7 +1,7 @@
-﻿using System.IO;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.IO;
+
     /// <summary>
     /// Represents a RenderWare node that indicates the end of an <see cref="RMDAnimationSet"/>. It does not contain any data other than itself.
     /// <para>This node is an extension to the RenderWare nodes developed by Atlus.</para>

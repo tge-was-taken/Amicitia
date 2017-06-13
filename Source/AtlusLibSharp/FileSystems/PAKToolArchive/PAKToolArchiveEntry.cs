@@ -8,7 +8,7 @@
     /// </summary>
     public class PAKToolArchiveEntry
     {
-        internal static int MAX_NAME_LENGTH = 252;
+        internal const int MAX_NAME_LENGTH = 252;
         private string _name;
 
         /**********************/

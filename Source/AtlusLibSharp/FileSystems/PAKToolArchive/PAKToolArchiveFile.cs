@@ -23,8 +23,22 @@
         /// </summary>
         /// <param name="path">Path of the file to load.</param>
         public PAKToolArchiveFile(string path) 
-            : this(File.OpenRead(path))
         {
+            using (FileStream stream = File.OpenRead(path))
+            {
+                /*
+                if (!InternalVerifyFileType(stream))
+                {
+                    throw new InvalidDataException("Not a valid file");
+                }
+                */
+
+                Entries = new List<PAKToolArchiveEntry>();
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    InternalRead(reader);
+                }
+            }
         }
 
         /// <summary>
@@ -33,10 +47,12 @@
         /// <param name="stream">Stream to load the archive from.</param>
         public PAKToolArchiveFile(Stream stream)
         {
+            /*
             if (!InternalVerifyFileType(stream))
             {
                 throw new InvalidDataException("Not a valid file");
             }
+            */
 
             Entries = new List<PAKToolArchiveEntry>();
             using (BinaryReader reader = new BinaryReader(stream))

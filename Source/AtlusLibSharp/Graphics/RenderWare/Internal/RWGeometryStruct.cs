@@ -1,12 +1,11 @@
-﻿using System.Numerics;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.Numerics;
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
     using Utilities;
 
     internal class RWMeshStruct : RWNode
@@ -105,7 +104,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             Vector3[] vertexPositions, Vector3[] vertexNormals, short[] triangleMaterialIDs,
             Vector2[][] textureCoordinateSets, Color[] vertexColors,
             ref byte[][] skinBoneIndices, ref float[][] skinBoneWeights)
-            : base(RWNodeType.Struct)
+                : base(RWNodeType.Struct)
         {
             _geoFlags =
                 RWGeometryFlags.HasVertices   |
@@ -139,7 +138,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         }
 
         internal RWMeshStruct(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
-        : base(header)
+            : base(header)
         {
             _geoFlags = (RWGeometryFlags)reader.ReadUInt16();
             byte numTexCoord = reader.ReadByte();

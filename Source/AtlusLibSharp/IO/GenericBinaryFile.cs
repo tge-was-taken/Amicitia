@@ -1,4 +1,6 @@
-﻿namespace AtlusLibSharp.IO
+﻿using AtlusLibSharp.Utilities;
+
+namespace AtlusLibSharp.IO
 {
     using System.IO;
 
@@ -22,9 +24,7 @@
         public GenericBinaryFile(Stream stream)
         {
             _path = string.Empty;
-            _data = new byte[stream.Length];
-            stream.Read(_data, 0, (int)stream.Length);
-            stream.Dispose();
+            _data = stream.ReadAllBytes();
         }
 
         public override byte[] GetBytes()

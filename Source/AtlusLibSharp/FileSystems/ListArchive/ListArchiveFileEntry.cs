@@ -23,6 +23,7 @@
         {
             _name = name;
             _data = new byte[(int)stream.Length];
+            stream.Position = 0;
             stream.Read(_data, 0, (int)stream.Length);
         }
 

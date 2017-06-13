@@ -12,24 +12,13 @@ using System.Drawing;
 
 namespace Amicitia
 {
-    internal static class NativeMethods
-    {
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool AllocConsole();
-
-
-        [DllImport("user32.dll")]
-        public static extern short GetAsyncKeyState(Keys vKey);
-    }
-
-    public partial class MainForm : Form
+    internal partial class MainForm : Form
     {
         //private static Rectangle _lastMainTreeViewSize;
         private static MainForm _instance;
         private ModelViewer.ModelViewer viewer;
 
-        internal static MainForm Instance
+        public static MainForm Instance
         {
             get
             {
@@ -46,19 +35,24 @@ namespace Amicitia
             }
         }
 
-        internal TreeView MainTreeView
+        public TreeView MainTreeView
         {
             get { return mainTreeView; }
         }
 
-        internal PropertyGrid MainPropertyGrid
+        public PropertyGrid MainPropertyGrid
         {
             get { return mainPropertyGrid; }
         }
 
-        internal PictureBox MainPictureBox
+        public PictureBox MainPictureBox
         {
             get { return mainPictureBox; }
+        }
+
+        public GLControl GLControl
+        {
+            get { return glControl1; }
         }
 
         public MainForm()
@@ -83,7 +77,7 @@ namespace Amicitia
         {
             string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop, false);
 
-            if (filePaths.Length > 0)
+            if (filePaths.Length != 0)
             {
                 HandleFileOpenFromPath(filePaths[0]);
             }
@@ -106,30 +100,42 @@ namespace Amicitia
         {
             // hide the picture box
             mainPictureBox.Visible = false;
-            viewer.DeleteScene();
             glControl1.Visible = false;
             ResourceWrapper res = mainTreeView.SelectedNode as ResourceWrapper;
 
             mainPropertyGrid.SelectedObject = res;
 
             if (res == null)
+            {
+                viewer.DeleteScene();
                 return;
+            }
 
             if(res.IsModelResource == true)
             {
-                try
-                {
-                    viewer.LoadScene((res as ResourceWrapper).WrappedObject as RMDScene);
-                    glControl1.Focus();
-                    glControl1.Invalidate();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    throw;
-                }
                 glControl1.Visible = true;
+
+                if (res.WrappedObject != viewer.LoadedScene)
+                {
+                    try
+                    {
+                        viewer.DeleteScene();
+                        viewer.LoadScene(res.WrappedObject as RMDScene);
+                        glControl1.Focus();
+                        glControl1.Invalidate();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        //throw;
+                    }
+                }
             }
+            else
+            {
+                viewer.DeleteScene();
+            }
+
             // Check if the resource is a texture
             if (res.IsImageResource == true)
             {
@@ -137,8 +143,6 @@ namespace Amicitia
                 mainPictureBox.Visible = true;
                 mainPictureBox.Image = ((ITextureFile)res.WrappedObject).GetBitmap();
             }
-
-            //res.InitializeCustomPropertyGrid();
         }
 
         private void MainTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -165,13 +169,12 @@ namespace Amicitia
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (mainTreeView.Nodes.Count > 0)
+            if (mainTreeView.Nodes.Count != 0)
             {
                 ((ResourceWrapper)mainTreeView.TopNode).Export(sender, e);
             }
         }
 
-        // Internal methods
         internal void UpdateReferences()
         {
             MainTreeView_AfterSelect(this, new TreeViewEventArgs(mainTreeView.SelectedNode));
@@ -181,6 +184,7 @@ namespace Amicitia
         private void InitializeMainForm()
         {
             // this
+            Text = Program.TitleString;
             Instance = this;
             DragDrop += MainForm_DragDrop;
             DragEnter += MainForm_DragEnter;
@@ -288,16 +292,11 @@ namespace Amicitia
             }
         }
 
-        private void HandleFileOpenFromPath(string filePath)
+        private void ClearForm()
         {
-            if (viewer.IsSceneReady == true) viewer.DeleteScene();
-            // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
-            int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(filePath);
-
-            if (supportedFileIndex == -1)
-            {
-                return;
-            }
+            // destroy the model scene if it's still loaded
+            if (viewer.IsSceneReady == true)
+                viewer.DeleteScene();
 
             // Hide the picture box so a possibly last selected image doesn't stay visible
             if (mainPictureBox.Visible == true)
@@ -306,10 +305,24 @@ namespace Amicitia
             }
 
             // Clear nodes as we don't want multiple hierarchies
-            if (mainTreeView.Nodes.Count > 0)
+            if (mainTreeView.Nodes.Count != 0)
             {
                 mainTreeView.Nodes.Clear();
             }
+        }
+
+        private void HandleFileOpenFromPath(string filePath)
+        {
+            // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
+            int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(filePath);
+
+            if (supportedFileIndex == -1)
+            {
+                return;
+            }
+
+            // clear the form of loaded resources
+            ClearForm();
 
             TreeNode treeNode = null;
 
@@ -323,46 +336,26 @@ namespace Amicitia
                     File.OpenRead(filePath), supportedFileIndex);
 #if !DEBUG
             }
-            catch (InvalidDataException exception)
+            catch (InvalidDataException)
             {
-                MessageBox.Show("Data was not in expected format, can't open file.\n Stacktrace:\n" + exception.StackTrace, "Open file error",
+                MessageBox.Show("Can't open this file format.", "Open file error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 return;
             }
 #endif
 
-                mainTreeView.BeginUpdate();
-
-            mainTreeView.Nodes.Add(treeNode);
-            mainTreeView.SelectedNode = mainTreeView.TopNode;
-
+            mainTreeView.BeginUpdate();
+            {
+                mainTreeView.Nodes.Add(treeNode);
+                mainTreeView.SelectedNode = mainTreeView.TopNode;
+            }
             mainTreeView.EndUpdate();
-        }
-
-        private void mainPictureBox_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void glControl1_Load(object sender, EventArgs e)
         {
             glControl1.Visible = false;
             viewer = new ModelViewer.ModelViewer(glControl1);
-        }
-
-        private void mainTreeView_AfterSelect_1(object sender, TreeViewEventArgs e)
-        {
-
-        }
-
-        private void mainMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -391,14 +384,32 @@ namespace Amicitia
                 d.ShowDialog(options);
                 viewer.BGColor = d.Color;
             };
-            colorlab.Text = "Model viewer bg color";
-            colorlab.Location = new System.Drawing.Point(16, 20);
+            colorlab.Text = "Model viewer background color";
+            colorlab.Location = new Point(16, 20);
             colorlab.Width = 200;
-            options.Size = new System.Drawing.Size(512, 256);
+            options.Size = new Size(512, 256);
             options.Controls.Add(picker);
             options.Controls.Add(colorlab);
             options.Controls.Add(more);
             options.ShowDialog(this);
         }
+    }
+
+    internal static class NativeMethods
+    {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AllocConsole();
+
+        public static bool GetAsyncKey(Keys key)
+        {
+            if (MainForm.Instance.GLControl.Focused)
+                return GetAsyncKeyState(key) != 0;
+            else
+                return false;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(Keys vKey);
     }
 }

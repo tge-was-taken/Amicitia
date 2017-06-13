@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.Collections.Generic;
+    using System.IO;
+
     internal class RWMaterialList : RWNode
     {
         private RWMaterialListStruct _struct;

@@ -96,6 +96,12 @@
         /*********************************/
         internal override void RebuildWrappedObject()
         {
+            if (TexturesWrapper.IsDirty)
+                TexturesWrapper.RebuildWrappedObject();
+
+            if (KeyFramesWrapper.IsDirty)
+                KeyFramesWrapper.RebuildWrappedObject();
+
             m_wrappedObject = new SPR4File(TexturesWrapper.WrappedObject, KeyFramesWrapper.WrappedObject);
             m_isDirty = false;
         }

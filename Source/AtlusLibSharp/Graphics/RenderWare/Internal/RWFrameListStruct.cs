@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+
     internal class RWSceneNodeListStruct : RWNode
     {
         // Fields

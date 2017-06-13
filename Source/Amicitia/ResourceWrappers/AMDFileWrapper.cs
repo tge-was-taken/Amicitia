@@ -83,8 +83,10 @@
             var archive = new AMDFile();
             foreach (ResourceWrapper node in Nodes)
             {
-                var chunk = node.WrappedObject as AMDChunk;
-                archive.Chunks.Add(chunk);
+                if (node.IsDirty)
+                    node.RebuildWrappedObject();
+
+                archive.Chunks.Add(node.WrappedObject as AMDChunk);
             }
 
             m_wrappedObject = archive;

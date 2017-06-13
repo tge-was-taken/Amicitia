@@ -25,10 +25,6 @@
     [Wrapper(typeof(BinaryFileBase), "Raw data", ".*")]
     internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
     {
-        /*******************/
-        /* Private members */
-        /*******************/
-
         // wrapped object storage
         protected internal object m_wrappedObject;
         protected internal SupportedFileType m_wrappedFileType;
@@ -287,7 +283,9 @@
                     TreeView.Nodes.Insert(index - 1, this);
                 }
             }
+
             TreeView.SelectedNode = this;
+            IsDirty = true;
         }
 
         /// <summary>
@@ -314,7 +312,9 @@
                     TreeView.Nodes.Insert(index + 1, this);
                 }
             }
+
             TreeView.SelectedNode = this;
+            IsDirty = true;
         }
 
         /// <summary>
@@ -322,6 +322,25 @@
         /// </summary>
         public void Delete(object sender, EventArgs e)
         {
+            if (Parent != null)
+            {
+                if (!(Parent is ResourceWrapper))
+                {
+                    if (Parent.Parent != null && Parent.Parent is ResourceWrapper)
+                    {
+                        (Parent.Parent as ResourceWrapper).IsDirty = true;
+                    }
+                    else
+                    {
+                        // Give up lol
+                    }
+                }
+                else
+                {
+                    (Parent as ResourceWrapper).IsDirty = true;
+                }
+            }
+
             Remove();
         }
 
@@ -332,6 +351,7 @@
         {
             TreeView.LabelEdit = true;
             BeginEdit(); // EndEdit() is called in the TreeView AfterLabelEdit event
+            IsDirty = true;
         }
 
         /// <summary>
@@ -353,7 +373,7 @@
                 }
 
                 // rebuild if dirty before export
-                if (m_isDirty)
+                if (IsDirty)
                 {
                     RebuildWrappedObject();
                 }

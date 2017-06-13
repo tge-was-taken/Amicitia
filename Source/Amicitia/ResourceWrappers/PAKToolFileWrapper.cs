@@ -100,6 +100,11 @@
             var archive = new PAKToolArchiveFile();
             foreach (ResourceWrapper node in Nodes)
             {
+                if (node.IsDirty)
+                {
+                    node.RebuildWrappedObject();
+                }
+
                 archive.Entries.Add(new PAKToolArchiveEntry(node.Text, node.GetMemoryStream()));
             }
 

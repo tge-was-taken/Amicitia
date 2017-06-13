@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.IO;
+
     internal class RWSceneStruct : RWNode
     {
         private int _drawCallCount;

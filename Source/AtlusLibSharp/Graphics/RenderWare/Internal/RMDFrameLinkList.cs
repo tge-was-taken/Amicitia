@@ -159,7 +159,7 @@
         {
             writer.Write(_frameANameID);
             writer.Write(_frameBNameID);
-            writer.Write(_matrix, true);
+            writer.Write(_matrix, false);
         }
     }
 }

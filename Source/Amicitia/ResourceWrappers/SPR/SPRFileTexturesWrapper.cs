@@ -44,6 +44,11 @@
             var list = new List<TMXFile>(Nodes.Count);
             foreach (TMXFileWrapper node in Nodes)
             {
+                if (node.IsDirty)
+                {
+                    node.RebuildWrappedObject();
+                }
+
                 list.Add(node.WrappedObject);
             }
 

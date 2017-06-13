@@ -1,7 +1,7 @@
-﻿using System.IO;
-
-namespace AtlusLibSharp.Graphics.RenderWare
+﻿namespace AtlusLibSharp.Graphics.RenderWare
 {
+    using System.IO;
+
     /// <summary>
     /// Represents a RenderWare node that indicates the a placeholder <see cref="RMDAnimationSet"/>. Its purpose is to keep the animations set order intact. 
     /// <para>It does not contain any data other than itself.</para>

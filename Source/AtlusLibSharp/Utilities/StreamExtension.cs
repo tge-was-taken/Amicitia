@@ -121,6 +121,18 @@ namespace AtlusLibSharp.Utilities
             stream.Read(bytes, 0, count);
             return bytes;
         }
+
+        public static byte[] ReadAllBytes(this Stream @this)
+        {
+            long positionSave = @this.Position;
+
+            byte[] buffer = new byte[@this.Length];
+            @this.Position = 0;
+            @this.Read(buffer, 0, buffer.Length);
+            @this.Position = positionSave;
+
+            return buffer;
+        }
     }
 
     public static class StreamHelper

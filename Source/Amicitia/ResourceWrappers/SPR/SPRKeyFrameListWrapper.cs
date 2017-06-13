@@ -43,9 +43,12 @@
         {
             var list = new List<SPRKeyFrame>(Nodes.Count);
 
-            for (int i = 0; i < Nodes.Count; i++)
+            foreach (SPRKeyFrameWrapper node in Nodes)
             {
-                WrappedObject.Add(((SPRKeyFrameWrapper)Nodes[i]).WrappedObject);
+                if (node.IsDirty)
+                    node.RebuildWrappedObject();
+
+                WrappedObject.Add(node.WrappedObject);
             }
 
             m_wrappedObject = list;

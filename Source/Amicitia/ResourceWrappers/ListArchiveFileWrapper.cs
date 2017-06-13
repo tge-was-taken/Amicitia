@@ -99,6 +99,11 @@
             var archive = new ListArchiveFile();
             foreach (ResourceWrapper node in Nodes)
             {
+                if (node.IsDirty)
+                {
+                    node.RebuildWrappedObject();
+                }
+
                 archive.Entries.Add(new ListArchiveFileEntry(node.Text, node.GetMemoryStream()));
             }
 

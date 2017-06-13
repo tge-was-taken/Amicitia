@@ -4,6 +4,7 @@
     using System.Runtime.InteropServices;
     using AtlusLibSharp.Utilities;
     using ISO;
+    using System;
 
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
     internal struct CVMDirectoryListingHeader
@@ -55,7 +56,8 @@
        
             for (int i = 0; i < _header.entryCount; i++)
             {
-                _subEntries[i].Update(record.SubEntries[i]);
+                // slow but lenient
+                Array.Find(_subEntries, elem => elem.Name == record.SubEntries[i].Name).Update(record.SubEntries[i]);
             }
         }
 

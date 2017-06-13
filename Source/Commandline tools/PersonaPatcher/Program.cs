@@ -104,10 +104,12 @@ namespace PersonaPatcher
             using (BinaryWriter writer = new BinaryWriter(File.Create(args[0])))
             {
                 writer.Write(elfHeader);
+
                 foreach (CVMExecutableListing cvmExecutableList in cvmExecutableListings)
                 {
                     cvmExecutableList.Save(writer.BaseStream);
                 }
+
                 writer.Write(elfFooter);
             }
 

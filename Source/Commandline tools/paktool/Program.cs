@@ -37,7 +37,9 @@
                 Directory.CreateDirectory(path);
                 for (int i = 0; i < pak.EntryCount; i++)
                 {
-                    File.WriteAllBytes(path + "//" + pak.Entries[i].Name, pak.Entries[i].Data);
+                    string filePath = Path.Combine(path, pak.Entries[i].Name);
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    File.WriteAllBytes(filePath, pak.Entries[i].Data);
                 }
             }
             else if (!Path.HasExtension(args[0]))

@@ -123,6 +123,10 @@
                 writer.Write(0);
                 return;
             }
+            else
+            {
+                writer.Write(_rootInfo.HierarchyNodeCount);
+            }
 
             writer.Write((uint)_rootInfo.Flags);
             writer.Write(KEYFRAME_SIZE);

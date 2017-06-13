@@ -44,6 +44,9 @@
             var list = new List<TGAFile>(Nodes.Count);
             foreach (TGAFileWrapper node in Nodes)
             {
+                if (node.IsDirty)
+                    node.RebuildWrappedObject();
+
                 list.Add(node.WrappedObject);
             }
 

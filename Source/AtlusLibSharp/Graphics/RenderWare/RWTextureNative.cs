@@ -7,7 +7,7 @@
     using System.Collections.Generic;
     using IO;
     using System;
-
+    using System.Runtime.InteropServices;
     /// <summary>
     /// Encapsulates a RenderWare texture node and all of its corresponding data structures.
     /// </summary>

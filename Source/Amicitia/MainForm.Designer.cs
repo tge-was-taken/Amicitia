@@ -54,7 +54,6 @@
             this.mainMenuStrip.Size = new System.Drawing.Size(779, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "menuStrip1";
-            this.mainMenuStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.mainMenuStrip_ItemClicked);
             // 
             // fileToolStripMenuItem
             // 
@@ -96,19 +95,12 @@
             this.mainTreeView.Name = "mainTreeView";
             this.mainTreeView.Size = new System.Drawing.Size(300, 551);
             this.mainTreeView.TabIndex = 1;
-            this.mainTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mainTreeView_AfterSelect_1);
             // 
             // mainPropertyGrid
             // 
             this.mainPropertyGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.mainPropertyGrid.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            // 
-            // 
-            // 
-            // 
-            // 
-            // 
             this.mainPropertyGrid.HelpVisible = false;
             this.mainPropertyGrid.Location = new System.Drawing.Point(319, 0);
             this.mainPropertyGrid.Margin = new System.Windows.Forms.Padding(1, 3, 3, 3);
@@ -116,9 +108,6 @@
             this.mainPropertyGrid.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.mainPropertyGrid.Size = new System.Drawing.Size(448, 277);
             this.mainPropertyGrid.TabIndex = 2;
-            // 
-            // 
-            // 
             // 
             // mainPictureBox
             // 
@@ -134,7 +123,6 @@
             this.mainPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.mainPictureBox.TabIndex = 3;
             this.mainPictureBox.TabStop = false;
-            this.mainPictureBox.Click += new System.EventHandler(this.mainPictureBox_Click);
             // 
             // glControl1
             // 
@@ -147,6 +135,7 @@
             this.glControl1.Size = new System.Drawing.Size(448, 292);
             this.glControl1.TabIndex = 4;
             this.glControl1.VSync = false;
+            //this.glControl1.Visible = false;
             this.glControl1.Load += new System.EventHandler(this.glControl1_Load);
             // 
             // MainForm
@@ -164,9 +153,8 @@
             this.MainMenuStrip = this.mainMenuStrip;
             this.MinimumSize = new System.Drawing.Size(662, 569);
             this.Name = "MainForm";
-            this.Text = "Amicitia 16/2/2016";
+            this.Text = Program.TitleString;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).EndInit();

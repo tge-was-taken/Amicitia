@@ -25,6 +25,9 @@
 
         internal static RWNode GetNode(RWNode parent, BinaryReader reader)
         {
+
+            Console.WriteLine("RWNode read at offset 0x{0}", reader.BaseStream.Position.ToString("X"));
+
             RWNodeInfo header = new RWNodeInfo
             {
                 Type = (RWNodeType)reader.ReadUInt32(),
@@ -32,6 +35,8 @@
                 Version = reader.ReadUInt32(),
                 Parent = parent
             };
+
+            Console.WriteLine("Type: {0}        Size: {1}       Version: {2}\n", header.Type, header.Size, header.Version);
 
             switch (header.Type)
             {

@@ -91,6 +91,7 @@
     <Compile Include="ModelViewer\ModelViewer.cs" />
     <Compile Include="ModelViewer\ShaderProgram.cs" />
     <Compile Include="ResourceProperty.cs" />
+    <Compile Include="ResourceWrappers\AMDChunkWrapper.cs" />
     <Compile Include="ResourceWrappers\AMDFileWrapper.cs" />
     <Compile Include="ResourceWrappers\BVPArchiveWrapper.cs" />
     <Compile Include="ResourceWrappers\ListArchiveFileWrapper.cs" />

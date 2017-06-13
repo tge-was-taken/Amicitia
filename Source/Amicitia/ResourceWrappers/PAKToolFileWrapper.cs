@@ -13,8 +13,7 @@
         /*********************/
         /* File filter types */
         /*********************/
-        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
-        {
+        public static readonly new SupportedFileType[] FileFilterTypes = {
             SupportedFileType.PAKToolArchiveFile, SupportedFileType.ListArchiveFile
         };
 

@@ -1,4 +1,6 @@
-﻿namespace Amicitia.ResourceWrappers
+﻿using System.Windows.Forms;
+
+namespace Amicitia.ResourceWrappers
 {
     using System.IO;
     using System;
@@ -60,8 +62,8 @@
         public AMDFileWrapper(string text, AMDFile res) 
             : base(text, res, SupportedFileType.AMDFile, true)
         {
-            m_canExport = false;
-            m_canReplace = false;
+            m_canAdd = true;
+
             InitializeContextMenuStrip();
         }
 
@@ -78,18 +80,32 @@
         /*********************************/
         /* Base wrapper method overrides */
         /*********************************/
+        public override void Add(object sender, EventArgs e)
+        {
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                if (openFileDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                Nodes.Add(new AMDChunkWrapper(Path.GetFileName(openFileDialog.FileName),
+                    new AMDChunk(string.Empty, 0, File.ReadAllBytes(openFileDialog.FileName))));
+
+                RebuildWrappedObject();
+            }
+        }
+
         internal override void RebuildWrappedObject()
         {
             var archive = new AMDFile();
-            foreach (ResourceWrapper node in Nodes)
+            foreach (AMDChunkWrapper node in Nodes)
             {
                 if (node.IsDirty)
                     node.RebuildWrappedObject();
 
-                archive.Chunks.Add(node.WrappedObject as AMDChunk);
+                archive.Chunks.Add(node.WrappedObject);
             }
 
-            m_wrappedObject = archive;
+            WrappedObject = archive;
             m_isDirty = false;
         }
 
@@ -100,11 +116,7 @@
             int idx = 0;
             foreach (AMDChunk chunk in WrappedObject.Chunks)
             {
-                var wrap = new ResourceWrapper(string.Format("{0}[{1}]", chunk.Tag, idx++), new GenericBinaryFile(chunk.Data), SupportedFileType.Resource, true);
-                wrap.m_canReplace = false;
-                wrap.m_canRename = false;
-                wrap.InitializeContextMenuStrip();
-
+                var wrap = new AMDChunkWrapper(chunk.Tag, chunk);
                 Nodes.Add(wrap);
             }
 

@@ -20,7 +20,7 @@ namespace Amicitia
 
         // increment VersionMinor each release
         public static int VersionMajor = 0;
-        public static int VersionMinor = 4;
+        public static int VersionMinor = 5;
 
 #if DEBUG
         public static string TitleString = string.Format("Amicitia v{0}.{1} [DEBUG]", VersionMajor, VersionMinor);

@@ -3,20 +3,20 @@
     using System.IO;
     using AtlusLibSharp.Utilities;
 
-    public class ABKey
+    public class AbKey
     {
         // Private constants
         private const int HEADER_SIZE = 8;
         private const int FIXED_POINT = 1 << 15; 
 
         // Private fields
-        private ushort _numAssignedFrames;
-        private ushort _type;
-        private ushort[] _assignedFrameIndices;
-        private float[][] _boneKeyData;
+        private ushort mNumAssignedFrames;
+        private ushort mType;
+        private ushort[] mAssignedFrameIndices;
+        private float[][] mBoneKeyData;
 
         // Constructors
-        internal ABKey(BinaryReader reader)
+        internal AbKey(BinaryReader reader)
         {
             InternalRead(reader);
         }
@@ -24,22 +24,22 @@
         // Properties
         public ushort AssignedFrameCount
         {
-            get { return _numAssignedFrames; }
+            get { return mNumAssignedFrames; }
         }
 
         public ushort Type
         {
-            get { return _type; }
+            get { return mType; }
         }
 
         public ushort[] AssignedFrameIndices
         {
-            get { return _assignedFrameIndices; }
+            get { return mAssignedFrameIndices; }
         }
 
         public float[][] BoneKeyData
         {
-            get { return _boneKeyData; }
+            get { return mBoneKeyData; }
         }
 
         // Methods
@@ -47,25 +47,25 @@
         {
             int size = GetSize();
             writer.Write(size);
-            writer.Write(_numAssignedFrames);
-            writer.Write(_type);
+            writer.Write(mNumAssignedFrames);
+            writer.Write(mType);
 
-            for (int i = 0; i < _numAssignedFrames; i++)
+            for (int i = 0; i < mNumAssignedFrames; i++)
             {
-                writer.Write(_assignedFrameIndices[i]);
+                writer.Write(mAssignedFrameIndices[i]);
             }
 
             writer.AlignPosition(4);
 
-            for (int i = 0; i < _numAssignedFrames; i++)
+            for (int i = 0; i < mNumAssignedFrames; i++)
             {
-                switch (_type)
+                switch (mType)
                 {
                     case 0x04:
                         {
                             for (int j = 0; j < 2; j++)
                             {
-                                writer.Write((ushort)(_boneKeyData[i][j] * FIXED_POINT));
+                                writer.Write((ushort)(mBoneKeyData[i][j] * FIXED_POINT));
                             }
                         }
 
@@ -74,7 +74,7 @@
                         {
                             for (int j = 0; j < 4; j++)
                             {
-                                writer.Write((ushort)(_boneKeyData[i][j] * FIXED_POINT));
+                                writer.Write((ushort)(mBoneKeyData[i][j] * FIXED_POINT));
                             }
                         }
 
@@ -83,7 +83,7 @@
                         {
                             for (int j = 0; j < 3; j++)
                             {
-                                writer.Write(_boneKeyData[i][j]);
+                                writer.Write(mBoneKeyData[i][j]);
                             }
                         }
 
@@ -96,54 +96,54 @@
 
         internal int GetSize()
         {
-            int assignedFrameIndicesSize = AlignmentHelper.Align(_numAssignedFrames * sizeof(ushort), 4);
-            int boneKeySize = GetKeySize(_type);
-            int boneKeyDataSize = _numAssignedFrames * boneKeySize;
+            int assignedFrameIndicesSize = AlignmentHelper.Align(mNumAssignedFrames * sizeof(ushort), 4);
+            int boneKeySize = GetKeySize(mType);
+            int boneKeyDataSize = mNumAssignedFrames * boneKeySize;
             return HEADER_SIZE + assignedFrameIndicesSize + boneKeyDataSize;
         }
 
         private void InternalRead(BinaryReader reader)
         {
             int size = reader.ReadInt32();
-            _numAssignedFrames = reader.ReadUInt16();
-            _type = reader.ReadUInt16();
+            mNumAssignedFrames = reader.ReadUInt16();
+            mType = reader.ReadUInt16();
 
-            _assignedFrameIndices = reader.ReadUInt16Array(_numAssignedFrames);
+            mAssignedFrameIndices = reader.ReadUInt16Array(mNumAssignedFrames);
 
             // Align to 4 bytes
             reader.AlignPosition(4);
 
-            _boneKeyData = new float[_numAssignedFrames][];
-            for (int i = 0; i < _numAssignedFrames; i++)
+            mBoneKeyData = new float[mNumAssignedFrames][];
+            for (int i = 0; i < mNumAssignedFrames; i++)
             {
-                switch (_type)
+                switch (mType)
                 {
                     case 0x04:
                         {
-                            _boneKeyData[i] = new float[2];
+                            mBoneKeyData[i] = new float[2];
                             for (int j = 0; j < 2; j++)
                             {
-                                _boneKeyData[i][j] = (float)reader.ReadInt16() / FIXED_POINT;
+                                mBoneKeyData[i][j] = (float)reader.ReadInt16() / FIXED_POINT;
                             }
                         }
 
                         break;
                     case 0x08:
                         {
-                            _boneKeyData[i] = new float[4];
+                            mBoneKeyData[i] = new float[4];
                             for (int j = 0; j < 4; j++)
                             {
-                                _boneKeyData[i][j] = (float)reader.ReadInt16() / FIXED_POINT;
+                                mBoneKeyData[i][j] = (float)reader.ReadInt16() / FIXED_POINT;
                             }
                         }
 
                         break;
                     case 0x0C:
                         {
-                            _boneKeyData[i] = new float[3];
+                            mBoneKeyData[i] = new float[3];
                             for (int j = 0; j < 3; j++)
                             {
-                                _boneKeyData[i][j] = reader.ReadSingle();
+                                mBoneKeyData[i][j] = reader.ReadSingle();
                             }
                         }
 

@@ -1,4 +1,6 @@
-﻿namespace AtlusLibSharp.PS2.Graphics
+﻿using AtlusLibSharp.Utilities;
+
+namespace AtlusLibSharp.PS2.Graphics
 {
     using System.IO;
     using System.Drawing;
@@ -20,12 +22,12 @@
 
         // alpha scalers
 
-        public static byte ConvertAlphaToPC(byte original)
+        public static byte ScaleHalfRangeAlphaToFullRange(byte original)
         {
             return (byte)((original / 128.0f) * 255);
         }
 
-        public static byte ConvertAlphaToPS2(byte original)
+        public static byte ScaleFullRangeAlphaToHalfRange(byte original)
         {
             return (byte)((original / 255.0f) * 128);
         }
@@ -48,14 +50,14 @@
         {
             switch (fmt)
             {
-                case PS2PixelFormat.PSMCT32:
+                case PS2PixelFormat.PSMTC32:
                 case PS2PixelFormat.PSMZ32:
                 case PS2PixelFormat.PSMZ24:
                     return 32;
-                case PS2PixelFormat.PSMCT24:
+                case PS2PixelFormat.PSMTC24:
                     return 24;
-                case PS2PixelFormat.PSMCT16:
-                case PS2PixelFormat.PSMCT16S:
+                case PS2PixelFormat.PSMTC16:
+                case PS2PixelFormat.PSMTC16S:
                 case PS2PixelFormat.PSMZ16:
                 case PS2PixelFormat.PSMZ16S:
                     return 16;
@@ -92,14 +94,14 @@
         {
             switch (fmt)
             {
-                case PS2PixelFormat.PSMCT32:
-                case PS2PixelFormat.PSMCT24:
+                case PS2PixelFormat.PSMTC32:
+                case PS2PixelFormat.PSMTC24:
                 case PS2PixelFormat.PSMZ32:
                 case PS2PixelFormat.PSMZ24:
                     return (width * height) * 4;
 
-                case PS2PixelFormat.PSMCT16:
-                case PS2PixelFormat.PSMCT16S:
+                case PS2PixelFormat.PSMTC16:
+                case PS2PixelFormat.PSMTC16S:
                 case PS2PixelFormat.PSMZ16:
                 case PS2PixelFormat.PSMZ16S:
                     return (width * height) * 2;
@@ -130,6 +132,20 @@
                     return true;
             }
             return false;
+        }
+
+        public static PS2PixelFormat GetBestPixelFormat(Bitmap bitmap)
+        {
+            /*
+            int similarColorCount = BitmapHelper.GetSimilarColorCount(bitmap);
+
+            if ( similarColorCount > 50 )
+                return PS2PixelFormat.PSMT8;
+            else
+                return PS2PixelFormat.PSMT4;
+            */
+
+            return PS2PixelFormat.PSMT8;
         }
 
         // post/pre processing methods
@@ -207,20 +223,20 @@
         {
             switch (fmt)
             {
-                case PS2PixelFormat.PSMCT32:
+                case PS2PixelFormat.PSMTC32:
                 case PS2PixelFormat.PSMZ32:
                     return ReadPSMCT32;
 
                 case PS2PixelFormat.PSMZ24:
-                case PS2PixelFormat.PSMCT24:
+                case PS2PixelFormat.PSMTC24:
                     return ReadPSMCT24;
 
-                case PS2PixelFormat.PSMCT16:
+                case PS2PixelFormat.PSMTC16:
                 case PS2PixelFormat.PSMZ16:
                     return ReadPSMCT16;
 
                 case PS2PixelFormat.PSMZ16S:
-                case PS2PixelFormat.PSMCT16S:
+                case PS2PixelFormat.PSMTC16S:
                     return ReadPSMCT16S;
 
                 default:
@@ -250,20 +266,20 @@
         {
             switch (fmt)
             {
-                case PS2PixelFormat.PSMCT32:
+                case PS2PixelFormat.PSMTC32:
                 case PS2PixelFormat.PSMZ32:
                     return WritePSMCT32;
 
                 case PS2PixelFormat.PSMZ24:
-                case PS2PixelFormat.PSMCT24:
+                case PS2PixelFormat.PSMTC24:
                     return WritePSMCT24;
 
-                case PS2PixelFormat.PSMCT16:
+                case PS2PixelFormat.PSMTC16:
                 case PS2PixelFormat.PSMZ16:
                     return WritePSMCT16;
 
                 case PS2PixelFormat.PSMZ16S:
-                case PS2PixelFormat.PSMCT16S:
+                case PS2PixelFormat.PSMTC16S:
                     return WritePSMCT16S;
 
                 default:
@@ -317,7 +333,7 @@
                 for (int i = 0; i < colorArray.Length; i++)
                 {
                     colorArray[i] = Color.FromArgb(
-                        ConvertAlphaToPC(colorArray[i].A),
+                        ScaleHalfRangeAlphaToFullRange(colorArray[i].A),
                         colorArray[i].R,
                         colorArray[i].G,
                         colorArray[i].B);
@@ -399,7 +415,7 @@
         {
             foreach (Color color in colorArray)
             {
-                uint colorData = (uint)(color.R | (color.G << 8) | (color.B << 16) | (ConvertAlphaToPS2(color.A) << 24));
+                uint colorData = (uint)(color.R | (color.G << 8) | (color.B << 16) | (ScaleFullRangeAlphaToHalfRange(color.A) << 24));
                 writer.Write(colorData);
             }
         }

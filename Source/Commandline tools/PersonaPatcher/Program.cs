@@ -57,7 +57,7 @@ namespace PersonaPatcher
             // Declare variables
             byte[] elfHeader;
             byte[] elfFooter;
-            CVMExecutableListing[] cvmExecutableListings;
+            CvmExecutableListing[] cvmExecutableListings;
             Tuple<int, string[]> data;
 
             using (FileStream stream = File.OpenRead(args[0]))
@@ -72,10 +72,10 @@ namespace PersonaPatcher
                 elfHeader = stream.ReadBytes(data.Item1);
 
                 // Read cvm lists
-                cvmExecutableListings = new CVMExecutableListing[data.Item2.Length];
+                cvmExecutableListings = new CvmExecutableListing[data.Item2.Length];
                 for (int i = 0; i < cvmExecutableListings.Length; i++)
                 {
-                    cvmExecutableListings[i] = new CVMExecutableListing(stream);
+                    cvmExecutableListings[i] = new CvmExecutableListing(stream);
                 }
 
                 // read data after listing
@@ -83,7 +83,7 @@ namespace PersonaPatcher
             }
 
             // Load cvm
-            CVMFile cvm = new CVMFile(args[1]);
+            CvmFile cvm = new CvmFile(args[1]);
 
             // Get the index from the cvm order
             // Check if the name of the cvm at least contains the original name
@@ -105,7 +105,7 @@ namespace PersonaPatcher
             {
                 writer.Write(elfHeader);
 
-                foreach (CVMExecutableListing cvmExecutableList in cvmExecutableListings)
+                foreach (CvmExecutableListing cvmExecutableList in cvmExecutableListings)
                 {
                     cvmExecutableList.Save(writer.BaseStream);
                 }

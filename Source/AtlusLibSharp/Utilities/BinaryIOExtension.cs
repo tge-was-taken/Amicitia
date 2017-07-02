@@ -10,7 +10,7 @@
     /// <summary>
     /// Provide extensions for the BinaryReader and BinaryWriter to in order to write more flexible code.
     /// </summary>
-    internal static class BinaryIOExtension
+    internal static class BinaryIoExtension
     {
         private static Encoding _sjisEncoding = Encoding.GetEncoding("Shift_JIS");
 

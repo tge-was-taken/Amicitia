@@ -31,7 +31,7 @@
 
         public static void SetElementAt(this Matrix4x4 mtx, int rowIndex, int elementIndex, float value)
         {
-            string fieldname = string.Format("M{0}{1}", rowIndex + 1, elementIndex + 1);
+            string fieldname = $"M{rowIndex + 1}{elementIndex + 1}";
             var field = _matrix4x4Type.GetField(fieldname);
             field.SetValue(mtx, value);
             //setElementFuncs[rowIndex | elementIndex << 2].Invoke(mtx, value);

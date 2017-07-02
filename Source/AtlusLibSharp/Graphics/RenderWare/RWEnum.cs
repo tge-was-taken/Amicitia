@@ -1,46 +1,50 @@
-﻿namespace AtlusLibSharp.Graphics.RenderWare
+﻿using System;
+
+namespace AtlusLibSharp.Graphics.RenderWare
 {
-    public enum RWNodeType : uint
+    public enum RwNodeId : uint
     {
         None                        = 0x00000000,
-        Struct                      = 0x00000001,
-        String                      = 0x00000002,
-        Extension                   = 0x00000003,
-        TextureReference            = 0x00000006,
-        Material                    = 0x00000007,
-        MaterialList                = 0x00000008,
-        World                       = 0x0000000B, // found in some map files
-        FrameList                   = 0x0000000E,
-        Geometry                    = 0x0000000F,
-        Scene                       = 0x00000010,
-        DrawCall                    = 0x00000014,
-        TextureNative               = 0x00000015,
-        GeometryList                = 0x0000001A,
-        Animation                   = 0x0000001B,
-        TextureDictionary           = 0x00000016,
-        UVAnimationDictionary       = 0x0000002B,
-        MeshMaterialSplitList       = 0x0000050E,
-        SkyMipMapValue              = 0x00000110,
-        SkinPlugin                  = 0x00000116,
-        SceneNodeBoneMetadata       = 0x0000011E,
-        UserDataPlugin              = 0x0000011F,
-        Maestro2D                   = 0x000001B1, // ???
-        RMDAnimationSetPlaceholder  = 0xF0F00001,
-        RMDAnimationSetRedirect     = 0xF0F00003,
-        RMDAnimationSetTerminator   = 0xF0F00004,
-        RMDTransformOverride        = 0xF0F00005,
-        RMDFrameLinkList            = 0xF0F00006,
-        RMDVisibilityAnim           = 0xF0F00080,
-        RMDAnimationSetCount        = 0xF0F000F0,
-        RMDParticleList             = 0xF0F000E0,
-        RMDParticleAnimation        = 0xF0F000E1,
+        RwStructNode                      = 0x00000001,
+        RwStringNode                      = 0x00000002,
+        RwExtensionNode                   = 0x00000003,
+        RwTextureReferenceNode            = 0x00000006,
+        RwMaterialNode                    = 0x00000007,
+        RwMaterialListNode                = 0x00000008,
+        RwWorldNode                       = 0x0000000B, // found in some map files
+        RwFrameListNode                   = 0x0000000E,
+        RwGeometryNode                    = 0x0000000F,
+        RwClumpNode                       = 0x00000010,
+        RwAtomicNode                    = 0x00000014,
+        RwTextureNativeNode               = 0x00000015,
+        RwGeometryListNode                = 0x0000001A,
+        RwAnimationNode                   = 0x0000001B,
+        RwTextureDictionaryNode           = 0x00000016,
+        RwUVAnimationDictionaryNode       = 0x0000002B,
+        RwMeshListNode       = 0x0000050E,
+        RwSkyMipMapValueNode              = 0x00000110,
+        RwSkinNode                  = 0x00000116,
+        RwHAnimFrameExtensionNode       = 0x0000011E,
+        RwUserDataPluginNode              = 0x0000011F,
+        RwMaestro2DNode                   = 0x000001B1, // ???
+        RmdAnimationPlaceholderNode  = 0xF0F00001,
+        RmdAnimationInstanceNode     = 0xF0F00003,
+        RmdAnimationTerminatorNode   = 0xF0F00004,
+        RmdTransformOverrideNode        = 0xF0F00005,
+        RmdNodeLinkListNode            = 0xF0F00006,
+        RmdVisibilityAnimNode           = 0xF0F00080,
+        RmdAnimationCountNode        = 0xF0F000F0,
+        RmdParticleListNode             = 0xF0F000E0,
+        RmdParticleAnimationNode        = 0xF0F000E1,
 
         // Reserved for internal use
-        RMDScene                    = 'R' << 8 | 'I' << 16 | 'G' << 24 | 0x00,
-        RMDAnimationSet             = 'R' << 8 | 'I' << 16 | 'G' << 24 | 0x01,
+        RmdSceneNode             = 'R' << 8 | 'I' << 16 | 'G' << 24 | 0x00,
+        RmdAnimation = 'R' << 8 | 'I' << 16 | 'G' << 24 | 0x01,
+        RmdAuthor                = 'R' << 8 | 'I' << 16 | 'G' << 24 | 'R' << 32
     }
 
-    public enum RWGeometryFlags : ushort
+    [Flags]
+    public enum RwGeometryFlags : ushort
     {
         Default = 0x0000,
         CanTriStrip = 0x0001,
@@ -53,14 +57,14 @@
         HasTexCoord2 = 0x0080
     }
 
-    public enum RWGeometryNativeFlag : byte
+    public enum RwGeometryNativeFlag : byte
     {
         Default = 0x00,
         GeometryNative = 0x01,
         GeometryNativeInstance = 0x02
     }
 
-    public enum RWRootBoneFlags : uint
+    public enum RwHAnimHierarchyFlags : uint
     {
         SubHierarchy = 0x1,
         NoMatrices = 0x2,
@@ -69,31 +73,32 @@
         LocalSpaceMatrices = 0x400
     }
 
-    public enum RWHierarchyNodeFlag : uint
+    public enum RwHierarchyNodeFlag : uint
     {
         Deformable = 0,
         PopParentMatrix = 1,
         PushParentMatrix = 2
     }
 
-    public enum RWDeviceID : ushort
+    public enum RwDeviceId : ushort
     {
         Default = 0x0,
         D3D8 = 0x1,
         D3D9 = 0x2,
         PS2 = 0x6,
-        XBOX = 0x8
+        Xbox = 0x8
     }
 
-    public enum RWPlatformID : uint
+    public enum RwPlatformId : uint
     {
-        XBOX = 0x05,
+        Xbox = 0x05,
         D3D8 = 0x08,
         D3D9 = 0x09,
         PS2 = 'P' | 'S' << 8 | '2' << 16
     }
 
-    public enum RWRasterFormats : uint
+    [Flags]
+    public enum RwRasterFormats : uint
     {
         Default = 0x00000,
         Unknown = 0x00004, // game will hang if not set

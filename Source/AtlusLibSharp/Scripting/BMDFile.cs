@@ -8,70 +8,70 @@
     using IO;
     using Compression;
 
-    public class BMDFile : BinaryFileBase
+    public class BmdFile : BinaryBase
     {
-        internal const short FLAG = 0x0007;
-        internal const string TAG = "MSG1";
-        internal const byte DATA_START_ADDRESS = 0x20;
-        internal const int UNK_CONSTANT = 0x20000;
+        internal const short Flag = 0x0007;
+        internal const string Tag = "MSG1";
+        internal const byte DataStartAddress = 0x20;
+        internal const int UnkConstant = 0x20000;
 
-        private BMDMessage[] _messages;
-        private string[] _actorNames;
+        private BmdMessage[] mMessages;
+        private string[] mActorNames;
 
         #region Properties
 
         public int DialogCount
         {
-            get { return _messages.Length; }
+            get { return mMessages.Length; }
         }
 
-        public BMDMessage[] Messages
+        public BmdMessage[] Messages
         {
-            get { return _messages; }
-            internal set { _messages = value; }
+            get { return mMessages; }
+            internal set { mMessages = value; }
         }
 
         public int ActorCount
         {
-            get { return _actorNames.Length; }
+            get { return mActorNames.Length; }
         }
 
         public string[] ActorNames
         {
-            get { return _actorNames; }
-            internal set { _actorNames = value; }
+            get { return mActorNames; }
+            internal set { mActorNames = value; }
         }
 
         #endregion
 
-        public BMDFile(string path)
+        public BmdFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
                 InternalRead(reader);
         }
 
-        public BMDFile(Stream stream, bool leaveStreamOpen)
+        public BmdFile(Stream stream, bool leaveStreamOpen)
         {
             using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, leaveStreamOpen))
                 InternalRead(reader);
         }
 
-        internal BMDFile(BinaryReader reader)
+        internal BmdFile(BinaryReader reader)
         {
             InternalRead(reader);
         }
 
-        internal BMDFile()
+        internal BmdFile()
         {
         }
 
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             int posFileStart = (int)writer.BaseStream.Position;
             List<int> addressList = new List<int>();
 
             // Seek past chunk and msg header for writing later
-            writer.BaseStream.Seek(DATA_START_ADDRESS, SeekOrigin.Current);
+            writer.BaseStream.Seek(DataStartAddress, SeekOrigin.Current);
 
             // Write a dummy message pointer table
             for (int i = 0; i < DialogCount; i++)
@@ -92,18 +92,18 @@
 
             writer.AlignPosition(4);
 
-            BMDMessageTable[] messagePointerTable = new BMDMessageTable[DialogCount];
+            BmdMessageTable[] messagePointerTable = new BmdMessageTable[DialogCount];
 
             // Write the messages and fill in the message pointer table
             for (int i = 0; i < DialogCount; i++)
             {
                 writer.AlignPosition(4);
-                messagePointerTable[i].Offset = (int)writer.BaseStream.Position - DATA_START_ADDRESS - posFileStart;
-                _messages[i].InternalWrite(writer, ref addressList, posFileStart);
+                messagePointerTable[i].Offset = (int)writer.BaseStream.Position - DataStartAddress - posFileStart;
+                mMessages[i].InternalWrite(writer, ref addressList, posFileStart);
             }
 
             writer.AlignPosition(4);
-            int actorNamePointerTableOffset = (int)writer.BaseStream.Position - DATA_START_ADDRESS - posFileStart;
+            int actorNamePointerTableOffset = (int)writer.BaseStream.Position - DataStartAddress - posFileStart;
 
             // Write dummy actor name pointer table if there are actors present
             if (ActorCount > 0)
@@ -118,8 +118,8 @@
                 int[] actorNamePointerTable = new int[ActorCount];
                 for (int i = 0; i < actorNamePointerTable.Length; i++)
                 {
-                    actorNamePointerTable[i] = (int)writer.BaseStream.Position - DATA_START_ADDRESS - posFileStart;
-                    writer.WriteCString(_actorNames[i]);
+                    actorNamePointerTable[i] = (int)writer.BaseStream.Position - DataStartAddress - posFileStart;
+                    writer.WriteCString(mActorNames[i]);
                 }
 
                 long addresRelocPosition = writer.BaseStream.Position;
@@ -131,7 +131,7 @@
             }
 
             // Compress and write the address relocationt able
-            byte[] addressRelocTable = PointerRelocationTableCompression.Compress(addressList, DATA_START_ADDRESS);
+            byte[] addressRelocTable = PointerRelocationTableCompression.Compress(addressList, DataStartAddress);
             int addressRelocTableOffset = (int)writer.BaseStream.Position - posFileStart;
             int addressRelocTableSize = addressRelocTable.Length;
             writer.Write(addressRelocTable);
@@ -144,17 +144,17 @@
             writer.BaseStream.Seek(posFileStart, SeekOrigin.Begin);
 
             // Write Chunk header
-            writer.Write(FLAG);
+            writer.Write(Flag);
             writer.Write((short)0); // userID
             writer.Write(length);
-            writer.WriteCString(TAG, 4);
+            writer.WriteCString(Tag, 4);
             writer.Write(0);
 
             // Write MSG header
             writer.Write(addressRelocTableOffset);
             writer.Write(addressRelocTableSize);
             writer.Write(DialogCount);
-            writer.Write(UNK_CONSTANT);
+            writer.Write(UnkConstant);
 
             for (int i = 0; i < DialogCount; i++)
             {
@@ -171,12 +171,12 @@
         {
             long posFileStart = reader.GetPosition();
             short flag = reader.ReadInt16();
-            short userID = reader.ReadInt16();
+            short userId = reader.ReadInt16();
             int length = reader.ReadInt32();
             string tag = reader.ReadCString(4);
             reader.AlignPosition(16);
 
-            if (tag != TAG)
+            if (tag != Tag)
             {
                 throw new InvalidDataException();
             }
@@ -185,7 +185,7 @@
             int addressRelocTableSize = reader.ReadInt32();
             int numMessages = reader.ReadInt32();
             short isRelocated = reader.ReadInt16(); // actually a byte but not very important
-            short unk0x1E = reader.ReadInt16();
+            short unk0X1E = reader.ReadInt16();
 
             /*
             if (unk0x1C != UNK_CONSTANT)
@@ -194,41 +194,41 @@
             }
             */
 
-            BMDMessageTable[] messagePointerTable = new BMDMessageTable[numMessages];
+            BmdMessageTable[] messagePointerTable = new BmdMessageTable[numMessages];
             for (int i = 0; i < messagePointerTable.Length; i++)
             {
-                messagePointerTable[i].Type = (BMDMessageType)reader.ReadInt32();
+                messagePointerTable[i].Type = (BmdMessageType)reader.ReadInt32();
                 messagePointerTable[i].Offset = reader.ReadInt32();
             }
 
             int actorNamePointerTableOffset = reader.ReadInt32();
             int numActors = reader.ReadInt32();
 
-            reader.BaseStream.Seek(posFileStart + DATA_START_ADDRESS + actorNamePointerTableOffset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(posFileStart + DataStartAddress + actorNamePointerTableOffset, SeekOrigin.Begin);
             int[] actorNamePointerTable = reader.ReadInt32Array(numActors);
 
-            _actorNames = new string[numActors];
-            for (int i = 0; i < _actorNames.Length; i++)
+            mActorNames = new string[numActors];
+            for (int i = 0; i < mActorNames.Length; i++)
             {
-                reader.BaseStream.Seek(posFileStart + DATA_START_ADDRESS + actorNamePointerTable[i], SeekOrigin.Begin);
-                _actorNames[i] = reader.ReadCString();
+                reader.BaseStream.Seek(posFileStart + DataStartAddress + actorNamePointerTable[i], SeekOrigin.Begin);
+                mActorNames[i] = reader.ReadCString();
             }
 
-            _messages = new BMDMessage[numMessages];
-            for (int i = 0; i < _messages.Length; i++)
+            mMessages = new BmdMessage[numMessages];
+            for (int i = 0; i < mMessages.Length; i++)
             {
-                _messages[i] = BMDMessageFactory.GetMessage(reader, (int)posFileStart, messagePointerTable[i]);
+                mMessages[i] = BmdMessageFactory.GetMessage(reader, (int)posFileStart, messagePointerTable[i]);
             }
         }
     }
 
-    struct BMDMessageTable
+    struct BmdMessageTable
     {
-        public BMDMessageType Type;
+        public BmdMessageType Type;
         public int Offset;
     }
 
-    public enum BMDMessageType : int
+    public enum BmdMessageType : int
     {
         Standard = 0,
         Selection = 1

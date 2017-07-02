@@ -7,51 +7,51 @@
     using AtlusLibSharp.Utilities;
     using CVM;
 
-    public class ISODirectoryRecord
+    public class IsoDirectoryRecord
     {
-        // Struct fields
-        private int _LBA;
-        private int _size;
-        private int _flags;
-        private string _name;
+        // StructNode fields
+        private int mLba;
+        private int mSize;
+        private int mFlags;
+        private string mName;
 
         // Properties
-        private ISODirectoryRecord _parent;
-        private List<ISODirectoryRecord> _subEntries;
+        private IsoDirectoryRecord mParent;
+        private List<IsoDirectoryRecord> mSubEntries;
 
         public int LBA
         {
-            get { return _LBA; }
+            get { return mLba; }
         }
 
         public int Size
         {
-            get { return _size; }
+            get { return mSize; }
         }
 
         public int Flags
         {
-            get { return _flags; }
+            get { return mFlags; }
         }
 
         public string Name
         {
-            get { return _name; }
+            get { return mName; }
         }
 
-        public ISODirectoryRecord ParentDirectory
+        public IsoDirectoryRecord ParentDirectory
         {
-            get { return _parent; }
+            get { return mParent; }
         }
 
-        public List<ISODirectoryRecord> SubEntries
+        public List<IsoDirectoryRecord> SubEntries
         {
-            get { return _subEntries; }
+            get { return mSubEntries; }
         }
 
-        internal ISODirectoryRecord(BinaryReader reader, ISODirectoryRecord parent)
+        internal IsoDirectoryRecord(BinaryReader reader, IsoDirectoryRecord parent)
         {
-            _parent = parent;
+            mParent = parent;
             InternalRead(reader);
         }
 
@@ -61,13 +61,13 @@
             byte length = reader.ReadByte();
             byte extLength = reader.ReadByte();
 
-            _LBA = reader.ReadInt32();
+            mLba = reader.ReadInt32();
             reader.Seek(0x04, SeekOrigin.Current); // LBA_BE
 
-            _size = reader.ReadInt32();
+            mSize = reader.ReadInt32();
             reader.Seek(0x04 + 0x07, SeekOrigin.Current); // size_BE + datetime
 
-            _flags = reader.ReadByte();
+            mFlags = reader.ReadByte();
             reader.Seek(0x06, SeekOrigin.Current); // unit size + interleave gap + volume seq number
 
             byte nameLength = reader.ReadByte();
@@ -76,32 +76,32 @@
             if (nameBytes.Length == 1)
             {
                 if (nameBytes[0] == 0)
-                    _name = ".";
+                    mName = ".";
                 else if (nameBytes[0] == 1)
-                    _name = "..";
+                    mName = "..";
             }
             else
             {
-                _name = Encoding.ASCII.GetString(nameBytes).Split(';')[0];
+                mName = Encoding.ASCII.GetString(nameBytes).Split(';')[0];
             }
 
-            bool isDirectory = (_flags & (int)RecordFlags.DirectoryRecord) == (int)RecordFlags.DirectoryRecord;
-            bool isNotParentOrGrandparentDirectory = nameLength != 1 || _parent == null;
+            bool isDirectory = (mFlags & (int)RecordFlags.DirectoryRecord) == (int)RecordFlags.DirectoryRecord;
+            bool isNotParentOrGrandparentDirectory = nameLength != 1 || mParent == null;
 
             if (isDirectory && isNotParentOrGrandparentDirectory)
             {
-                reader.Seek(CVMFile.CVM_HEADER_SIZE + ((long)_LBA * CVMFile.ISO_BLOCKSIZE), SeekOrigin.Begin);
-                _subEntries = new List<ISODirectoryRecord>();
+                reader.Seek(CvmFile.CVM_HEADER_SIZE + ((long)mLba * CvmFile.ISO_BLOCKSIZE), SeekOrigin.Begin);
+                mSubEntries = new List<IsoDirectoryRecord>();
 
                 // Set the initial sector start position
                 long posSubEntriesSectorStart = reader.BaseStream.Position;
-                long posSubEntriesDataEnd = posSubEntriesSectorStart + _size;
+                long posSubEntriesDataEnd = posSubEntriesSectorStart + mSize;
 
                 while (reader.BaseStream.Position < posSubEntriesDataEnd)
                 {
-                    ISODirectoryRecord record = new ISODirectoryRecord(reader, this);
+                    IsoDirectoryRecord record = new IsoDirectoryRecord(reader, this);
 
-                    _subEntries.Add(record);
+                    mSubEntries.Add(record);
 
                     // Skip padding
                     while (reader.ReadByte() == 0 && reader.BaseStream.Position < posSubEntriesDataEnd);

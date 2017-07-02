@@ -6,27 +6,27 @@ using System.Threading.Tasks;
 
 namespace AtlusLibSharp.Scripting
 {
-    public enum BFOperandType
+    public enum BfOperandType
     {
         Immediate = 1,
         FloatingPoint = 2,
     }
 
-    public class BFOperand
+    public class BfOperand
     {
-        public BFOperandType Type { get; internal set; }
+        public BfOperandType Type { get; internal set; }
         public long? ImmediateValue { get; internal set; }
         public float? FloatValue { get; internal set; }
 
-        internal BFOperand(long immediate)
+        internal BfOperand(long immediate)
         {
-            Type = BFOperandType.Immediate;
+            Type = BfOperandType.Immediate;
             ImmediateValue = immediate;
         }
 
-        internal BFOperand(float floatValue)
+        internal BfOperand(float floatValue)
         {
-            Type = BFOperandType.FloatingPoint;
+            Type = BfOperandType.FloatingPoint;
             FloatValue = floatValue;
         }
 
@@ -34,9 +34,9 @@ namespace AtlusLibSharp.Scripting
         {
             switch (Type)
             {
-                case BFOperandType.Immediate:
+                case BfOperandType.Immediate:
                     return ImmediateValue.Value.ToString();
-                case BFOperandType.FloatingPoint:
+                case BfOperandType.FloatingPoint:
                     return FloatValue.Value.ToString();
                 default:
                     return string.Empty;
@@ -44,22 +44,22 @@ namespace AtlusLibSharp.Scripting
         }
     }
 
-    public class BFOpcode
+    public class BfOpcode
     {
-        private ushort _instr;
-        private BFOperand _operand;
-        private int _codeBlockIndex;
+        private ushort mInstr;
+        private BfOperand mOperand;
+        private int mCodeBlockIndex;
 
-        public BFOpcode(BFInstruction instruction, IConvertible operand)
+        public BfOpcode(BfInstruction instruction, IConvertible operand)
         {
-            _instr = (ushort)instruction;
+            mInstr = (ushort)instruction;
             SetOperand(operand);
         }
 
-        internal BFOpcode(ushort instruction, int codeBlockIndex, IConvertible operand)
+        internal BfOpcode(ushort instruction, int codeBlockIndex, IConvertible operand)
         {
-            _instr = instruction;
-            _codeBlockIndex = codeBlockIndex;
+            mInstr = instruction;
+            mCodeBlockIndex = codeBlockIndex;
             SetOperand(operand);
         }
 
@@ -67,53 +67,53 @@ namespace AtlusLibSharp.Scripting
         {
             switch (Instruction)
             {
-                case BFInstruction.SetVariable:
-                case BFInstruction.PushVariable:
-                case BFInstruction.PushUInt16:
-                case BFInstruction.JumpIfFalse:
-                case BFInstruction.Jump:
-                case BFInstruction.CallProcedure:
-                case BFInstruction.CallNative:
-                case BFInstruction.BeginProcedure:
-                case BFInstruction.PushUInt32:
+                case BfInstruction.SetVariable:
+                case BfInstruction.PushVariable:
+                case BfInstruction.PushUInt16:
+                case BfInstruction.JumpIfFalse:
+                case BfInstruction.Jump:
+                case BfInstruction.CallProcedure:
+                case BfInstruction.CallNative:
+                case BfInstruction.BeginProcedure:
+                case BfInstruction.PushUInt32:
                     if (operand == null)
                         throw new ArgumentException("You must specify 1 operand for this instruction.");
-                    _operand = new BFOperand(Convert.ToInt64(operand));
+                    mOperand = new BfOperand(Convert.ToInt64(operand));
                     break;
-                case BFInstruction.PushFloat:
+                case BfInstruction.PushFloat:
                     if (operand == null)
                         throw new ArgumentException("You must specify 1 operand for this instruction.");
-                    _operand = new BFOperand(Convert.ToSingle(operand));
+                    mOperand = new BfOperand(Convert.ToSingle(operand));
                     break;
                 default:
                     if (operand != null)
-                        _operand = new BFOperand(Convert.ToInt64(operand));
+                        mOperand = new BfOperand(Convert.ToInt64(operand));
                     break;
             }
         }
 
-        internal BFOpcode(BFInstruction instruction, int codeBlockIndex, IConvertible operand)
+        internal BfOpcode(BfInstruction instruction, int codeBlockIndex, IConvertible operand)
         {
-            _instr = (ushort)instruction;
-            _codeBlockIndex = codeBlockIndex;
+            mInstr = (ushort)instruction;
+            mCodeBlockIndex = codeBlockIndex;
             SetOperand(operand);
         }
 
-        public BFInstruction Instruction
+        public BfInstruction Instruction
         {
-            get { return (BFInstruction)_instr; }
-            internal set { _instr = (ushort)value; }
+            get { return (BfInstruction)mInstr; }
+            internal set { mInstr = (ushort)value; }
         }
 
-        public BFOperand Operand
+        public BfOperand Operand
         {
-            get { return _operand; }
-            internal set { _operand = value; }
+            get { return mOperand; }
+            internal set { mOperand = value; }
         }
 
         public int CodeBlockIndex
         {
-            get { return _codeBlockIndex; }
+            get { return mCodeBlockIndex; }
         }
 
         public int Size
@@ -122,8 +122,8 @@ namespace AtlusLibSharp.Scripting
             {
                 switch (Instruction)
                 {
-                    case BFInstruction.PushUInt32:
-                    case BFInstruction.PushFloat:
+                    case BfInstruction.PushUInt32:
+                    case BfInstruction.PushFloat:
                         return 8; // these occupy the next 4 bytes as well to store the data for the push
                     default:
                         return 4;
@@ -133,7 +133,7 @@ namespace AtlusLibSharp.Scripting
 
         public override string ToString()
         {
-            return Instruction.ToString() + (_operand != null ? " " + _operand.ToString() : string.Empty);
+            return Instruction.ToString() + (mOperand != null ? " " + mOperand.ToString() : string.Empty);
         }
     }
 }

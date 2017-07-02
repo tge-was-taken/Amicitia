@@ -5,7 +5,7 @@ namespace AtlusLibSharp.FileSystems.CVM
     using ISO;
     using AtlusLibSharp.Utilities;
 
-    public class CVMFile
+    public class CvmFile
     {
         internal const int CVM_HEADER_SIZE = 0x1800;
         internal const int ISO_RESERVED_SIZE = 0x8000;
@@ -13,20 +13,20 @@ namespace AtlusLibSharp.FileSystems.CVM
         internal const int ISO_ROOTDIRECTORY_OFFSET = 0x9C;
         internal const int ID_PRIM_VOLUME_DESC = 0x01;
 
-        private ISODirectoryRecord _rootDirectory;
+        private IsoDirectoryRecord mRootDirectory;
 
-        public ISODirectoryRecord RootDirectory
+        public IsoDirectoryRecord RootDirectory
         {
-            get { return _rootDirectory; }
+            get { return mRootDirectory; }
         }
 
-        public CVMFile(string path)
+        public CvmFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
                 InternalRead(reader);
         }
 
-        public CVMFile(Stream stream)
+        public CvmFile(Stream stream)
         {
             using (BinaryReader reader = new BinaryReader(stream))
                 InternalRead(reader);
@@ -45,7 +45,7 @@ namespace AtlusLibSharp.FileSystems.CVM
             }
 
             reader.Seek(ISO_ROOTDIRECTORY_OFFSET - 1, SeekOrigin.Current);
-            _rootDirectory = new ISODirectoryRecord(reader, null);
+            mRootDirectory = new IsoDirectoryRecord(reader, null);
         }
     }
 }

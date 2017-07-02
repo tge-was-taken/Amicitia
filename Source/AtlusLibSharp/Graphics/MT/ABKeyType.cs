@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.Graphics.MT
 {
-    public enum ABKeyType : short
+    public enum AbKeyType : short
     {
         Translation = 0,
         Scale       = 2,

@@ -15,62 +15,62 @@
         Strings = 4,
     }
 
-    public class BFFile : BinaryFileBase
+    public class BfFile : BinaryBase
     {
-        private const byte HEADER_SIZE = 0x10;
-        private const int DATA_START = 0x70;
-        private const int TYPE_TABLE_COUNT = 5;
-        private const short TYPE = 0;
-        private const string TAG = "FLW0";
+        private const byte HeaderSize = 0x10;
+        private const int DataStart = 0x70;
+        private const int TypeTableCount = 5;
+        private const short Type = 0;
+        private const string Tag = "FLW0";
 
-        private BFCodeLabel[] _procedures;
-        private BFCodeLabel[] _jumpLabels;
-        private bool _requireSortProcedures;
-        private bool _requireSortJumps;
-        private List<BFOpcode> _opcodes;
-        private BMDFile _messageFile;
+        private BfCodeLabel[] mProcedures;
+        private BfCodeLabel[] mJumpLabels;
+        private bool mRequireSortProcedures;
+        private bool mRequireSortJumps;
+        private List<BfOpcode> mOpcodes;
+        private BmdFile mMessageFile;
 
         #region Properties
 
-        public BFCodeLabel[] Procedures
+        public BfCodeLabel[] Procedures
         {
-            get { return _procedures; }
+            get { return mProcedures; }
         }
 
-        public BFCodeLabel[] Jumps
+        public BfCodeLabel[] Jumps
         {
-            get { return _jumpLabels; }
+            get { return mJumpLabels; }
         }
 
-        public List<BFOpcode> Opcodes
+        public List<BfOpcode> Opcodes
         {
-            get { return _opcodes; }
+            get { return mOpcodes; }
         }
 
-        public BMDFile MessageFile
+        public BmdFile MessageFile
         {
-            get { return _messageFile; }
+            get { return mMessageFile; }
         }
 
         #endregion
 
-        public BFFile(string path)
+        public BfFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
                 InternalRead(reader);
         }
 
-        internal BFFile(BinaryReader reader)
+        internal BfFile(BinaryReader reader)
         {
             InternalRead(reader);
         }
 
-        internal BFFile(BFCodeLabel[] procedures, BFCodeLabel[] jumpLabels, List<BFOpcode> opcodes, BMDFile messageFile = null)
+        internal BfFile(BfCodeLabel[] procedures, BfCodeLabel[] jumpLabels, List<BfOpcode> opcodes, BmdFile messageFile = null)
         {
-            _procedures = procedures;
-            _jumpLabels = jumpLabels;
-            _opcodes = opcodes;
-            _messageFile = messageFile;
+            mProcedures = procedures;
+            mJumpLabels = jumpLabels;
+            mOpcodes = opcodes;
+            mMessageFile = messageFile;
         }
 
         /*
@@ -98,20 +98,20 @@
 
         public void ExportDisassembly(string path)
         {
-            BFDisassembler.Disassemble(path, _opcodes, _procedures, _jumpLabels);
+            BfDisassembler.Disassemble(path, mOpcodes, mProcedures, mJumpLabels);
         }
 
-        public static BFFile AssembleFromBFASM(string path, BMDFile messageDialog = null)
+        public static BfFile AssembleFromBfasm(string path, BmdFile messageDialog = null)
         {
-            BFFile bf = BFAssembler.AssembleFromASMText(path);
-            bf._messageFile = messageDialog;
+            BfFile bf = BfAssembler.AssembleFromAsmText(path);
+            bf.mMessageFile = messageDialog;
             return bf;
         }
 
-        public static BFFile LoadFromStream(Stream stream, bool leaveStreamOpen)
+        public static BfFile LoadFromStream(Stream stream, bool leaveStreamOpen)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
-                return new BFFile(reader);
+                return new BfFile(reader);
         }
 
         private static TypeTableEntry CreateTypeTableEntry(TypeTableType entryType, int entriesTotalSize, int dataOffset = 0)
@@ -134,76 +134,76 @@
 
             TypeTableEntry entry = new TypeTableEntry()
             {
-                type = (int)entryType,
-                dataOffset = dataOffset,
-                elementCount = entriesTotalSize / elementLength,
-                elementLength = elementLength,
+                Type = (int)entryType,
+                DataOffset = dataOffset,
+                ElementCount = entriesTotalSize / elementLength,
+                ElementLength = elementLength,
             };
 
             return entry;
         }
        
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             int posFileStart = (int)writer.BaseStream.Position;
 
-            // seek past the header, type table and code labels
-            writer.BaseStream.Seek(DATA_START + (_procedures.Length * BFCodeLabel.SIZE) + (_jumpLabels.Length * BFCodeLabel.SIZE), SeekOrigin.Current);
+            // seek past the header, id table and code labels
+            writer.BaseStream.Seek(DataStart + (mProcedures.Length * BfCodeLabel.Size) + (mJumpLabels.Length * BfCodeLabel.Size), SeekOrigin.Current);
 
-            // create code label type table entries
-            int procsLength = _procedures.Length * BFCodeLabel.SIZE;
-            int jumpsLength = _jumpLabels.Length * BFCodeLabel.SIZE;
+            // create code label id table entries
+            int procsLength = mProcedures.Length * BfCodeLabel.Size;
+            int jumpsLength = mJumpLabels.Length * BfCodeLabel.Size;
 
             int opCodeDataStart = (int)(writer.BaseStream.Position - posFileStart);
             int numProcsSet = 0;
             int numJumpsSet = 0;
-            for (int i = 0; i < _opcodes.Count; i++)
+            for (int i = 0; i < mOpcodes.Count; i++)
             {
                 int procIdx = -1;
 
                 // try to find a procedure with this index
-                if (numProcsSet != _procedures.Length)
+                if (numProcsSet != mProcedures.Length)
                 {
-                    procIdx = Array.FindIndex(_procedures, p => p.OpcodeIndex == i);
+                    procIdx = Array.FindIndex(mProcedures, p => p.OpcodeIndex == i);
                     if (procIdx != -1)
                     {
-                        _procedures[procIdx].Offset = (uint)(((writer.BaseStream.Position - posFileStart) - opCodeDataStart) / 4);
+                        mProcedures[procIdx].Offset = (uint)(((writer.BaseStream.Position - posFileStart) - opCodeDataStart) / 4);
                         numProcsSet++;
                     }
                 }
 
                 // if we haven't found a procedure, try to find a jump label with this index
-                if (procIdx == -1 && numJumpsSet != _jumpLabels.Length)
+                if (procIdx == -1 && numJumpsSet != mJumpLabels.Length)
                 {
-                    int jumpIdx = Array.FindIndex(_jumpLabels, j => j.OpcodeIndex == i);
+                    int jumpIdx = Array.FindIndex(mJumpLabels, j => j.OpcodeIndex == i);
                     if (jumpIdx != -1)
                     {
-                        _jumpLabels[jumpIdx].Offset = (uint)(((writer.BaseStream.Position - posFileStart) - opCodeDataStart) / 4);
+                        mJumpLabels[jumpIdx].Offset = (uint)(((writer.BaseStream.Position - posFileStart) - opCodeDataStart) / 4);
                         numJumpsSet++;
                     }
                 }
                 
                 // write the opcode data
-                writer.Write((ushort)_opcodes[i].Instruction);
+                writer.Write((ushort)mOpcodes[i].Instruction);
 
-                if (_opcodes[i].Operand != null)
+                if (mOpcodes[i].Operand != null)
                 {
-                    switch (_opcodes[i].Operand.Type)
+                    switch (mOpcodes[i].Operand.Type)
                     {
-                        case BFOperandType.Immediate:
-                            if (_opcodes[i].Instruction == BFInstruction.PushUInt32)
+                        case BfOperandType.Immediate:
+                            if (mOpcodes[i].Instruction == BfInstruction.PushUInt32)
                             {
                                 writer.Write((ushort)0);
-                                writer.Write((uint)_opcodes[i].Operand.ImmediateValue);
+                                writer.Write((uint)mOpcodes[i].Operand.ImmediateValue);
                             }
                             else
                             {
-                                writer.Write((ushort)_opcodes[i].Operand.ImmediateValue);
+                                writer.Write((ushort)mOpcodes[i].Operand.ImmediateValue);
                             }
                             break;
-                        case BFOperandType.FloatingPoint:
+                        case BfOperandType.FloatingPoint:
                             writer.Write((ushort)0);
-                            writer.Write((float)_opcodes[i].Operand.FloatValue);
+                            writer.Write((float)mOpcodes[i].Operand.FloatValue);
                             break;
                     }
                 }
@@ -215,21 +215,21 @@
 
             int opCodeDataEnd = (int)(writer.BaseStream.Position - posFileStart);
 
-            // set type table entries
-            TypeTableEntry[] typeTableEntries = new TypeTableEntry[TYPE_TABLE_COUNT];
-            typeTableEntries[(int)TypeTableType.Procedures] = CreateTypeTableEntry(TypeTableType.Procedures, procsLength, DATA_START);
-            typeTableEntries[(int)TypeTableType.JumpLabels] = CreateTypeTableEntry(TypeTableType.JumpLabels, jumpsLength, DATA_START + procsLength);
+            // set id table entries
+            TypeTableEntry[] typeTableEntries = new TypeTableEntry[TypeTableCount];
+            typeTableEntries[(int)TypeTableType.Procedures] = CreateTypeTableEntry(TypeTableType.Procedures, procsLength, DataStart);
+            typeTableEntries[(int)TypeTableType.JumpLabels] = CreateTypeTableEntry(TypeTableType.JumpLabels, jumpsLength, DataStart + procsLength);
             typeTableEntries[(int)TypeTableType.Opcodes]    = CreateTypeTableEntry(TypeTableType.Opcodes, opCodeDataEnd - opCodeDataStart, opCodeDataStart);
             typeTableEntries[(int)TypeTableType.Messages]   = CreateTypeTableEntry(TypeTableType.Messages, 0, opCodeDataEnd);
             typeTableEntries[(int)TypeTableType.Strings]    = CreateTypeTableEntry(TypeTableType.Strings, 0xF0, opCodeDataEnd);
 
-            if (_messageFile != null)
+            if (mMessageFile != null)
             {
-                _messageFile.InternalWrite(writer);
+                mMessageFile.Write(writer);
                 int messageDataEnd = (int)writer.BaseStream.Position - posFileStart;
                 int messageDataSize = messageDataEnd - opCodeDataEnd;
 
-                typeTableEntries[(int)TypeTableType.Strings].dataOffset += messageDataSize;
+                typeTableEntries[(int)TypeTableType.Strings].DataOffset += messageDataSize;
                 typeTableEntries[(int)TypeTableType.Messages] = CreateTypeTableEntry(TypeTableType.Messages, messageDataSize, opCodeDataEnd);
             }
 
@@ -243,10 +243,10 @@
             writer.BaseStream.Seek(posFileStart, SeekOrigin.Begin);
 
             // write standard header
-            writer.Write(TYPE);
+            writer.Write(Type);
             writer.Write((short)0); // userID
             writer.Write(length);
-            writer.WriteCString(TAG, 4);
+            writer.WriteCString(Tag, 4);
             writer.Write(0); // unused
 
             // write bf header
@@ -254,19 +254,19 @@
             writer.Write(0); // some unknown value here, not sure what its for
             writer.AlignPosition(16);
 
-            // write type table entries
+            // write id table entries
             foreach (TypeTableEntry entry in typeTableEntries)
             {
                 entry.InternalWrite(writer);
             }
 
             // lastly, write the code labels
-            foreach (BFCodeLabel label in _procedures)
+            foreach (BfCodeLabel label in mProcedures)
             {
                 label.InternalWrite(writer);
             }
 
-            foreach (BFCodeLabel label in _jumpLabels)
+            foreach (BfCodeLabel label in mJumpLabels)
             {
                 label.InternalWrite(writer);
             }
@@ -276,12 +276,12 @@
         {
             long posFileStart = reader.GetPosition();
             short flag = reader.ReadInt16();
-            short userID = reader.ReadInt16();
+            short userId = reader.ReadInt16();
             int length = reader.ReadInt32();
             string tag = reader.ReadCString(4);
             int unused = reader.ReadInt32();
 
-            if (tag != TAG)
+            if (tag != Tag)
             {
                 throw new InvalidDataException("Identifier mismatch.");
             }
@@ -297,32 +297,32 @@
                 typeTable[i] = new TypeTableEntry(reader);
             }
 
-            System.Diagnostics.Debug.Assert(typeTable[(int)TypeTableType.Strings].elementCount == 0xF0);
+            System.Diagnostics.Debug.Assert(typeTable[(int)TypeTableType.Strings].ElementCount == 0xF0);
 
             for (int i = 0; i < numTypeTableEntries; i++)
             {
-                reader.Seek(posFileStart + typeTable[i].dataOffset, SeekOrigin.Begin);
+                reader.Seek(posFileStart + typeTable[i].DataOffset, SeekOrigin.Begin);
 
-                switch ((TypeTableType)typeTable[i].type)
+                switch ((TypeTableType)typeTable[i].Type)
                 {
                     case TypeTableType.Procedures:
-                        ReadCodeLabels(reader, ref _procedures, typeTable[i].elementCount, out _requireSortProcedures);
+                        ReadCodeLabels(reader, ref mProcedures, typeTable[i].ElementCount, out mRequireSortProcedures);
                         break;
                     case TypeTableType.JumpLabels:
-                        ReadCodeLabels(reader, ref _jumpLabels, typeTable[i].elementCount, out _requireSortJumps);
+                        ReadCodeLabels(reader, ref mJumpLabels, typeTable[i].ElementCount, out mRequireSortJumps);
                         break;
                     case TypeTableType.Opcodes:
                         {
                             bool hasExtendedOpcodes;
-                            _opcodes = BFDisassembler.ParseCodeblock(reader.ReadUInt32Array(typeTable[i].elementCount), out hasExtendedOpcodes);
+                            mOpcodes = BfDisassembler.ParseCodeblock(reader.ReadUInt32Array(typeTable[i].ElementCount), out hasExtendedOpcodes);
 
                             if (hasExtendedOpcodes) // only fix up the opcode indices if they have to be
                                 FixupOpcodeIndices(); // this function is kinda 2*O(n^2)
                         }
                         break;
                     case TypeTableType.Messages:
-                        if (typeTable[i].elementCount > 0)
-                            _messageFile = new BMDFile(StreamHelper.ReadStream(reader, typeTable[i].elementCount), false);
+                        if (typeTable[i].ElementCount > 0)
+                            mMessageFile = new BmdFile(StreamHelper.ReadStream(reader, typeTable[i].ElementCount), false);
                         break;
                     case TypeTableType.Strings:
                         // TODO: Implement this
@@ -331,14 +331,14 @@
             }
         }
 
-        private static void ReadCodeLabels(BinaryReader reader, ref BFCodeLabel[] array, int count, out bool requireSort)
+        private static void ReadCodeLabels(BinaryReader reader, ref BfCodeLabel[] array, int count, out bool requireSort)
         {
-            array = new BFCodeLabel[count];
+            array = new BfCodeLabel[count];
             requireSort = false;
             int lastIdx = -1;
             for (int j = 0; j < array.Length; j++)
             {
-                array[j] = new BFCodeLabel(reader);
+                array[j] = new BfCodeLabel(reader);
                 if (!requireSort && lastIdx > array[j].OpcodeIndex)
                     requireSort = true;
                 else
@@ -348,14 +348,14 @@
 
         private void FixupOpcodeIndices()
         {
-            for (int i = 0; i < _procedures.Length; i++)
+            for (int i = 0; i < mProcedures.Length; i++)
             {
-                _procedures[i].OpcodeIndex = _opcodes.FindIndex(op => op.CodeBlockIndex == _procedures[i].Offset);
+                mProcedures[i].OpcodeIndex = mOpcodes.FindIndex(op => op.CodeBlockIndex == mProcedures[i].Offset);
             }
 
-            for (int i = 0; i < _jumpLabels.Length; i++)
+            for (int i = 0; i < mJumpLabels.Length; i++)
             {
-                _jumpLabels[i].OpcodeIndex = _opcodes.FindIndex(op => op.CodeBlockIndex == _jumpLabels[i].Offset);
+                mJumpLabels[i].OpcodeIndex = mOpcodes.FindIndex(op => op.CodeBlockIndex == mJumpLabels[i].Offset);
             }
         }
 

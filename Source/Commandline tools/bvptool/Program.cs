@@ -21,12 +21,12 @@ namespace bvptool
 
             if (args[0].EndsWith(".BVP", StringComparison.InvariantCultureIgnoreCase))
             {
-                BVPFile bvp = new BVPFile(args[0]);
+                BvpFile bvp = new BvpFile(args[0]);
                 bvp.Extract(Path.GetFileNameWithoutExtension(args[0]));
             }
             else if (!Path.HasExtension(args[0]))
             {
-                BVPFile bvp = BVPFile.Create(args[0]);
+                BvpFile bvp = BvpFile.Create(args[0]);
                 bvp.Save(Path.GetFileName(args[0]) + ".BVP");
             }
         }

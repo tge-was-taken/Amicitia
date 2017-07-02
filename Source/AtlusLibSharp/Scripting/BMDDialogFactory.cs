@@ -3,21 +3,21 @@
     using System;
     using System.IO;
 
-    internal static class BMDMessageFactory
+    internal static class BmdMessageFactory
     {
-        internal static BMDMessage GetMessage(BinaryReader reader, int filePointer, BMDMessageTable msgTbl)
+        internal static BmdMessage GetMessage(BinaryReader reader, int filePointer, BmdMessageTable msgTbl)
         {
-            reader.BaseStream.Seek(filePointer + BMDFile.DATA_START_ADDRESS + msgTbl.Offset, SeekOrigin.Begin);
+            reader.BaseStream.Seek(filePointer + BmdFile.DataStartAddress + msgTbl.Offset, SeekOrigin.Begin);
             switch (msgTbl.Type)
             {
-                case BMDMessageType.Standard:
-                    return new BMDStandardMessage(reader, filePointer);
+                case BmdMessageType.Standard:
+                    return new BmdStandardMessage(reader, filePointer);
 
-                case BMDMessageType.Selection:
-                    return new BMDSelectionMessage(reader, filePointer);
+                case BmdMessageType.Selection:
+                    return new BmdSelectionMessage(reader, filePointer);
 
                 default:
-                    throw new ArgumentException("Unknown message type: " + msgTbl.Type);
+                    throw new ArgumentException("SkinBoneIndexCount message id: " + msgTbl.Type);
             }
         }
     }

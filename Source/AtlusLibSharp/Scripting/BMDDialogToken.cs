@@ -13,39 +13,39 @@ namespace AtlusLibSharp.Scripting
     }
     */
 
-    public abstract class BMDDialogToken
+    public abstract class BmdDialogToken
     {
-        public abstract BMDDialogTokenType Type { get; }
+        public abstract BmdDialogTokenType Type { get; }
 
         public abstract byte[] Data { get; }
 
         internal abstract void InternalWrite(BinaryWriter writer);
     }
 
-    public class BMDFunctionToken : BMDDialogToken
+    public class BmdFunctionToken : BmdDialogToken
     {
-        private byte _funcCategory;
-        private byte _funcID;
-        private byte[] _params;
+        private byte mFuncCategory;
+        private byte mFuncId;
+        private byte[] mParams;
 
         public byte FunctionCategory
         {
-            get { return _funcCategory; }
+            get { return mFuncCategory; }
         }
 
-        public byte FunctionID
+        public byte FunctionId
         {
-            get { return _funcID; }
+            get { return mFuncId; }
         }
 
         public byte[] Parameters
         {
-            get { return _params; }
+            get { return mParams; }
         }
 
-        public override BMDDialogTokenType Type
+        public override BmdDialogTokenType Type
         {
-            get { return BMDDialogTokenType.Function; }
+            get { return BmdDialogTokenType.Function; }
         }
 
         public override byte[] Data
@@ -62,61 +62,61 @@ namespace AtlusLibSharp.Scripting
 
         public override string ToString()
         {
-            string str = string.Format("func {0:X} {1:X}", _funcCategory, _funcID);
-            for (int i = 0; i < _params.Length; i++)
+            string str = $"func {mFuncCategory:X} {mFuncId:X}";
+            for (int i = 0; i < mParams.Length; i++)
             {
-                byte param = _params[i];
+                byte param = mParams[i];
 
                 if (param != 0xFF)
                     param -= 1;
 
-                str += string.Format(" {0:X}", param);
+                str += $" {param:X}";
             }
             return str;
         }
 
-        public BMDFunctionToken(byte funcCategory, byte funcID, params byte[] funcParams)
+        public BmdFunctionToken(byte funcCategory, byte funcId, params byte[] funcParams)
         {
-            _funcCategory = funcCategory;
-            _funcID = funcID;
-            _params = funcParams;
+            mFuncCategory = funcCategory;
+            mFuncId = funcId;
+            mParams = funcParams;
         }
 
         internal override void InternalWrite(BinaryWriter writer)
         {
-            writer.Write(0xF << 4 | _params.Length + 1);
-            writer.Write((_funcCategory & 0x7) << 5 | _funcID & 0x1F);
-            writer.Write(_params);
+            writer.Write(0xF << 4 | mParams.Length + 1);
+            writer.Write((mFuncCategory & 0x7) << 5 | mFuncId & 0x1F);
+            writer.Write(mParams);
         }
     }
 
-    public class BMDTextToken : BMDDialogToken
+    public class BmdTextToken : BmdDialogToken
     {
-        private string _string;
+        private string mString;
 
-        public override BMDDialogTokenType Type
+        public override BmdDialogTokenType Type
         {
-            get { return BMDDialogTokenType.Text; }
+            get { return BmdDialogTokenType.Text; }
         }
 
         public override byte[] Data
         {
-            get { return Encoding.GetEncoding("SHIFT_JIS").GetBytes(_string); }
+            get { return Encoding.GetEncoding("SHIFT_JIS").GetBytes(mString); }
         }
 
-        public BMDTextToken(string value)
+        public BmdTextToken(string value)
         {
-            _string = value;
+            mString = value;
         }
 
-        public BMDTextToken(byte[] stringBytes)
+        public BmdTextToken(byte[] stringBytes)
         {
-            _string = Encoding.GetEncoding("SHIFT_JIS").GetString(stringBytes);
+            mString = Encoding.GetEncoding("SHIFT_JIS").GetString(stringBytes);
         }
 
         public override string ToString()
         {
-            return _string;
+            return mString;
         }
 
         internal override void InternalWrite(BinaryWriter writer)
@@ -125,7 +125,7 @@ namespace AtlusLibSharp.Scripting
         }
     }
 
-    public enum BMDDialogTokenType
+    public enum BmdDialogTokenType
     {
         Default,
         Text,

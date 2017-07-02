@@ -8,52 +8,52 @@
     using IO;
     using TMX;
 
-    public class TBFile : BinaryFileBase
+    public class TbFile : BinaryBase
     {
         private const byte HEADER_SIZE = 0x10;
         private const short FLAG = 0x0009;
         internal const string TAG = "TXP0";
 
         // Private Fields
-        private List<TMXFile> _textures;
+        private List<TmxFile> mTextures;
 
         // Constructors
-        internal TBFile(BinaryReader reader)
+        internal TbFile(BinaryReader reader)
         {
             InternalRead(reader);
         }
 
-        public TBFile(IEnumerable<TMXFile> textures)
+        public TbFile(IEnumerable<TmxFile> textures)
         {
-            _textures = textures.ToList();
+            mTextures = textures.ToList();
         }
 
         // Properties
         public int TextureCount
         {
-            get { return _textures.Count; }
+            get { return mTextures.Count; }
         }
 
-        public List<TMXFile> Textures
+        public List<TmxFile> Textures
         {
-            get { return _textures; }
+            get { return mTextures; }
         }
 
         // Public Static Methods
-        public static TBFile LoadFrom(string path)
+        public static TbFile LoadFrom(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-                return new TBFile(reader);
+                return new TbFile(reader);
         }
 
-        public static TBFile LoadFrom(Stream stream, bool leaveStreamOpen)
+        public static TbFile LoadFrom(Stream stream, bool leaveStreamOpen)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
-                return new TBFile(reader);
+                return new TbFile(reader);
         }
 
         // Internal Methods
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             int posFileStart = (int)writer.BaseStream.Position;
 
@@ -70,7 +70,7 @@
             {
                 writer.AlignPosition(64);
                 texturePointerTable[i] = (int)(writer.BaseStream.Position - posFileStart);
-                _textures[i].InternalWrite(writer);
+                mTextures[i].Write(writer);
             }
 
             // Calculate length
@@ -98,7 +98,7 @@
         {
             int posFileStart = (int)reader.BaseStream.Position;
             short flag = reader.ReadInt16();
-            short userID = reader.ReadInt16();
+            short userId = reader.ReadInt16();
             int length = reader.ReadInt32();
             string tag = reader.ReadCString(4);
             int unused = reader.ReadInt32();
@@ -111,11 +111,11 @@
             int numTextures = reader.ReadInt32();
             int[] texturePointerTable = reader.ReadInt32Array(numTextures);
 
-            _textures = new List<TMXFile>(numTextures);
+            mTextures = new List<TmxFile>(numTextures);
             for (int i = 0; i < numTextures; i++)
             {
                 reader.BaseStream.Seek(posFileStart + texturePointerTable[i], SeekOrigin.Begin);
-                _textures.Add(TMXFile.Load(reader.BaseStream, true));
+                mTextures.Add(TmxFile.Load(reader.BaseStream, true));
             }
         }
     }

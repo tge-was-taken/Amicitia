@@ -2,28 +2,28 @@
 
 namespace AtlusLibSharp.FileSystems.CVM
 {
-    public class CVMExecutableListing
+    public class CvmExecutableListing
     {
-        private CVMDirectoryListing _rootDirectoryListing;
+        private CvmDirectoryListing mRootDirectoryListing;
 
-        public CVMDirectoryListing RootDirectoryListing
+        public CvmDirectoryListing RootDirectoryListing
         {
-            get { return _rootDirectoryListing; }
+            get { return mRootDirectoryListing; }
         }
 
-        public CVMExecutableListing(string path)
+        public CvmExecutableListing(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path))) 
-                _rootDirectoryListing = new CVMDirectoryListing(reader, null);
+                mRootDirectoryListing = new CvmDirectoryListing(reader, null);
         }
 
-        public CVMExecutableListing(Stream stream)
+        public CvmExecutableListing(Stream stream)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, true))
-                _rootDirectoryListing = new CVMDirectoryListing(reader, null);
+                mRootDirectoryListing = new CvmDirectoryListing(reader, null);
         }
 
-        public void Update(CVMFile cvm)
+        public void Update(CvmFile cvm)
         {
             /*
             if (cvm.RootDirectory.SubEntries.Count != _rootDirectoryListing.SubEntries.Length)
@@ -32,19 +32,19 @@ namespace AtlusLibSharp.FileSystems.CVM
             }
             */
 
-            _rootDirectoryListing.Update(cvm.RootDirectory);
+            mRootDirectoryListing.Update(cvm.RootDirectory);
         }
 
         public void Save(string path)
         {
             using (BinaryWriter writer = new BinaryWriter(File.Create(path), System.Text.Encoding.Default, true))
-                _rootDirectoryListing.InternalWrite(writer);
+                mRootDirectoryListing.InternalWrite(writer);
         }
 
         public void Save(Stream stream)
         {
             using (BinaryWriter writer = new BinaryWriter(stream, System.Text.Encoding.Default, true))
-                _rootDirectoryListing.InternalWrite(writer);
+                mRootDirectoryListing.InternalWrite(writer);
         }
     }
 } 

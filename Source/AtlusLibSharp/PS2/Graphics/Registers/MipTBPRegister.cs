@@ -4,51 +4,51 @@
     using System.IO;
     using AtlusLibSharp.Utilities;
 
-    public class MipTBPRegister
+    public class MipTbpRegister
     {
-        private ulong _rawData;
+        private ulong mRawData;
 
         #region Properties
 
         public ulong Mip1BasePointer
         {
-            get { return BitHelper.GetBits(_rawData, 14, 0); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 14, value, 0); }
+            get { return BitHelper.GetBits(mRawData, 14, 0); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 14, value, 0); }
         }
 
         public ulong Mip1BufferWidth
         {
-            get { return BitHelper.GetBits(_rawData, 6, 14); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 6, value, 14); }
+            get { return BitHelper.GetBits(mRawData, 6, 14); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 6, value, 14); }
         }
 
         public ulong Mip2BasePointer
         {
-            get { return BitHelper.GetBits(_rawData, 14, 20); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 14, value, 20); }
+            get { return BitHelper.GetBits(mRawData, 14, 20); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 14, value, 20); }
         }
 
         public ulong Mip2BufferWidth
         {
-            get { return BitHelper.GetBits(_rawData, 6, 34); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 6, value, 34); }
+            get { return BitHelper.GetBits(mRawData, 6, 34); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 6, value, 34); }
         }
 
         public ulong Mip3BasePointer
         {
-            get { return BitHelper.GetBits(_rawData, 14, 40); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 14, value, 40); }
+            get { return BitHelper.GetBits(mRawData, 14, 40); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 14, value, 40); }
         }
 
         public ulong Mip3BufferWidth
         {
-            get { return BitHelper.GetBits(_rawData, 6, 54); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 6, value, 54); }
+            get { return BitHelper.GetBits(mRawData, 6, 54); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 6, value, 54); }
         }
 
         #endregion Properties
 
-        public MipTBPRegister()
+        public MipTbpRegister()
         {
             Mip1BasePointer = 0;
             Mip1BufferWidth = 1;
@@ -58,7 +58,7 @@
             Mip3BufferWidth = 1;
         }
 
-        public MipTBPRegister(
+        public MipTbpRegister(
             ulong mip1BasePointer, ulong mip1BufferWidth,
             ulong mip2BasePointer, ulong mip2BufferWidth,
             ulong mip3BasePointer, ulong mip3BufferWidth)
@@ -71,14 +71,14 @@
             Mip3BufferWidth = mip3BufferWidth;
         }
 
-        internal MipTBPRegister(BinaryReader reader)
+        internal MipTbpRegister(BinaryReader reader)
         {
-            _rawData = reader.ReadUInt64();
+            mRawData = reader.ReadUInt64();
         }
 
         internal byte[] GetBytes()
         {
-            return BitConverter.GetBytes(_rawData);
+            return BitConverter.GetBytes(mRawData);
         }
     }
 }

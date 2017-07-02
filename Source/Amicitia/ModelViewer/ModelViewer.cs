@@ -8,179 +8,166 @@ using OpenTK.Graphics.OpenGL4;
 using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
 using SN = System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace Amicitia.ModelViewer
 {
-    public struct GPUModel
+    public struct GpuModel
     {
-        public int vbo;
-        public int[] ibo;
-        public int vc;
-        public int[] ic;
-        public string[] tid;
-        public Color[] color;
-        public bool strip;
-        public GPUModel(int vbo, int[] ibo, int vc, int[] ic, string[] tid, Color[] color, bool strip)
+        public int Vbo;
+        public int[] Ibo;
+        public int Vc;
+        public int[] Ic;
+        public string[] Tid;
+        public Color[] Color;
+        public bool Strip;
+        public GpuModel(int vbo, int[] ibo, int vc, int[] ic, string[] tid, Color[] color, bool strip)
         {
-            this.vbo = vbo;
-            this.ibo = ibo;
-            this.vc = vc;
-            this.ic = ic;
-            this.tid = tid;
-            this.color = color;
-            this.strip = strip;
+            this.Vbo = vbo;
+            this.Ibo = ibo;
+            this.Vc = vc;
+            this.Ic = ic;
+            this.Tid = tid;
+            this.Color = color;
+            this.Strip = strip;
         }
     }
 
     public struct BasicCol4
     {
-        public byte r;
-        public byte g;
-        public byte b;
-        public byte a;
+        public byte R;
+        public byte G;
+        public byte B;
+        public byte A;
 
         public BasicCol4(Color color)
         {
-            r = color.R;
-            g = color.G;
-            b = color.B;
-            a = color.A;
+            R = color.R;
+            G = color.G;
+            B = color.B;
+            A = color.A;
         }
     }
 
     public struct BasicVec4
     {
-        public float x;
-        public float y;
-        public float z;
-        public float w;
+        public float X;
+        public float Y;
+        public float Z;
+        public float W;
 
         public BasicVec4(float x, float y, float z, float w)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.w = w;
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
+            this.W = w;
         }
 
         public BasicVec4(Vector4 v)
         {
-            x = v.X;
-            y = v.Y;
-            z = v.Z;
-            w = v.W;
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
+            W = v.W;
         }
 
         public BasicVec4(Color4 v)
         {
-            x = v.R;
-            y = v.G;
-            z = v.B;
-            w = v.A;
+            X = v.R;
+            Y = v.G;
+            Z = v.B;
+            W = v.A;
         }
     }
 
     public struct BasicVec3
     {
-        public float x;
-        public float y;
-        public float z;
+        public float X;
+        public float Y;
+        public float Z;
 
         public BasicVec3(float x, float y, float z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
         }
 
         public BasicVec3(SN.Vector3 v)
         {
-            x = v.X;
-            y = v.Y;
-            z = v.Z;
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
         }
     }
 
     public struct BasicVec2
     {
-        public float x, y;
+        public float X, Y;
 
         public BasicVec2(float x, float y)
         {
-            this.x = x;
-            this.y = y;
+            this.X = x;
+            this.Y = y;
         }
 
         public BasicVec2(SN.Vector2 v)
         {
-            x = v.X;
-            y = v.Y;
+            X = v.X;
+            Y = v.Y;
         }
 
     }
 
     public struct Vertex
     {
-        public BasicVec3 pos; 
-        public BasicVec3 nrm; 
-        public BasicVec2 tex;
-        public BasicVec4 col;
+        public BasicVec3 Pos; 
+        public BasicVec3 Nrm; 
+        public BasicVec2 Tex;
+        public BasicVec4 Col;
 
         public Vertex(BasicVec3 pos, BasicVec3 nrm, BasicVec2 tex, BasicVec4 col)
         {
-            this.pos = pos;
-            this.nrm = nrm;
-            this.tex = tex;
-            this.col = col;
+            this.Pos = pos;
+            this.Nrm = nrm;
+            this.Tex = tex;
+            this.Col = col;
         }
     }
 
     public class Camera
     {
-        private Vector3 _position;
-        private Vector3 _forward;
-        private Vector3 _up;
-        private Quaternion _rot;
-
         public Camera()
         {
             // default settings
-            _position = new Vector3(100, 100, 100);
-            _forward = new Vector3(0, 0, 1);
-            _up = new Vector3(0, 1, 0);
+            Target = new Vector3( 0, 100, 0 );
+            Position = new Vector3(0, 100, 150);
+            Forward = Vector3.Normalize( Target - Position );
+            Up = new Vector3(0, 1, 0);
         }
 
-        public Vector3 Position
-        {
-            get { return _position; }
-            set { _position = value; }
-        }
+        public Vector3 Position { get; set; }
 
-        public Quaternion Rotation
-        {
-            get { return _rot; }
-            set { _rot = value; }
-        }
+        public Quaternion Rotation { get; set; }
 
-        public Vector3 Forward
-        {
-            get { return _forward; }
-            set { _forward = value; }
-        }
+        public Vector3 Forward { get; set; }
+
+        public Vector3 Up { get; set; }
+
+        public Vector3 Target { get; set; }
 
         public void Bind(ShaderProgram shader, GLControl control)
         {
-            Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(60.0f), (float)control.Width / control.Height, 0.1f, 10000.0f);
-            Matrix4 view = Matrix4.LookAt(_position, _position + _forward, _up);
+            Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(60.0f), (float)control.Width / control.Height, 0.1f, 100000.0f);
+            Matrix4 view = Matrix4.LookAt(Position, Position + Forward, Up);
             shader.SetUniform("proj", proj);
             shader.SetUniform("view", view);
         }
     }
 
-    internal static class RWToGLConversionHelper
+    internal static class RwtoGlConversionHelper
     {
-        private static Dictionary<PS2FilterMode, int> _ps2Filter_GLFilter_dict = new Dictionary<PS2FilterMode, int>()
+        public static Dictionary<PS2FilterMode, int> FilterDictionary { get; } = new Dictionary<PS2FilterMode, int>()
         {
             { PS2FilterMode.None,               (int)TextureMagFilter.Linear },
             { PS2FilterMode.Nearest,            (int)TextureMagFilter.Nearest },
@@ -191,397 +178,380 @@ namespace Amicitia.ModelViewer
             { PS2FilterMode.LinearMipLinear,    (int)TextureMagFilter.Linear }
         };
 
-        private static Dictionary<PS2AddressingMode, int> _ps2AddrMode_GLWrapMode_dict = new Dictionary<PS2AddressingMode, int>()
+        public static Dictionary<PS2AddressingMode, int> WrapDictionary { get; } = new Dictionary<PS2AddressingMode, int>()
         {
             { PS2AddressingMode.None,       (int)TextureWrapMode.Repeat },
             { PS2AddressingMode.Wrap,       (int)TextureWrapMode.Repeat },
             { PS2AddressingMode.Mirror,     (int)TextureWrapMode.MirroredRepeat },
             { PS2AddressingMode.Clamp,      (int)TextureWrapMode.ClampToBorder }
         };
-
-        public static Dictionary<PS2FilterMode, int> FilterDictionary
-        {
-            get { return _ps2Filter_GLFilter_dict; }
-        }
-
-        public static Dictionary<PS2AddressingMode, int> WrapDictionary
-        {
-            get { return _ps2AddrMode_GLWrapMode_dict; }
-        }
-
     }
 
     public class ModelViewer
     {
         // view states
-        private bool _isViewReady;
-        private bool _isViewFocused;
-
-        // scene states
-        private bool _isSceneReady;
+        private bool mIsViewReady;
+        private bool mIsViewFocused;
 
         // store a handle to the loaded scene
-        private RMDScene _loadedScene;
 
         // gl control handle
-        private GLControl _viewerCtrl;
+        private GLControl mViewerCtrl;
 
         // model render data
-        private List<GPUModel> _models;
-        private Dictionary<string, int> _texLookup;
-        private ShaderProgram _shaderProg;
-        private int _currentGPUModelID;
-        private int _currentTextureID;
-        private Matrix4 _transform;
+        private List<GpuModel> mModels;
+        private Dictionary<string, int> mTexLookup;
+        private ShaderProgram mShaderProg;
+        private int mCurrentGpuModelId;
+        private int mCurrentTextureId;
+        private Matrix4 mTransform;
 
         // camera data
-        private Camera _camera;
-        private Vector3 _tp;
-        private Vector3 _cameraTarget;
+        private Camera mCamera;
+        private Vector3 mTp;
 
         // clear color
-        private Color _bgColor;
+        private Color mBgColor;
 
-        public Color BGColor
+        public Color BgColor
         {
-            get { return _bgColor; }
+            get { return mBgColor; }
             set
             {
-                _bgColor = value;
-                GL.ClearColor(_bgColor);
-                _viewerCtrl.Invalidate();
+                mBgColor = value;
+                GL.ClearColor(mBgColor);
+                mViewerCtrl.Invalidate();
             }
         }
 
-        public bool IsSceneReady
-        {
-            get { return _isSceneReady; }
-        }
-
-        public RMDScene LoadedScene
-        {
-            get { return _loadedScene; }
-        }
+        public static bool IsSupported => GL.GetString(StringName.Version)[0] >= 4;
 
         public ModelViewer(GLControl controller)
         {
-            Console.WriteLine(GL.GetString(StringName.Version));
-            _isViewReady = _isSceneReady = false;
-            _viewerCtrl = controller;
-            _models = new List<GPUModel>();
-            _texLookup = new Dictionary<string, int>();
+            string version = GL.GetString(StringName.Version);
+            Console.WriteLine( version );
+
+            mIsViewReady = false;
+            mViewerCtrl = controller;
+            mModels = new List<GpuModel>();
+            mTexLookup = new Dictionary<string, int>();
+
             GL.ClearColor(new Color4(128, 128, 128, 255));
             GL.FrontFace(FrontFaceDirection.Ccw);
             GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
-            
-            _viewerCtrl.Paint += ModelViewerPaint;
-            _viewerCtrl.Resize += ModelViewerResize;
-            _viewerCtrl.Enter += (object sender, EventArgs e) => { _isViewFocused = true; };
-            _viewerCtrl.Leave += (object sender, EventArgs e) => { _isViewFocused = false; };
-            
-            _tp = new Vector3();
-            _isViewReady = true;
+
+            mViewerCtrl.Paint += ModelViewerPaint;
+            mViewerCtrl.Resize += ModelViewerResize;
+            mViewerCtrl.Enter += (s, e) => { mIsViewFocused = true; };
+            mViewerCtrl.Leave += (s, e) => { mIsViewFocused = false; };
+            mViewerCtrl.KeyPress += Input;
+
+            mTp = new Vector3();
+            mIsViewReady = true;
             GL.Viewport(0, 0, controller.Width, controller.Height);
+            mCamera = new Camera();
+
+            InitializeShaderProgram();
         }
 
-        private void Input()
+        private void InitializeShaderProgram()
         {
-            if (!_isSceneReady || !_isViewFocused)
+            // set up shader program
+            mShaderProg = new ShaderProgram( "shader" );
+            mShaderProg.AddUniform( "proj" );
+            mShaderProg.AddUniform( "view" );
+            mShaderProg.AddUniform( "tran" );
+            mShaderProg.AddUniform( "diffuse" );
+            mShaderProg.AddUniform( "diffuseColor" );
+            mShaderProg.AddUniform( "isTextured" ); //used like a bool but is actually an int because of glsl design limitations ¬~¬
+            mShaderProg.Bind();
+        }
+
+        private void Input(object sender, System.Windows.Forms.KeyPressEventArgs args )
+        {
+            if (!mIsViewFocused)
                 return;
 
-            Vector3 oldpos = _camera.Position;
-            const float MOVE_SPEED = 0.1f;
-            bool inputWasHandled = true;
+            Vector3 oldpos = mCamera.Position;
+            float moveSpeed = 10f;
+            if (NativeMethods.GetAsyncKey(Keys.Shift))
+                moveSpeed *= 2;
 
-            if (NativeMethods.GetAsyncKey(Keys.W))
+            bool inputWasHandled = false;
+
+            if ( NativeMethods.GetAsyncKey( Keys.W ) )
             {
-                _camera.Position += _camera.Forward * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
-            }
-            else if (NativeMethods.GetAsyncKey(Keys.S))
-            {
-                _camera.Position -= _camera.Forward * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y, tp.Z - 10f);
-            }
-            else if (NativeMethods.GetAsyncKey(Keys.D))
-            {
-                _camera.Position -= Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
-            }
-            else if (NativeMethods.GetAsyncKey(Keys.A))
-            {
-                _camera.Position += Vector3.Cross(_camera.Forward, new Vector3(0, 1.0f, 0)) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-            }
-            else if (NativeMethods.GetAsyncKey(Keys.Q))
-            {
-                _camera.Position += new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-            }
-            else if (NativeMethods.GetAsyncKey(Keys.E))
-            {
-                _camera.Position -= new Vector3(0, 1.0f, 0) * MOVE_SPEED; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-            }
-            else
-            {
-                inputWasHandled = false;
+                mCamera.Position += mCamera.Forward * moveSpeed; // tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
+                inputWasHandled = true;
             }
 
-            if (IsNaN(_camera.Position))
+            if (NativeMethods.GetAsyncKey(Keys.S))
+            {
+                mCamera.Position -= mCamera.Forward * moveSpeed; // tp = new Vector3(tp.X, tp.Y, tp.Z - 10f);
+                inputWasHandled = true;
+            }
+
+            if (NativeMethods.GetAsyncKey(Keys.D))
+            {
+                mCamera.Position -= Vector3.Cross(mCamera.Forward, new Vector3(0, 1.0f, 0)) * moveSpeed; // tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
+                inputWasHandled = true;
+            }
+
+            if (NativeMethods.GetAsyncKey(Keys.A))
+            {
+                mCamera.Position += Vector3.Cross(mCamera.Forward, new Vector3(0, 1.0f, 0)) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+                inputWasHandled = true;
+            }
+
+            if (NativeMethods.GetAsyncKey(Keys.Q))
+            {
+                mCamera.Position += new Vector3(0, 1.0f, 0) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+                inputWasHandled = true;
+            }
+
+            if (NativeMethods.GetAsyncKey(Keys.E))
+            {
+                mCamera.Position -= new Vector3(0, 1.0f, 0) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+                inputWasHandled = true;
+            }
+
+            if ( inputWasHandled && IsNaN( mCamera.Position))
             {
                 if (!IsNaN(oldpos))
                 {
-                    _camera.Position = oldpos; // prevents the camera from dying
+                    mCamera.Position = oldpos; // prevents the camera from dying
                 }
                 else
                 {
                     // shouldn't really happen
-                    _camera.Position = new Vector3();
+                    mCamera.Position = new Vector3();
                 }
             }
 
-            _camera.Forward = Vector3.Normalize(_cameraTarget - _camera.Position);
+            mCamera.Forward = Vector3.Normalize(mCamera.Target - mCamera.Position);
 
             if (inputWasHandled)
             {
-                _viewerCtrl.Invalidate();
+                mViewerCtrl.Invalidate();
             }
+
+            Console.WriteLine( mCamera.Position );
         }
 
         public static bool IsNaN(Vector3 value)
         {
-            if (float.IsNaN(value.X))
-                return true;
-            else if (float.IsNaN(value.Y))
-                return true;
-            else if (float.IsNaN(value.Z))
-                return true;
-            else
-                return false;
+            return float.IsNaN(value.X) || float.IsNaN(value.Y) || float.IsNaN(value.Z);
         }
 
-        public void LoadScene(RMDScene rmdScene)
+        public void LoadTextures(RwTextureDictionaryNode textures)
         {
-            _camera = new Camera();
+            if (textures == null)
+                return;
 
-            // set up shader program
-            _shaderProg = new ShaderProgram("shader");
-            _shaderProg.AddUniform("proj");
-            _shaderProg.AddUniform("view");
-            _shaderProg.AddUniform("tran");
-            _shaderProg.AddUniform("diffuse");
-            _shaderProg.AddUniform("diffuseColor");
-            _shaderProg.AddUniform("isTextured"); //used like a bool but is actually an int because of glsl design limitations ¬~¬
-            _shaderProg.Bind();
+            int textureIdx = 0;
+            foreach ( RwTextureNativeNode texture in textures.Textures )
+            {
+                Console.WriteLine( "processing texture: {0}", textureIdx++ );
 
+                var colorpixels = texture.GetPixels();
+
+                // get the pixel array
+                var pixels = new BasicCol4[texture.Width * texture.Height];
+                for ( int i = 0; i < texture.Width * texture.Height; i++ )
+                    pixels[i] = new BasicCol4( colorpixels[i] );
+
+                // create the texture
+                GL.CreateTextures( TextureTarget.Texture2D, 1, out int tex );
+
+                // set up the params
+                GL.TextureParameter( tex, TextureParameterName.TextureWrapS, RwtoGlConversionHelper.WrapDictionary[texture.HorrizontalAddressingMode] );
+                GL.TextureParameter( tex, TextureParameterName.TextureWrapT, RwtoGlConversionHelper.WrapDictionary[texture.VerticalAddressingMode] );
+                GL.TextureParameter( tex, TextureParameterName.TextureMagFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
+                GL.TextureParameter( tex, TextureParameterName.TextureMinFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
+
+                // set up the bitmap data
+                GL.TextureStorage2D( tex, 1, SizedInternalFormat.Rgba8, texture.Width, texture.Height );
+                GL.TextureSubImage2D( tex, 0, 0, 0, texture.Width, texture.Height, PixelFormat.Rgba, PixelType.UnsignedByte, pixels );
+
+                // add a texture lookup for the processed texture
+                mTexLookup.Add( texture.Name, tex );
+            }
+        }
+
+        public void LoadModel(RwClumpNode clump)
+        {
+            Console.WriteLine( "geometry count: {0}", clump.GeometryCount );
+
+            for ( var atomicIndex = 0; atomicIndex < clump.Atomics.Count; atomicIndex++ )
+            {
+                RwAtomicNode atomic = clump.Atomics[atomicIndex];
+                Console.WriteLine( "processing draw call: {0}", atomicIndex );
+                Console.WriteLine( "geo:{0}\t frame:{1}\t flag1:{2}\t flag2{3}\t", atomic.GeometryIndex, atomic.FrameIndex, atomic.Flag1, atomic.Flag2 );
+
+                var geom = clump.GeometryList[atomic.GeometryIndex];
+                var frame = clump.FrameList[atomic.FrameIndex];
+
+                LoadGeometry(geom, frame.WorldTransform);
+            }
+        }
+
+        public void LoadGeometry(RwGeometryNode geom, SN.Matrix4x4 transform)
+        {
+            if (geom.MeshListNode == null)
+            {
+                geom.MeshListNode = new RwMeshListNode(geom);
+            }
+
+            Console.WriteLine( geom.MeshListNode.MeshCount );
+            Console.WriteLine( geom.MeshListNode.PrimitiveType );
+
+            Vertex[] vertices = new Vertex[geom.VertexCount];
+            int[][] allIndices = new int[geom.MeshListNode.MeshCount][];
+            int[] allIndicesCount = new int[geom.MeshListNode.MeshCount];
+            int[] fullIndices = new int[geom.TriangleCount * 3];
+
+            for ( int i = 0; i < geom.TriangleCount; i++ )
+            {
+                fullIndices[i * 3 + 0] = geom.Triangles[i].A;
+                fullIndices[i * 3 + 1] = geom.Triangles[i].B;
+                fullIndices[i * 3 + 2] = geom.Triangles[i].C;
+            }
+
+            // remap the vertices
+            for ( int i = 0; i < geom.VertexCount; i++ )
+            {
+                // set the new interleaved vertex
+                Vertex vtx = new Vertex
+                {
+                    Pos = new BasicVec3( SN.Vector3.Transform( geom.Vertices[i], transform ) )
+                };
+
+                if ( geom.HasNormals )
+                    vtx.Nrm = new BasicVec3( SN.Vector3.TransformNormal( geom.Normals[i], transform ) );
+
+                if ( geom.HasTexCoords )
+                    vtx.Tex = new BasicVec2( geom.TextureCoordinateChannels[0][i] );
+
+                if ( geom.HasColors )
+                    vtx.Col = new BasicVec4( geom.Colors[i] );
+                else
+                    vtx.Col = new BasicVec4( 1, 1, 1, 1 );
+
+                vertices[i] = vtx;
+            }
+
+            for ( int i = 0; i < geom.MeshListNode.MeshCount; i++ )
+            {
+                allIndices[i] = geom.MeshListNode.MaterialMeshes[i].Indices;
+                allIndicesCount[i] = geom.MeshListNode.MaterialMeshes[i].IndexCount;
+            }
+
+            Console.WriteLine( "tex channels: " + geom.TextureCoordinateChannelCount );
+            Console.WriteLine( "num materials: " + geom.MaterialCount );
+
+            for ( int m = 0; m < geom.MaterialCount; m++ )
+                Console.WriteLine( "material: {0}", geom.Materials[m] );
+
+            // setup the vbo
+            int vbo = GL.GenBuffer();
+            GL.BindBuffer( BufferTarget.ArrayBuffer, vbo );
+            GL.BufferData( BufferTarget.ArrayBuffer, sizeof( float ) * 12 * vertices.Length, vertices, BufferUsageHint.StaticDraw );
+
+            // setup the ibo
+            int[] ibo = new int[allIndices.Length];
+            GL.GenBuffers( allIndices.Length, ibo );
+            for ( int i = 0; i < ibo.Length; i++ )
+            {
+                GL.BindBuffer( BufferTarget.ElementArrayBuffer, ibo[i] );
+                GL.BufferData( BufferTarget.ElementArrayBuffer, sizeof( int ) * allIndices[i].Length, allIndices[i], BufferUsageHint.StaticDraw );
+            }
+
+            // setup the vertex attribs
+            GL.VertexAttribPointer( 0, 3, VertexAttribPointerType.Float, false, sizeof( float ) * 12, 0 );
+            GL.VertexAttribPointer( 1, 3, VertexAttribPointerType.Float, false, sizeof( float ) * 12, ( sizeof( float ) * 3 ) );
+            GL.VertexAttribPointer( 2, 2, VertexAttribPointerType.Float, false, sizeof( float ) * 12, ( sizeof( float ) * 6 ) );
+            GL.VertexAttribPointer( 3, 4, VertexAttribPointerType.Float, false, sizeof( float ) * 12, ( sizeof( float ) * 8 ) );
+
+            // get the mesh color from the material
+            // get the texture name if there's a texture assigned
+            string[] texname = new string[geom.MeshListNode.MeshCount];
+            Color[] colors = new Color[geom.MeshListNode.MeshCount];
+            for ( int i = 0; i < texname.Length; i++ )
+            {
+                texname[i] = geom.MaterialCount > 0 && geom.Materials[geom.MeshListNode.MaterialMeshes[i].MaterialIndex].IsTextured ?
+                        geom.Materials[geom.MeshListNode.MaterialMeshes[i].MaterialIndex].TextureReferenceNode.ReferencedTextureName
+                        : string.Empty;
+
+                colors[i] = geom.MaterialCount > 0
+                    ? geom.Materials[geom.MeshListNode.MaterialMeshes[i].MaterialIndex].Color
+                    : Color.White;
+            }
+
+            // add the render model to the list
+            mModels.Add( new GpuModel( vbo, ibo, geom.VertexCount, allIndicesCount, texname, colors,
+                geom.MeshListNode.PrimitiveType == RwPrimitiveType.TriangleStrip ) );
+        }
+
+        public void LoadScene(RmdScene rmdScene)
+        {
             Console.WriteLine("loading scene");
             Console.WriteLine("num textures: {0} ", rmdScene.TextureDictionary != null ? rmdScene.TextureDictionary.TextureCount : 0);
 
-            if (rmdScene.TextureDictionary != null)
+            LoadTextures(rmdScene.TextureDictionary);
+
+            foreach (var clump in rmdScene.Clumps)
             {
-                int textureIdx = 0;
-                foreach (RWTextureNative texture in rmdScene.TextureDictionary.Textures)
-                {
-                    Console.WriteLine("processing texture: {0}", textureIdx++);
-
-                    var colorpixels = texture.GetPixels();
-
-                    // get the pixel array
-                    BasicCol4[] pixels = new BasicCol4[texture.Width * texture.Height];
-                    for (int i = 0; i < texture.Width * texture.Height; i++)
-                        pixels[i] = new BasicCol4(colorpixels[i]);
-
-                    // create the texture
-                    int tex = 0;
-                    GL.CreateTextures(TextureTarget.Texture2D, 1, out tex);
-
-                    // set up the params
-                    GL.TextureParameter(tex, TextureParameterName.TextureWrapS, RWToGLConversionHelper.WrapDictionary[texture.HorrizontalAddressingMode]);
-                    GL.TextureParameter(tex, TextureParameterName.TextureWrapT, RWToGLConversionHelper.WrapDictionary[texture.VerticalAddressingMode]);
-                    GL.TextureParameter(tex, TextureParameterName.TextureMagFilter, RWToGLConversionHelper.FilterDictionary[texture.FilterMode]);
-                    GL.TextureParameter(tex, TextureParameterName.TextureMinFilter, RWToGLConversionHelper.FilterDictionary[texture.FilterMode]);
-
-                    // set up the bitmap data
-                    GL.TextureStorage2D(tex, 1, SizedInternalFormat.Rgba8, texture.Width, texture.Height);
-                    GL.TextureSubImage2D(tex, 0, 0, 0, texture.Width, texture.Height, PixelFormat.Rgba, PixelType.UnsignedByte, pixels);
-
-                    // add a texture lookup for the processed texture
-                    _texLookup.Add(texture.Name, tex);
-                }
+                LoadModel( clump );
             }
-
-            float min_x = 0, min_y = 0, min_z = 0;
-            float max_x = 0, max_y = 0, max_z = 0;
-            int clumpIdx = 0;
-            foreach (RWScene rwScene in rmdScene.Scenes)
-            {
-                Console.WriteLine("geometry count: {0}", rwScene.MeshCount);
-                Console.WriteLine("processing clump: {0}", clumpIdx++);
-
-                int drawCallIdx = 0;
-                foreach (RWDrawCall drawCall in rwScene.DrawCalls)
-                {
-                    Console.WriteLine("processing draw call: {0}", drawCallIdx);
-                    Console.WriteLine("geo:{0}\t frame:{1}\t flag1:{2}\t flag2{3}\t", drawCall.MeshIndex, drawCall.NodeIndex, drawCall.Flag1, drawCall.Flag2);
-
-                    var geom = rwScene.Meshes[drawCall.MeshIndex];
-                    var frame = rwScene.Nodes[drawCall.NodeIndex];
-
-                    Console.WriteLine(geom.MaterialSplitData.MaterialSplitCount);
-                    Console.WriteLine(geom.MaterialSplitData.PrimitiveType);
-
-                    Vertex[] vertices = new Vertex[geom.VertexCount];
-                    int[][] allIndices = new int[geom.MaterialSplitData.MaterialSplitCount][];
-                    int[] allIndicesCount = new int[geom.MaterialSplitData.MaterialSplitCount];
-                    int[] fullIndices = new int[geom.TriangleCount*3];
-
-                    for(int i = 0; i < geom.TriangleCount; i++)
-                    {
-                        fullIndices[i * 3 + 0] = geom.Triangles[i].A;
-                        fullIndices[i * 3 + 1] = geom.Triangles[i].B;
-                        fullIndices[i * 3 + 2] = geom.Triangles[i].C;
-                    }
-
-                    // remap the vertices
-                    for (int i = 0; i < geom.VertexCount; i++)
-                    {
-                        // set the new interleaved vertex
-                        Vertex vtx = new Vertex();
-                        vtx.pos = new BasicVec3(SN.Vector3.Transform(geom.Vertices[i], frame.WorldTransform) / 10);
-
-                        if (vtx.pos.x < min_x) min_x = vtx.pos.x;
-                        if (vtx.pos.x > max_x) max_x = vtx.pos.x;
-                        if (vtx.pos.y < min_y) min_y = vtx.pos.y;
-                        if (vtx.pos.y > max_y) max_y = vtx.pos.y;
-                        if (vtx.pos.z < min_z) min_z = vtx.pos.z;
-                        if (vtx.pos.z > max_z) max_z = vtx.pos.z;
-
-                        if (geom.HasNormals)
-                            vtx.nrm = new BasicVec3(SN.Vector3.TransformNormal(geom.Normals[i], frame.WorldTransform));
-
-                        if (geom.HasTexCoords)
-                            vtx.tex = new BasicVec2(geom.TextureCoordinateChannels[0][i]);
-
-                        if (geom.HasColors)
-                            vtx.col = new BasicVec4(geom.Colors[i]);
-                        else
-                            vtx.col = new BasicVec4(1, 1, 1, 1);
-
-                        vertices[i] = vtx;
-                    }
-
-                    for (int i = 0; i < geom.MaterialSplitData.MaterialSplitCount; i++)
-                    {
-                        allIndices[i] = geom.MaterialSplitData.MaterialSplits[i].Indices;
-                        allIndicesCount[i] = geom.MaterialSplitData.MaterialSplits[i].IndexCount;
-                    }
-
-                    Console.WriteLine("tex channels: " + geom.TextureCoordinateChannelCount);
-                    Console.WriteLine("num materials: " + geom.MaterialCount);
-
-                    for (int m = 0; m < geom.MaterialCount; m++)
-                        Console.WriteLine("material: {0}", geom.Materials[m]);
-
-                    // setup the vbo
-                    int vbo = GL.GenBuffer();
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-                    GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 12 * vertices.Length, vertices, BufferUsageHint.StaticDraw);
-
-                    // setup the ibo
-                    int[] ibo = new int[allIndices.Length];
-                    GL.GenBuffers(allIndices.Length, ibo);
-                    for (int i = 0; i < ibo.Length; i++)
-                    {
-                        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo[i]);
-                        GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * allIndices[i].Length, allIndices[i], BufferUsageHint.StaticDraw);
-                    }
-
-                    // setup the vertex attribs
-                    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, sizeof(float) * 12, 0);
-                    GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, sizeof(float) * 12, (sizeof(float) * 3));
-                    GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, sizeof(float) * 12, (sizeof(float) * 6));
-                    GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, sizeof(float) * 12, (sizeof(float) * 8));
-
-                    // get the mesh color from the material
-                    // get the texture name if there's a texture assigned
-                    string[] texname = new string[geom.MaterialSplitData.MaterialSplitCount];
-                    Color[] colors = new Color[geom.MaterialSplitData.MaterialSplitCount];
-                    for (int i = 0; i < texname.Length; i++)
-                    {
-                        texname[i] = geom.MaterialCount > 0 && geom.Materials[geom.MaterialSplitData.MaterialSplits[i].MaterialIndex].IsTextured ? geom.Materials[geom.MaterialSplitData.MaterialSplits[i].MaterialIndex].TextureReference.ReferencedTextureName : string.Empty;
-                        colors[i] = geom.MaterialCount > 0 ? geom.Materials[geom.MaterialSplitData.MaterialSplits[i].MaterialIndex].Color : Color.White;
-                    }
-
-                    // add the render model to the list
-                    _models.Add(new GPUModel(vbo, ibo, geom.VertexCount, allIndicesCount, texname, colors, geom.MaterialSplitData.PrimitiveType == RWPrimitiveType.TriangleStrip));
-                }
-            }
-
-            _cameraTarget = new Vector3((min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2);
-            Console.WriteLine(_cameraTarget);
-            
-            // everything's processed, the scene is ready to be rendered
-            _isSceneReady = true;
-            _loadedScene = rmdScene;
-
-            Program.LoopFunctions.Add(Input);
         }
 
         public void DeleteScene()
         {
-            if (!_isSceneReady)
-                return;
-
-            Program.LoopFunctions.Remove(Input);
             Console.WriteLine("deleting scene");
             EndBind();
             Console.WriteLine("unbind models");
             GL.BindTexture(TextureTarget.Texture2D, 0);
             Console.WriteLine("unbind textures");
-            _currentTextureID = _currentGPUModelID = 0;
+            mCurrentTextureId = mCurrentGpuModelId = 0;
 
             // death to the textures
-            int[] texIds = new int[_texLookup.Count];
-            _texLookup.Values.CopyTo(texIds, 0);
-            for (int i = 0; i < _texLookup.Count; i++)
+            int[] texIds = new int[mTexLookup.Count];
+            mTexLookup.Values.CopyTo(texIds, 0);
+            for (int i = 0; i < mTexLookup.Count; i++)
             {
                 Console.WriteLine("deleting texture: " + i);
                 GL.DeleteTexture(texIds[i]);
             }
 
             // death to models
-            for (int i = 0; i < _models.Count; i++)
+            for (int i = 0; i < mModels.Count; i++)
             {
                 Console.WriteLine("deleting model: " + i);
 
-                if(_models[i].vbo != 0)
-                    GL.DeleteBuffer(_models[i].vbo);
+                if(mModels[i].Vbo != 0)
+                    GL.DeleteBuffer(mModels[i].Vbo);
 
-                if(_models[i].ibo[0] != 0)
-                    GL.DeleteBuffers(_models[0].ibo.Length, _models[i].ibo);
+                if(mModels[i].Ibo[0] != 0)
+                    GL.DeleteBuffers(mModels[0].Ibo.Length, mModels[i].Ibo);
             }
 
-            _models.Clear();
-            _texLookup.Clear();
-            _isSceneReady = false;
-            _loadedScene = null;
+            mModels.Clear();
+            mTexLookup.Clear();
         }
 
         public void DisposeViewer()
         {
             Console.WriteLine("disposing");
-
-            if (_isSceneReady)
-                DeleteScene();
-
-            if (_shaderProg != null)
-                _shaderProg.Delete();
-
-            _isSceneReady = false;
-            _loadedScene = null;
-            _isViewReady = false;
+            DeleteScene();
+            mShaderProg.Delete();
+            mIsViewReady = false;
         }
 
-        private void BeginBind(GPUModel data)
+        private void BeginBind(GpuModel data)
         {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, data.vbo);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, data.Vbo);
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
@@ -592,16 +562,15 @@ namespace Amicitia.ModelViewer
             GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, sizeof(float) * 12, sizeof(float) * 8);
         }
 
-        private void SubBind(GPUModel data)
+        private void SubBind(GpuModel data)
         {
-            for (int i = 0; i < data.ibo.Length; i++)
+            for (int i = 0; i < data.Ibo.Length; i++)
             {
                 int isTextured = 0;
 
-                if (data.tid[i] != string.Empty)
+                if (data.Tid[i] != string.Empty)
                 {
-                    int texIdx;
-                    bool texPresent = _texLookup.TryGetValue(data.tid[i], out texIdx);
+                    bool texPresent = mTexLookup.TryGetValue( data.Tid[i], out int texIdx );
 
                     if (texPresent)
                     {
@@ -611,13 +580,13 @@ namespace Amicitia.ModelViewer
                 }
 
                 // set shader vars
-                _shaderProg.SetUniform("diffuseColor", data.color[i]);
-                _shaderProg.SetUniform("isTextured", isTextured);
+                mShaderProg.SetUniform("diffuseColor", data.Color[i]);
+                mShaderProg.SetUniform("isTextured", isTextured);
 
                 // bind model
-                GL.BindBuffer(BufferTarget.ArrayBuffer, data.vbo);
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.ibo[i]);
-                GL.DrawElements(data.strip ? BeginMode.TriangleStrip : BeginMode.Triangles, data.ic[i], DrawElementsType.UnsignedInt, 0);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, data.Vbo);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, data.Ibo[i]);
+                GL.DrawElements(data.Strip ? BeginMode.TriangleStrip : BeginMode.Triangles, data.Ic[i], DrawElementsType.UnsignedInt, 0);
             }
         }
 
@@ -631,17 +600,17 @@ namespace Amicitia.ModelViewer
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
         }
 
-        private void FullBind(GPUModel data) // for optimization
+        private void FullBind(GpuModel data) // for optimization
         {
-            if (data.vbo == 0)
+            if (data.Vbo == 0)
                 return;
 
-            if (_currentGPUModelID != data.vbo)
+            if (mCurrentGpuModelId != data.Vbo)
             {
                 EndBind();  // incase the previous was a SubBind
                 BeginBind(data);
                 SubBind(data);
-                _currentGPUModelID = data.vbo;
+                mCurrentGpuModelId = data.Vbo;
             }
             else
             {
@@ -651,41 +620,38 @@ namespace Amicitia.ModelViewer
 
         private void FullTexBind(int texture)
         {
-            if (texture == 0 || texture == _currentTextureID)
+            if (texture == 0 || texture == mCurrentTextureId)
                 return;
 
             GL.BindTexture(TextureTarget.Texture2D, texture);
-            _currentTextureID = texture;
+            mCurrentTextureId = texture;
         }
 
         private void ModelViewerResize(object sender, EventArgs e)
         {
-            if (!_isViewReady)
+            if (!mIsViewReady)
                 return;
 
-            GL.Viewport(0, 0, _viewerCtrl.Width, _viewerCtrl.Height);
+            GL.Viewport(0, 0, mViewerCtrl.Width, mViewerCtrl.Height);
         }
 
         private void ModelViewerPaint(object sender, PaintEventArgs e)
         {
-            if (!_isViewReady || !_viewerCtrl.Visible)
+            if (!mIsViewReady || !mViewerCtrl.Visible)
                 return;
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            if (_isSceneReady)
-            {
-                _shaderProg.Bind();
-                _camera.Bind(_shaderProg, _viewerCtrl);
-                _transform = Matrix4.CreateTranslation(_tp) * Matrix4.CreateFromQuaternion(Quaternion.FromEulerAngles(0, 0, 0)) * Matrix4.CreateScale(new Vector3(1.0f, 1.0f, 1.0f));
-                _shaderProg.SetUniform("tran", _transform);
+            mShaderProg.Bind();
+            mCamera.Bind( mShaderProg, mViewerCtrl );
+            mTransform = Matrix4.CreateTranslation( mTp ) * Matrix4.CreateFromQuaternion( Quaternion.FromEulerAngles( 0, 0, 0 ) ) * Matrix4.CreateScale( new Vector3( 1.0f, 1.0f, 1.0f ) );
+            mShaderProg.SetUniform( "tran", mTransform );
 
-                if (_models.Count > 0)
-                    for (int i = 0; i < _models.Count; i++)
-                        FullBind(_models[i]);
-            }
+            if ( mModels.Count > 0 )
+                for ( int i = 0; i < mModels.Count; i++ )
+                    FullBind( mModels[i] );
 
-            _viewerCtrl.SwapBuffers();
+            mViewerCtrl.SwapBuffers();
         }
     }
 }

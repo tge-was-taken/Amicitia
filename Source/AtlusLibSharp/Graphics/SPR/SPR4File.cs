@@ -1,14 +1,18 @@
-﻿namespace AtlusLibSharp.Graphics.SPR
+﻿using System.Text;
+
+namespace AtlusLibSharp.Graphics.SPR
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.InteropServices;
     using AtlusLibSharp.Utilities;
+    using System.Linq;
     using IO;
     using TGA;
 
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
-    internal struct SPR4Header
+    internal struct Spr4Header
     {
         public const ushort FLAGS = 0x0001;
         public const string TAG = "SPR4";
@@ -45,7 +49,7 @@
         [FieldOffset(28)]
         public int keyFramePointerTableOffset;
 
-        public SPR4Header(int textureCount, int keyFrameCount)
+        public Spr4Header(int textureCount, int keyFrameCount)
         {
             flags = FLAGS;
             userId = 0;
@@ -60,70 +64,78 @@
         }
     }
 
-    public class SPR4File : BinaryFileBase
+    public class Spr4File : BinaryBase, ISprFile
     {
-        private List<TGAFile> _textures;
-        private List<SPRKeyFrame> _keyFrames;
+        private IList<TgaFile> mTextures;
+        private IList<SprKeyFrame> mKeyFrames;
 
-        internal SPR4File(BinaryReader reader)
+        internal Spr4File(BinaryReader reader)
         {
-            InternalRead(reader);
+            Read(reader);
         }
 
-        public SPR4File()
+        public Spr4File()
         {
-            _textures = new List<TGAFile>();
-            _keyFrames = new List<SPRKeyFrame>();
+            mTextures = new List<TgaFile>();
+            mKeyFrames = new List<SprKeyFrame>();
         }
 
-        public SPR4File(List<TGAFile> textures, List<SPRKeyFrame> keyframes)
+        public Spr4File(IList<TgaFile> textures, IList<SprKeyFrame> keyframes)
         {
-            _textures = textures;
-            _keyFrames = keyframes;
+            mTextures = textures;
+            mKeyFrames = keyframes;
+        }
+
+        public Spr4File(Stream stream, bool leaveOpen = false)
+        {
+            using (var reader = new BinaryReader(stream, Encoding.Default, leaveOpen))
+                Read(reader);
         }
 
         public int TextureCount
         {
-            get { return _textures.Count; }
+            get { return mTextures.Count; }
         }
 
         public int KeyFrameCount
         {
-            get { return _keyFrames.Count; }
+            get { return mKeyFrames.Count; }
         }
 
-        public List<TGAFile> Textures
+        public IList<TgaFile> Textures
         {
-            get { return _textures; }
+            get { return mTextures; }
         }
 
-        public List<SPRKeyFrame> KeyFrames
+        public IList<SprKeyFrame> KeyFrames
         {
-            get { return _keyFrames; }
+            get { return mKeyFrames; }
         }
 
-        public static SPR4File Load(string path)
+        IList<ITextureFile> ISprFile.Textures => Textures.Cast<ITextureFile>().ToList();
+
+        public static Spr4File Load(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path), System.Text.Encoding.Default, true))
-                return new SPR4File(reader);
+                return new Spr4File(reader);
         }
 
-        public static SPR4File LoadFrom(Stream stream, bool leaveStreamOpen = false)
+        public static Spr4File LoadFrom(Stream stream, bool leaveStreamOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
-                return new SPR4File(reader);
+                return new Spr4File(reader);
         }
 
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             // Save the start position to calculate the filesize and 
             // to write out the header after we know where all the structure offsets are
             Stream stream = writer.BaseStream;
             int posFileStart = (int)stream.Position;
-            stream.Seek(SPR4Header.SIZE, SeekOrigin.Current);
+            stream.Seek(Spr4Header.SIZE, SeekOrigin.Current);
 
             // Create initial header and tables
-            SPR4Header header = new SPR4Header(TextureCount, KeyFrameCount);
+            Spr4Header header = new Spr4Header(TextureCount, KeyFrameCount);
             TypePointerTable[] keyFramePointerTable = new TypePointerTable[header.numKeyFrames];
             TypePointerTable[] texturePointerTable = new TypePointerTable[header.numTextures];
 
@@ -140,7 +152,7 @@
             {
                 writer.AlignPosition(16);
                 keyFramePointerTable[i].offset = (int)(stream.Position - posFileStart);
-                _keyFrames[i].InternalWrite(writer);
+                mKeyFrames[i].Write(writer);
             }
 
             writer.Seek(16, SeekOrigin.Current);
@@ -150,7 +162,7 @@
             for (int i = 0; i < header.numTextures; i++)
             {
                 texturePointerTable[i].offset = (int)(stream.Position - posFileStart);
-                _textures[i].InternalWrite(writer);
+                mTextures[i].Write(writer);
                 writer.Seek(16, SeekOrigin.Current);
             }
 
@@ -174,12 +186,12 @@
         }
 
         // Private Methods
-        private void InternalRead(BinaryReader reader)
+        private void Read(BinaryReader reader)
         {
             Stream stream = reader.BaseStream;
             int posFileStart = (int)reader.GetPosition();
 
-            SPR4Header header = stream.ReadStructure<SPR4Header>();
+            Spr4Header header = stream.ReadStructure<Spr4Header>();
 
             stream.Seek(posFileStart + header.texturePointerTableOffset, SeekOrigin.Begin);
             TypePointerTable[] texturePointerTable = stream.ReadStructures<TypePointerTable>(header.numTextures);
@@ -187,18 +199,18 @@
             stream.Seek(posFileStart + header.keyFramePointerTableOffset, SeekOrigin.Begin);
             TypePointerTable[] keyFramePointerTable = stream.ReadStructures<TypePointerTable>(header.numKeyFrames);
 
-            _textures = new List<TGAFile>(header.numTextures);
+            mTextures = new List<TgaFile>(header.numTextures);
             for (int i = 0; i < header.numTextures; i++)
             {
                 stream.Seek(posFileStart + texturePointerTable[i].offset, SeekOrigin.Begin);
-                _textures.Add(new TGAFile(stream, true));
+                mTextures.Add(new TgaFile(stream, true));
             }
 
-            _keyFrames = new List<SPRKeyFrame>(header.numKeyFrames);
+            mKeyFrames = new List<SprKeyFrame>(header.numKeyFrames);
             for (int i = 0; i < header.numKeyFrames; i++)
             {
                 stream.Seek(posFileStart + keyFramePointerTable[i].offset, SeekOrigin.Begin);
-                _keyFrames.Add(new SPRKeyFrame(reader));
+                mKeyFrames.Add(new SprKeyFrame(reader));
             }
         }
     }

@@ -5,7 +5,7 @@
     using System.IO;
     using Utilities;
 
-    public class AMDFile : BinaryFileBase
+    public class AmdFile : BinaryBase
     {
         /****************/
         /* Private data */
@@ -15,106 +15,106 @@
         private const string MAGIC = "CHNK";
 
         // members
-        private List<AMDChunk> m_chunkList;
+        private List<AmdChunk> mChunkList;
 
         /**************/
         /* Properties */
         /**************/
         /// <summary>
-        /// Gets the number of chunks contained in the <see cref="AMDFile"/>.
+        /// Gets the number of chunks contained in the <see cref="AmdFile"/>.
         /// </summary>
         public int ChunkCount
         {
-            get { return m_chunkList.Count; }
+            get { return mChunkList.Count; }
         }
 
         /// <summary>
-        /// Gets the list of chunks contained in the <see cref="AMDFile"/>.
+        /// Gets the list of chunks contained in the <see cref="AmdFile"/>.
         /// </summary>
-        public List<AMDChunk> Chunks
+        public List<AmdChunk> Chunks
         {
-            get { return m_chunkList; }
+            get { return mChunkList; }
         }
 
         /****************/
         /* Constructors */
         /****************/
         /// <summary>
-        /// Creates a new, empty <see cref="AMDFile"/>.
+        /// Creates a new, empty <see cref="AmdFile"/>.
         /// </summary>
-        public AMDFile()
+        public AmdFile()
         {
-            m_chunkList = new List<AMDChunk>();
+            mChunkList = new List<AmdChunk>();
         }
 
         /// <summary>
-        /// Creates a new <see cref="AMDFile"/> by reading the AMD file at the given path.
+        /// Creates a new <see cref="AmdFile"/> by reading the AMD file at the given path.
         /// </summary>
         /// <param name="path">The path pointing to the the file to load.</param>
-        public AMDFile(string path)
+        public AmdFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                InternalRead(reader);
+                Read(reader);
             }
         }
 
         /// <summary>
-        /// Creates a new <see cref="AMDFile"/> by reading the AMD file from the given stream.
+        /// Creates a new <see cref="AmdFile"/> by reading the AMD file from the given stream.
         /// </summary>
         /// <param name="path">The path pointing to the the file to load.</param>
-        public AMDFile(Stream stream)
+        public AmdFile(Stream stream, bool leaveOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream))
             {
-                InternalRead(reader);
+                Read(reader);
             }
         }
 
         /// <summary>
-        /// Creates a new <see cref="AMDFile"/> by reading it from the <see cref="Stream"/> using the <see cref="BinaryReader"/>.
+        /// Creates a new <see cref="AmdFile"/> by reading it from the <see cref="Stream"/> using the <see cref="BinaryReader"/>.
         /// </summary>
         /// <param name="reader"></param>
-        internal AMDFile(BinaryReader reader)
+        internal AmdFile(BinaryReader reader)
         {
-            InternalRead(reader);
+            Read(reader);
         }
 
         /************************/
         /* Read / Write methods */
         /************************/
         // read the amd file data using the binary reader
-        private void InternalRead(BinaryReader reader)
+        private void Read(BinaryReader reader)
         {
             // read magic & verify
             string magic = reader.ReadCString(MAGIC_LENGTH);
 
             if (magic != MAGIC)
             {
-                throw new InvalidDataException(string.Format("Expected magic string {0}. Got {1}.", MAGIC, magic));
+                throw new InvalidDataException($"Expected magic string {MAGIC}. Got {magic}.");
             }
 
             // read chunks
             int numChunks = reader.ReadInt32();
-            m_chunkList = new List<AMDChunk>(numChunks);
+            mChunkList = new List<AmdChunk>(numChunks);
 
             for (int i = 0; i < numChunks; i++)
             {
-                m_chunkList.Add(new AMDChunk(reader));
+                mChunkList.Add(new AmdChunk(reader));
             }
         }
 
         // write the data using the binary writer
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             // write magic
             writer.WriteCString(MAGIC, MAGIC_LENGTH);
 
             // write chunk list
             writer.Write(ChunkCount);
-            foreach (AMDChunk chunk in Chunks)
+            foreach (AmdChunk chunk in Chunks)
             {
-                chunk.InternalWrite(writer);
+                chunk.Write(writer);
             }
         }
     }

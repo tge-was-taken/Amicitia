@@ -7,7 +7,7 @@
     using System;
 
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
-    internal struct CVMDirectoryListingHeader
+    internal struct CvmDirectoryListingHeader
     {
         public const int SIZE = 22;
 
@@ -28,76 +28,76 @@
         public short unused; // always 0
     }
 
-    public class CVMDirectoryListing
+    public class CvmDirectoryListing
     {
-        private CVMDirectoryListingHeader _header;
-        private CVMDirectoryListingEntry _originEntry; // the entry this listing originates from, null if it's the root directory
-        private CVMDirectoryListingEntry[] _subEntries;
+        private CvmDirectoryListingHeader mHeader;
+        private CvmDirectoryListingEntry mOriginEntry; // the entry this listing originates from, null if it's the root directory
+        private CvmDirectoryListingEntry[] mSubEntries;
 
-        internal CVMDirectoryListing(BinaryReader reader, CVMDirectoryListingEntry originEntry)
+        internal CvmDirectoryListing(BinaryReader reader, CvmDirectoryListingEntry originEntry)
         {
-            _originEntry = originEntry;
+            mOriginEntry = originEntry;
             InternalRead(reader);
         }
 
-        public CVMDirectoryListingEntry OriginEntry
+        public CvmDirectoryListingEntry OriginEntry
         {
-            get { return _originEntry; }
+            get { return mOriginEntry; }
         }
 
-        public CVMDirectoryListingEntry[] SubEntries
+        public CvmDirectoryListingEntry[] SubEntries
         {
-            get { return _subEntries; }
+            get { return mSubEntries; }
         }
 
-        internal void Update(ISODirectoryRecord record)
+        internal void Update(IsoDirectoryRecord record)
         {
-            _header.directoryRecordLBA = record.LBA;
+            mHeader.directoryRecordLBA = record.LBA;
        
-            for (int i = 0; i < _header.entryCount; i++)
+            for (int i = 0; i < mHeader.entryCount; i++)
             {
                 // slow but lenient
-                Array.Find(_subEntries, elem => elem.Name == record.SubEntries[i].Name).Update(record.SubEntries[i]);
+                Array.Find(mSubEntries, elem => elem.Name == record.SubEntries[i].Name).Update(record.SubEntries[i]);
             }
         }
 
         internal void InternalWrite(BinaryWriter writer)
         {
-            writer.WriteStructure(_header);
+            writer.WriteStructure(mHeader);
 
-            for (int i = 0; i < _header.entryCount; i++)
+            for (int i = 0; i < mHeader.entryCount; i++)
             {
-                _subEntries[i].InternalWrite(writer);
+                mSubEntries[i].InternalWrite(writer);
             }
 
             writer.AlignPosition(16);
 
-            for (int i = 0; i < _header.entryCount; i++)
+            for (int i = 0; i < mHeader.entryCount; i++)
             {
-                if (i > 1 && _subEntries[i].Flags.HasFlagUnchecked(RecordFlags.DirectoryRecord))
+                if (i > 1 && mSubEntries[i].Flags.HasFlagUnchecked(RecordFlags.DirectoryRecord))
                 {
-                    _subEntries[i].DirectoryListing.InternalWrite(writer);
+                    mSubEntries[i].DirectoryListing.InternalWrite(writer);
                 }
             }
         }
 
         private void InternalRead(BinaryReader reader)
         {
-            _header = reader.ReadStructure<CVMDirectoryListingHeader>(CVMDirectoryListingHeader.SIZE);
-            _subEntries = new CVMDirectoryListingEntry[_header.entryCount];
+            mHeader = reader.ReadStructure<CvmDirectoryListingHeader>(CvmDirectoryListingHeader.SIZE);
+            mSubEntries = new CvmDirectoryListingEntry[mHeader.entryCount];
           
-            for (int i = 0; i < _header.entryCount; i++)
+            for (int i = 0; i < mHeader.entryCount; i++)
             {
-                _subEntries[i] = new CVMDirectoryListingEntry(reader, this);
+                mSubEntries[i] = new CvmDirectoryListingEntry(reader, this);
             }
             
             reader.AlignPosition(16);
            
-            for (int i = 0; i < _header.entryCount; i++)
+            for (int i = 0; i < mHeader.entryCount; i++)
             {
-                if (i > 1 && _subEntries[i].Flags.HasFlagUnchecked(RecordFlags.DirectoryRecord))
+                if (i > 1 && mSubEntries[i].Flags.HasFlagUnchecked(RecordFlags.DirectoryRecord))
                 {
-                    _subEntries[i].DirectoryListing = new CVMDirectoryListing(reader, _subEntries[i]);
+                    mSubEntries[i].DirectoryListing = new CvmDirectoryListing(reader, mSubEntries[i]);
                 }
             }
         }

@@ -2,47 +2,56 @@
 
 namespace Amicitia
 {
-    internal struct SupportedFileInfo
+    internal class SupportedFileInfo
     {
         public string Description;
         public SupportedFileType EnumType;
         public Type ClassType;
-        public bool ExportOnly;
         public string[] Extensions;
 
-        public SupportedFileInfo(string description, SupportedFileType type, Type classType, bool exportOnly, params string[] extensions)
+        public SupportedFileInfo(string description, SupportedFileType type, Type classType, params string[] extensions)
         {
             Description = description;
             EnumType = type;
             ClassType = classType;
-            ExportOnly = exportOnly;
             Extensions = extensions;
         }
     }
 
-    internal enum SupportedFileType
+    public enum SupportedFileType
     {
         // Default
         Resource = 0,
 
         // Archive formats
-        BVPArchiveFile,
+        BvpArchiveFile,
         ListArchiveFile,
-        PAKToolArchiveFile,
-        AMDFile,
+        PakToolArchiveFile,
+        AmdFile,
 
         // Texture formats
-        RWTextureDictionary,
-        RWTextureNative,
-        PNGFile,
-        SPRFile,
-        SPR4File,
-        TMXFile,
-        TGAFile,
+        RwTextureDictionaryNode,
+        RwTextureNativeNode,
+        Bitmap,
+        SprFile,
+        Spr4File,
+        TmxFile,
+        TgaFile,
 
         // Model formats
-        RMDScene,
-        RWScene,
-        DAEFile
+        RmdScene,
+        RwClumpNode,
+        AssimpModelFile,
+        RmdNodeLink,
+        RmdNodeLinkList,
+        SprKeyFrame,
+        RwNode,
+        RmdAnimation,
+        RwGeometryNode,
+        CmrFile,
+        FbnFile,
+        HbnFile,
+        RwAtomicNode,
+        AcxFile
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace AtlusLibSharp.Utilities
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace AtlusLibSharp.Utilities
 {
     using System.Drawing;
     using System.Drawing.Imaging;
@@ -199,7 +202,7 @@
             int bitDepth = Image.GetPixelFormatSize(bitmap.PixelFormat);
             if (bitDepth != 32)
             {
-                bitmap = ConvertTo32bpp(bitmap);
+                bitmap = ConvertTo32Bpp(bitmap);
             }
 
             WuQuantizer quantizer = new WuQuantizer();
@@ -208,7 +211,25 @@
             indices = GetIndices(quantBitmap);
         }
 
-        private static Bitmap ConvertTo32bpp(Image img)
+        public static int GetSimilarColorCount(Bitmap bitmap, double threshold = ColorHelper.SIMILARITY_THRESHOLD_STRICT)
+        {
+            return GetSimilarColorCount(GetColors(bitmap), threshold);
+        }
+
+        public static int GetSimilarColorCount(Color[] colors, double threshold = ColorHelper.SIMILARITY_THRESHOLD_STRICT )
+        {
+            List<Color> uniqueColors = new List<Color>();
+
+            foreach (var color in colors)
+            {
+                if (!uniqueColors.Any(x => x.IsSimilar(color, threshold)))
+                    uniqueColors.Add(color);
+            }
+
+            return uniqueColors.Count;
+        }
+
+        private static Bitmap ConvertTo32Bpp(Image img)
         {
             var bmp = new Bitmap(img.Width, img.Height, PixelFormat.Format32bppArgb);
             using (var gr = Graphics.FromImage(bmp))

@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.Graphics.TMX
 {
-    public enum TMXWrapMode : byte
+    public enum TmxWrapMode : byte
     {
         Repeat = 0x00,
         Clamp = 0x01

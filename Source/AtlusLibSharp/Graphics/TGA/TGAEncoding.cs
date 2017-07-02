@@ -1,9 +1,9 @@
 ﻿namespace AtlusLibSharp.Graphics.TGA
 { 
     /// <summary>
-    /// Truevision TARGA image data encoding type enumeration. Black and white, Run-length encoding and compression are currently not implemented.
+    /// Truevision TARGA image data encoding id enumeration. Black and white, Run-length encoding and compression are currently not implemented.
     /// </summary>
-    public enum TGAEncoding : byte
+    public enum TgaEncoding : byte
     {
         /// <summary>
         /// No image data included.
@@ -46,7 +46,7 @@
         IndexedHDRLE = 0x20,
 
         /// <summary>
-        /// Compressed color-mapped data, using Huffman, Delta, and runlength encoding. 4-pass quadtree-type process.
+        /// Compressed color-mapped data, using Huffman, Delta, and runlength encoding. 4-pass quadtree-id process.
         /// </summary>
         IndexedHDRLEQ = 0x21
     }

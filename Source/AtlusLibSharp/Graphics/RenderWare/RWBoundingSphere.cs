@@ -1,4 +1,6 @@
-﻿namespace AtlusLibSharp.Graphics.RenderWare
+﻿using AtlusLibSharp.IO;
+
+namespace AtlusLibSharp.Graphics.RenderWare
 {
     using System.Numerics;
     using System;
@@ -8,37 +10,37 @@
     /// <summary>
     /// Represents a RenderWare bounding sphere used for collision and culling calculations.
     /// </summary>
-    public struct RWBoundingSphere
+    public class RwBoundingSphere : BinaryBase
     {
         private const int POS_FLAG = 1;
         private const int NRM_FLAG = 1;
 
         /// <summary>
-        /// The <see cref="RWBoundingSphere"/> center vector.
+        /// The <see cref="RwBoundingSphere"/> center vector.
         /// </summary>
-        public readonly Vector3 Center;
+        public Vector3 Center;
 
         /// <summary>
-        /// The <see cref="RWBoundingSphere"/> sphere radius.
+        /// The <see cref="RwBoundingSphere"/> sphere radius.
         /// </summary>
-        public readonly float Radius;
+        public float Radius;
 
         /// <summary>
-        /// Initialize a <see cref="RWBoundingSphere"/> using a given sphere center vector and radius.
+        /// Initialize a <see cref="RwBoundingSphere"/> using a given sphere center vector and radius.
         /// </summary>
         /// <param name="sphereCentre">The sphere center vector.</param>
         /// <param name="sphereRadius">The sphere radius.</param>
-        public RWBoundingSphere(Vector3 sphereCentre, float sphereRadius)
+        public RwBoundingSphere(Vector3 sphereCentre, float sphereRadius)
         {
             Center = sphereCentre;
             Radius = sphereRadius;
         }
 
         /// <summary>
-        /// Initialize a <see cref="RWBoundingSphere"/> by reading the structure from a stream using the <see cref="BinaryReader"/>.
+        /// Initialize a <see cref="RwBoundingSphere"/> by reading the structure from a stream using the <see cref="BinaryReader"/>.
         /// </summary>
         /// <param name="reader">The <see cref="BinaryReader"/> used to read from the stream.</param>
-        internal RWBoundingSphere(BinaryReader reader)
+        internal RwBoundingSphere(BinaryReader reader)
         {
             Center = reader.ReadVector3();
             Radius = reader.ReadSingle();
@@ -54,11 +56,11 @@
         }
 
         /// <summary>
-        /// Calculate a <see cref="RWBoundingSphere"/> using the given vertices.
+        /// Calculate a <see cref="RwBoundingSphere"/> using the given vertices.
         /// </summary>
         /// <param name="vertices">The vertices used in calculation.</param>
-        /// <returns>A calculated <see cref="RWBoundingSphere"/></returns>
-        public static RWBoundingSphere Calculate(Vector3[] vertices)
+        /// <returns>A calculated <see cref="RwBoundingSphere"/></returns>
+        public static RwBoundingSphere Calculate(Vector3[] vertices)
         {
             Vector3 minExtent = Vector3.Zero;
             Vector3 maxExtent = Vector3.Zero;
@@ -89,14 +91,14 @@
 
             float sphereRadius = (float)Math.Sqrt(maxDistSq);
 
-            return new RWBoundingSphere(sphereCentre, sphereRadius);
+            return new RwBoundingSphere(sphereCentre, sphereRadius);
         }
 
         /// <summary>
-        /// Write the <see cref="RWBoundingSphere"/> to a stream using the provided <see cref="BinaryWriter"/>.
+        /// Write the <see cref="RwBoundingSphere"/> to a stream using the provided <see cref="BinaryWriter"/>.
         /// </summary>
         /// <param name="writer">The <see cref="BinaryWriter"/> used to write to the stream.</param>
-        internal void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             writer.Write(Center);
             writer.Write(Radius);

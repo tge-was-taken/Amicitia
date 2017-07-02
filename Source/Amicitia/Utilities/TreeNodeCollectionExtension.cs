@@ -13,7 +13,7 @@
             }
         }
 
-        public static void Add(this TreeNodeCollection collection, params ResourceWrapper[] treeNodes)
+        public static void Add(this TreeNodeCollection collection, params IResourceWrapper[] treeNodes)
         {
             foreach (TreeNode item in treeNodes)
             {

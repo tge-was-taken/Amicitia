@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Amicitia
@@ -12,20 +11,19 @@ namespace Amicitia
     internal static class Program
     {
         public static Assembly Assembly = Assembly.GetExecutingAssembly();
-        public static string Name = Assembly.GetName().Name;
-        public static string Version = Assembly.GetName().Version.ToString();
+        public static AssemblyName AssemblyName = Assembly.GetName();
+        public static Version Version = AssemblyName.Version;
         public static DateTime BuildTime = Assembly.GetLinkerTime();
         public static Type[] Types = Assembly.GetTypes();
-        public static List<Loop> LoopFunctions;
 
         // increment VersionMinor each release
-        public static int VersionMajor = 0;
-        public static int VersionMinor = 6;
+        public static int VersionMajor = 1;
+        public static int VersionMinor = 0;
 
 #if DEBUG
-        public static string TitleString = string.Format("Amicitia v{0}.{1} [DEBUG]", VersionMajor, VersionMinor);
+        public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor} [DEBUG]";
 #else
-        public static string TitleString = string.Format("Amicitia v{0}.{1}", VersionMajor, VersionMinor);
+        public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor};
 #endif
 
         /// <summary>
@@ -34,11 +32,11 @@ namespace Amicitia
         [STAThread]
         static void Main()
         {
-            LoopFunctions = new List<Loop>();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new MainForm()); //classical way of doing forms but we want to make a message pump
-            //oh boy here we go
+            Application.Run(new MainForm()); 
+
+            /*
             MainForm form = new MainForm();
             bool running = true;
             form.FormClosed += (object sender, FormClosedEventArgs e) => { running = false; };
@@ -53,6 +51,7 @@ namespace Amicitia
 
                 //System.Threading.Thread.Sleep(1);
             } while (running);
+            */
         }
     }
 

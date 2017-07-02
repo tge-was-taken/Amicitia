@@ -1,6 +1,6 @@
 ﻿namespace AtlusLibSharp.PS2.Graphics.Interfaces.VIF
 {
-    public struct VIFTag
+    public struct VifTag
     {
         // Fields
         public ushort Immediate;

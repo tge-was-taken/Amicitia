@@ -73,7 +73,5 @@ namespace AtlusLibSharp.FileSystems.CVM
             public string tag;      // 0x00, 4 bytes
             public ulong length;    // 0x04, big endian
         }
-
-        protected void InternalReadHeader(SafeBufferAccessor)
     }
 }

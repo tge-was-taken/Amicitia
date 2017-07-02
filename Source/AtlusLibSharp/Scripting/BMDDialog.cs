@@ -4,36 +4,36 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class BMDDialog
+    public class BmdDialog
     {
-        private List<BMDDialogToken> _dialogTokens;
+        private List<BmdDialogToken> mDialogTokens;
 
-        public List<BMDDialogToken> Tokens
+        public List<BmdDialogToken> Tokens
         {
-            get { return _dialogTokens; }
+            get { return mDialogTokens; }
         }
 
-        public BMDDialog(IList<BMDDialogToken> tokens)
+        public BmdDialog(IList<BmdDialogToken> tokens)
         {
-            _dialogTokens = tokens.ToList();
+            mDialogTokens = tokens.ToList();
         }
 
-        internal BMDDialog(BinaryReader reader)
+        internal BmdDialog(BinaryReader reader)
         {
-            _dialogTokens = new List<BMDDialogToken>();
+            mDialogTokens = new List<BmdDialogToken>();
             InternalRead(reader);
         }
 
-        internal BMDDialog()
+        internal BmdDialog()
         {
-            _dialogTokens = new List<BMDDialogToken>();
+            mDialogTokens = new List<BmdDialogToken>();
         }
 
         internal void InternalWrite(BinaryWriter writer)
         {
-            for (int i = 0; i < _dialogTokens.Count; i++)
+            for (int i = 0; i < mDialogTokens.Count; i++)
             {
-                _dialogTokens[i].InternalWrite(writer);
+                mDialogTokens[i].InternalWrite(writer);
             }
 
             writer.Write((byte)0);
@@ -43,7 +43,7 @@
         {
             while (true)
             {
-                BMDDialogToken token;
+                BmdDialogToken token;
 
                 byte b = reader.ReadByte();
 
@@ -58,9 +58,9 @@
                     int numParams = ((b & 0x0F) - 1) << 1;
                     byte b2 = reader.ReadByte();
                     byte funcCategory = (byte)((b2 & 0xE0) >> 5);
-                    byte funcID = (byte)(b2 & 0x1F);
+                    byte funcId = (byte)(b2 & 0x1F);
 
-                    token = new BMDFunctionToken(funcCategory, funcID, reader.ReadBytes(numParams));
+                    token = new BmdFunctionToken(funcCategory, funcId, reader.ReadBytes(numParams));
                 }
                 else
                 {
@@ -86,10 +86,10 @@
                         b = reader.ReadByte();
                     }
 
-                    token = new BMDTextToken(textBytes.ToArray());
+                    token = new BmdTextToken(textBytes.ToArray());
                 }
 
-                _dialogTokens.Add(token);
+                mDialogTokens.Add(token);
             }
         }
     }

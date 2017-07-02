@@ -10,27 +10,27 @@
     /// </summary>
     public class TRXDIRRegister
     {
-        private ulong _rawData;
+        private ulong mRawData;
 
-        public PS2TRXDIRTransmissionDirection TransmissionDirection
+        public PS2TrxdirTransmissionDirection TransmissionDirection
         {
-            get { return (PS2TRXDIRTransmissionDirection)BitHelper.GetBits(_rawData, 2, 0); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 2, (ulong)value, 0); }
+            get { return (PS2TrxdirTransmissionDirection)BitHelper.GetBits(mRawData, 2, 0); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 2, (ulong)value, 0); }
         }
 
-        public TRXDIRRegister(PS2TRXDIRTransmissionDirection transDirection)
+        public TRXDIRRegister(PS2TrxdirTransmissionDirection transDirection)
         {
             TransmissionDirection = transDirection;
         }
 
         internal TRXDIRRegister(BinaryReader reader)
         {
-            _rawData = reader.ReadUInt64();
+            mRawData = reader.ReadUInt64();
         }
 
         internal byte[] GetBytes()
         {
-            return BitConverter.GetBytes(_rawData);
+            return BitConverter.GetBytes(mRawData);
         }
     }
 }

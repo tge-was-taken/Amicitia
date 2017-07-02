@@ -1,270 +1,171 @@
-﻿namespace Amicitia.ResourceWrappers
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Forms;
+using AtlusLibSharp.IO;
+
+namespace Amicitia.ResourceWrappers
 {
-    using System;
-    using System.Windows.Forms;
-    using System.ComponentModel;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Collections.Generic;
-    using AtlusLibSharp.IO;
-
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    internal sealed class WrapperAttribute : Attribute
+    [Flags]
+    public enum CommonContextMenuOptions
     {
-        private Type m_wrappedResourceType;
-        private string m_description;
-        private string m_filter;
-
-        // This is a positional argument
-        public WrapperAttribute(Type wrappedResourceType, string description, params string[] extensions)
-        {
-            m_wrappedResourceType = wrappedResourceType;
-        }
+        Export   = 1 << 1,
+        Replace  = 1 << 2,
+        Add      = 1 << 3,
+        Move     = 1 << 4,
+        Rename   = 1 << 5,
+        Encode   = 1 << 6,
+        Delete   = 1 << 7,
     }
 
-    [Wrapper(typeof(BinaryFileBase), "Raw data", ".*")]
-    internal partial class ResourceWrapper : TreeNode, INotifyPropertyChanged
+    internal interface IResourceWrapper : INotifyPropertyChanged
     {
-        // wrapped object storage
-        protected internal object m_wrappedObject;
-        protected internal SupportedFileType m_wrappedFileType;
+        string Text { get; }
 
-        // wrapper states
-        protected internal bool m_isInitialized = false;
+        object Resource { get; }
 
-        // wrapped object states
-        protected internal bool m_isDirty = false;
-        protected internal bool m_isImage = false;
-        protected internal bool m_isModel = false;
+        SupportedFileType FileType { get; }
 
-        // context menu states
-        protected internal bool m_canExport = true;
-        protected internal bool m_canReplace = true;
-        protected internal bool m_canMove = true;
-        protected internal bool m_canRename = true;
-        protected internal bool m_canDelete = true;
-        protected internal bool m_canAdd = false;
-        protected internal bool m_canEncode = false;
+        bool NeedsRebuild { get; set; }
 
-        /*********************/
-        /* File filter types */
-        /*********************/
-        public static readonly SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        CommonContextMenuOptions CommonContextMenuOptions { get; set; }
+
+        void MoveUp();
+
+        void MoveDown();
+
+        void Delete();
+
+        void Rename();
+
+        void Export();
+
+        void Export(string path);
+
+        void Export(string path, SupportedFileType type);
+
+        void Replace();
+
+        void Replace( string path );
+
+        void Replace( string path, SupportedFileType type );
+
+        void Add();
+
+        void Add( string path );
+
+        void Add( string path, SupportedFileType type );
+
+        byte[] GetResourceBytes();
+
+        MemoryStream GetResourceMemoryStream();
+    }
+
+    public abstract partial class ResourceWrapper<TResource> : TreeNode, IResourceWrapper
+    {
+        public static readonly Action<string, ResourceWrapper<TResource>> DefaultFileAddAction = (path, wrapper) =>
         {
-           SupportedFileType.Resource
+            var resWrap = ResourceWrapperFactory.GetResourceWrapper(path);
+            wrapper.Nodes.Add((TreeNode)resWrap);
         };
 
-        /*****************************************/
-        /* Import / Export delegate dictionaries */
-        /*****************************************/
-        public static readonly Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
-        {
-            { SupportedFileType.Resource, (x, y) => x.WrappedObject = new GenericBinaryFile(y) }
-        };
+        private TResource mResource;
+        private bool mInitialized;
+        private bool mNeedsRebuild;
+        private Dictionary<SupportedFileType, Func<TResource, string, TResource>> mFileReplaceActions;
+        private Dictionary<SupportedFileType, Action<TResource, string>> mFileExportActions;
+        private Dictionary<SupportedFileType, Action<string, ResourceWrapper<TResource>>> mFileAddActions;
+        private Func<ResourceWrapper<TResource>, TResource> mRebuildAction;
 
-        public static readonly Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
-        {
-            { SupportedFileType.Resource, (x, y) => (x.WrappedObject as BinaryFileBase).Save(y) }
-        };
-
-        /***********************************/
-        /* Import / export virtual methods */
-        /***********************************/
-        protected virtual Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
-        {
-            return ImportDelegates;
-        }
-
-        protected virtual Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
-        {
-            return ExportDelegates;
-        }
-
-        protected virtual SupportedFileType[] GetSupportedFileTypes()
-        {
-            return FileFilterTypes;
-        }
-
-        /// <summary>
-        /// Fired when a property in this class changes.
-        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// Creates a new generic resource wrapper.
-        /// </summary>
-        /// <param name="text">Node text to display on the tree view.</param>
-        /// <param name="wrappedObject">The object to store in the wrapper.</param>
-        /// <param name="type">The <see cref="SupportedFileType"/> of the wrapped object.</param>
-        /// <param name="suppressContextMenuInit">Sets if the call to initialize the context menu strip will be supressed (use if context menu states are set in the constructor).</param>
-        public ResourceWrapper(string text, object wrappedObject, SupportedFileType type, bool suppressContextMenuInit)
-            : base(text)
-        {
-            m_wrappedFileType = type;
-            m_wrappedObject = wrappedObject;
-       
-            if (!suppressContextMenuInit)
-                InitializeContextMenuStrip();
-
-            InitializeWrapper();
-        }
-
-        /// <summary>
-        /// Creates a new generic resource wrapper.
-        /// </summary>
-        /// <param name="text">Node text to display on the tree view.</param>
-        /// <param name="wrappedObject">The object to store in the wrapper.</param>
-        public ResourceWrapper(string text, object wrappedObject)
-            : this(text, wrappedObject, SupportedFileType.Resource, false)
-        {
-        }
-
-        /***************************/
-        /* Wrapper node properties */
-        /***************************/
-
-        /// <summary>
-        /// Gets or sets the wrapped object.
-        /// </summary>
         [Browsable(false)]
-        public virtual object WrappedObject
+        public TResource Resource
         {
             get
             {
-                return m_wrappedObject;
+                RebuildResource();
+                return mResource;
             }
-            set
+            private set
             {
-                SetProperty(ref m_wrappedObject, value);
+                SetField(ref mResource, value, true);
+
+                if (mInitialized)
+                    PopulateViewFully();
             }
         }
 
-        /// <summary>
-        /// Gets if the wrapper node has been initialized.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsInitialized
-        {
-            get { return m_isInitialized; }
-        }
+        object IResourceWrapper.Resource => Resource;
 
-        /// <summary>
-        /// Gets the <see cref="SupportedFileType"/> of the wrapped object.
-        /// </summary>
-        public SupportedFileType FileType
-        {
-            get { return m_wrappedFileType; }
-        }
+        [Category("Resource info")]
+        [OrderedProperty]
+        public SupportedFileType FileType { get; }
 
-        /// <summary>
-        /// Gets if the wrapped object was modified and needs to be rebuilt.
-        /// </summary>
 #if DEBUG
+        [Category("Debug")]
+        [OrderedProperty]
         [Browsable(true)]
 #else
-        [Browsable(false)]
+	    [Browsable(false)]
 #endif
-        public bool IsDirty
+        public bool NeedsRebuild
         {
-            get { return m_isDirty; }
-            set { SetProperty(ref m_isDirty, value); }
+            get { return mNeedsRebuild; }
+
+#if DEBUG
+            set { mNeedsRebuild = value; }
+#else
+		    protected set { mNeedsRebuild = value; }
+#endif
         }
 
-        /**********************/
-        /* Context menu bools */
-        /**********************/
 
-        /// <summary>
-        /// Gets if the Export context menu option is visible for this wrapper. Default is true.
-        /// </summary>
         [Browsable(false)]
-        public bool CanExport
+        public CommonContextMenuOptions CommonContextMenuOptions { get; set; }
+
+        protected ResourceWrapper(string text, TResource resource)
+            : base(text)
         {
-            get { return m_canExport; }
+            Resource = resource;
+            FileType = SupportedFileManager.GetSupportedFileType(typeof(TResource));
+
+            Initialize();
+            PopulateViewFully();
+            mInitialized = true;
         }
 
-        /// <summary>
-        /// Gets if the Replace context menu option is visible for this wrapper. Default is true.
-        /// </summary>
-        [Browsable(false)]
-        public bool CanReplace
+        public byte[] GetResourceBytes()
         {
-            get { return m_canReplace; }
+            var binaryFileBase = Resource as BinaryBase;
+
+            return binaryFileBase?.GetBytes();
         }
 
-        /// <summary>
-        /// Gets if the Move Up and Move Up context menu option are visible for this wrapper. Default is true.
-        /// </summary>
-        [Browsable(false)]
-        public bool CanMove
+        public MemoryStream GetResourceMemoryStream()
         {
-            get { return m_canMove; }
+            var binaryFileBase = Resource as BinaryBase;
+
+            return binaryFileBase?.GetMemoryStream();
         }
 
+
         /// <summary>
-        /// Gets if the Rename context menu option is visible for this wrapper. Default is true.
+        /// This method of base class is overriden so we can make the parent dirty because removing this node would change the parent's node collection.
         /// </summary>
-        [Browsable(false)]
-        public bool CanRename
+        public new void Remove()
         {
-            get { return m_canRename; }
+            SetRebuildFlag(Parent);
+            base.Remove();
         }
 
-        /// <summary>
-        /// Gets if the Delete context menu option is visible for this wrapper. Default is true.
-        /// </summary>
-        [Browsable(false)]
-        public bool CanDelete
-        {
-            get { return m_canDelete; }
-        }
-
-        /// <summary>
-        /// Gets if the Add context menu option is visible for this wrapper. Default is false.
-        /// </summary>
-        [Browsable(false)]
-        public bool CanAdd
-        {
-            get { return m_canAdd; }
-        }
-
-        /// <summary>
-        /// Gets if the Encode context menu option is visible for this wrapper. Default is false.
-        /// </summary>
-        [Browsable(false)]
-        public bool CanEncode
-        {
-            get { return m_canEncode; }
-        }
-
-        /// <summary>
-        /// Gets if this wrapped object implements the <see cref="ITextureFile"/> interface. Default is false.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsImageResource
-        {
-            get { return m_isImage; }
-        }
-
-        /// <summary>
-        /// Gets if this wrapped object is a model resource. Default is false.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsModelResource
-        {
-            get { return m_isModel; }
-        }
-
-        /************************/
-        /* Context menu actions */
-        /************************/
-
-        /// <summary>
-        /// Move the wrapper node up in the tree (if possible).
-        /// </summary>
-        public void MoveUp(object sender, EventArgs e)
+        public void MoveUp()
         {
             TreeNode parent = Parent;
+
             if (parent != null)
             {
                 int index = parent.Nodes.IndexOf(this);
@@ -272,6 +173,7 @@
                 {
                     parent.Nodes.RemoveAt(index);
                     parent.Nodes.Insert(index - 1, this);
+                    SetRebuildFlag(Parent); // we modified the parent's nodes
                 }
             }
             else if (TreeView.Nodes.Contains(this)) //root node
@@ -281,17 +183,14 @@
                 {
                     TreeView.Nodes.RemoveAt(index);
                     TreeView.Nodes.Insert(index - 1, this);
+                    SetRebuildFlag(Parent); // we modified the parent's nodes
                 }
             }
 
             TreeView.SelectedNode = this;
-            IsDirty = true;
         }
 
-        /// <summary>
-        /// Move the wrapper node down in the tree (if possible).
-        /// </summary>
-        public void MoveDown(object sender, EventArgs e)
+        public void MoveDown()
         {
             TreeNode parent = Parent;
             if (parent != null)
@@ -301,6 +200,7 @@
                 {
                     parent.Nodes.RemoveAt(index);
                     parent.Nodes.Insert(index + 1, this);
+                    SetRebuildFlag(Parent);
                 }
             }
             else if (TreeView != null && TreeView.Nodes.Contains(this)) //root node
@@ -310,265 +210,419 @@
                 {
                     TreeView.Nodes.RemoveAt(index);
                     TreeView.Nodes.Insert(index + 1, this);
+                    SetRebuildFlag(Parent);
                 }
             }
 
             TreeView.SelectedNode = this;
-            IsDirty = true;
         }
 
-        /// <summary>
-        /// Deletes the wrapper node from the tree.
-        /// </summary>
-        public void Delete(object sender, EventArgs e)
+        public void Delete()
         {
-            if (Parent != null)
-            {
-                if (!(Parent is ResourceWrapper))
-                {
-                    if (Parent.Parent != null && Parent.Parent is ResourceWrapper)
-                    {
-                        (Parent.Parent as ResourceWrapper).IsDirty = true;
-                    }
-                    else
-                    {
-                        // Give up lol
-                    }
-                }
-                else
-                {
-                    (Parent as ResourceWrapper).IsDirty = true;
-                }
-            }
-
             Remove();
         }
 
-        /// <summary>
-        /// Renames the wrapper node in the tree.
-        /// </summary>
-        public void Rename(object sender, EventArgs e)
+        public void Rename()
         {
             TreeView.LabelEdit = true;
             BeginEdit(); // EndEdit() is called in the TreeView AfterLabelEdit event
-            IsDirty = true;
+            NeedsRebuild = true;
         }
 
-        /// <summary>
-        /// Opens up the file export dialog for exporting this wrapper node.
-        /// </summary>
-        public void Export(object sender, EventArgs e)
+        public void Export()
         {
-            using (SaveFileDialog saveFileDlg = new SaveFileDialog())
-            {
-                var delegates = GetExportDelegates();
-                var fileTypes = GetSupportedFileTypes();
+            if (mFileExportActions == null)
+                return;
 
+            using (var saveFileDlg = new SaveFileDialog())
+            {
+                var fileTypes = mFileExportActions.Keys.ToArray();
+            
+                saveFileDlg.AutoUpgradeEnabled = true;
+                saveFileDlg.CheckPathExists = true;
                 saveFileDlg.FileName = Text;
                 saveFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
+                saveFileDlg.OverwritePrompt = true;
+                saveFileDlg.Title = "Select a file to export to";
+                saveFileDlg.ValidateNames = true;
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                // rebuild if dirty before export
-                if (IsDirty)
-                {
-                    RebuildWrappedObject();
-                }
-
-                delegates[fileTypes[saveFileDlg.FilterIndex - 1]].Invoke(this, saveFileDlg.FileName);
+                var fileType = GetCorrectedSupportedFileType( saveFileDlg.FilterIndex - 1, saveFileDlg.FileName, fileTypes );
+                Export(saveFileDlg.FileName, fileType);
             }
         }
 
-        /// <summary>
-        /// Opens up the file open dialog and replaces the wrapper node with the opened file.
-        /// </summary>
-        public void Replace(object sender, EventArgs e)
+        public void Export(string path)
         {
-            using (OpenFileDialog openFileDlg = new OpenFileDialog())
-            {
-                var delegates = GetImportDelegates();
-                var fileTypes = GetSupportedFileTypes();
+            var fileInfo = SupportedFileManager.GetSupportedFileInfo( Path.GetExtension( path ) );
+            Export(path, fileInfo.EnumType);
+        }
 
+        public void Export(string path, SupportedFileType type)
+        {
+            if (mFileExportActions == null)
+                return;
+
+            var fileExportAction = mFileExportActions[type];
+            fileExportAction.Invoke(Resource, path);
+        }
+
+        public void Replace()
+        {
+            if (mFileReplaceActions == null)
+                return;
+
+            using (var openFileDlg = new OpenFileDialog())
+            {
+                var fileTypes = mFileReplaceActions.Keys.ToArray();
+
+                openFileDlg.AutoUpgradeEnabled = true;
+                openFileDlg.CheckPathExists = true;
+                openFileDlg.CheckFileExists = true;
                 openFileDlg.FileName = Text;
                 openFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
+                openFileDlg.Multiselect = false;
+                openFileDlg.SupportMultiDottedExtensions = true;
+                openFileDlg.Title = "Select a replacement file";
+                openFileDlg.ValidateNames = true;
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
                     return;
                 }
 
-                // get the delegate
-                delegates[fileTypes[openFileDlg.FilterIndex-1]].Invoke(this, openFileDlg.FileName);
-
-                // re-init
-                InitializeWrapper();
-
-                // set it to not dirty, the delegate will have invoked the property change for the wrapped object
-                // so the parents have already been informed about the replacement
-                m_isDirty = false;
+                var fileType = GetCorrectedSupportedFileType(openFileDlg.FilterIndex - 1, openFileDlg.FileName, fileTypes);
+                Replace(openFileDlg.FileName, fileType);
             }
         }
 
-        /// <summary>
-        /// Opens up the file open dialog and adds the opened file to the wrapper node's collection.
-        /// </summary>
-        public virtual void Add(object sender, EventArgs e) { }
-
-        /// <summary>
-        /// Opens up the encoder dialog for this wrapper node.
-        /// </summary>
-        public virtual void Encode(object sender, EventArgs e) { }
-
-        /// <summary>
-        /// Rebuilds the data of the wrapped object.
-        /// </summary>
-        internal virtual void RebuildWrappedObject()
+        public void Replace(string path)
         {
-            m_isDirty = false;
+            var fileInfo = SupportedFileManager.GetSupportedFileInfo( Path.GetExtension( path ) );
+            Replace(path, fileInfo.EnumType);
         }
 
-        /// <summary>
-        /// Initializes the wrapper.
-        /// </summary>
-        internal virtual void InitializeWrapper()
+        public void Replace(string path, SupportedFileType type)
         {
-            if (m_isInitialized)
+            if (mFileReplaceActions == null)
+                return;
+
+            var fileReplaceAction = mFileReplaceActions[type];
+            Resource = fileReplaceAction.Invoke(Resource, path);
+        }
+
+        public void Add()
+        {
+            if (mFileAddActions == null)
+                return;
+
+            using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
-                MainForm.Instance.UpdateReferences();
+                var fileTypes = mFileAddActions.Keys.ToArray();
+
+                openFileDlg.AutoUpgradeEnabled = true;
+                openFileDlg.CheckPathExists = true;
+                openFileDlg.CheckFileExists = true;
+                openFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
+                openFileDlg.Multiselect = true;
+                openFileDlg.SupportMultiDottedExtensions = true;
+                openFileDlg.Title = "Select file(s) to add";
+                openFileDlg.ValidateNames = true;
+
+                if (openFileDlg.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+
+                foreach (string fileName in openFileDlg.FileNames)
+                {
+                    var fileType = GetCorrectedSupportedFileType( openFileDlg.FilterIndex - 1, fileName, fileTypes );
+                    Add( fileName, fileType );
+                }          
             }
-            else
+        }
+
+        public void Add(string path)
+        {
+            var fileInfo = SupportedFileManager.GetSupportedFileInfo( Path.GetExtension( path ) );
+            Add(path, fileInfo.EnumType);
+        }
+
+        public void Add(string path, SupportedFileType type)
+        {
+            var fileAddAction = mFileAddActions[type];
+            fileAddAction.Invoke(path, this);
+
+            NeedsRebuild = true;
+        }
+
+        protected void MoveUpEventHandler(object sender, EventArgs e)
+        {
+            MoveUp();
+        }
+
+        protected void MoveDownEventHandler(object sender, EventArgs e)
+        {
+            MoveDown();
+        }
+
+        protected void DeleteEventHandler(object sender, EventArgs e)
+        {
+            Delete();
+        }
+
+        protected void RenameEventHandler(object sender, EventArgs e)
+        {
+            Rename();
+        }
+
+        protected void ExportEventHandler(object sender, EventArgs e)
+        {
+            Export();
+        }
+
+        protected void ReplaceEventHandler(object sender, EventArgs e)
+        {
+            Replace();
+        }
+
+        protected void AddEventHandler(object sender, EventArgs e)
+        {
+            Add();
+        }
+
+        protected abstract void Initialize();
+
+        protected abstract void PopulateView();
+
+        protected void RegisterFileReplaceAction(SupportedFileType type, Func<TResource, string, TResource> action)
+        {
+            if (mFileReplaceActions == null)
+                mFileReplaceActions = new Dictionary<SupportedFileType, Func<TResource, string, TResource>>();
+            mFileReplaceActions[type] = action;
+        }
+
+        protected void RegisterFileExportAction(SupportedFileType type, Action<TResource, string> action)
+        {
+            if (mFileExportActions == null)
+                mFileExportActions = new Dictionary<SupportedFileType, Action<TResource, string>>();
+            mFileExportActions[type] = action;
+        }
+
+        protected void RegisterFileAddAction(SupportedFileType type, Action<string, ResourceWrapper<TResource>> action)
+        {
+            if (mFileAddActions == null)
+                mFileAddActions = new Dictionary<SupportedFileType, Action<string, ResourceWrapper<TResource>>>();
+            mFileAddActions[type] = action;
+        }
+
+        protected void RegisterRebuildAction(Func<ResourceWrapper<TResource>, TResource> action)
+        {
+            mRebuildAction = action;
+        }
+
+        protected void SetField<T>(ref T field, T value, bool onlyParentNeedsRebuild = false, [CallerMemberName] string propertyName = null)
+        {
+            if (typeof(T).IsValueType)
             {
-                m_isInitialized = true;
+                if (Equals(field, value))
+                    return;
             }
-        }
 
-        /***********************/
-        /* Convienence methods */
-        /***********************/
+            field = value;
 
-        /// <summary>
-        /// Gets the data of the wrapped object in a byte array.
-        /// </summary>
-        public byte[] GetBytes()
-        {
-            return (WrappedObject as BinaryFileBase).GetBytes();
-        }
+            if (!mInitialized)
+                return;
 
-        /// <summary>
-        /// Gets the data of the wrapped object in a memory stream.
-        /// </summary>
-        public MemoryStream GetMemoryStream()
-        {
-            return (WrappedObject as BinaryFileBase).GetMemoryStream();
-        }
-
-        /**********************************/
-        /* Property get/set event methods */
-        /**********************************/
-
-        /// <summary>
-        /// Triggers the property changed event for a specific property.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that has changed.</param>
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-            // everything's alll dirty now
-            m_isDirty = true;
-            SetParentsToDirty(this);
+            mNeedsRebuild = !onlyParentNeedsRebuild;
+
+            SetRebuildFlag(Parent);
         }
 
-        private void SetParentsToDirty(TreeNode node)
+        protected void SetProperty<T>(object instance, T value, bool onlyParentNeedsRebuild = false, [CallerMemberName] string propertyName = null)
         {
-            if (node.Parent == null)
-                return;
+            if (propertyName == null)
+                throw new ArgumentNullException(nameof(propertyName));
 
-            if (node.Parent is ResourceWrapper)
-                (node.Parent as ResourceWrapper).m_isDirty = true; // don't use the property as it's unnecessary
-
-            SetParentsToDirty(node.Parent);
-        }
-
-        /// <summary>
-        /// Sets a property if it is not equal to the current value and fires the <see cref="OnPropertyChanged"/> event.
-        /// </summary>
-        protected void SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (Equals(property, value))
-                return;
-
-            property = value;
-            OnPropertyChanged(propertyName);
-        }
-
-        /// <summary>
-        /// Sets a property if it is not equal to the current value and fires the <see cref="OnPropertyChanged"/> event.
-        /// </summary>
-        protected void SetProperty<T>(object instance, T value, [CallerMemberName] string propertyName = null)
-        {
             var prop = instance.GetType().GetProperty(propertyName);
+            if (prop == null)
+                throw new ArgumentNullException(nameof(prop));
 
-            if (Equals(prop.GetValue(instance, null), value))
-                return;
+            if (typeof(T).IsValueType)
+            {
+                if (Equals(prop.GetValue(instance, null), value))
+                    return;
+            }
 
             prop.SetValue(instance, value);
-            OnPropertyChanged(propertyName);
+
+            if (!mInitialized)
+                return;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            if (!onlyParentNeedsRebuild)
+                mNeedsRebuild = true;
+
+            SetRebuildFlag(Parent);
+        }
+
+        private static void SetRebuildFlag(TreeNode node)
+        {
+            while (true)
+            {
+                if (node == null)
+                    return;
+
+                if (node is IResourceWrapper)
+                {
+                    (node as IResourceWrapper).NeedsRebuild = true;
+                }
+
+                node = node.Parent;
+            }
+        }
+
+        private static SupportedFileType GetCorrectedSupportedFileType(int fileTypeIndex, string fileName, IList<SupportedFileType> fileTypes)
+        {
+            var fileType = fileTypes[fileTypeIndex];
+
+            // check if the selected type in the filter contains the extension of the path
+            // if it doesn't, try to find the first best matching type
+            var extension = Path.GetExtension( fileName );
+            if (extension != null)
+            {
+                var info = SupportedFileManager.GetSupportedFileInfo(fileType);
+
+                if (!info.Extensions.Contains(extension, StringComparer.InvariantCultureIgnoreCase))
+                {
+                    var actualInfo = SupportedFileManager.SupportedFileInfos
+                        .Where(x => fileTypes.Contains(x.EnumType))
+                        .FirstOrDefault(
+                            x => x.Extensions.Contains(extension, StringComparer.InvariantCultureIgnoreCase));
+
+                    if (actualInfo != null)
+                    {
+                        fileType = actualInfo.EnumType;
+                    }
+                }
+            }
+
+            return fileType;
         }
 
         /// <summary>
-        /// Initializes the context menu strip using the boolean context menu properties.
+        /// Clears nodes and populates the view and context menu strip.
         /// </summary>
-        protected internal void InitializeContextMenuStrip()
+        private void PopulateViewFully()
+        {
+            if (mInitialized)
+                Nodes.Clear();
+
+            PopulateView();
+            PopulateContextMenuStrip();
+        }
+
+        /// <summary>
+        /// Populates the context menu strip, should be called after the context menu options have been set.
+        /// </summary>
+        private void PopulateContextMenuStrip()
         {
             ContextMenuStrip = new ContextMenuStrip();
 
-            if (m_canExport)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Export))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Export", null, Export, Keys.Control | Keys.E));
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Export", null, ExportEventHandler, Keys.Control | Keys.E));
             }
 
-            if (m_canReplace)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Replace))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Replace", null, Replace, Keys.Control | Keys.R));
-                if (!m_canAdd)
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Replace", null, ReplaceEventHandler, Keys.Control | Keys.R));
+                if (!CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Add))
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (m_canAdd)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Add))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Add", null, Add, Keys.Control | Keys.A));
-                if (m_canMove)
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Add", null, AddEventHandler, Keys.Control | Keys.A));
+                if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Move))
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (m_canMove)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Move))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Up", null, MoveUp, Keys.Control | Keys.Up));
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Down", null, MoveDown, Keys.Control | Keys.Down));
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Up", null, MoveUpEventHandler, Keys.Control | Keys.Up));
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Move &Down", null, MoveDownEventHandler, Keys.Control | Keys.Down));
             }
 
-            if (m_canRename)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Rename))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Re&name", null, Rename, Keys.Control | Keys.N));
-                if (!m_canEncode && m_canDelete)
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Re&name", null, RenameEventHandler, Keys.Control | Keys.N));
+                if (!CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Encode) && CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Delete))
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (m_canEncode)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Encode))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Encode", null, Encode, Keys.Control | Keys.N));
-                if (m_canDelete)
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("Encode", null, null, Keys.Control | Keys.N));
+                if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Delete))
                     ContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
 
-            if (m_canDelete)
+            if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Delete))
             {
-                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Delete", null, Delete, Keys.Control | Keys.Delete));
+                ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteEventHandler, Keys.Control | Keys.Delete));
             }
+        }
+
+        /// <summary>
+        /// Wrapper around the rebuild action. Checks for null and reinitializes the wrapper afterwards.
+        /// </summary>
+        private void RebuildResource()
+        {
+            if (!NeedsRebuild)
+                return;
+
+            mNeedsRebuild = false;
+
+            if (mRebuildAction != null)
+            {
+                Resource = mRebuildAction.Invoke(this);
+                SetRebuildFlag(Parent);
+            }
+        }
+    }
+
+    public class BinaryBaseWrapper : ResourceWrapper<BinaryBase>
+    {
+        public BinaryBaseWrapper(string text, BinaryBase resource) : base(text, resource)
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Move |
+                                       CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction(SupportedFileType.Resource, (res, path) => res.Save(path));
+            RegisterFileReplaceAction(SupportedFileType.Resource, (res, path) => new BinaryFile(path));
+        }
+
+        protected override void PopulateView()
+        {
+        }
+    }
+
+    public class BinaryFileWrapper : BinaryBaseWrapper
+    {
+        public BinaryFileWrapper( string text, BinaryFile resource ) : base( text, resource )
+        {
         }
     }
 }

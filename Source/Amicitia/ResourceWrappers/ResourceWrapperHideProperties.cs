@@ -4,7 +4,7 @@
     using System.Drawing;
     using System.Windows.Forms;
 
-    internal partial class ResourceWrapper
+    public partial class ResourceWrapper<TResource>
     {
         // Override all these to hide them from the property grid
         [Browsable(false)]

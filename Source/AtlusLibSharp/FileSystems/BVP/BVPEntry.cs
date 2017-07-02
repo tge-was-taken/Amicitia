@@ -6,7 +6,7 @@
     /// <summary>
     /// Class representing an entry in a battle voice package.
     /// </summary>
-    public sealed class BVPEntry
+    public sealed class BvpEntry
     {
         internal const int SIZE = 0xC;
 
@@ -15,7 +15,7 @@
         /// </summary>
         /// <param name="filePath">Path to the file whose data will be imported.</param>
         /// <param name="flag">Entry flag to set. Defaults to 0.</param>
-        public BVPEntry(string filePath, int flag = 0)
+        public BvpEntry(string filePath, int flag = 0)
         {
             Flag = flag;
             Data = File.ReadAllBytes(filePath);
@@ -26,7 +26,7 @@
         /// </summary>
         /// <param name="data">Byte array of data.</param>
         /// <param name="flag">Entry flag to set. Defaults to 0.</param>
-        public BVPEntry(byte[] data, int flag = 0)
+        public BvpEntry(byte[] data, int flag = 0)
         {
             Flag = flag;
             Data = data;
@@ -35,7 +35,7 @@
         /// <summary>
         /// Creates a new battle voice package entry using a specified <see cref="BinaryReader"/>. 
         /// </summary>
-        internal BVPEntry(BinaryReader reader)
+        internal BvpEntry(BinaryReader reader)
         {
             Flag = reader.ReadInt32();
             FileDataOffset = reader.ReadInt32();

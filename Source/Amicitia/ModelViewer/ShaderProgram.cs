@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using System.IO;
@@ -27,6 +24,7 @@ namespace Amicitia.ModelViewer
             string fSource = new StreamReader(Program.Assembly.GetManifestResourceStream("Amicitia." + name + ".fs")).ReadToEnd();
 
             // create vertex shader
+
             int vs = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vs, vSource);
             GL.CompileShader(vs);

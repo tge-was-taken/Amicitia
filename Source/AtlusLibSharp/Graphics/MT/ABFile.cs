@@ -76,56 +76,56 @@
         }
     }
 
-    public class ABFile : BinaryFileBase
+    public class AbFile : BinaryBase
     {
         internal const int DATA_START_ADDRESS = 0x20;
 
         // Private fields
-        private ABKeyInfo[] _animKeyInfo;
-        private ABAnimation[] _anims;
+        private AbKeyInfo[] mAnimKeyInfo;
+        private AbAnimation[] mAnims;
 
         // Constructors
-        internal ABFile(BinaryReader reader)
+        internal AbFile(BinaryReader reader)
         {
-            InternalRead(reader);
+            Read(reader);
         }
 
         // Properties
         public int AnimationCount
         {
-            get { return _anims.Length; }
+            get { return mAnims.Length; }
         }
 
         public int KeyCount
         {
-            get { return _animKeyInfo.Length; }
+            get { return mAnimKeyInfo.Length; }
         }
 
-        public ABKeyInfo[] KeyInfoArray
+        public AbKeyInfo[] KeyInfoArray
         {
-            get { return _animKeyInfo; }
+            get { return mAnimKeyInfo; }
         }
 
-        public ABAnimation[] Animations
+        public AbAnimation[] Animations
         {
-            get { return _anims; }
+            get { return mAnims; }
         }
 
         // Public Static Methods
-        public static ABFile LoadFrom(string path)
+        public static AbFile LoadFrom(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-                return new ABFile(reader);
+                return new AbFile(reader);
         }
 
-        public static ABFile LoadFrom(Stream stream, bool leaveStreamOpen)
+        public static AbFile LoadFrom(Stream stream, bool leaveStreamOpen)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
-                return new ABFile(reader);
+                return new AbFile(reader);
         }
 
         // Methods
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             // Skip header
             long posFileStart = (int)writer.BaseStream.Position;
@@ -137,17 +137,17 @@
             List<int> addressList = new List<int>();
 
             // Calculate size of key info table & anim pointer table offset
-            int keyInfoTableSize = header.numKeys * ABKeyInfo.SIZE;
+            int keyInfoTableSize = header.numKeys * AbKeyInfo.SIZE;
             header.animPointerTableOffset = (int)(((writer.GetPosition() + keyInfoTableSize) - DATA_START_ADDRESS) - posFileStart);
 
             addressList.Add((int)(writer.GetPosition() - 4 - posFileStart)); // animPointerTableOffset
 
             // Write key info
-            for (int i = 0; i < _animKeyInfo.Length; i++)
+            for (int i = 0; i < mAnimKeyInfo.Length; i++)
             {
-                writer.Write((ushort)_animKeyInfo[i].KeyType);
-                writer.Write(_animKeyInfo[i].UnkMorph);
-                writer.Write(_animKeyInfo[i].BoneIndex);
+                writer.Write((ushort)mAnimKeyInfo[i].KeyType);
+                writer.Write(mAnimKeyInfo[i].UnkMorph);
+                writer.Write(mAnimKeyInfo[i].BoneIndex);
             }
 
             // Calculate anim pointer table size
@@ -159,7 +159,7 @@
             int[] animPointers = new int[header.numAnims];
             for (int i = 0; i < animPointers.Length; i++)
             {
-                if (_anims[i] == null)
+                if (mAnims[i] == null)
                 {
                     animPointers[i] = 0;
                 }
@@ -168,7 +168,7 @@
                     animPointers[i] = (int)((animPointerBase - DATA_START_ADDRESS) - posFileStart);
 
                     writer.Seek(animPointerBase, SeekOrigin.Begin);
-                    _anims[i].Write(writer);
+                    mAnims[i].Write(writer);
                     animPointerBase = (int)writer.GetPosition();
                 }
             }
@@ -177,7 +177,7 @@
             writer.Seek(posAnimPointerTable, SeekOrigin.Begin);
             for (int i = 0; i < animPointers.Length; i++)
             {
-                if (_anims[i] != null)
+                if (mAnims[i] != null)
                 {
                     addressList.Add((int)(writer.GetPosition() - posFileStart));
                     writer.Write(animPointers[i]);
@@ -207,18 +207,18 @@
             writer.AlignPosition(64);
         }
 
-        private void InternalRead(BinaryReader reader)
+        internal void Read(BinaryReader reader)
         {
             int posFileStart = (int)reader.BaseStream.Position;
             MT00Header header = reader.ReadStructure<MT00Header>();
 
-            _animKeyInfo = reader.ReadStructures<ABKeyInfo>(header.numKeys);
+            mAnimKeyInfo = reader.ReadStructures<AbKeyInfo>(header.numKeys);
 
             reader.BaseStream.Seek(posFileStart + DATA_START_ADDRESS + header.animPointerTableOffset, SeekOrigin.Begin);
             int[] animPointers = reader.ReadInt32Array(header.numAnims);
 
-            _anims = new ABAnimation[header.numAnims];
-            for (int i = 0; i < _anims.Length; i++)
+            mAnims = new AbAnimation[header.numAnims];
+            for (int i = 0; i < mAnims.Length; i++)
             {
                 if (animPointers[i] == 0)
                 {
@@ -227,7 +227,7 @@
                 }
 
                 reader.BaseStream.Seek(posFileStart + DATA_START_ADDRESS + animPointers[i], SeekOrigin.Begin);
-                _anims[i] = new ABAnimation(header.numKeys, reader);
+                mAnims[i] = new AbAnimation(header.numKeys, reader);
             }
         }
     }

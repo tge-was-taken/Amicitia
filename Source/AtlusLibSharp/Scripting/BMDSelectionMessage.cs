@@ -6,27 +6,27 @@
 
     using AtlusLibSharp.Utilities;
 
-    public class BMDSelectionMessage : BMDMessage
+    public class BmdSelectionMessage : BmdMessage
     {
-        private ushort _field18;
+        private ushort mField18;
 
-        public override BMDMessageType MessageType
+        public override BmdMessageType MessageType
         {
-            get { return BMDMessageType.Selection; }
+            get { return BmdMessageType.Selection; }
         }
 
-        internal BMDSelectionMessage(BinaryReader reader, int fp)
+        internal BmdSelectionMessage(BinaryReader reader, int fp)
         {
             InternalRead(reader, fp);
         }
 
-        internal BMDSelectionMessage() { }
+        internal BmdSelectionMessage() { }
 
         internal override void InternalWrite(BinaryWriter writer, ref List<int> addressList, int fp)
         {
             // Write header fields
-            writer.WriteCString(name, NAME_LENGTH);
-            writer.Write(_field18);
+            writer.WriteCString(name, NameLength);
+            writer.Write(mField18);
             writer.Write((ushort)DialogCount);
             
             // unknown zero
@@ -51,7 +51,7 @@
             long pageDataStart = writer.BaseStream.Position;
             for (int i = 0; i < DialogCount; i++)
             {
-                pagePointerTable[i] = (int)writer.BaseStream.Position - BMDFile.DATA_START_ADDRESS - fp;
+                pagePointerTable[i] = (int)writer.BaseStream.Position - BmdFile.DataStartAddress - fp;
                 dialogs[i].InternalWrite(writer);
             }
 
@@ -71,11 +71,11 @@
 
         private void InternalRead(BinaryReader reader, int fp)
         {
-            name = reader.ReadCString(NAME_LENGTH);
-            _field18 = reader.ReadUInt16();
+            name = reader.ReadCString(NameLength);
+            mField18 = reader.ReadUInt16();
             ushort numChoices = reader.ReadUInt16();
 
-            if (_field18 != 0)
+            if (mField18 != 0)
             {
                 throw new NotImplementedException("_unk0x18 is not zero!");
             }
@@ -86,11 +86,11 @@
             int[] pagePointerTable = reader.ReadInt32Array(numChoices);
             int pageDataLength = reader.ReadInt32();
 
-            dialogs = new BMDDialog[numChoices];
+            dialogs = new BmdDialog[numChoices];
             for (int i = 0; i < numChoices; i++)
             {
-                reader.BaseStream.Seek(fp + BMDFile.DATA_START_ADDRESS + pagePointerTable[i], SeekOrigin.Begin);
-                dialogs[i] = new BMDDialog(reader);
+                reader.BaseStream.Seek(fp + BmdFile.DataStartAddress + pagePointerTable[i], SeekOrigin.Begin);
+                dialogs[i] = new BmdDialog(reader);
             }
         }
     }

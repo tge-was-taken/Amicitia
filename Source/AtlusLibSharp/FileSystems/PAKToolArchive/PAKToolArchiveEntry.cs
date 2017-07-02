@@ -6,34 +6,34 @@
     /// <summary>
     /// Class representing an entry in a PAKToolFile instance.
     /// </summary>
-    public class PAKToolArchiveEntry
+    public class PakToolArchiveEntry : IArchiveEntry
     {
         internal const int MAX_NAME_LENGTH = 252;
-        private string _name;
+        private string mName;
 
         /**********************/
         /**** Constructors ****/
         /**********************/
 
-        public PAKToolArchiveEntry(string filepath)
+        public PakToolArchiveEntry(string filepath)
         {
             Name = Path.GetFileName(filepath);
             Data = File.ReadAllBytes(filepath);
         }
 
-        public PAKToolArchiveEntry(string name, byte[] data)
+        public PakToolArchiveEntry(string name, byte[] data)
         {
             Name = name;
             Data = data;
         }
 
-        public PAKToolArchiveEntry(string name, MemoryStream stream)
+        public PakToolArchiveEntry(string name, MemoryStream stream)
         {
             Name = name;
             Data = stream.ToArray();
         }
 
-        internal PAKToolArchiveEntry(BinaryReader reader)
+        internal PakToolArchiveEntry(BinaryReader reader)
         {
             InternalRead(reader);
         }
@@ -49,19 +49,24 @@
         {
             get
             {
-                return _name;
+                return mName;
             }
             set
             {
                 if (value.Length > MAX_NAME_LENGTH)
                 {
-                    _name = _name.Remove(MAX_NAME_LENGTH - 1);
+                    mName = mName.Remove(MAX_NAME_LENGTH - 1);
                 }
                 else
                 {
-                    _name = value;
+                    mName = value;
                 }
             }
+        }
+
+        IArchiveEntry IArchiveEntry.Create(byte[] data, string name)
+        {
+            return new PakToolArchiveEntry(name, data);
         }
 
         /// <summary>
@@ -83,7 +88,7 @@
 
         internal void InternalWrite(BinaryWriter writer)
         {
-            writer.WriteCString(_name, MAX_NAME_LENGTH);
+            writer.WriteCString(mName, MAX_NAME_LENGTH);
             writer.Write(DataLength);
             writer.Write(Data);
             writer.AlignPosition(64);
@@ -91,7 +96,7 @@
 
         private void InternalRead(BinaryReader reader)
         {
-            _name = reader.ReadCString(MAX_NAME_LENGTH);
+            mName = reader.ReadCString(MAX_NAME_LENGTH);
             int dataLength = reader.ReadInt32();
 
             if (dataLength > reader.BaseStream.Length || dataLength < 0)

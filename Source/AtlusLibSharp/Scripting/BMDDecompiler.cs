@@ -3,20 +3,20 @@ using System.IO;
 
 namespace AtlusLibSharp.Scripting
 {
-    public static class BMDDecompiler
+    public static class BmdDecompiler
     {
-        private delegate string DecompileFunc(BMDFunctionToken func);
+        private delegate string DecompileFunc(BmdFunctionToken func);
 
-        private static Dictionary<BMDMessageType, string> _msgTypeToKeyword = new Dictionary<BMDMessageType, string>()
+        private static Dictionary<BmdMessageType, string> _msgTypeToKeyword = new Dictionary<BmdMessageType, string>()
         {
-            { BMDMessageType.Standard, "messagebox" },
-            { BMDMessageType.Selection, "selection" }
+            { BmdMessageType.Standard, "messagebox" },
+            { BmdMessageType.Selection, "selection" }
         };
 
-        private static Dictionary<BMDMessageType, string> _msgTypeToPageKeyword = new Dictionary<BMDMessageType, string>()
+        private static Dictionary<BmdMessageType, string> _msgTypeToPageKeyword = new Dictionary<BmdMessageType, string>()
         {
-            { BMDMessageType.Standard, "dialog" },
-            { BMDMessageType.Selection, "choice" }
+            { BmdMessageType.Standard, "dialog" },
+            { BmdMessageType.Selection, "choice" }
         };
 
         private static Dictionary<uint, DecompileFunc> _msgFuncToDecDelegateP4 = new Dictionary<uint, DecompileFunc>()
@@ -27,22 +27,22 @@ namespace AtlusLibSharp.Scripting
             { 3 << 16 | 1, DecFuncVplay },
         };
 
-        public static void Decompile(BMDFile bmd, string path)
+        public static void Decompile(BmdFile bmd, string path)
         {
             using (StreamWriter writer = new StreamWriter(path))
             {
-                foreach (BMDMessage dlg in bmd.Messages)
+                foreach (BmdMessage dlg in bmd.Messages)
                 {
                     DecompileMessage(writer, dlg);
                 }
             }
         }
 
-        private static void DecompileMessage(StreamWriter writer, BMDMessage msg)
+        private static void DecompileMessage(StreamWriter writer, BmdMessage msg)
         {
             writer.WriteLine("\n{0} {1}", _msgTypeToKeyword[msg.MessageType], msg.Name);
 
-            foreach (BMDDialog dlg in msg.Dialogs)
+            foreach (BmdDialog dlg in msg.Dialogs)
             {
                 writer.Write("\n[{0}]\n", _msgTypeToPageKeyword[msg.MessageType]);
                 DecompileDialog(writer, dlg);
@@ -50,16 +50,16 @@ namespace AtlusLibSharp.Scripting
             }
         }
 
-        private static void DecompileDialog(StreamWriter writer, BMDDialog dlg)
+        private static void DecompileDialog(StreamWriter writer, BmdDialog dlg)
         {
             bool lastLineWasNoNewlineFunc = false;
             bool lastLineWasText = false;
 
-            foreach (BMDDialogToken token in dlg.Tokens)
+            foreach (BmdDialogToken token in dlg.Tokens)
             {
                 switch (token.Type)
                 {
-                    case BMDDialogTokenType.Text:
+                    case BmdDialogTokenType.Text:
                         {
                             if (!lastLineWasText)
                             {
@@ -69,9 +69,9 @@ namespace AtlusLibSharp.Scripting
                             writer.Write(token.ToString());
                         }
                         break;
-                    case BMDDialogTokenType.Function:
+                    case BmdDialogTokenType.Function:
                         {
-                            string funcName = GetFuncString((BMDFunctionToken)token);
+                            string funcName = GetFuncString((BmdFunctionToken)token);
 
                             if (lastLineWasText)
                             {
@@ -95,12 +95,12 @@ namespace AtlusLibSharp.Scripting
                         break;
 
                     default:
-                        throw new InvalidDataException("Unexpected page token type!");
+                        throw new InvalidDataException("Unexpected page token id!");
                 }
             }
         }
         
-        private static string GetFuncString(BMDFunctionToken func)
+        private static string GetFuncString(BmdFunctionToken func)
         {
             /*
             DecompileFunc decFunc;
@@ -116,22 +116,22 @@ namespace AtlusLibSharp.Scripting
             return func.ToString();
         }
 
-        private static string DecFuncWait(BMDFunctionToken func)
+        private static string DecFuncWait(BmdFunctionToken func)
         {
             return "wait";
         }
 
-        private static string DecFuncPname(BMDFunctionToken func)
+        private static string DecFuncPname(BmdFunctionToken func)
         {
             return "pname";
         }
 
-        private static string DecFuncBustup(BMDFunctionToken func)
+        private static string DecFuncBustup(BmdFunctionToken func)
         {
-            return string.Format("bup {0} {1} {2}", func.Parameters[0]-1, func.Parameters[2]-1, func.Parameters[6]-1);
+            return $"bup {func.Parameters[0] - 1} {func.Parameters[2] - 1} {func.Parameters[6] - 1}";
         }
 
-        private static string DecFuncVplay(BMDFunctionToken func)
+        private static string DecFuncVplay(BmdFunctionToken func)
         {
             return string.Format("vplay {0} {1} {2}", func.Parameters[0], func.Parameters[1], func.Parameters[6], func.Parameters[7]);
         }

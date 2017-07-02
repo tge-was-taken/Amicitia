@@ -3,13 +3,13 @@
     using System.IO;
     using AtlusLibSharp.Utilities;
 
-    public class SPRKeyFrame
+    public class SprKeyFrame
     {
         // Private Fields
         private int _unk0x00;
-        private string _comment;
-        private int _textureIndex;
-        private int _unk0x18;   // some sort of type?
+        private string mComment;
+        private int mTextureIndex;
+        private int _unk0x18;   // some sort of id?
         private int _unk0x1C;
         private int _unk0x20;
         private int _unk0x24;
@@ -38,22 +38,40 @@
 
         public string Comment
         {
-            get { return _comment; }
-            set { _comment = value; }
+            get { return mComment; }
+            set { mComment = value; }
+        }
+
+        public int TextureIndex
+        {
+            get { return mTextureIndex; }
+            set { mTextureIndex = value; }
+        }
+
+        public SprKeyFrame(string path)
+        {
+            using (var reader = new BinaryReader(File.OpenRead(path)))
+                Read(reader);
         }
 
         // Constructors
-        internal SPRKeyFrame(BinaryReader reader)
+        internal SprKeyFrame(BinaryReader reader)
         {
-            InternalRead(reader);
+            Read(reader);
+        }
+
+        public void Save(string path)
+        {
+            using (var writer = new BinaryWriter(File.Create(path)))
+                Write(writer);
         }
 
         // Internal Methods
-        internal void InternalWrite(BinaryWriter writer)
+        internal void Write(BinaryWriter writer)
         {
             writer.Write(_unk0x00);
-            writer.WriteCString(_comment, 16);
-            writer.Write(_textureIndex);
+            writer.WriteCString(mComment, 16);
+            writer.Write(mTextureIndex);
             writer.Write(_unk0x18);
             writer.Write(_unk0x1C);
             writer.Write(_unk0x20);
@@ -83,11 +101,11 @@
         }
 
         // Private Methods
-        private void InternalRead(BinaryReader reader)
+        private void Read(BinaryReader reader)
         {
             _unk0x00 = reader.ReadInt32();
-            _comment = reader.ReadCString(16);
-            _textureIndex = reader.ReadInt32();
+            mComment = reader.ReadCString(16);
+            mTextureIndex = reader.ReadInt32();
             _unk0x18 = reader.ReadInt32();
             _unk0x1C = reader.ReadInt32();
             _unk0x20 = reader.ReadInt32();

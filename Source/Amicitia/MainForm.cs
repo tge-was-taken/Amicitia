@@ -1,59 +1,48 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
 using Amicitia.ResourceWrappers;
-using AtlusLibSharp.Utilities;
 using AtlusLibSharp.Graphics;
 using OpenTK;
 using System.Runtime.InteropServices;
-using Amicitia.ModelViewer;
 using AtlusLibSharp.Graphics.RenderWare;
 using System.Drawing;
+using System.Linq;
+using System.Numerics;
+using Amicitia.Utilities;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 
 namespace Amicitia
 {
     internal partial class MainForm : Form
     {
         //private static Rectangle _lastMainTreeViewSize;
-        private static MainForm _instance;
-        private ModelViewer.ModelViewer viewer;
+        private static MainForm mInstance;
+        private ModelViewer.ModelViewer mViewer;
 
         public static MainForm Instance
         {
-            get
-            {
-                return _instance;
-            }
+            get => mInstance;
             set
             {
-                if (_instance != null)
+                if (mInstance != null)
                 {
                     throw new Exception("Instance already exists!");
                 }
 
-                _instance = value;
+                mInstance = value;
             }
         }
 
-        public TreeView MainTreeView
-        {
-            get { return mainTreeView; }
-        }
+        public static TreeView MainTreeView => Instance.mainTreeView;
 
-        public PropertyGrid MainPropertyGrid
-        {
-            get { return mainPropertyGrid; }
-        }
+        public static PropertyGrid MainPropertyGrid => Instance.mainPropertyGrid;
 
-        public PictureBox MainPictureBox
-        {
-            get { return mainPictureBox; }
-        }
+        public static PictureBox MainPictureBox => Instance.mainPictureBox;
 
-        public GLControl GLControl
-        {
-            get { return glControl1; }
-        }
+        public static GLControl GLControl => Instance.glControl1;
 
         public MainForm()
         {
@@ -65,7 +54,7 @@ namespace Amicitia
         }
 
         // Events
-        private void MainForm_DragEnter(object sender, DragEventArgs e)
+        private void MainFormDragEnterEventHandler(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
@@ -73,22 +62,22 @@ namespace Amicitia
                 e.Effect = DragDropEffects.None;
         }
 
-        private void MainForm_DragDrop(object sender, DragEventArgs e)
+        private void MainFormDragDropEventHandler(object sender, DragEventArgs e)
         {
             string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop, false);
 
             if (filePaths.Length != 0)
             {
-                HandleFileOpenFromPath(filePaths[0]);
+                OpenFile(filePaths[0]);
             }
         }
 
-        private void MainTreeView_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+        private void MainTreeViewAfterLabelEditEventHandler(object sender, NodeLabelEditEventArgs e)
         {
             mainTreeView.LabelEdit = false;
         }
 
-        private void MainTreeView_KeyDown(object sender, KeyEventArgs e)
+        private void MainTreeViewKeyDownEventHandler(object sender, KeyEventArgs e)
         {
             if (e.Control)
             {
@@ -96,63 +85,111 @@ namespace Amicitia
             }
         }
 
-        private void MainTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        private void MainTreeViewAfterSelectEventHandler(object sender, TreeViewEventArgs e)
         {
             // hide the picture box
             mainPictureBox.Visible = false;
             glControl1.Visible = false;
-            ResourceWrapper res = mainTreeView.SelectedNode as ResourceWrapper;
+            IResourceWrapper res = mainTreeView.SelectedNode as IResourceWrapper;
 
-            mainPropertyGrid.SelectedObject = res;
-
-            if (res == null)
+            if ( res == null )
             {
-                viewer.DeleteScene();
                 return;
             }
 
-            if(res.IsModelResource == true)
+            try
             {
-                glControl1.Visible = true;
+                mainPropertyGrid.SelectedObject = res;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                mainPropertyGrid.SelectedObject = res;
+            }
 
-                if (res.WrappedObject != viewer.LoadedScene)
+            if (mViewer != null)
+            {
+                if (res.FileType == SupportedFileType.RmdScene || res.FileType == SupportedFileType.RwClumpNode || res.FileType == SupportedFileType.RwGeometryNode || res.FileType == SupportedFileType.RwAtomicNode)
                 {
+                    glControl1.Visible = true;
+
                     try
                     {
-                        viewer.DeleteScene();
-                        viewer.LoadScene(res.WrappedObject as RMDScene);
-                        glControl1.Focus();
-                        glControl1.Invalidate();
+                        mViewer.DeleteScene();
+
+                        if ( res.FileType == SupportedFileType.RmdScene )
+                        {
+                            mViewer.LoadScene( res.Resource as RmdScene );
+                        }
+                        else if ( res.FileType == SupportedFileType.RwClumpNode )
+                        {
+                            var model = ( RwClumpNode )res.Resource;
+                            var scene = model.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
+                            if ( scene != null && scene.TextureDictionary != null )
+                                mViewer.LoadTextures( scene.TextureDictionary );
+
+                            mViewer.LoadModel( model );
+                        }
+                        else if ( res.FileType == SupportedFileType.RwGeometryNode )
+                        {
+                            var geometry = ( RwGeometryNode )res.Resource;
+                            var scene = geometry.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
+                            if ( scene != null && scene.TextureDictionary != null )
+                                mViewer.LoadTextures( scene.TextureDictionary );
+
+                            mViewer.LoadGeometry( geometry, Matrix4x4.Identity );
+                        }
+                        else if ( res.FileType == SupportedFileType.RwAtomicNode )
+                        {
+                            var atomicNode = ( RwAtomicNode )res.Resource;
+                            var clump = atomicNode.FindParentNode( RwNodeId.RwClumpNode ) as RwClumpNode;
+                            var geometry = clump.GeometryList[atomicNode.GeometryIndex];
+                            var frame = clump.FrameList[atomicNode.FrameIndex];
+
+                            var scene = atomicNode.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
+                            if ( scene != null && scene.TextureDictionary != null )
+                                mViewer.LoadTextures( scene.TextureDictionary );
+
+                            mViewer.LoadGeometry( geometry, frame.WorldTransform );
+                        }
                     }
-                    catch (Exception ex)
+                    catch ( Exception ex )
                     {
-                        Console.WriteLine(ex.Message);
+                        Console.WriteLine( ex.Message );
                         //throw;
                     }
+
+                    glControl1.Focus();
+                    glControl1.Invalidate();
+                    glControl1.Update();
                 }
-            }
-            else
-            {
-                viewer.DeleteScene();
+                else
+                {
+                    mViewer.DeleteScene();
+                }
             }
 
             // Check if the resource is a texture
-            if (res.IsImageResource == true)
+            if (res.Resource is ITextureFile)
             {
                 // Unhide the picture box if we have a picture selected
                 mainPictureBox.Visible = true;
-                mainPictureBox.Image = ((ITextureFile)res.WrappedObject).GetBitmap();
+                mainPictureBox.Image = ((ITextureFile)res.Resource).GetBitmap();
             }
         }
 
-        private void MainTreeView_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void MainTreeViewNodeMouseClickEventHandler(object sender, TreeNodeMouseClickEventArgs e)
         {
             // Setting this will make all mouse clicks select a node, as opposed to only left clicks
             mainTreeView.SelectedNode = e.Node;
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenToolStripMenuItemClickEventHandler(object sender, EventArgs e)
         {
+            // hide file dropdown
+            fileToolStripMenuItem.HideDropDown();
+
+            using ( var centeringService = new DialogCenteringService( this ) )
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.Filter = SupportedFileManager.FileFilter;
@@ -163,21 +200,37 @@ namespace Amicitia
                     return;
                 }
 
-                HandleFileOpenFromPath(openFileDlg.FileName);
+                OpenFile( openFileDlg.FileName);
             }
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveToolStripMenuItemClickEventHandler(object sender, EventArgs e)
         {
-            if (mainTreeView.Nodes.Count != 0)
+            if ( mainTreeView.Nodes.Count != 0 )
             {
-                ((ResourceWrapper)mainTreeView.TopNode).Export(sender, e);
+                var wrapper = ( IResourceWrapper)mainTreeView.Nodes[0];
+                var path = openToolStripMenuItem.DropDownItems[openToolStripMenuItem.DropDownItems.Count - 1].Text;
+                wrapper.Export( path, wrapper.FileType );
+
+                using (var centeringService = new DialogCenteringService(this))
+                    MessageBox.Show( "File has been saved successfully.", "Success" );
+            }
+        }
+
+        private void SaveAsToolStripMenuItemClickEventHandler( object sender, EventArgs e )
+        {
+            if ( mainTreeView.Nodes.Count != 0 )
+            {
+                ( ( IResourceWrapper )mainTreeView.Nodes[0] ).Export();
+
+                using ( var centeringService = new DialogCenteringService( this ) )
+                    MessageBox.Show( "File has been saved successfully.", "Success" );
             }
         }
 
         internal void UpdateReferences()
         {
-            MainTreeView_AfterSelect(this, new TreeViewEventArgs(mainTreeView.SelectedNode));
+            MainTreeViewAfterSelectEventHandler(this, new TreeViewEventArgs(mainTreeView.SelectedNode));
         }
 
         // Initializer
@@ -186,108 +239,56 @@ namespace Amicitia
             // this
             Text = Program.TitleString;
             Instance = this;
-            DragDrop += MainForm_DragDrop;
-            DragEnter += MainForm_DragEnter;
-            //MouseMove += MainForm_MouseMove;
-            //_lastMainTreeViewSize = mainTreeView.Bounds;
+            DragDrop += MainFormDragDropEventHandler;
+            DragEnter += MainFormDragEnterEventHandler;
 
             // mainTreeView
-            mainTreeView.AfterSelect += MainTreeView_AfterSelect;
-            mainTreeView.KeyDown += MainTreeView_KeyDown;
-            mainTreeView.AfterLabelEdit += MainTreeView_AfterLabelEdit;
-            mainTreeView.NodeMouseClick += MainTreeView_NodeMouseClick;
+            mainTreeView.AfterSelect += MainTreeViewAfterSelectEventHandler;
+            mainTreeView.KeyDown += MainTreeViewKeyDownEventHandler;
+            mainTreeView.AfterLabelEdit += MainTreeViewAfterLabelEditEventHandler;
+            mainTreeView.NodeMouseClick += MainTreeViewNodeMouseClickEventHandler;
             //mainTreeView.SizeChanged += MainTreeView_SizeChanged;
             
             // mainPictureBox
             mainPictureBox.Visible = false;
 
             // mainPropertyGrid
+            //mainPropertyGrid.PropertySort = PropertySort.Categorized;
             mainPropertyGrid.PropertySort = PropertySort.NoSort;
+            mainPropertyGrid.PropertyValueChanged += ( s, e ) => MainTreeViewAfterSelectEventHandler(s, new TreeViewEventArgs(MainTreeView.SelectedNode));
         }
-
-        /*
-        private void MainForm_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.X == mainPictureBox.Location.X + mainPictureBox.Size.Width)
-            {
-                Cursor.Current = Cursors.SizeWE;
-            }
-        }
-
-        private void MainTreeView_SizeChanged(object sender, EventArgs e)
-        {
-            float widthDiff = mainTreeView.Bounds.Width - _lastMainTreeViewSize.Width;
-
-            MoveDockedObject(mainPictureBox, (int)widthDiff * 2, 0);
-            MoveDockedObject(mainPropertyGrid, (int)widthDiff * 2, 0);
-
-            if (mainPictureBox.Bounds.IntersectsWith(mainTreeView.Bounds) || mainPropertyGrid.Bounds.IntersectsWith(mainTreeView.Bounds))
-            {
-                
-                MoveDockedObject(mainPictureBox, -2, 0);
-                MoveDockedObject(mainPropertyGrid, -2, 0);
-                
-            }
-
-            _lastMainTreeViewSize = mainTreeView.Bounds;
-        }
-
-        private void MoveDockedObject(Control control, int width, int height)
-        {
-            Rectangle old = control.Bounds;
-            old.X += width;
-            old.Y += height;
-            control.Bounds = old;
-        }
-        */
 
         // Handlers
         private void HandleTreeViewCtrlShortcuts(Keys keys)
         {
-            ResourceWrapper res = (ResourceWrapper)mainTreeView.SelectedNode;
+            bool handled = false;
 
-            // Move up
-            if (keys.HasFlagUnchecked(Keys.Up))
+            foreach ( ToolStripItem item in mainMenuStrip.Items )
             {
-                if (res.CanMove)
+                var menuItem = item as ToolStripMenuItem;
+                if ( menuItem != null )
                 {
-                    res.MoveUp(this, EventArgs.Empty);
+                    if (menuItem.ShortcutKeys.HasFlag(keys))
+                    {
+                        menuItem.PerformClick();
+                        handled = true;
+                    }
                 }
             }
 
-            // Move down
-            else if (keys.HasFlagUnchecked(Keys.Down))
-            {
-                if (res.CanMove)
-                {
-                    res.MoveDown(this, EventArgs.Empty);
-                }
-            }
+            if ( handled )
+                return;
 
-            // Delete
-            else if (keys.HasFlagUnchecked(Keys.Delete))
+            if (mainTreeView.SelectedNode != null && mainTreeView.SelectedNode.ContextMenuStrip != null)
             {
-                if (res.CanDelete)
+                foreach (ToolStripItem item in mainTreeView.SelectedNode.ContextMenuStrip.Items)
                 {
-                    res.Delete(this, EventArgs.Empty);
-                }
-            }
-
-            // Replace
-            else if (keys.HasFlagUnchecked(Keys.R))
-            {
-                if (res.CanReplace)
-                {
-                    res.Replace(this, EventArgs.Empty);
-                }
-            }
-
-            // Rename
-            else if (keys.HasFlagUnchecked(Keys.E))
-            {
-                if (res.CanRename)
-                {
-                    res.Export(this, EventArgs.Empty);
+                    var menuItem = item as ToolStripMenuItem;
+                    if (menuItem != null)
+                    {
+                        if (menuItem.ShortcutKeys.HasFlag(keys))
+                            menuItem.PerformClick();
+                    }
                 }
             }
         }
@@ -295,11 +296,11 @@ namespace Amicitia
         private void ClearForm()
         {
             // destroy the model scene if it's still loaded
-            if (viewer.IsSceneReady == true)
-                viewer.DeleteScene();
+            if (mViewer != null)
+                mViewer.DeleteScene();
 
             // Hide the picture box so a possibly last selected image doesn't stay visible
-            if (mainPictureBox.Visible == true)
+            if (mainPictureBox.Visible)
             {
                 mainPictureBox.Visible = false;
             }
@@ -311,10 +312,10 @@ namespace Amicitia
             }
         }
 
-        private void HandleFileOpenFromPath(string filePath)
+        private void OpenFile(string path)
         {
             // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
-            int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(filePath);
+            int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(path);
 
             if (supportedFileIndex == -1)
             {
@@ -324,22 +325,22 @@ namespace Amicitia
             // clear the form of loaded resources
             ClearForm();
 
-            TreeNode treeNode = null;
+            TreeNode treeNode;
 
 #if !DEBUG
             try
             {
 #endif
                 // Get the resource from the factory and it to the tree view
-                treeNode = ResourceFactory.GetResource(
-                    Path.GetFileName(filePath),
-                    File.OpenRead(filePath), supportedFileIndex);
+                using (var fileStream = File.OpenRead(path))
+                    treeNode = (TreeNode)ResourceWrapperFactory.GetResourceWrapper(Path.GetFileName(path), fileStream, supportedFileIndex);
 #if !DEBUG
             }
             catch (InvalidDataException)
             {
-                MessageBox.Show("Can't open this file format.", "Open file error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                using (var centeringService = new DialogCenteringService(this))
+                    MessageBox.Show("Can't open this file format.", "Open file error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
                 return;
             }
 #endif
@@ -350,21 +351,35 @@ namespace Amicitia
                 mainTreeView.SelectedNode = mainTreeView.TopNode;
             }
             mainTreeView.EndUpdate();
+
+            AddRecentlyOpenedFile(path);
         }
 
-        private void glControl1_Load(object sender, EventArgs e)
+        private void AddRecentlyOpenedFile(string path)
+        {
+            var item = openToolStripMenuItem.DropDownItems.Add(path);
+            item.Click += (o, s) => { OpenFile(path); };
+        }
+
+        private void GlControl1_Load(object sender, EventArgs e)
         {
             glControl1.Visible = false;
-            viewer = new ModelViewer.ModelViewer(glControl1);
+
+            if (ModelViewer.ModelViewer.IsSupported)
+                mViewer = new ModelViewer.ModelViewer(glControl1);
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            viewer.DisposeViewer();
+            if (mViewer != null)
+                mViewer.DisposeViewer();
         }
 
-        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OptionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (mViewer == null)
+                return;
+
             Form options = new Form();
             Label colorlab = new Label();
             Label more = new Label();
@@ -379,10 +394,9 @@ namespace Amicitia
             picker.Width /= 3;
             picker.Click += (object s, EventArgs ev) =>
             {
-                ColorDialog d = new ColorDialog();
-                d.Color = viewer.BGColor;
+                ColorDialog d = new ColorDialog {Color = mViewer.BgColor};
                 d.ShowDialog(options);
-                viewer.BGColor = d.Color;
+                mViewer.BgColor = d.Color;
             };
             colorlab.Text = "Model viewer background color";
             colorlab.Location = new Point(16, 20);
@@ -403,7 +417,7 @@ namespace Amicitia
 
         public static bool GetAsyncKey(Keys key)
         {
-            if (MainForm.Instance.GLControl.Focused)
+            if (MainForm.GLControl.Focused)
                 return GetAsyncKeyState(key) != 0;
             else
                 return false;

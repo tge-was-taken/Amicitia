@@ -51,7 +51,7 @@
             int fb = triangleStrips[1];
             int fc = 0;
 
-            for (int i = 2; i < numTris; i++)
+            for (int i = 2; i < triangleStrips.Length; i++)
             {
                 fc = triangleStrips[i];
                 flip = !flip;

@@ -6,7 +6,7 @@
     /// <summary>
     /// A RenderWare triangle: Vertex indices that together form a triangle along with the specified material index for that triangle.
     /// </summary>
-    public struct RWTriangle
+    public struct RwTriangle
     {
         /// <summary>
         /// Index of the third vertex.
@@ -21,7 +21,7 @@
         /// <summary>
         /// Index of the material applied to this triangle.
         /// </summary>
-        public short MatID;
+        public short MatId;
 
         /// <summary>
         /// Index of the first vertex.
@@ -34,24 +34,24 @@
         /// <param name="a">First vertex index.</param>
         /// <param name="b">Second vertex index.</param>
         /// <param name="c">Third vertex index.</param>
-        /// <param name="matID">Material index.</param>
-        public RWTriangle(ushort a, ushort b, ushort c, short matID)
+        /// <param name="matId">MaterialNode index.</param>
+        public RwTriangle(ushort a, ushort b, ushort c, short matId)
         {
             A = a;
             B = b;
             C = c;
-            MatID = matID;
+            MatId = matId;
         }
 
         /// <summary>
         /// Initialize an instance of this structure by reading it from the given <see cref="BinaryReader"/>.
         /// </summary>
         /// <param name="reader">The <see cref="BinaryReader"/> to read the structure from.</param>
-        internal RWTriangle(BinaryReader reader)
+        internal RwTriangle(BinaryReader reader)
         {
             C = reader.ReadUInt16();
             B = reader.ReadUInt16();
-            MatID = reader.ReadInt16();
+            MatId = reader.ReadInt16();
             A = reader.ReadUInt16();
         }
 
@@ -105,7 +105,7 @@
         {
             writer.Write(C);
             writer.Write(B);
-            writer.Write(MatID);
+            writer.Write(MatId);
             writer.Write(A);
         }
     }

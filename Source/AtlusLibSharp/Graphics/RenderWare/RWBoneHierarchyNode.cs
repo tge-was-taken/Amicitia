@@ -1,47 +1,35 @@
 ﻿using System.IO;
+using AtlusLibSharp.IO;
 
 namespace AtlusLibSharp.Graphics.RenderWare
 {
-    public struct RWBoneHierarchyNode
+    public class RwHAnimNodeInfo : BinaryBase
     {
-        private int _nameID;
-        private int _hIndex;
-        private RWHierarchyNodeFlag _flag;
+        public int NodeId { get; set; }
 
-        public int FrameNameID
+        public int Index { get; set; }
+
+        public RwHierarchyNodeFlag Flags { get; set; }
+
+        public RwHAnimNodeInfo(int nodeId, int index, RwHierarchyNodeFlag flags)
         {
-            get { return _nameID; }
+            NodeId = nodeId;
+            Index = index;
+            Flags = flags;
         }
 
-        public int HierarchyIndex
+        internal RwHAnimNodeInfo(BinaryReader reader)
         {
-            get { return _hIndex; }
+            NodeId = reader.ReadInt32();
+            Index = reader.ReadInt32();
+            Flags = (RwHierarchyNodeFlag)reader.ReadUInt32();
         }
 
-        public RWHierarchyNodeFlag Flags
+        internal override void Write(BinaryWriter writer)
         {
-            get { return _flag; }
-        }
-
-        public RWBoneHierarchyNode(int boneNameID, int hierarchyIndex, RWHierarchyNodeFlag flag)
-        {
-            _nameID = boneNameID;
-            _hIndex = hierarchyIndex;
-            _flag = flag;
-        }
-
-        internal RWBoneHierarchyNode(BinaryReader reader)
-        {
-            _nameID = reader.ReadInt32();
-            _hIndex = reader.ReadInt32();
-            _flag = (RWHierarchyNodeFlag)reader.ReadUInt32();
-        }
-
-        internal void InternalWrite(BinaryWriter writer)
-        {
-            writer.Write(_nameID);
-            writer.Write(_hIndex);
-            writer.Write((uint)_flag);
+            writer.Write(NodeId);
+            writer.Write(Index);
+            writer.Write((uint)Flags);
         }
     }
 }

@@ -2,14 +2,14 @@
 {
     using System.IO;
 
-    public class ABAnimation
+    public class AbAnimation
     {
         // Private fields
-        private int _numFrames;
-        private ABKey[] _keys;
+        private int mNumFrames;
+        private AbKey[] mKeys;
 
         // Constructors
-        internal ABAnimation(short numKeys, BinaryReader reader)
+        internal AbAnimation(short numKeys, BinaryReader reader)
         {
             InternalRead(numKeys, reader);
         }
@@ -17,19 +17,19 @@
         // Properties
         public int FrameCount
         {
-            get { return _numFrames; }
+            get { return mNumFrames; }
         }
 
-        public ABKey[] Keys
+        public AbKey[] Keys
         {
-            get { return _keys; }
+            get { return mKeys; }
         }
 
         // Methods
         internal void Write(BinaryWriter writer)
         {
-            writer.Write(_numFrames);
-            foreach (ABKey key in _keys)
+            writer.Write(mNumFrames);
+            foreach (AbKey key in mKeys)
             {
                 key.InternalWrite(writer);
             }
@@ -38,7 +38,7 @@
         internal int GetSize()
         {
             int size = sizeof(int);
-            foreach (ABKey key in _keys)
+            foreach (AbKey key in mKeys)
             {
                 size += key.GetSize();
             }
@@ -47,11 +47,11 @@
 
         private void InternalRead(short numKeys, BinaryReader reader)
         {
-            _numFrames = reader.ReadInt32();
-            _keys = new ABKey[numKeys];
+            mNumFrames = reader.ReadInt32();
+            mKeys = new AbKey[numKeys];
             for (int i = 0; i < numKeys; i++)
             {
-                _keys[i] = new ABKey(reader);
+                mKeys[i] = new AbKey(reader);
             }
         }
     }

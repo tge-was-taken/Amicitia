@@ -3,12 +3,12 @@
     using System.Collections.Generic;
     using System.IO;
 
-    public abstract class BMDMessage
+    public abstract class BmdMessage
     {
-        internal const int NAME_LENGTH = 24;
+        internal const int NameLength = 24;
 
         protected string name;
-        protected BMDDialog[] dialogs;
+        protected BmdDialog[] dialogs;
 
         public string Name
         {
@@ -16,7 +16,7 @@
             set { name = value; }
         }
 
-        public BMDDialog[] Dialogs
+        public BmdDialog[] Dialogs
         {
             get { return dialogs; }
             set { dialogs = value; }
@@ -27,9 +27,9 @@
             get { return dialogs.Length; }
         }
 
-        public abstract BMDMessageType MessageType { get; }
+        public abstract BmdMessageType MessageType { get; }
 
-        internal BMDMessage() { }
+        internal BmdMessage() { }
 
         internal abstract void InternalWrite(BinaryWriter writer, ref List<int> addressList, int fp);
     }

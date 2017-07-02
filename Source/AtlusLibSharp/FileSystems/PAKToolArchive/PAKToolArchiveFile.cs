@@ -1,4 +1,7 @@
-﻿namespace AtlusLibSharp.FileSystems.PAKToolArchive
+﻿using System.Linq;
+using System.Text;
+
+namespace AtlusLibSharp.FileSystems.PAKToolArchive
 {
     using System;
     using System.Collections.Generic;
@@ -12,7 +15,7 @@
     /// Used in Persona 3, 4 and later Atlus games as a generic file container.
     /// Other used extensions are *.F00, *.F01, *.P00, *.P01, *.BIN and others
     /// </summary>
-    public sealed class PAKToolArchiveFile : BinaryFileBase
+    public sealed class PakToolArchiveFile : BinaryBase, ISimpleArchiveFile
     {
         /**********************/
         /**** Constructors ****/
@@ -22,7 +25,7 @@
         /// Loads an archive from the given path.
         /// </summary>
         /// <param name="path">Path of the file to load.</param>
-        public PAKToolArchiveFile(string path) 
+        public PakToolArchiveFile(string path) 
         {
             using (FileStream stream = File.OpenRead(path))
             {
@@ -33,10 +36,10 @@
                 }
                 */
 
-                Entries = new List<PAKToolArchiveEntry>();
+                Entries = new List<PakToolArchiveEntry>();
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
-                    InternalRead(reader);
+                    Read(reader);
                 }
             }
         }
@@ -45,7 +48,7 @@
         /// Loads an archive from the stream.
         /// </summary>
         /// <param name="stream">Stream to load the archive from.</param>
-        public PAKToolArchiveFile(Stream stream)
+        public PakToolArchiveFile(Stream stream, bool leaveOpen = false)
         {
             /*
             if (!InternalVerifyFileType(stream))
@@ -54,10 +57,10 @@
             }
             */
 
-            Entries = new List<PAKToolArchiveEntry>();
-            using (BinaryReader reader = new BinaryReader(stream))
+            Entries = new List<PakToolArchiveEntry>();
+            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, leaveOpen))
             {
-                InternalRead(reader);
+                Read(reader);
             }
         }
 
@@ -65,22 +68,22 @@
         /// Create a new archive from a list of file paths representing archive entries.
         /// </summary>
         /// <param name="filepaths">List of file paths pointing to files to be loaded as entries.</param>
-        public PAKToolArchiveFile(IList<string> filepaths)
+        public PakToolArchiveFile(IList<string> filepaths)
         {
-            Entries = new List<PAKToolArchiveEntry>(filepaths.Count);
+            Entries = new List<PakToolArchiveEntry>(filepaths.Count);
 
             for (int i = 0; i < filepaths.Count; i++)
             {
-                Entries.Add(new PAKToolArchiveEntry(filepaths[i]));
+                Entries.Add(new PakToolArchiveEntry(filepaths[i]));
             }
         }
 
         /// <summary>
         /// Creates a new, empty archive.
         /// </summary>
-        public PAKToolArchiveFile()
+        public PakToolArchiveFile()
         {
-            Entries = new List<PAKToolArchiveEntry>();
+            Entries = new List<PakToolArchiveEntry>();
         }
 
         /********************/
@@ -95,10 +98,23 @@
             get { return Entries.Count; }
         }
 
+        ISimpleArchiveFile ISimpleArchiveFile.Create(IEnumerable<IArchiveEntry> entries)
+        {
+            var file = new PakToolArchiveFile();
+            foreach (var entry in entries)
+            {
+                file.Entries.Add(new PakToolArchiveEntry(entry.Name, entry.Data));
+            }
+
+            return file;
+        }
+
         /// <summary>
         /// Gets the list of archive entries.
         /// </summary>
-        public List<PAKToolArchiveEntry> Entries { get; }
+        public List<PakToolArchiveEntry> Entries { get; }
+
+        IEnumerable<IArchiveEntry> ISimpleArchiveFile.Entries => Entries;
 
         /*****************/
         /**** Methods ****/
@@ -109,31 +125,31 @@
         /// </summary>
         /// <param name="directorypath">Path to the directory containing the files to load as entries.</param>
         /// <returns>A newly created archive.</returns>
-        public static PAKToolArchiveFile Create(string directorypath)
+        public static PakToolArchiveFile Create(string directorypath)
         {
-            return new PAKToolArchiveFile(Directory.GetFiles(directorypath));
+            return new PakToolArchiveFile(Directory.GetFiles(directorypath));
         }
 
         /// <summary>
         /// Create a new archive file using a <see cref="ListArchiveFile"/>.
         /// </summary>
-        /// <param name="arc">The <see cref="ListArchiveFile"/> to load into the <see cref="PAKToolArchiveFile"/>.</param>
+        /// <param name="arc">The <see cref="ListArchiveFile"/> to load into the <see cref="PakToolArchiveFile"/>.</param>
         /// <returns>A newly created archive.</returns>
-        public static PAKToolArchiveFile Create(ListArchiveFile arc)
+        public static PakToolArchiveFile Create(ListArchiveFile arc)
         {
-            PAKToolArchiveFile pak = new PAKToolArchiveFile();
+            PakToolArchiveFile pak = new PakToolArchiveFile();
 
             for (int i = 0; i < arc.EntryCount; i++)
             {
-                ListArchiveFileEntry arcEntry = arc.Entries[i];
-                pak.Entries.Add(new PAKToolArchiveEntry(arcEntry.Name, arcEntry.Data));
+                ListArchiveEntry arcEntry = arc.Entries[i];
+                pak.Entries.Add(new PakToolArchiveEntry(arcEntry.Name, arcEntry.Data));
             }
 
             return pak;
         }
 
         /// <summary>
-        /// Verifies that the file at the path is a valid <see cref="PAKToolArchiveFile"/>.
+        /// Verifies that the file at the path is a valid <see cref="PakToolArchiveFile"/>.
         /// </summary>
         public static bool VerifyFileType(string path)
         {
@@ -141,35 +157,35 @@
         }
 
         /// <summary>
-        /// Verifies that the stream is of a valid <see cref="PAKToolArchiveFile"/>.
+        /// Verifies that the stream is of a valid <see cref="PakToolArchiveFile"/>.
         /// </summary>
         public static bool VerifyFileType(Stream stream)
         {
             return InternalVerifyFileType(stream);
         }
 
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
-            foreach (PAKToolArchiveEntry entry in Entries)
+            foreach (PakToolArchiveEntry entry in Entries)
             {
                 entry.InternalWrite(writer);
             }
 
             // Write terminator entry
-            writer.Write(0, PAKToolArchiveEntry.MAX_NAME_LENGTH + 4);
+            writer.Write(0, PakToolArchiveEntry.MAX_NAME_LENGTH + 4);
         }
 
         private static bool InternalVerifyFileType(Stream stream)
         {
             // check if the file is too small to be a proper pak file
-            if (stream.Length <= PAKToolArchiveEntry.MAX_NAME_LENGTH + 4)
+            if (stream.Length <= PakToolArchiveEntry.MAX_NAME_LENGTH + 4)
             {
                 return false;
             }
 
             // read some test data
-            byte[] testData = new byte[PAKToolArchiveEntry.MAX_NAME_LENGTH + 4];
-            stream.Read(testData, 0, PAKToolArchiveEntry.MAX_NAME_LENGTH + 4);
+            byte[] testData = new byte[PakToolArchiveEntry.MAX_NAME_LENGTH + 4];
+            stream.Read(testData, 0, PakToolArchiveEntry.MAX_NAME_LENGTH + 4);
             stream.Position = 0;
 
             // check if first byte is zero, if so then no name can be stored thus making the file corrupt
@@ -177,7 +193,7 @@
                 return false;
 
             bool nameTerminated = false;
-            for (int i = 0; i < PAKToolArchiveEntry.MAX_NAME_LENGTH; i++)
+            for (int i = 0; i < PakToolArchiveEntry.MAX_NAME_LENGTH; i++)
             {
                 if (testData[i] == 0x00)
                     nameTerminated = true;
@@ -188,7 +204,7 @@
                     return false;
             }
 
-            int testLength = BitConverter.ToInt32(testData, PAKToolArchiveEntry.MAX_NAME_LENGTH);
+            int testLength = BitConverter.ToInt32(testData, PakToolArchiveEntry.MAX_NAME_LENGTH);
 
             // sanity check, if the length of the first file is >= 100 mb, fail the test
             if (testLength >= (1024 * 1024 * 100) || testLength < 0)
@@ -199,10 +215,10 @@
             return true;
         }
 
-        private void InternalRead(BinaryReader reader)
+        private void Read(BinaryReader reader)
         {
             // Read first entry
-            PAKToolArchiveEntry entry = new PAKToolArchiveEntry(reader);
+            PakToolArchiveEntry entry = new PakToolArchiveEntry(reader);
 
             while (entry.DataLength != 0)
             {
@@ -215,7 +231,7 @@
                 }
 
                 // Read next entry
-                entry = new PAKToolArchiveEntry(reader);
+                entry = new PakToolArchiveEntry(reader);
             }
         }
     }

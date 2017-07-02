@@ -3,54 +3,54 @@ using System.IO;
 
 namespace AtlusLibSharp.Scripting
 {
-    public class BFCodeLabel
+    public class BfCodeLabel
     {
-        internal const int SIZE = 0x20;
+        internal const int Size = 0x20;
 
-        private string _name;
-        private uint _offset;
-        private ushort _id;
-        private int _opcodeIndex;
+        private string mName;
+        private uint mOffset;
+        private ushort mId;
+        private int mOpcodeIndex;
 
-        internal BFCodeLabel() { }
+        internal BfCodeLabel() { }
 
-        internal BFCodeLabel(BinaryReader reader)
+        internal BfCodeLabel(BinaryReader reader)
         {
-            _name = reader.ReadCString(24);
-            _offset = reader.ReadUInt32();
+            mName = reader.ReadCString(24);
+            mOffset = reader.ReadUInt32();
             int unused = reader.ReadInt32();
-            _opcodeIndex = (int)_offset;
+            mOpcodeIndex = (int)mOffset;
         }
 
         internal void InternalWrite(BinaryWriter writer)
         {
-            writer.WriteCString(_name, 24);
-            writer.Write(_offset);
+            writer.WriteCString(mName, 24);
+            writer.Write(mOffset);
             writer.Write(0);
         }
 
         public string Name
         {
-            get { return _name; }
-            set { _name = value; }
+            get { return mName; }
+            set { mName = value; }
         }
 
-        public int ID
+        public int Id
         {
-            get { return _id; }
-            internal set { _id = (ushort)value; }
+            get { return mId; }
+            internal set { mId = (ushort)value; }
         }
 
         public int OpcodeIndex
         {
-            get { return _opcodeIndex; }
-            internal set { _opcodeIndex = value; }
+            get { return mOpcodeIndex; }
+            internal set { mOpcodeIndex = value; }
         }
 
         internal uint Offset
         {
-            get { return _offset; }
-            set { _offset = value; }
+            get { return mOffset; }
+            set { mOffset = value; }
         }
     }
 }

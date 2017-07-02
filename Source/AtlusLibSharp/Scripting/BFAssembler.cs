@@ -6,11 +6,11 @@ using System.IO;
 
 namespace AtlusLibSharp.Scripting
 {
-    internal static class BFAssembler
+    internal static class BfAssembler
     {
-        internal static Dictionary<string, BFInstruction> ASMKeywordToBFInstruction = BFDisassembler.BFInstructionToASMKeyword.Reverse();
+        internal static Dictionary<string, BfInstruction> AsmKeywordToBfInstruction = BfDisassembler.BfInstructionToAsmKeyword.Reverse();
 
-        public static BFFile AssembleFromASMText(string path)
+        public static BfFile AssembleFromAsmText(string path)
         {
             using (StreamReader reader = new StreamReader(path))
             {
@@ -25,9 +25,9 @@ namespace AtlusLibSharp.Scripting
                 List<Tuple<string, int>> unresolvedProcs = new List<Tuple<string, int>>();
 
                 // code label and opcode lists
-                List<BFCodeLabel> procedures = new List<BFCodeLabel>();
-                List<BFCodeLabel> jumps = new List<BFCodeLabel>();
-                List<BFOpcode> opcodes = new List<BFOpcode>();
+                List<BfCodeLabel> procedures = new List<BfCodeLabel>();
+                List<BfCodeLabel> jumps = new List<BfCodeLabel>();
+                List<BfOpcode> opcodes = new List<BfOpcode>();
 
                 while (!reader.EndOfStream)
                 {
@@ -47,12 +47,12 @@ namespace AtlusLibSharp.Scripting
                     {
                         if (tokens[0].StartsWith("@")) // and the label is a jump label identifier
                         {
-                            jumps.Add(ParseASMLabel(lineIndex, tokens[0], jumpIndex, opIndex, '@', ':'));
+                            jumps.Add(ParseAsmLabel(lineIndex, tokens[0], jumpIndex, opIndex, '@', ':'));
                             jumpIndex++;
                         }
                         else // the label is a procedure identifier
                         {
-                            procedures.Add(ParseASMLabel(lineIndex, tokens[0], procIndex, opIndex, ':'));
+                            procedures.Add(ParseAsmLabel(lineIndex, tokens[0], procIndex, opIndex, ':'));
                             procIndex++;
                         }
                     }
@@ -60,11 +60,11 @@ namespace AtlusLibSharp.Scripting
                     {
                         // instruction without any procedures, throw an error
                         if (procedures.Count == 0)
-                            throw new BFASMParserException("Instruction defined at line {0} before any procedures", lineIndex + 1);
+                            throw new BfasmParserException("Instruction defined at line {0} before any procedures", lineIndex + 1);
 
-                        BFInstruction instr;
-                        BFOpcode op = null;
-                        bool isDefined = ASMKeywordToBFInstruction.TryGetValue(tokens[0].ToLowerInvariant(), out instr);
+                        BfInstruction instr;
+                        BfOpcode op = null;
+                        bool isDefined = AsmKeywordToBfInstruction.TryGetValue(tokens[0].ToLowerInvariant(), out instr);
 
                         if (!isDefined) // 'unk_XX' instruction expected
                         {
@@ -75,10 +75,10 @@ namespace AtlusLibSharp.Scripting
                             if (opNumStr.Length < 2 || !int.TryParse(opNumStr, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out opNumInt) ||
                                 !long.TryParse(tokens[1], out operand))
                             {
-                                throw new BFASMParserException("unk_XX", lineIndex + 1);
+                                throw new BfasmParserException("unk_XX", lineIndex + 1);
                             }
 
-                            op = new BFOpcode((ushort)opNumInt, 0, operand);
+                            op = new BfOpcode((ushort)opNumInt, 0, operand);
                         }
                         else // regular instruction expected
                         {
@@ -87,17 +87,17 @@ namespace AtlusLibSharp.Scripting
 
                             switch (instr)
                             {
-                                case BFInstruction.BeginProcedure:
-                                case BFInstruction.CallNative:
-                                case BFInstruction.CallProcedure:
-                                case BFInstruction.Jump:
-                                case BFInstruction.JumpIfFalse:
+                                case BfInstruction.BeginProcedure:
+                                case BfInstruction.CallNative:
+                                case BfInstruction.CallProcedure:
+                                case BfInstruction.Jump:
+                                case BfInstruction.JumpIfFalse:
                                     string strArg = tokens[1];
                                     int intArg;
 
                                     if (int.TryParse(strArg, out intArg)) // reference by id
                                     {
-                                        op = new BFOpcode(instr, intArg);
+                                        op = new BfOpcode(instr, intArg);
                                     }
                                     else // reference by name 
                                     {
@@ -105,19 +105,19 @@ namespace AtlusLibSharp.Scripting
                                     }
                                     break;
 
-                                case BFInstruction.PushFloat:
+                                case BfInstruction.PushFloat:
                                     op = ParseInstrWithDecimalLiteralArgs(instr, tokens, lineIndex);
                                     break;
 
-                                case BFInstruction.PushUInt16:
-                                case BFInstruction.PushVariable:
-                                case BFInstruction.SetVariable:
-                                case BFInstruction.PushUInt32:
+                                case BfInstruction.PushUInt16:
+                                case BfInstruction.PushVariable:
+                                case BfInstruction.SetVariable:
+                                case BfInstruction.PushUInt32:
                                     op = ParseInstrWithNumberLiteralArgs(instr, tokens, lineIndex);
                                     break;
 
                                 default:
-                                    op = new BFOpcode(instr, null); // opcode takes no operands, eg add, subtract, return
+                                    op = new BfOpcode(instr, null); // opcode takes no operands, eg add, subtract, return
                                     break;
                             }
                         }
@@ -125,7 +125,7 @@ namespace AtlusLibSharp.Scripting
                         // this shouldn't be possible
                         // but they said the same about the world being round
                         if (op == null)
-                            throw new BFASMParserException(instr, lineIndex + 1);
+                            throw new BfasmParserException(instr, lineIndex + 1);
 
                         opcodes.Add(op);
                         opIndex++;
@@ -136,100 +136,100 @@ namespace AtlusLibSharp.Scripting
                 ResolveLabelReferences(unresolvedJumps, jumps, opcodes);
                 ResolveLabelReferences(unresolvedProcs, procedures, opcodes);
 
-                return new BFFile(procedures.ToArray(), jumps.ToArray(), opcodes);
+                return new BfFile(procedures.ToArray(), jumps.ToArray(), opcodes);
             }
         }
 
-        private static BFCodeLabel ParseASMLabel(int lineIndex, string nameToken, int jumpIndex, int opIndex, params char[] splitChars)
+        private static BfCodeLabel ParseAsmLabel(int lineIndex, string nameToken, int jumpIndex, int opIndex, params char[] splitChars)
         {
-            BFCodeLabel label = new BFCodeLabel()
+            BfCodeLabel label = new BfCodeLabel()
             {
                 Name = nameToken.Split(splitChars, StringSplitOptions.RemoveEmptyEntries)[0],
-                ID = jumpIndex,
+                Id = jumpIndex,
                 OpcodeIndex = opIndex
             };
 
             if (label.Name.Length == 0)
-                throw new BFASMParserException("Label", lineIndex + 1);
+                throw new BfasmParserException("Label", lineIndex + 1);
 
             return label;
         }
 
-        private static void VerifyArgCount(BFInstruction instr, string[] tokens, int lineIndex)
+        private static void VerifyArgCount(BfInstruction instr, string[] tokens, int lineIndex)
         {
             switch (instr)
             {
-                case BFInstruction.PushUInt32:
-                case BFInstruction.PushFloat:
-                case BFInstruction.BeginProcedure:
-                case BFInstruction.CallNative:
-                case BFInstruction.CallProcedure:
-                case BFInstruction.Jump:
-                case BFInstruction.JumpIfFalse:
-                case BFInstruction.PushUInt16:
-                case BFInstruction.PushVariable:
-                case BFInstruction.SetVariable:
+                case BfInstruction.PushUInt32:
+                case BfInstruction.PushFloat:
+                case BfInstruction.BeginProcedure:
+                case BfInstruction.CallNative:
+                case BfInstruction.CallProcedure:
+                case BfInstruction.Jump:
+                case BfInstruction.JumpIfFalse:
+                case BfInstruction.PushUInt16:
+                case BfInstruction.PushVariable:
+                case BfInstruction.SetVariable:
                     if (tokens.Length < 2)
-                        throw new BFASMParserException(instr, lineIndex + 1);
+                        throw new BfasmParserException(instr, lineIndex + 1);
                     break;
             }
         }
 
-        private static BFOpcode ParseInstrWithNumberLiteralArgs(BFInstruction instr, string[] tokens, int lineIndex)
+        private static BfOpcode ParseInstrWithNumberLiteralArgs(BfInstruction instr, string[] tokens, int lineIndex)
         {
             long value;
 
             if (!long.TryParse(tokens[1], out value))
-                throw new BFASMParserException(instr, lineIndex + 1);
+                throw new BfasmParserException(instr, lineIndex + 1);
 
-            return new BFOpcode(instr, value);
+            return new BfOpcode(instr, value);
         }
 
-        private static BFOpcode ParseInstrWithDecimalLiteralArgs(BFInstruction instr, string[] tokens, int lineIndex)
+        private static BfOpcode ParseInstrWithDecimalLiteralArgs(BfInstruction instr, string[] tokens, int lineIndex)
         {
             float value;
 
             if (!float.TryParse(tokens[1], out value))
-                throw new BFASMParserException(instr, lineIndex + 1);
+                throw new BfasmParserException(instr, lineIndex + 1);
 
-            return new BFOpcode(instr, value);
+            return new BfOpcode(instr, value);
         }
 
-        private static BFOpcode ParseInstrWithStringLiteralArgs(
-            BFInstruction instr, string stringLiteral, int lineIndex, int opIndex,
+        private static BfOpcode ParseInstrWithStringLiteralArgs(
+            BfInstruction instr, string stringLiteral, int lineIndex, int opIndex,
             List<Tuple<string, int>> unresolvedProcs, List<Tuple<string, int>> unresolvedJumps)
         {
             switch (instr)
             {
-                case BFInstruction.BeginProcedure:
-                case BFInstruction.CallProcedure:
+                case BfInstruction.BeginProcedure:
+                case BfInstruction.CallProcedure:
                     unresolvedProcs.Add(Tuple.Create(stringLiteral, opIndex));
                     break;
 
-                case BFInstruction.CallNative:
-                    BFCallNativeType callType;
+                case BfInstruction.CallNative:
+                    BfCallNativeType callType;
 
                     if (!Enum.TryParse(stringLiteral, true, out callType))
-                        throw new BFASMParserException(instr, lineIndex + 1);
+                        throw new BfasmParserException(instr, lineIndex + 1);
 
-                    return new BFOpcode(instr, (int)callType);
+                    return new BfOpcode(instr, (int)callType);
 
-                case BFInstruction.Jump:
-                case BFInstruction.JumpIfFalse:
+                case BfInstruction.Jump:
+                case BfInstruction.JumpIfFalse:
                     string jumpLabelName = stringLiteral.Split(new char[] { '@', ':' }, StringSplitOptions.RemoveEmptyEntries)[0];
 
                     if (jumpLabelName.Length == 0)
-                        throw new BFASMParserException(instr, lineIndex + 1);
+                        throw new BfasmParserException(instr, lineIndex + 1);
 
                     unresolvedJumps.Add(Tuple.Create(jumpLabelName, opIndex));
                     break;
             }
 
             // actual operand value will be resolved later, so just set it to -1 for now
-            return new BFOpcode(instr, -1);
+            return new BfOpcode(instr, -1);
         }
 
-        private static void ResolveLabelReferences(List<Tuple<string, int>> unresolved, List<BFCodeLabel> labels, List<BFOpcode> opcodes)
+        private static void ResolveLabelReferences(List<Tuple<string, int>> unresolved, List<BfCodeLabel> labels, List<BfOpcode> opcodes)
         {
             for (int i = 0; i < unresolved.Count; i++)
             {
@@ -237,7 +237,7 @@ namespace AtlusLibSharp.Scripting
 
                 // label was not found
                 if (idx == -1)
-                    throw new BFASMParserException("Label {0} was referenced but was not found.", unresolved[i].Item1);
+                    throw new BfasmParserException("Label {0} was referenced but was not found.", unresolved[i].Item1);
 
                 opcodes[unresolved[i].Item2].Operand.ImmediateValue = idx;
             }
@@ -245,14 +245,14 @@ namespace AtlusLibSharp.Scripting
     }
 
     [Serializable]
-    public class BFASMParserException : Exception
+    public class BfasmParserException : Exception
     {
-        public BFASMParserException(object instruction, object line)
-            : base(string.Format("'{0}' instruction at line {1} was not in expected format", instruction, line))
+        public BfasmParserException(object instruction, object line)
+            : base($"'{instruction}' instruction at line {line} was not in expected format")
         {
         }
 
-        public BFASMParserException(string message, params object[] args)
+        public BfasmParserException(string message, params object[] args)
             : base(string.Format(message, args))
         {
         }

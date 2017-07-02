@@ -1,155 +1,99 @@
-﻿namespace Amicitia.ResourceWrappers
+﻿using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
+using AtlusLibSharp.Graphics.TMX;
+using AtlusLibSharp.PS2.Graphics;
+
+namespace Amicitia.ResourceWrappers
 {
-    using System;
-    using System.ComponentModel;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using AtlusLibSharp.PS2.Graphics;
-    using AtlusLibSharp.Graphics.TMX;
-
-    [Wrapper(typeof(TMXFile), "Atlus PS2 Texture", ".tmx")]
-    internal class TMXFileWrapper : ResourceWrapper
+    //[TypeConverter(typeof(PropertySorter))]
+    public class TmxFileWrapper : ResourceWrapper<TmxFile>
     {
-        /*********************/
-        /* File filter types */
-        /*********************/
-        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
-        {
-            SupportedFileType.TMXFile, SupportedFileType.PNGFile
-        };
+        [Category("Texture dimensions")]
+        [OrderedProperty]
+        public ushort Width => Resource.Width;
 
-        /*****************************************/
-        /* Import / Export delegate dictionaries */
-        /*****************************************/
-        public static new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
-        {
-            {
-                SupportedFileType.TMXFile, (res, path) => 
-                res.WrappedObject = TMXFile.Load(path)
-            },
-            {
-                SupportedFileType.PNGFile, (res, path) =>
-                res.WrappedObject = new TMXFile(new Bitmap(path), (res as TMXFileWrapper).PixelFormat, (res as TMXFileWrapper).UserComment)
-            }
-        };
+        [Category("Texture dimensions")]
+        [OrderedProperty]
+        public ushort Height => Resource.Height;
 
-        public static new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
-        {
-            {
-                SupportedFileType.TMXFile, (res, path) =>
-                (res as TMXFileWrapper).WrappedObject.Save(path)
-            },
-            {
-                SupportedFileType.PNGFile, (res, path) =>
-                (res as TMXFileWrapper).WrappedObject.GetBitmap().Save(path, ImageFormat.Png)
-            }
-        };
+        [Category("Texture format")]
+        [OrderedProperty]
+        public PS2PixelFormat PixelFormat => Resource.PixelFormat;
 
-        // virtual delegate shenanigans
-        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        [Category("Texture format")]
+        [OrderedProperty]
+        public bool UsesPalette => Resource.UsesPalette;
+
+        [Category("Texture format")]
+        [OrderedProperty]
+        public byte PaletteCount => Resource.PaletteCount;
+
+        [Category("Texture format")]
+        [OrderedProperty]
+        public PS2PixelFormat PaletteFormat => Resource.PaletteFormat;
+
+        [Category("Texture format")]
+        [OrderedProperty]
+        public byte MipMapCount => Resource.MipMapCount;
+
+        [Category("Texture wrapping modes")]
+        [OrderedProperty]
+        public TmxWrapMode HorizontalWrappingMode
         {
-            return ImportDelegates;
+            get => Resource.HorizontalWrappingMode;
+            set => SetProperty(Resource, value);
         }
 
-        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        [Category("Texture wrapping modes")]
+        [OrderedProperty]
+        public TmxWrapMode VerticalWrappingMode
         {
-            return ExportDelegates;
+            get => Resource.VerticalWrappingMode;
+            set => SetProperty(Resource, value);
         }
 
-        protected override SupportedFileType[] GetSupportedFileTypes()
+        [Category("Texture metadata")]
+        [OrderedProperty]
+        public int UserTextureId
         {
-            return FileFilterTypes;
+            get => Resource.UserTextureId;
+            set => SetProperty(Resource, value);
         }
 
-        /***************/
-        /* Constructor */
-        /***************/
-        public TMXFileWrapper(string text, TMXFile tmx) 
-            : base(text, tmx, SupportedFileType.TMXFile, false)
+        [Category("Texture metadata")]
+        [OrderedProperty]
+        public int UserClutId
         {
-            m_isImage = true;
+            get => Resource.UserClutId;
+            set => SetProperty(Resource, value);
         }
 
-        /*****************************/
-        /* Wrapped object properties */
-        /*****************************/
-        [Browsable(false)]
-        public new TMXFile WrappedObject
-        {
-            get
-            {
-                return (TMXFile)m_wrappedObject;
-            }
-            set
-            {
-                SetProperty(ref m_wrappedObject, value);
-            }
-        }
-
-        public ushort Width
-        {
-            get { return WrappedObject.Width; }
-        }
-
-        public ushort Height
-        {
-            get { return WrappedObject.Height; }
-        }
-
-        public PS2PixelFormat PixelFormat
-        {
-            get { return WrappedObject.PixelFormat; }
-        }
-
-        public bool UsesPalette
-        {
-            get { return WrappedObject.UsesPalette; }
-        }
-
-        public byte PaletteCount
-        {
-            get { return WrappedObject.PaletteCount; }
-        }
-
-        public PS2PixelFormat PaletteFormat
-        {
-            get { return WrappedObject.PaletteFormat; }
-        }
-
-        public byte MipMapCount
-        {
-            get { return WrappedObject.MipMapCount; }
-        }
-
-        public TMXWrapMode HorizontalWrappingMode
-        {
-            get { return WrappedObject.HorizontalWrappingMode; }
-            set { SetProperty(WrappedObject, value); }
-        }
-
-        public TMXWrapMode VerticalWrappingMode
-        {
-            get { return WrappedObject.VerticalWrappingMode; }
-            set { SetProperty(WrappedObject, value); }
-        }
-
-        public int UserTextureID
-        {
-            get { return WrappedObject.UserTextureID; }
-            set { SetProperty(WrappedObject, value); }
-        }
-
-        public int UserClutID
-        {
-            get { return WrappedObject.UserClutID; }
-            set { SetProperty(WrappedObject, value); }
-        }
-
+        [Category("Texture metadata")]
+        [OrderedProperty]
         public string UserComment
         {
-            get { return WrappedObject.UserComment; }
-            set { SetProperty(WrappedObject, value); }
+            get => Resource.UserComment;
+            set => SetProperty(Resource, value);
+        }
+
+        public TmxFileWrapper(string text, TmxFile resource) : base(text, resource)
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Move |
+                                       CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction(SupportedFileType.TmxFile, (res, path) => res.Save(path));
+            RegisterFileExportAction(SupportedFileType.Bitmap, (res, path) => res.GetBitmap().Save(path, ImageFormat.Png));
+            RegisterFileReplaceAction(SupportedFileType.TmxFile, (res, path) => TmxFile.Load(path));
+            RegisterFileReplaceAction(SupportedFileType.Bitmap, (res, path) => new TmxFile(new Bitmap(path), res.PixelFormat, res.UserComment));
+        }
+
+        protected override void PopulateView()
+        {
         }
     }
 }

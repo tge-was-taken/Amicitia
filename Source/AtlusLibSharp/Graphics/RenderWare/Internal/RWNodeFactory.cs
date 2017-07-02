@@ -7,202 +7,202 @@
     /// <summary>
     /// Handles the building of RenderWare nodes when loading the nodes from a binary file.
     /// </summary>
-    internal static class RWNodeFactory
+    internal static class RwNodeFactory
     {
-        internal struct RWNodeInfo
+        internal struct RwNodeHeader
         {
-            public RWNodeType Type;
+            public RwNodeId Id;
             public uint Size;
             public uint Version;
-            public RWNode Parent;
+            public RwNode Parent;
         }
 
-        internal static T GetNode<T>(RWNode parent, BinaryReader reader)
-            where T : RWNode
+        internal static T GetNode<T>(RwNode parent, BinaryReader reader)
+            where T : RwNode
         {
             return (T)GetNode(parent, reader);
         }
 
-        internal static RWNode GetNode(RWNode parent, BinaryReader reader)
+        internal static RwNode GetNode(RwNode parent, BinaryReader reader)
         {
 
-            Console.WriteLine("RWNode read at offset 0x{0}", reader.BaseStream.Position.ToString("X"));
+            //Console.WriteLine("RWNode read at offset 0x{0}", reader.BaseStream.Position.ToString("X"));
 
-            RWNodeInfo header = new RWNodeInfo
+            RwNodeHeader header = new RwNodeHeader
             {
-                Type = (RWNodeType)reader.ReadUInt32(),
+                Id = (RwNodeId)reader.ReadUInt32(),
                 Size = reader.ReadUInt32(),
                 Version = reader.ReadUInt32(),
                 Parent = parent
             };
 
-            Console.WriteLine("Type: {0}        Size: {1}       Version: {2}\n", header.Type, header.Size, header.Version);
+            //Console.WriteLine("Id: {0}        Size: {1}       Version: {2}\n", header.Id, header.Size, header.Version);
 
-            switch (header.Type)
+            switch (header.Id)
             {
-                case RWNodeType.Struct:
+                case RwNodeId.RwStructNode:
                     return GetStructNode(header, reader);
 
-                case RWNodeType.String:
-                    return new RWString(header, reader);
+                case RwNodeId.RwStringNode:
+                    return new RwStringNode(header, reader);
 
-                case RWNodeType.Extension:
-                    return new RWExtension(header, reader);
+                case RwNodeId.RwExtensionNode:
+                    return new RwExtensionNode(header, reader);
 
-                case RWNodeType.TextureReference:
-                    return new RWTextureReference(header, reader);
+                case RwNodeId.RwTextureReferenceNode:
+                    return new RwTextureReferenceNode(header, reader);
 
-                case RWNodeType.Material:
-                    return new RWMaterial(header, reader);
+                case RwNodeId.RwMaterialNode:
+                    return new RwMaterial(header, reader);
 
-                case RWNodeType.MaterialList:
-                    return new RWMaterialList(header, reader);
+                case RwNodeId.RwMaterialListNode:
+                    return new RwMaterialListNode(header, reader);
 
-                //case RWType.World:
+                //case RWType.WorldNode:
                 //    return new RWWorld(header, reader);
 
-                case RWNodeType.FrameList:
-                    return new RWSceneNodeList(header, reader);
+                case RwNodeId.RwFrameListNode:
+                    return new RwFrameListNode(header, reader);
 
-                case RWNodeType.Geometry:
-                    return new RWMesh(header, reader);
+                case RwNodeId.RwGeometryNode:
+                    return new RwGeometryNode(header, reader);
 
-                case RWNodeType.Scene:
-                    return new RWScene(header, reader);
+                case RwNodeId.RwClumpNode:
+                    return new RwClumpNode(header, reader);
 
-                case RWNodeType.DrawCall:
-                    return new RWDrawCall(header, reader);
+                case RwNodeId.RwAtomicNode:
+                    return new RwAtomicNode(header, reader);
 
-                case RWNodeType.TextureNative:
-                    return new RWTextureNative(header, reader);
+                case RwNodeId.RwTextureNativeNode:
+                    return new RwTextureNativeNode(header, reader);
 
-                case RWNodeType.GeometryList:
-                    return new RWMeshList(header, reader);
+                case RwNodeId.RwGeometryListNode:
+                    return new RwGeometryListNode(header, reader);
 
-                //case RWType.Animation:
-                //    return new RWAnimation(header, reader);
+                //case RwNodeId.AnimationNode:
+                //    return new RwAnimationNode(header, reader);
 
-                case RWNodeType.TextureDictionary:
-                    return new RWTextureDictionary(header, reader);
+                case RwNodeId.RwTextureDictionaryNode:
+                    return new RwTextureDictionaryNode(header, reader);
 
-                case RWNodeType.UVAnimationDictionary:
-                    return new RWUVAnimationDictionary(header, reader);
+                //case RwNodeId.UVAnimationDictionaryNode:
+                //    return new RwUVAnimationDictionary(header, reader);
 
-                case RWNodeType.MeshMaterialSplitList:
-                    return new RWMeshMaterialSplitData(header, reader);
+                case RwNodeId.RwMeshListNode:
+                    return new RwMeshListNode(header, reader);
 
-                case RWNodeType.SkyMipMapValue:
-                    return new RWSkyMipMapValue(header, reader);
+                case RwNodeId.RwSkyMipMapValueNode:
+                    return new RwSkyMipMapValueNode(header, reader);
 
-                case RWNodeType.SkinPlugin:
-                    return new RWSkinPlugin(header, reader, parent.Parent as RWMesh);
+                case RwNodeId.RwSkinNode:
+                    return new RwSkinNode(header, reader, parent.Parent as RwGeometryNode);
 
-                case RWNodeType.SceneNodeBoneMetadata:
-                    return new RWSceneNodeBoneMetadata(header, reader);
+                case RwNodeId.RwHAnimFrameExtensionNode:
+                    return new RwHAnimFrameExtensionNode(header, reader);
 
-                //case RWType.UserDataPlugin:
+                //case RWType.UserDataPluginNode:
                 //    return new RWUserDataPlugin(header, reader);
 
-                //case RWType.Maestro2D:
+                //case RWType.Maestro2DNode:
                 //    return new RWMaestro2D(header, reader);
 
-                case RWNodeType.RMDAnimationSet:
-                    return new RMDAnimationSet(header, reader);
+                case RwNodeId.RmdAnimation:
+                    return new RmdAnimation(header, reader);
 
-                case RWNodeType.RMDAnimationSetPlaceholder:
-                    return new RMDAnimationSetPlaceholder(header);
+                case RwNodeId.RmdAnimationPlaceholderNode:
+                    return new RmdAnimationPlaceholderNode(header);
 
-                case RWNodeType.RMDAnimationSetRedirect:
-                    return new RMDAnimationSetRedirect(header, reader);
+                case RwNodeId.RmdAnimationInstanceNode:
+                    return new RmdAnimationInstanceNode(header, reader);
 
-                case RWNodeType.RMDAnimationSetTerminator:
-                    return new RMDAnimationSetTerminator(header);
+                case RwNodeId.RmdAnimationTerminatorNode:
+                    return new RmdAnimationTerminatorNode(header);
 
                 //case RWType.RMDTransformOverride:
                 //    return new RMDTransformOverride(header, reader);
 
-                case RWNodeType.RMDFrameLinkList:
-                    return new RMDFrameLinkList(header, reader);
+                case RwNodeId.RmdNodeLinkListNode:
+                    return new RmdNodeLinkListNode(header, reader);
 
                 //case RWType.RMDVisibilityAnim:
                 //    return new RMDVisibilityAnim(header, reader);
 
-                case RWNodeType.RMDAnimationSetCount:
-                    return new RMDAnimationSetCount(header, reader);
+                case RwNodeId.RmdAnimationCountNode:
+                    return new RmdAnimationCountNode(header, reader);
 
                 //case RWType.RMDParticleList:
-                    //return new RMDParticleList(header, reader);
+                //return new RMDParticleList(header, reader);
 
                 //case RWType.RMDParticleAnimation:
                 //    return new RMDParticleAnimation(header, reader);
 
                 default:
-                    return new RWNode(header, reader);
+                    return new RwNode(header, reader);
             }
         }
 
-        private static RWNode GetStructNode(RWNodeInfo header, BinaryReader reader)
+        private static RwNode GetStructNode(RwNodeHeader header, BinaryReader reader)
         {
-            switch (header.Parent.Type)
+            switch (header.Parent.Id)
             {
-                case RWNodeType.Scene:
-                    return new RWSceneStruct(header, reader);
+                case RwNodeId.RwClumpNode:
+                    return new RwClumpStructNode(header, reader);
 
-                case RWNodeType.FrameList:
-                    return new RWSceneNodeListStruct(header, reader);
+                case RwNodeId.RwFrameListNode:
+                    return new RwFrameListStructNode(header, reader);
 
-                case RWNodeType.GeometryList:
-                    return new RWGeometryListStruct(header, reader);
+                case RwNodeId.RwGeometryListNode:
+                    return new RwGeometryListStructNode(header, reader);
 
-                case RWNodeType.Geometry:
-                    return new RWMeshStruct(header, reader);
+                case RwNodeId.RwGeometryNode:
+                    return new RwGeometryStructNode(header, reader);
 
-                case RWNodeType.Material:
-                    return new RWMaterialStruct(header, reader);
+                case RwNodeId.RwMaterialNode:
+                    return new RwMaterialStructNode(header, reader);
 
-                case RWNodeType.MaterialList:
-                    return new RWMaterialListStruct(header, reader);
+                case RwNodeId.RwMaterialListNode:
+                    return new RwMaterialListStructNode(header, reader);
 
-                case RWNodeType.TextureReference:
-                    return new RWTextureReferenceStruct(header, reader);
+                case RwNodeId.RwTextureReferenceNode:
+                    return new RwTextureReferenceStruct(header, reader);
 
-                case RWNodeType.DrawCall:
-                    return new RWDrawCallStruct(header, reader);
+                case RwNodeId.RwAtomicNode:
+                    return new RwAtomicStructNode(header, reader);
 
-                case RWNodeType.TextureDictionary:
-                    return new RWTextureDictionaryStruct(header, reader);
+                case RwNodeId.RwTextureDictionaryNode:
+                    return new RwTextureDictionaryStructNode(header, reader);
 
-                case RWNodeType.TextureNative:
+                case RwNodeId.RwTextureNativeNode:
                     return GetStructNodeParentIsTextureNative(header, reader);
 
-                case RWNodeType.Struct:
+                case RwNodeId.RwStructNode:
                     return GetStructNodeParentIsStruct(header, reader);
 
-                case RWNodeType.UVAnimationDictionary:
-                    return new RWUVAnimationDictionaryStruct(header, reader);
+                case RwNodeId.RwUVAnimationDictionaryNode:
+                    return new RWUVAnimationDictionaryStructNode(header, reader);
 
                 default:
-                    return new RWNode(header, reader);
+                    return new RwNode(header, reader);
 
             }
         }
 
-        private static RWNode GetStructNodeParentIsTextureNative(RWNodeInfo header, BinaryReader reader)
+        private static RwNode GetStructNodeParentIsTextureNative(RwNodeHeader header, BinaryReader reader)
         {
-            RWTextureNative txn = header.Parent as RWTextureNative;
+            RwTextureNativeNode txn = header.Parent as RwTextureNativeNode;
 
             if (txn == null)
             {
                 throw new InvalidDataException("Texture native shouldn't be null!");
             }
 
-            if (txn.Struct == null)
+            if (txn.StructNode == null)
             {
-                return new RWTextureNativeStruct(header, reader);
+                return new RwTextureNativeStructNode(header, reader);
             }
-            else if (txn.Raster == null)
+            else if (txn.RasterStructNode == null)
             {
-                return new RWRaster(header, reader);
+                return new RwRasterStructNode(header, reader);
             }
             else
             {
@@ -210,17 +210,17 @@
             }
         }
 
-        private static RWNode GetStructNodeParentIsStruct(RWNodeInfo header, BinaryReader reader)
+        private static RwNode GetStructNodeParentIsStruct(RwNodeHeader header, BinaryReader reader)
         {
-            RWNode grandParent = header.Parent.Parent;
+            RwNode grandParent = header.Parent.Parent;
 
             // If the grandparent is null then I don't know what kind of node this is.
             if (grandParent == null)
-                return new RWNode(header, reader);
+                return new RwNode(header, reader);
 
-            switch (grandParent.Type)
+            switch (grandParent.Id)
             {
-                case RWNodeType.TextureNative:
+                case RwNodeId.RwTextureNativeNode:
                     return GetStructNodeParentIsStructGrandParentIsTextureNative(header, reader);
 
                 default:
@@ -228,23 +228,22 @@
             }
         }
 
-        // award for longest method name goes to...
-        private static RWNode GetStructNodeParentIsStructGrandParentIsTextureNative(RWNodeInfo header, BinaryReader reader)
+        private static RwNode GetStructNodeParentIsStructGrandParentIsTextureNative(RwNodeHeader header, BinaryReader reader)
         {
-            RWRaster raster = header.Parent as RWRaster;
+            RwRasterStructNode rasterStructNode = header.Parent as RwRasterStructNode;
 
-            if (raster == null)
+            if (rasterStructNode == null)
             {
-                throw new InvalidDataException("Raster shouldn't be null!");
+                throw new InvalidDataException("RasterStructNode shouldn't be null!");
             }
 
-            if (raster.Info == null)
+            if (rasterStructNode.InfoStructNode == null)
             {
-                return new RWRasterInfo(header, reader);
+                return new RwRasterInfoStructNode(header, reader);
             }
-            else if (raster.Data == null)
+            else if (rasterStructNode.DataStructNode == null)
             {
-                return new RWRasterData(header, reader);
+                return new RwRasterDataStructNode(header, reader);
             }
             else
             {

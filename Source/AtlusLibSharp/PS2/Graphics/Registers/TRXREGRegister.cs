@@ -11,15 +11,15 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
     /// </summary>
     public class TRXREGRegister
     {
-        private ulong _rawData;
+        private ulong mRawData;
 
         /// <summary>
         /// Width of Transmission Area
         /// </summary>
         public ulong TransmissionWidth
         {
-            get { return BitHelper.GetBits(_rawData, 12, 0); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 12, value, 0); }
+            get { return BitHelper.GetBits(mRawData, 12, 0); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 12, value, 0); }
         }
 
         /// <summary>
@@ -27,8 +27,8 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// </summary>
         public ulong TransmissionHeight
         {
-            get { return BitHelper.GetBits(_rawData, 12, 32); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 12, value, 32); }
+            get { return BitHelper.GetBits(mRawData, 12, 32); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 12, value, 32); }
         }
 
         public TRXREGRegister(
@@ -40,12 +40,12 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
 
         internal TRXREGRegister(BinaryReader reader)
         {
-            _rawData = reader.ReadUInt64();
+            mRawData = reader.ReadUInt64();
         }
 
         internal byte[] GetBytes()
         {
-            return BitConverter.GetBytes(_rawData);
+            return BitConverter.GetBytes(mRawData);
         }
     }
 }

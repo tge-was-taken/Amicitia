@@ -4,34 +4,34 @@
     using System.IO;
     using Utilities;
 
-    public class BMDStandardMessage : BMDMessage
+    public class BmdStandardMessage : BmdMessage
     {
-        private short _actorIndex;
+        private short mActorIndex;
 
-        public short ActorID
+        public short ActorId
         {
-            get { return _actorIndex; }
-            internal set { _actorIndex = value; }
+            get { return mActorIndex; }
+            internal set { mActorIndex = value; }
         }
 
-        public override BMDMessageType MessageType
+        public override BmdMessageType MessageType
         {
-            get { return BMDMessageType.Standard; }
+            get { return BmdMessageType.Standard; }
         }
 
-        internal BMDStandardMessage(BinaryReader reader, int fp)
+        internal BmdStandardMessage(BinaryReader reader, int fp)
         {
             InternalRead(reader, fp);
         }
 
-        internal BMDStandardMessage() { }
+        internal BmdStandardMessage() { }
 
         internal override void InternalWrite(BinaryWriter writer, ref List<int> addressList, int fp)
         {
             // Write header fields
-            writer.WriteCString(name, NAME_LENGTH);
+            writer.WriteCString(name, NameLength);
             writer.Write((ushort)DialogCount);
-            writer.Write(_actorIndex);
+            writer.Write(mActorIndex);
 
             // Save the pointer table offset for writing later
             long pagePointerTableOffset = writer.BaseStream.Position;
@@ -52,7 +52,7 @@
             long pageDataStart = writer.BaseStream.Position;
             for (int i = 0; i < DialogCount; i++)
             {
-                pagePointerTable[i] = (int)writer.BaseStream.Position - BMDFile.DATA_START_ADDRESS - fp;
+                pagePointerTable[i] = (int)writer.BaseStream.Position - BmdFile.DataStartAddress - fp;
                 dialogs[i].InternalWrite(writer);
             }
 
@@ -72,24 +72,24 @@
 
         private void InternalRead(BinaryReader reader, int fp)
         {
-            name = reader.ReadCString(NAME_LENGTH);
+            name = reader.ReadCString(NameLength);
             ushort numDialogs = reader.ReadUInt16();
-            _actorIndex = (reader.ReadInt16());
+            mActorIndex = (reader.ReadInt16());
 
-            if (_actorIndex != -1)
+            if (mActorIndex != -1)
             {
                 // High bit is a special flag?
-                _actorIndex = (short)(_actorIndex & 0x7FFF);
+                mActorIndex = (short)(mActorIndex & 0x7FFF);
             }
 
             int[] pagePointerTable = reader.ReadInt32Array(numDialogs);
             int pageDataLength = reader.ReadInt32();
 
-            dialogs = new BMDDialog[numDialogs];
+            dialogs = new BmdDialog[numDialogs];
             for (int i = 0; i < numDialogs; i++)
             {
-                reader.BaseStream.Seek(fp + BMDFile.DATA_START_ADDRESS + pagePointerTable[i], SeekOrigin.Begin);
-                dialogs[i] = new BMDDialog(reader);
+                reader.BaseStream.Seek(fp + BmdFile.DataStartAddress + pagePointerTable[i], SeekOrigin.Begin);
+                dialogs[i] = new BmdDialog(reader);
             }
         }
     }

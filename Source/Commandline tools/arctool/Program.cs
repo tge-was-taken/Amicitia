@@ -25,7 +25,7 @@
                 if (!ListArchiveFile.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper arc file!");
-                    if (PAKToolArchiveFile.VerifyFileType(args[0]))
+                    if (PakToolArchiveFile.VerifyFileType(args[0]))
                     {
                         Console.WriteLine("Detected format: regular .bin/.pac/.pak archive.");
                     }

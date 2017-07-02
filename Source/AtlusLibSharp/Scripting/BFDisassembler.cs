@@ -6,101 +6,101 @@ using System.Linq;
 
 namespace AtlusLibSharp.Scripting
 {
-    internal static class BFDisassembler
+    internal static class BfDisassembler
     {
-        public static Dictionary<BFCallNativeType, string> CallNativeToHintString = new Dictionary<BFCallNativeType, string>()
+        public static Dictionary<BfCallNativeType, string> CallNativeToHintString = new Dictionary<BfCallNativeType, string>()
         {
-            { BFCallNativeType.ITF_SEL,         "Takes 3 arguments" },
-            { BFCallNativeType.ITF_YESNO_ANS,   "Takes no arguments" },
-            { BFCallNativeType.ITF_YESNO_CLS,   "Takes no arguments" },
-            { BFCallNativeType.ITF_YESNO_DSP,   "Takes 1 argument" },
-            { BFCallNativeType.MSG_DISP,        "Takes 1 argument." },
-            { BFCallNativeType.MSG,             "Takes 2 arguments where the first is the dialogue id" },
-            { BFCallNativeType.MSG_SEL,         "Takes 3 arguments where the first is dialogue id" },
-            { BFCallNativeType.MSG_WND_CLS,     "Takes 1 argument" },
-            { BFCallNativeType.MSG_WND_DSP,     "Takes 3 arguments" },
-            { BFCallNativeType.PUT,             "Takes 1 argument where the first is the variable value?" },
-            { BFCallNativeType.RUMBLE_START,    "Takes 3 arguments" },
-            { BFCallNativeType.RUMBLE_STOP,     "Takes no arguments" },
-            { BFCallNativeType.SCR_DEC_COMVAR,  "Takes 1 argument, the variable id" },
-            { BFCallNativeType.SCR_GET_COMVAR,  "Takes 1 argument, the variable id" },
-            { BFCallNativeType.SCR_INC_COMVAR,  "Takes 1 argument, the variable id" },
-            { BFCallNativeType.SCR_SET_COMVAR,  "Takes 2 arguments, the variable id, and the value to set" },
-            { BFCallNativeType.FLAG_CLEAR,      "Takes 1 argument: the flag to clear."},
-            { BFCallNativeType.FLAG_GET,        "Takes 1 argument: the flag to get." },
-            { BFCallNativeType.FLAG_SET,        "Takes 1 argument: the flag to set." }
+            { BfCallNativeType.ItfSel,         "Takes 3 arguments" },
+            { BfCallNativeType.ItfYesnoAns,   "Takes no arguments" },
+            { BfCallNativeType.ItfYesnoCls,   "Takes no arguments" },
+            { BfCallNativeType.ItfYesnoDsp,   "Takes 1 argument" },
+            { BfCallNativeType.MsgDisp,        "Takes 1 argument." },
+            { BfCallNativeType.Msg,             "Takes 2 arguments where the first is the dialogue id" },
+            { BfCallNativeType.MsgSel,         "Takes 3 arguments where the first is dialogue id" },
+            { BfCallNativeType.MsgWndCls,     "Takes 1 argument" },
+            { BfCallNativeType.MsgWndDsp,     "Takes 3 arguments" },
+            { BfCallNativeType.Put,             "Takes 1 argument where the first is the variable value?" },
+            { BfCallNativeType.RumbleStart,    "Takes 3 arguments" },
+            { BfCallNativeType.RumbleStop,     "Takes no arguments" },
+            { BfCallNativeType.ScrDecComvar,  "Takes 1 argument, the variable id" },
+            { BfCallNativeType.ScrGetComvar,  "Takes 1 argument, the variable id" },
+            { BfCallNativeType.ScrIncComvar,  "Takes 1 argument, the variable id" },
+            { BfCallNativeType.ScrSetComvar,  "Takes 2 arguments, the variable id, and the value to set" },
+            { BfCallNativeType.FlagClear,      "Takes 1 argument: the flag to clear."},
+            { BfCallNativeType.FlagGet,        "Takes 1 argument: the flag to get." },
+            { BfCallNativeType.FlagSet,        "Takes 1 argument: the flag to set." }
         };
 
-        public static Dictionary<BFInstruction, string> BFInstructionToASMKeyword = new Dictionary<BFInstruction, string>()
+        public static Dictionary<BfInstruction, string> BfInstructionToAsmKeyword = new Dictionary<BfInstruction, string>()
         {
-            { BFInstruction.Add,                "add" },
-            { BFInstruction.BeginProcedure,     "beginp" },
-            { BFInstruction.CallNative,         "calln" },
-            { BFInstruction.CallProcedure,      "callp" },
-            { BFInstruction.Division,           "div" },
-            { BFInstruction.Jump,               "jmp" },
-            { BFInstruction.JumpIfFalse,        "jmpf" },
-            { BFInstruction.Minus,              "min" },
-            { BFInstruction.Multiply,           "mult" },
-            { BFInstruction.Equal,              "eq"},
-            { BFInstruction.Not,                "not" },
-            { BFInstruction.NotEqual,           "neq" },
-            { BFInstruction.NotEqualZero,       "neqz" },
-            { BFInstruction.PopFloat,           "popf" },
-            { BFInstruction.PopInt,             "popi" },
-            { BFInstruction.PushFloat,          "pushf" },
-            { BFInstruction.PushResult,         "pushr" },
-            { BFInstruction.PushUInt16,         "pushs" },
-            { BFInstruction.PushUInt32,         "pushi" },
-            { BFInstruction.PushVariable,       "pushv" },
-            { BFInstruction.Return,             "ret" },
-            { BFInstruction.SetVariable,        "setv" },
-            { BFInstruction.Subtract,           "sub" },
+            { BfInstruction.Add,                "add" },
+            { BfInstruction.BeginProcedure,     "beginp" },
+            { BfInstruction.CallNative,         "calln" },
+            { BfInstruction.CallProcedure,      "callp" },
+            { BfInstruction.Division,           "div" },
+            { BfInstruction.Jump,               "jmp" },
+            { BfInstruction.JumpIfFalse,        "jmpf" },
+            { BfInstruction.Minus,              "min" },
+            { BfInstruction.Multiply,           "mult" },
+            { BfInstruction.Equal,              "eq"},
+            { BfInstruction.Not,                "not" },
+            { BfInstruction.NotEqual,           "neq" },
+            { BfInstruction.NotEqualZero,       "neqz" },
+            { BfInstruction.PopFloat,           "popf" },
+            { BfInstruction.PopInt,             "popi" },
+            { BfInstruction.PushFloat,          "pushf" },
+            { BfInstruction.PushResult,         "pushr" },
+            { BfInstruction.PushUInt16,         "pushs" },
+            { BfInstruction.PushUInt32,         "pushi" },
+            { BfInstruction.PushVariable,       "pushv" },
+            { BfInstruction.Return,             "ret" },
+            { BfInstruction.SetVariable,        "setv" },
+            { BfInstruction.Subtract,           "sub" },
         };
 
-        public static List<BFOpcode> ParseCodeblock(uint[] data, out bool isExtendedOpcodePresent)
+        public static List<BfOpcode> ParseCodeblock(uint[] data, out bool isExtendedOpcodePresent)
         {
             isExtendedOpcodePresent = false;
-            List<BFOpcode> opcodes = new List<BFOpcode>(2 << 12);
+            List<BfOpcode> opcodes = new List<BfOpcode>(2 << 12);
 
             for (int i = 0; i < data.Length; i++)
             {
-                BFInstruction instruction = (BFInstruction)(data[i] & 0x0000FFFF);
-                BFOpcode op = null;
+                BfInstruction instruction = (BfInstruction)(data[i] & 0x0000FFFF);
+                BfOpcode op = null;
 
                 switch (instruction)
                 {
-                    case BFInstruction.PushUInt32:
+                    case BfInstruction.PushUInt32:
                         {
                             if (!isExtendedOpcodePresent) // optimization, keep track of whether or not there are extended opcodes for sorting later
                                 isExtendedOpcodePresent = true;
 
                             Debug.Assert((data[i] & 0xFFFF0000) == 0); // debug: check if the high bits are indeed zeroed out
 
-                            op = new BFOpcode(instruction, i, data[++i]); // consume next int for op
+                            op = new BfOpcode(instruction, i, data[++i]); // consume next int for op
                         }
                         break;
-                    case BFInstruction.PushFloat:
+                    case BfInstruction.PushFloat:
                         {
                             if (!isExtendedOpcodePresent) // optimization, keep track of whether or not there are extended opcodes for sorting later
                                 isExtendedOpcodePresent = true;
 
                             Debug.Assert((data[i] & 0xFFFF0000) == 0); // debug: check if the high bits are indeed zeroed out
 
-                            op = new BFOpcode(instruction, i, BitConverter.ToSingle(BitConverter.GetBytes(data[++i]), 0)); // consume next int as float for op
+                            op = new BfOpcode(instruction, i, BitConverter.ToSingle(BitConverter.GetBytes(data[++i]), 0)); // consume next int as float for op
                         }
                         break;
-                    case BFInstruction.Add:
-                    case BFInstruction.NotEqual:
-                    case BFInstruction.PushResult:
-                    case BFInstruction.Return:
-                    case BFInstruction.Subtract:
-                    case BFInstruction.Equal:
+                    case BfInstruction.Add:
+                    case BfInstruction.NotEqual:
+                    case BfInstruction.PushResult:
+                    case BfInstruction.Return:
+                    case BfInstruction.Subtract:
+                    case BfInstruction.Equal:
                         Debug.Assert((data[i] & 0xFFFF0000) == 0); // debug: check if the high bits are indeed zeroed out
-                        op = new BFOpcode(instruction, i, null); // uses no operands, high bits are zeroed out
+                        op = new BfOpcode(instruction, i, null); // uses no operands, high bits are zeroed out
                         break;
                     default:
-                        op = new BFOpcode(instruction, i, ((data[i] & 0xFFFF0000) >> 16));
+                        op = new BfOpcode(instruction, i, ((data[i] & 0xFFFF0000) >> 16));
                         break;     
                 }
 
@@ -110,7 +110,7 @@ namespace AtlusLibSharp.Scripting
             return opcodes;
         }
 
-        public static void Disassemble(string path, List<BFOpcode> opcodes, BFCodeLabel[] procedures, BFCodeLabel[] jumpLabels)
+        public static void Disassemble(string path, List<BfOpcode> opcodes, BfCodeLabel[] procedures, BfCodeLabel[] jumpLabels)
         {
             using (StreamWriter writer = new StreamWriter(File.Create(path)))
             {
@@ -118,14 +118,14 @@ namespace AtlusLibSharp.Scripting
                 int jumpIdx = 0;
 
                 // sorting these is faster than searching every interation
-                BFCodeLabel[] sortedProcedures = procedures.OrderBy(i => i.OpcodeIndex).ToArray(); 
-                BFCodeLabel[] sortedJumpLabels = jumpLabels.OrderBy(i => i.OpcodeIndex).ToArray();
+                BfCodeLabel[] sortedProcedures = procedures.OrderBy(i => i.OpcodeIndex).ToArray(); 
+                BfCodeLabel[] sortedJumpLabels = jumpLabels.OrderBy(i => i.OpcodeIndex).ToArray();
 
                 for (int i = 0; i < opcodes.Count; i++)
                 {
-                    BFOpcode op = opcodes[i];
-                    BFCodeLabel procedure = null;
-                    BFCodeLabel jumpLabel = null;
+                    BfOpcode op = opcodes[i];
+                    BfCodeLabel procedure = null;
+                    BfCodeLabel jumpLabel = null;
 
                     // first check if maybe a procedure starts at this index
                     if (procIdx != sortedProcedures.Length && sortedProcedures[procIdx].OpcodeIndex == i)
@@ -140,25 +140,25 @@ namespace AtlusLibSharp.Scripting
                         writer.WriteLine("\n@" + jumpLabel.Name + ": \t; jump label \"{0}\"", jumpLabel.Name);
                     }
 
-                    bool isKnown = BFInstructionToASMKeyword.ContainsKey(op.Instruction);
+                    bool isKnown = BfInstructionToAsmKeyword.ContainsKey(op.Instruction);
                     string opStr = isKnown ?
-                        BFInstructionToASMKeyword[op.Instruction] :
+                        BfInstructionToAsmKeyword[op.Instruction] :
                         "unk_" + op.Instruction.ToString("X");
 
                     switch (op.Instruction)
                     {
-                        case BFInstruction.CallNative:
-                            BFCallNativeType callType = (BFCallNativeType)op.Operand.ImmediateValue;
-                            opStr += " " + callType + (Enum.IsDefined(typeof(BFCallNativeType), callType) ? " \t; " + CallNativeToHintString[callType] : string.Empty);
+                        case BfInstruction.CallNative:
+                            BfCallNativeType callType = (BfCallNativeType)op.Operand.ImmediateValue;
+                            opStr += " " + callType + (Enum.IsDefined(typeof(BfCallNativeType), callType) ? " \t; " + CallNativeToHintString[callType] : string.Empty);
                             break;
-                        case BFInstruction.BeginProcedure:
+                        case BfInstruction.BeginProcedure:
                             opStr += " " + procedure.Name;
                             break;
-                        case BFInstruction.CallProcedure:
+                        case BfInstruction.CallProcedure:
                             opStr += " " + procedures[(int)op.Operand.ImmediateValue].Name;
                             break;
-                        case BFInstruction.Jump:
-                        case BFInstruction.JumpIfFalse:
+                        case BfInstruction.Jump:
+                        case BfInstruction.JumpIfFalse:
                             opStr += " @" + jumpLabels[(int)op.Operand.ImmediateValue].Name;
                             break;
                         default:

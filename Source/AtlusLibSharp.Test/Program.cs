@@ -1,7 +1,11 @@
-﻿namespace AtlusLibSharp.Test
+﻿using System;
+using System.Linq;
+using System.Numerics;
+using Assimp.Configs;
+
+namespace AtlusLibSharp.Test
 {
     using Graphics.RenderWare;
-    using OpenTK;
     using Scripting;
     using AtlusLibSharp.FileSystems.CVM;
     using System.IO;
@@ -13,6 +17,85 @@
     {
         static void Main(string[] args)
         {
+            var aiCtx = new Assimp.AssimpContext();
+            Assimp.Scene aiScene;
+            RmdScene rmdScene;
+            RwClumpNode rwClumpNode;
+            PakToolArchiveFile pak;
+
+            aiCtx.SetConfig(new MaxBoneCountConfig(64));
+            //aiScene = aiCtx.ImportFile(@"D:\Users\smart\Desktop\temp\BC001.FBX", Assimp.PostProcessSteps.SplitByBoneCount);
+            aiScene = aiCtx.ImportFile(@"D:\Users\smart\Desktop\temp\test.FBX", Assimp.PostProcessSteps.SplitByBoneCount);
+            //aiCtx.ExportFile(aiScene, @"D:\Users\smart\Desktop\temp\BC001_out.FBX", "fbx");
+            //aiScene = aiCtx.ImportFile(@"D:\Users\smart\Desktop\temp\BC001_out.FBX");
+
+            rmdScene = new RmdScene(@"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001.RMD");
+            rwClumpNode = rmdScene.Clumps[0];
+            //aiScene = RWScene.ToAssimpScene(rwClumpNode);
+
+            using (var writer = File.CreateText("boneMap.txt"))
+            {
+                for (int i = 0; i < rwClumpNode.FrameList.Count; i++)
+                {
+                    int boneNameId = -1;
+                    if (rwClumpNode.FrameList[i].HasHAnimExtension)
+                        boneNameId = rwClumpNode.FrameList[i].HAnimFrameExtensionNode.NameId;
+
+                    writer.WriteLine(
+                        $"{i:D4} {rwClumpNode.FrameList.GetHierarchyIndexByFrameIndex(i):D4} {boneNameId:D4}");
+                }
+            }
+
+            //aiCtx.ExportFile(aiScene, @"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001.DAE", "collada");
+            //aiScene = aiCtx.ImportFile(@"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001.DAE");
+            rwClumpNode.ReplaceGeometries(aiScene);
+
+            /*
+            var geometry = rwClumpNode.GeometryListNode[4];
+            var matrix = rwClumpNode.Nodes[rwClumpNode.Atomics[4].FrameIndex].WorldTransform;
+            Matrix4x4.Invert(matrix, out Matrix4x4 matrixInv);
+            var matrixLocal = rwClumpNode.Nodes[rwClumpNode.Atomics[4].FrameIndex].Transform;
+            Matrix4x4.Invert(matrixLocal, out Matrix4x4 matrixLocalInv);
+            Matrix4x4.Invert(rwClumpNode.Nodes[0].Transform, out Matrix4x4 matrixInv2);
+            Matrix4x4.Invert(matrix * matrixInv2, out matrixInv2);
+
+
+            rwClumpNode.Atomics[4].FrameIndex = 0;
+
+            for (int i = 0; i < geometry.Vertices.Length; i++)
+                geometry.Vertices[i] = Vector3.Transform(geometry.Vertices[i], matrix);
+
+            var skinPlugin = (RWSkinPlugin)geometry.ExtensionNodes.Find(x => x.Id == RWNodeType.SkinNode);
+            var skinMatrices = rwClumpNode.AnimationRootBone.HAnimFrameExtensionNode.Hierarchy.Nodes.Select(x =>
+            {
+                return rwClumpNode.FrameNode.GetFrameByHierarchyIndex(x.Index).Transform;
+            }).ToArray();
+
+            for (int i = 0; i < skinPlugin.SkinToBoneMatrices.Length; i++)
+            {
+                //skinMatrices[i] = Matrix4x4.Transpose(skinMatrices[i]);
+
+                //skinMatrices[i] = Matrix4x4.Multiply(matrixLocal, skinMatrices[i]);
+                //Matrix4x4.Invert(skinMatrices[i], out Matrix4x4 invertedSkinMatrix);
+                //skinPlugin.SkinToBoneMatrices[i] = invertedSkinMatrix;
+
+                // works
+                Matrix4x4.Invert(skinPlugin.SkinToBoneMatrices[i], out Matrix4x4 boneMatrix);
+                boneMatrix *= matrix;
+                Matrix4x4.Invert(boneMatrix, out boneMatrix);
+                skinPlugin.SkinToBoneMatrices[i] = boneMatrix;
+            }
+            */
+
+            //geometry.ExtensionNodes.Remove(geometry.ExtensionNodes.Find(x => x.Id == RWNodeType.SkinNode));
+
+            rmdScene.Save(@"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001_new.RMD");
+
+            pak = new PakToolArchiveFile(@"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001.PAC");
+            pak.Entries.Find(x => x.Name.EndsWith("RMD")).Data = rmdScene.GetBytes();
+            pak.Save(@"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001_new.PAC");
+
+
             //PAKToolArchiveFileUnsafe test = new PAKToolArchiveFileUnsafe(@"D:\Modding\Persona34\Persona4\CVM_DATA\MODEL\PACK\BC001.PAC");
             //ACXFile acx = new ACXFile(@"D:\Modding\Persona34\Persona4\bc001.acx");
             //CVMFileRewrite cvm = new CVMFileRewrite();
@@ -29,8 +112,8 @@
 
             /*
             RMDScene rmd = new RMDScene(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\bc001.RMD");
-            var split = new RWMeshMaterialSplitData(rmd.Scenes[0].Meshes[4], RWPrimitiveType.TriangleStrip);
-            var split2 = new RWMeshMaterialSplitData(rmd.Scenes[0].Meshes[4], RWPrimitiveType.TriangleList);
+            var split = new RWGeometryMaterialSplitMeshData(rmd.Clumps[0].GeometryListNode[4], RWPrimitiveType.TriangleStrip);
+            var split2 = new RWGeometryMaterialSplitMeshData(rmd.Clumps[0].GeometryListNode[4], RWPrimitiveType.TriangleList);
             */
 
             //            BFFile bf;
@@ -75,16 +158,16 @@
 
             /*
             PAKToolFile pac = new PAKToolFile(@"C:\Users\TGE\Downloads\Shin_Megami_Tensei_Persona_4_NTSC_PS2DVD-STRiKE.[www.usabit.com]\CVM_DATA\MODEL\PACK\BC001.PAC");
-            RMDScene scene = new RMDScene(pac.Entries.Find(entry => entry.Name.Contains(".RMD")).Data);
+            RMDScene clumpNode = new RMDScene(pac.Entries.Find(entry => entry.Name.Contains(".RMD")).MeshListNode);
 
             Assimp.AssimpContext aiContext = new Assimp.AssimpContext();
-            Assimp.Scene aiScene = new Assimp.Scene();
+            Assimp.ClumpNode aiScene = new Assimp.ClumpNode();
             aiScene.RootNode = new Assimp.Node("Root");
 
-            foreach (RWClump clump in scene.Clumps)
+            foreach (RWClump clumpNode in clumpNode.Clumps)
             {
                 int geoIdx = 0;
-                foreach (RWGeometry geo in clump.GeometryList)
+                foreach (RWGeometry geo in clumpNode.GeometryListNode)
                 {
                     Assimp.Mesh aiMesh = new Assimp.Mesh("mesh_" + geoIdx++, Assimp.PrimitiveType.Triangle);
 
@@ -134,20 +217,20 @@
                     int idx = 0;
                     foreach (RWMaterial mat in geo.Materials)
                     {
-                        Assimp.Material aiMaterial = new Assimp.Material();
+                        Assimp.MaterialNode aiMaterial = new Assimp.MaterialNode();
                         aiMaterial.Name = "material_" + idx++;
                         aiScene.Materials.Add(aiMaterial);
                     }
 
-                    aiScene.Meshes.Add(aiMesh);
+                    aiScene.GeometryListNode.Add(aiMesh);
                 }
 
-                foreach (RWAtomic atomic in clump.Atomics)
+                foreach (RWAtomic atomic in clumpNode.Atomics)
                 {
                     Assimp.Node node = new Assimp.Node();
-                    node.Name = aiScene.Meshes[atomic.GeometryIndex].Name;
+                    node.Name = aiScene.GeometryListNode[atomic.GeometryIndex].Name;
                     node.MeshIndices.Add(atomic.GeometryIndex);
-                    node.Transform = clump.FrameListNode.Frames[atomic.FrameIndex].WorldMatrix.ToAssimpMatrix4x4();
+                    node.Transform = clumpNode.FrameNode.FrameListNode[atomic.FrameIndex].WorldMatrix.ToAssimpMatrix4x4();
                     aiScene.RootNode.Children.Add(node);
                 }
             }
@@ -155,18 +238,18 @@
             aiContext.ExportFile(aiScene, "test.dae", "collada");
             
             /*
-            for (int i = 0; i < scene.TextureDictionary.TextureCount; i++)
+            for (int i = 0; i < clumpNode.TextureDictionary.TextureCount; i++)
             {
-                Bitmap bitmap = scene.TextureDictionary.Textures[i].GetBitmap();
-                string name = scene.TextureDictionary.Textures[i].Name;
+                Bitmap bitmap = clumpNode.TextureDictionary.Textures[i].GetBitmap();
+                string name = clumpNode.TextureDictionary.Textures[i].Name;
 
-                //scene.TextureDictionary.Textures[i] = new RWTextureNative(name, bitmap, PS2.Graphics.PixelFormat.PSMT8);
+                //clumpNode.TextureDictionary.Textures[i] = new RWTextureNative(name, bitmap, PS2.Graphics.PixelFormat.PSMT8);
             }
 
-            scene.TextureDictionary.Save("_test.txd");
+            clumpNode.TextureDictionary.Save("_test.txd");
 
             PAKToolFile newPac = new PAKToolFile();
-            newPac.Entries.Add(new PAKToolFileEntry("bc001.RMD", scene.GetBytes()));
+            newPac.Entries.Add(new PAKToolFileEntry("bc001.RMD", clumpNode.GetBytes()));
             newPac.Save("BC001.PAC");
             */
         }
@@ -195,7 +278,7 @@
         //                {
         //                    if (subMesh == null)
         //                        continue;
-        //                    switch (subMesh.Type)
+        //                    switch (subMesh.Id)
         //                    {
         //                        case 1:
         //                            {

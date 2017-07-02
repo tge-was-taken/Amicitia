@@ -1,4 +1,6 @@
-﻿namespace AtlusLibSharp.FileSystems.ListArchive
+﻿using System.Text;
+
+namespace AtlusLibSharp.FileSystems.ListArchive
 {
     using System;
     using System.IO;
@@ -6,10 +8,10 @@
     using IO;
     using PAKToolArchive;
 
-    public sealed class ListArchiveFile : BinaryFileBase
+    public sealed class ListArchiveFile : BinaryBase, ISimpleArchiveFile
     {
         // Fields
-        private List<ListArchiveFileEntry> _entries;
+        private List<ListArchiveEntry> mEntries;
 
         // Constructors
         public ListArchiveFile(string path)
@@ -21,47 +23,60 @@
 
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                InternalRead(reader);
+                Read(reader);
             }
         }
 
-        public ListArchiveFile(Stream stream)
+        public ListArchiveFile(Stream stream, bool leaveOpen = false)
         {
             if (!VerifyFileType(stream))
             {
                 throw new InvalidDataException("Not a valid ListArchiveFile.");
             }
 
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, leaveOpen))
             {
-                InternalRead(reader);
+                Read(reader);
             }
         }
 
         public ListArchiveFile(string[] filepaths)
         {
-            _entries = new List<ListArchiveFileEntry>(filepaths.Length);
+            mEntries = new List<ListArchiveEntry>(filepaths.Length);
             foreach (string path in filepaths)
             {
-                _entries.Add(new ListArchiveFileEntry(path));
+                mEntries.Add(new ListArchiveEntry(path));
             }
         }
 
         public ListArchiveFile()
         {
-            _entries = new List<ListArchiveFileEntry>();
+            mEntries = new List<ListArchiveEntry>();
         }
 
         // Properties
         public int EntryCount
         {
-            get { return _entries.Count; }
+            get { return mEntries.Count; }
         }
 
-        public List<ListArchiveFileEntry> Entries
+        ISimpleArchiveFile ISimpleArchiveFile.Create(IEnumerable<IArchiveEntry> entries)
         {
-            get { return _entries; }
+            var file = new ListArchiveFile();
+            foreach (var archiveEntry in entries)
+            {
+                file.Entries.Add(new ListArchiveEntry(archiveEntry.Name, archiveEntry.Data));
+            }
+
+            return file;
         }
+
+        public List<ListArchiveEntry> Entries
+        {
+            get { return mEntries; }
+        }
+
+        IEnumerable<IArchiveEntry> ISimpleArchiveFile.Entries => Entries;
 
         // static methods
         public static ListArchiveFile Create(string directorypath)
@@ -69,12 +84,12 @@
             return new ListArchiveFile(Directory.GetFiles(directorypath));
         }
 
-        public static ListArchiveFile Create(PAKToolArchiveFile pak)
+        public static ListArchiveFile Create(PakToolArchiveFile pak)
         {
             ListArchiveFile arc = new ListArchiveFile();
-            foreach (PAKToolArchiveEntry entry in pak.Entries)
+            foreach (PakToolArchiveEntry entry in pak.Entries)
             {
-                arc.Entries.Add(new ListArchiveFileEntry(entry.Name, entry.Data));
+                arc.Entries.Add(new ListArchiveEntry(entry.Name, entry.Data));
             }
             return arc;
         }
@@ -92,11 +107,11 @@
         private static bool InternalVerifyFileType(Stream stream)
         {
             // check stream length
-            if (stream.Length <= 4 + ListArchiveFileEntry.NAME_LENGTH + 4)
+            if (stream.Length <= 4 + ListArchiveEntry.NAME_LENGTH + 4)
                 return false;
 
-            byte[] testData = new byte[4 + ListArchiveFileEntry.NAME_LENGTH + 4];
-            stream.Read(testData, 0, 4 + ListArchiveFileEntry.NAME_LENGTH + 4);
+            byte[] testData = new byte[4 + ListArchiveEntry.NAME_LENGTH + 4];
+            stream.Read(testData, 0, 4 + ListArchiveEntry.NAME_LENGTH + 4);
             stream.Position = 0;
 
             int numOfFiles = BitConverter.ToInt32(testData, 0);
@@ -107,7 +122,7 @@
 
             // check if the name field is correct
             bool nameTerminated = false;
-            for (int i = 0; i < ListArchiveFileEntry.NAME_LENGTH; i++)
+            for (int i = 0; i < ListArchiveEntry.NAME_LENGTH; i++)
             {
                 if (testData[4 + i] == 0x00)
                     nameTerminated = true;
@@ -117,7 +132,7 @@
             }
 
             // first entry length sanity check
-            int length = BitConverter.ToInt32(testData, 4 + ListArchiveFileEntry.NAME_LENGTH);
+            int length = BitConverter.ToInt32(testData, 4 + ListArchiveEntry.NAME_LENGTH);
             if (length >= (1024 * 1024 * 100) || length < 0)
             {
                 return false;
@@ -127,22 +142,22 @@
         }
 
         // instance methods
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
-            writer.Write(_entries.Count);
-            foreach (ListArchiveFileEntry entry in _entries)
+            writer.Write(mEntries.Count);
+            foreach (ListArchiveEntry entry in mEntries)
             {
                 entry.InternalWrite(writer);
             }
         }
 
-        private void InternalRead(BinaryReader reader)
+        private void Read(BinaryReader reader)
         {
             int numEntries = reader.ReadInt32();
-            _entries = new List<ListArchiveFileEntry>(numEntries);
+            mEntries = new List<ListArchiveEntry>(numEntries);
             for (int i = 0; i < numEntries; i++)
             {
-                _entries.Add(new ListArchiveFileEntry(reader));
+                mEntries.Add(new ListArchiveEntry(reader));
             }
         }
     }

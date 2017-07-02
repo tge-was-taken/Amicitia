@@ -3,12 +3,12 @@
     using System.Runtime.InteropServices;
 
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
-    public struct ABKeyInfo
+    public struct AbKeyInfo
     {
         public const int SIZE = 8;
 
         [FieldOffset(0)]
-        public ABKeyType KeyType;
+        public AbKeyType KeyType;
 
         [FieldOffset(2)]
         public short UnkMorph;

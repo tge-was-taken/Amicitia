@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AtlusLibSharp.Scripting
 {
-    public enum BFInstruction : ushort
+    public enum BfInstruction : ushort
     {
         /// <summary>
         /// Pushes a <see cref="uint"/> value onto the top of the stack.

@@ -1,16 +1,16 @@
 ﻿namespace AtlusLibSharp.PS2.Graphics.Interfaces.VIF
 {
-    public class VIFPacket
+    public class VifPacket
     {
         // Protected fields
         protected ushort _immediate;
-        protected byte _count;
+        protected byte Count;
         protected byte _command;
 
-        public VIFPacket(VIFTag vt)
+        public VifPacket(VifTag vt)
         {
             _immediate = vt.Immediate;
-            _count = vt.Count;
+            Count = vt.Count;
             _command = vt.Command;
         }
 
@@ -22,12 +22,12 @@
 
         public virtual byte DataCount
         {
-            get { return _count; }
+            get { return Count; }
         }
 
-        public virtual PS2VIFCommand Command
+        public virtual PS2VifCommand Command
         {
-            get { return (PS2VIFCommand)_command; }
+            get { return (PS2VifCommand)_command; }
         }
     }
 }

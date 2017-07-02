@@ -15,22 +15,22 @@ namespace AtlusLibSharp.PS2.Graphics
         private const ulong TRXREG_ADDRESS = 0x52;
         private const ulong TRXDIR_ADDRESS = 0x53;
 
-        private GIFTag _gifTag0;
-        private TRXPOSRegister _trxPos;
-        private TRXREGRegister _trxReg;
-        private TRXDIRRegister _trxDir;
-        private GIFTag _gifTag1;
+        private GifTag mGifTag0;
+        private TRXPOSRegister mTrxPos;
+        private TRXREGRegister mTrxReg;
+        private TRXDIRRegister mTrxDir;
+        private GifTag mGifTag1;
 
         public PS2StandardImageHeader(
-            GIFTag regListTag,
+            GifTag regListTag,
             TRXPOSRegister trxPos, TRXREGRegister TRXRegister, TRXDIRRegister trxDir,
-            GIFTag imageDataTag)
+            GifTag imageDataTag)
         {
-            _gifTag0 = regListTag;
-            _trxPos = trxPos;
-            _trxReg = TRXRegister;
-            _trxDir = trxDir;
-            _gifTag1 = imageDataTag;
+            mGifTag0 = regListTag;
+            mTrxPos = trxPos;
+            mTrxReg = TRXRegister;
+            mTrxDir = trxDir;
+            mGifTag1 = imageDataTag;
         }
 
         internal PS2StandardImageHeader(BinaryReader reader)
@@ -40,14 +40,14 @@ namespace AtlusLibSharp.PS2.Graphics
 
         private void InternalRead(BinaryReader reader)
         {
-            _gifTag0 = new GIFTag(reader);
-            _trxPos = new TRXPOSRegister(reader);
+            mGifTag0 = new GifTag(reader);
+            mTrxPos = new TRXPOSRegister(reader);
             ulong trxPosAddress = reader.ReadUInt64();
-            _trxReg = new TRXREGRegister(reader);
+            mTrxReg = new TRXREGRegister(reader);
             ulong trxRegisterAddress = reader.ReadUInt64();
-            _trxDir = new TRXDIRRegister(reader);
+            mTrxDir = new TRXDIRRegister(reader);
             ulong trxDirAddress = reader.ReadUInt64();
-            _gifTag1 = new GIFTag(reader);
+            mGifTag1 = new GifTag(reader);
         }
 
         internal byte[] GetBytes()
@@ -56,22 +56,22 @@ namespace AtlusLibSharp.PS2.Graphics
             using (BinaryWriter writer = new BinaryWriter(new MemoryStream()))
             {
                 // Reglist GIFTag
-                writer.Write(_gifTag0.GetBytes());
+                writer.Write(mGifTag0.GetBytes());
 
                 // TRXPos
-                writer.Write(_trxPos.GetBytes());
+                writer.Write(mTrxPos.GetBytes());
                 writer.Write(TRXPOS_ADDRESS);
 
                 // TRXRegister
-                writer.Write(_trxReg.GetBytes());
+                writer.Write(mTrxReg.GetBytes());
                 writer.Write(TRXREG_ADDRESS);
 
                 // TRXDir
-                writer.Write(_trxDir.GetBytes());
+                writer.Write(mTrxDir.GetBytes());
                 writer.Write(TRXDIR_ADDRESS);
 
                 // Image data GIFTag
-                writer.Write(_gifTag1.GetBytes());
+                writer.Write(mGifTag1.GetBytes());
 
                 data = (writer.BaseStream as MemoryStream).ToArray();
             }

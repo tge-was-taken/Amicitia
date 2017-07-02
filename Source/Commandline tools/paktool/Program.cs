@@ -22,7 +22,7 @@
 
             if (Path.HasExtension(args[0]))
             {
-                if (!PAKToolArchiveFile.VerifyFileType(args[0]))
+                if (!PakToolArchiveFile.VerifyFileType(args[0]))
                 {
                     Console.WriteLine("This is not a proper pak file!");
                     if (ListArchiveFile.VerifyFileType(args[0]))
@@ -32,7 +32,7 @@
                     return;
                 }
 
-                PAKToolArchiveFile pak = new PAKToolArchiveFile(args[0]);
+                PakToolArchiveFile pak = new PakToolArchiveFile(args[0]);
                 string path = Path.GetFileNameWithoutExtension(args[0]);
                 Directory.CreateDirectory(path);
                 for (int i = 0; i < pak.EntryCount; i++)
@@ -44,7 +44,7 @@
             }
             else if (!Path.HasExtension(args[0]))
             {
-                PAKToolArchiveFile pak = PAKToolArchiveFile.Create(args[0]);
+                PakToolArchiveFile pak = PakToolArchiveFile.Create(args[0]);
                 pak.Save(Path.GetFileName(args[0]) + ".PAK");
             }
         }

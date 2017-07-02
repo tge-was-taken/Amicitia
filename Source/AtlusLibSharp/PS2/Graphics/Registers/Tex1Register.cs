@@ -5,7 +5,7 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
     using AtlusLibSharp.Utilities;
     using System.IO;
 
-    public enum TEX1LODCalculationMethod
+    public enum Tex1LodCalculationMethod
     {
         /// <summary>
         /// Due to formula (LOD = (log2(1 / |Q|) &lt;&lt;L)+K)
@@ -18,7 +18,7 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         FixedValue = 1
     }
 
-    public enum TEX1BaseAddressSpecification
+    public enum Tex1BaseAddressSpecification
     {
         /// <summary>
         /// Value specified by MIPTBP1 and MIPTBP2 is used.
@@ -36,17 +36,17 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
     /// </summary>
     public class Tex1Register
     {
-        private ulong _rawData;
+        private ulong mRawData;
 
         #region Properties
 
         /// <summary>
         /// LOD Calculation Method
         /// </summary>
-        public TEX1LODCalculationMethod LodCalculationMethod
+        public Tex1LodCalculationMethod LodCalculationMethod
         {
-            get { return (TEX1LODCalculationMethod)BitHelper.GetBits(_rawData, 1, 0); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 1, (ulong)value, 0); }
+            get { return (Tex1LodCalculationMethod)BitHelper.GetBits(mRawData, 1, 0); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 1, (ulong)value, 0); }
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// </summary>
         public ulong MaxMipLevel
         {
-            get { return BitHelper.GetBits(_rawData, 3, 2); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 3, value, 2); }
+            get { return BitHelper.GetBits(mRawData, 3, 2); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 3, value, 2); }
         }
 
         /// <summary>
@@ -63,8 +63,8 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// </summary>
         public PS2FilterMode MipMaxFilter
         {
-            get { return (PS2FilterMode)BitHelper.GetBits(_rawData, 1, 5); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 1, (ulong)value, 5); }
+            get { return (PS2FilterMode)BitHelper.GetBits(mRawData, 1, 5); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 1, (ulong)value, 5); }
         }
 
         /// <summary>
@@ -72,17 +72,17 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// </summary>
         public PS2FilterMode MipMinFilter
         {
-            get { return (PS2FilterMode)BitHelper.GetBits(_rawData, 3, 6); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 3, (ulong)value, 6); }
+            get { return (PS2FilterMode)BitHelper.GetBits(mRawData, 3, 6); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 3, (ulong)value, 6); }
         }
 
         /// <summary>
         /// Base Address Specification of MIPMAP Texture of Level 1 or More
         /// </summary>
-        public TEX1BaseAddressSpecification MipTexBaseAddressSpecification
+        public Tex1BaseAddressSpecification MipTexBaseAddressSpecification
         {
-            get { return (TEX1BaseAddressSpecification)BitHelper.GetBits(_rawData, 1, 9); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 1, (ulong)value, 9); }
+            get { return (Tex1BaseAddressSpecification)BitHelper.GetBits(mRawData, 1, 9); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 1, (ulong)value, 9); }
         }
 
         /// <summary>
@@ -90,8 +90,8 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// </summary>
         public ulong MipL
         {
-            get { return BitHelper.GetBits(_rawData, 2, 19); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 2, value, 19); }
+            get { return BitHelper.GetBits(mRawData, 2, 19); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 2, value, 19); }
         }
 
         /// <summary>
@@ -99,31 +99,31 @@ namespace AtlusLibSharp.PS2.Graphics.Registers
         /// </summary>
         public ulong MipK
         {
-            get { return BitHelper.GetBits(_rawData, 12, 32); }
-            set { BitHelper.ClearAndSetBits(ref _rawData, 12, value, 32); }
+            get { return BitHelper.GetBits(mRawData, 12, 32); }
+            set { BitHelper.ClearAndSetBits(ref mRawData, 12, value, 32); }
         }
 
         #endregion Properties
 
         public Tex1Register()
         {
-            LodCalculationMethod = TEX1LODCalculationMethod.Formula;
+            LodCalculationMethod = Tex1LodCalculationMethod.Formula;
             MaxMipLevel = 0;
             MipMaxFilter = PS2FilterMode.None;
             MipMinFilter = PS2FilterMode.Nearest;
-            MipTexBaseAddressSpecification = TEX1BaseAddressSpecification.UseSpecified;
+            MipTexBaseAddressSpecification = Tex1BaseAddressSpecification.UseSpecified;
             MipL = 0;
             MipK = 0;
         }
 
         internal Tex1Register(BinaryReader reader)
         {
-            _rawData = reader.ReadUInt64();
+            mRawData = reader.ReadUInt64();
         }
 
         internal byte[] GetBytes()
         {
-            return BitConverter.GetBytes(_rawData);
+            return BitConverter.GetBytes(mRawData);
         }
     }
 }

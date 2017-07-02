@@ -4,27 +4,27 @@
 
     internal struct TypeTableEntry
     {
-        internal const int TYPETABLE_ENTRY_LENGTH = 16;
+        internal const int TypetableEntryLength = 16;
 
-        public int type;
-        public int elementLength;
-        public int elementCount;
-        public int dataOffset;
+        public int Type;
+        public int ElementLength;
+        public int ElementCount;
+        public int DataOffset;
 
         internal TypeTableEntry(BinaryReader reader)
         {
-            type = reader.ReadInt32();
-            elementLength = reader.ReadInt32();
-            elementCount = reader.ReadInt32();
-            dataOffset = reader.ReadInt32();
+            Type = reader.ReadInt32();
+            ElementLength = reader.ReadInt32();
+            ElementCount = reader.ReadInt32();
+            DataOffset = reader.ReadInt32();
         }
 
         internal void InternalWrite(BinaryWriter writer)
         {
-            writer.Write(type);
-            writer.Write(elementLength);
-            writer.Write(elementCount);
-            writer.Write(dataOffset);
+            writer.Write(Type);
+            writer.Write(ElementLength);
+            writer.Write(ElementCount);
+            writer.Write(DataOffset);
         }
     }
 }

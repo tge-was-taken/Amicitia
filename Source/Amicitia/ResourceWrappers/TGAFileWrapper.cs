@@ -1,119 +1,39 @@
-﻿namespace Amicitia.ResourceWrappers
+﻿using System.Drawing.Imaging;
+using AtlusLibSharp.Graphics.TGA;
+
+namespace Amicitia.ResourceWrappers
 {
-    using System;
-    using System.ComponentModel;
-    using System.Windows.Forms;
-    using AtlusLibSharp.Graphics.TGA;
-    using System.Collections.Generic;
-
-    internal class TGAFileWrapper : ResourceWrapper
+    public class TgaFileWrapper : ResourceWrapper<TgaFile>
     {
-        /*********************/
-        /* File filter types */
-        /*********************/
-        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
-        {
-            SupportedFileType.TGAFile, SupportedFileType.PNGFile
-        };
+        public int Width => Resource.Width;
 
-        /*****************************************/
-        /* Import / Export delegate dictionaries */
-        /*****************************************/
-       public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
-        {
-            {
-                SupportedFileType.TGAFile, (res, path) =>
-                res.WrappedObject = new TGAFile(path)
-            },
-            {
-                SupportedFileType.PNGFile, (res, path) =>
-                res.WrappedObject = new TGAFile(path, (res as TGAFileWrapper).WrappedObject.Encoding, (res as TGAFileWrapper).BitsPerPixel, (res as TGAFileWrapper).PaletteDepth)
-            }
-        };
+        public int Height => Resource.Height;
 
-        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
-        {
-            {
-                SupportedFileType.TGAFile, (res, path) =>
-                (res as TGAFileWrapper).WrappedObject.Save(path)
-            },
-            {
-                SupportedFileType.PNGFile, (res, path) =>
-                (res as TGAFileWrapper).WrappedObject.GetBitmap().Save(path, System.Drawing.Imaging.ImageFormat.Png)
-            }
-        };
+        public TgaEncoding Encoding => Resource.Encoding;
 
-        /************************************/
-        /* Import / export method overrides */
-        /************************************/
-        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
+        public int BitsPerPixel => Resource.BitsPerPixel;
+
+        public int PaletteDepth => Resource.PaletteDepth;
+
+        public bool IsIndexed => Resource.IsIndexed;
+
+        public TgaFileWrapper(string text, TgaFile resource) : base(text, resource)
         {
-            return ImportDelegates;
         }
 
-        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
+        protected override void Initialize()
         {
-            return ExportDelegates;
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Move |
+                                       CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction(SupportedFileType.TgaFile, (res, path) => res.Save(path));
+            RegisterFileExportAction(SupportedFileType.Bitmap, (res, path) => res.GetBitmap().Save(path, ImageFormat.Png));
+            RegisterFileReplaceAction(SupportedFileType.TgaFile, (res, path) => new TgaFile(path));
+            RegisterFileReplaceAction(SupportedFileType.Bitmap, (res, path) => new TgaFile(path, res.Encoding, res.BitsPerPixel, res.PaletteDepth));
         }
 
-        protected override SupportedFileType[] GetSupportedFileTypes()
+        protected override void PopulateView()
         {
-            return FileFilterTypes;
-        }
-
-        /***************/
-        /* Constructor */
-        /***************/
-        public TGAFileWrapper(string text, TGAFile tga) 
-            : base(text, tga, SupportedFileType.TGAFile, false)
-        {
-            m_isImage = true;
-        }
-
-        /*****************************/
-        /* Wrapped object properties */
-        /*****************************/
-        [Browsable(false)]
-        public new TGAFile WrappedObject
-        {
-            get
-            {
-                return (TGAFile)m_wrappedObject;
-            }
-            set
-            {
-                SetProperty(ref m_wrappedObject, value);
-            }
-        }
-
-        public int Width
-        {
-            get { return WrappedObject.Width; }
-        }
-
-        public int Height
-        {
-            get { return WrappedObject.Height; }
-        }
-
-        public TGAEncoding PixelFormat
-        {
-            get { return WrappedObject.Encoding; }
-        }
-
-        public int BitsPerPixel
-        {
-            get { return WrappedObject.BitsPerPixel; }
-        }
-
-        public int PaletteDepth
-        {
-            get { return WrappedObject.PaletteDepth; }
-        }
-
-        public bool IsIndexed
-        {
-            get { return WrappedObject.IsIndexed; }
         }
     }
 }

@@ -4,19 +4,20 @@
     using System.IO;
     using IO;
     using AtlusLibSharp.Utilities;
+    using System;
 
     /// <summary>
     /// Base class for RenderWare nodes.
     /// </summary>
-    public class RWNode : BinaryFileBase
+    public class RwNode : BinaryBase
     {
         private const uint HEADER_SIZE = 12;
-        private RWNodeType _type;
-        private uint _rawVersion;
-        private RWNode _parent;
-        private List<RWNode> _children;
-        private byte[] _data;
-        private uint _size;
+        private RwNodeId mId;
+        private uint mRawVersion;
+        private RwNode mParent;
+        private List<RwNode> mChildren;
+        private byte[] mData;
+        private uint mSize;
 
         /// <summary>
         /// RenderWare version of nodes used by Persona 3, Persona 3 FES, and Persona 4.
@@ -24,16 +25,17 @@
         public const uint VersionPersona3 = 0x1C020037;
 
         /// <summary>
-        /// RenderWare version used when exporting an <see cref="RWNode"/>. Set to <see cref="VersionPersona3"/> by default.
+        /// RenderWare version used when exporting an <see cref="RwNode"/>. Set to <see cref="VersionPersona3"/> by default.
         /// </summary>
         public static uint ExportVersion = VersionPersona3;
 
         /// <summary>
-        /// Gets the RenderWare node type.
+        /// Gets the RenderWare node id.
         /// </summary>
-        public RWNodeType Type
+        public RwNodeId Id
         {
-            get { return _type; }
+            get { return mId; }
+            internal set { mId = value; }
         }
 
         //public float Version
@@ -60,30 +62,30 @@
         /// <summary>
         /// Gets or sets the RenderWare parent node of this node.
         /// </summary>
-        public RWNode Parent
+        public RwNode Parent
         {
-            get { return _parent; }
+            get { return mParent; }
             internal set
             {
                 if (value == null) return;
 
-                if (value._children == null)
-                    value._children = new List<RWNode>();
+                if (value.mChildren == null)
+                    value.mChildren = new List<RwNode>();
 
-                if (!value._children.Contains(this))
-                    value._children.Add(this);
+                if (!value.mChildren.Contains(this))
+                    value.mChildren.Add(this);
 
-                _parent = value;
+                mParent = value;
             }
         }
 
         /// <summary>
         /// Gets or sets the list of child nodes of this node.
         /// </summary>
-        public List<RWNode> Children
+        public List<RwNode> Children
         {
-            get { return _children; }
-            protected set { _children = value; }
+            get { return mChildren; }
+            protected set { mChildren = value; }
         }
 
         /// <summary>
@@ -91,57 +93,57 @@
         /// </summary>
         protected uint Size
         {
-            get { return _size; }
+            get { return mSize; }
         }
 
         /// <summary>
-        /// Initialize a RenderWare node using the given RenderWare node type.
+        /// Initialize a RenderWare node using the given RenderWare node id.
         /// </summary>
-        protected RWNode(RWNodeType type)
+        protected RwNode(RwNodeId id)
         {
-            _type = type;
-            _size = 0;
-            _rawVersion = ExportVersion;
-            _parent = null;
+            mId = id;
+            mSize = 0;
+            mRawVersion = ExportVersion;
+            mParent = null;
         }
 
         /// <summary>
-        /// Initialize a RenderWare node using the given RenderWare node type and parent node.
+        /// Initialize a RenderWare node using the given RenderWare node id and parent node.
         /// </summary>
-        protected RWNode(RWNodeType type, RWNode parent)
+        protected RwNode(RwNodeId id, RwNode parent)
         {
-            _type = type;
-            _size = 0;
-            _rawVersion = ExportVersion;
+            mId = id;
+            mSize = 0;
+            mRawVersion = ExportVersion;
             Parent = parent;
         }
 
         /// <summary>
-        /// Initializer only to be called by <see cref="RWNodeFactory"/>.
+        /// Initializer only to be called by <see cref="RwNodeFactory"/>.
         /// </summary>
-        internal RWNode(RWNodeFactory.RWNodeInfo header)
+        internal RwNode(RwNodeFactory.RwNodeHeader header)
         {
-            _type = header.Type;
-            _size = header.Size;
-            _rawVersion = header.Version;
+            mId = header.Id;
+            mSize = header.Size;
+            mRawVersion = header.Version;
             Parent = header.Parent;
         }
 
 
         /// <summary>
-        /// Initializer only to be called by <see cref="RWNodeFactory"/>.
+        /// Initializer only to be called by <see cref="RwNodeFactory"/>.
         /// </summary>
-        internal RWNode(RWNodeFactory.RWNodeInfo header, BinaryReader reader)
+        internal RwNode(RwNodeFactory.RwNodeHeader header, BinaryReader reader)
         {
-            _type = header.Type;
-            _size = header.Size;
-            _rawVersion = header.Version;
+            mId = header.Id;
+            mSize = header.Size;
+            mRawVersion = header.Version;
             Parent = header.Parent;
-            _data = reader.ReadBytes((int)_size);
+            mData = reader.ReadBytes((int)mSize);
 
-            switch (_type)
+            switch (mId)
             {
-                case RWNodeType.RMDParticleList:
+                case RwNodeId.RmdParticleListNode:
                     reader.AlignPosition(16);
                     break;
             }
@@ -152,10 +154,10 @@
         /// </summary>
         /// <param name="path">Path to the RenderWare file to load.</param>
         /// <returns>RenderWare node loaded from the path.</returns>
-        public static RWNode Load(string path)
+        public static RwNode Load(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-                return RWNodeFactory.GetNode(null, reader);
+                return RwNodeFactory.GetNode(null, reader);
         }
 
         /// <summary>
@@ -164,36 +166,80 @@
         /// <param name="path">Path to the RenderWare file to load.</param>
         /// <param name="leaveOpen">Option to keep the stream open after reading instead of disposing it.</param>
         /// <returns>RenderWare node loaded from the path.</returns>
-        public static RWNode Load(Stream stream, bool leaveOpen = false)
+        public static RwNode Load(Stream stream, bool leaveOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveOpen))
-                return RWNodeFactory.GetNode(null, reader);
+                return RwNodeFactory.GetNode(null, reader);
         }
 
-        public static RWNode Load(byte[] data)
+        public static RwNode Load(byte[] data)
         {
             return Load(new MemoryStream(data), false);
         }
 
+        public RwNode FindParentNode(RwNodeId nodeId)
+        {
+            RwNode node = this;
+
+            while (true)
+            {
+                var parent = node.Parent;
+
+                if ( parent == null )
+                    return null;
+
+                if (parent.Id == nodeId)
+                    return parent;
+
+                if ( parent.Parent != null )
+                    node = parent;
+                else
+                    return null;
+            }
+        }
+
+        public RwNode FindNode(RwNodeId nodeId)
+        {
+            RwNode FindNode(RwNode node)
+            {
+                foreach ( var child in node.Children )
+                {
+                    if ( child.Id == nodeId )
+                        return child;
+                }
+
+                foreach ( var child in node.Children )
+                {
+                    var foundNode = FindNode(child);
+                    if ( foundNode != null )
+                        return foundNode;
+                }
+
+                return null;
+            }
+
+            return FindNode(this);
+        }
+
         /// <summary>
-        /// Inherited from <see cref="BinaryFileBase"/>. Writes the data to the stream using given <see cref="BinaryWriter"/>.
+        /// Inherited from <see cref="BinaryBase"/>. Writes the data to the stream using given <see cref="BinaryWriter"/>.
         /// </summary>
         /// <param name="writer">The <see cref="BinaryWriter"/> used to write to the stream.</param>
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             long headerPosition = writer.BaseStream.Position;
             writer.BaseStream.Position += HEADER_SIZE;
 
-            InternalWriteInnerData(writer);
+            WriteBody(writer);
 
             // Calculate size of this node
             long endPosition = writer.BaseStream.Position;
-            _size = (uint)(endPosition - (headerPosition + HEADER_SIZE));
+            mSize = (uint)(endPosition - (headerPosition + HEADER_SIZE));
 
             // Seek back to where the header should be, and write it using the calculated size.
             writer.BaseStream.Position = headerPosition;
-            writer.Write((uint)_type);
-            writer.Write(_size);
+            writer.Write((uint)mId);
+            writer.Write(mSize);
             writer.Write(ExportVersion);
 
             // Seek to the end of this node
@@ -204,9 +250,11 @@
         /// Writes the data beyond the header.
         /// </summary>
         /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
-        protected internal virtual void InternalWriteInnerData(BinaryWriter writer)
+        protected internal virtual void WriteBody(BinaryWriter writer)
         {
-            writer.Write(_data);
+            writer.Write(mData);
         }
+
+        protected internal virtual void ReadBody( BinaryReader reader ) { }
     }
 }

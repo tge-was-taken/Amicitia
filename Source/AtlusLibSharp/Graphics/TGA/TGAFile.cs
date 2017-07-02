@@ -13,44 +13,44 @@
     /// <summary>
     /// Encapsulates a TrueVision TARGA image file.
     /// </summary>
-    public class TGAFile : BinaryFileBase, ITextureFile
+    public class TgaFile : BinaryBase, ITextureFile
     {
         /****************************/
         /* TGA header struct fields */
         /****************************/
-        private byte _idLength;
-        private byte _colorMapType;
-        private TGAEncoding _dataType;
-        private short _paletteStartIndex;
-        private short _paletteLength;
-        private byte _paletteDepth;
-        private short _xOrigin;
-        private short _yOrigin;
-        private short _width;
-        private short _height;
-        private byte _bpp;
-        private byte _imageDescriptor;
+        private byte mIdLength;
+        private byte mColorMapType;
+        private TgaEncoding mDataType;
+        private short mPaletteStartIndex;
+        private short mPaletteLength;
+        private byte mPaletteDepth;
+        private short mXOrigin;
+        private short mYOrigin;
+        private short mWidth;
+        private short mHeight;
+        private byte mBpp;
+        private byte mImageDescriptor;
 
         // palette and palette indices are used for indexed formats, otherwise they have value null
-        private Color[] _palette;
-        private byte[] _paletteIndices;
+        private Color[] mPalette;
+        private byte[] mPaletteIndices;
 
         // pixels is used for non-indexed formats, otherwise null
-        private Color[] _pixels;
+        private Color[] mPixels;
 
         // last created bitmap backing store
-        private Bitmap _bitmap;
+        private Bitmap mBitmap;
 
         // pixel de/encoder delegate
-        private delegate byte[] TGADataDecoder(byte[] encoded);
-        private delegate byte[] TGADataEncoder(byte[] unencoded);
+        private delegate byte[] TgaDataDecoder(byte[] encoded);
+        private delegate byte[] TgaDataEncoder(byte[] unencoded);
 
         /// <summary>
-        /// Gets the pixel data encoding type of the image data.
+        /// Gets the pixel data encoding id of the image data.
         /// </summary>
-        public TGAEncoding Encoding
+        public TgaEncoding Encoding
         {
-            get { return _dataType; }
+            get { return mDataType; }
         }
 
         /// <summary>
@@ -58,7 +58,7 @@
         /// </summary>
         public bool IsIndexed
         {
-            get { return _colorMapType == 1; }
+            get { return mColorMapType == 1; }
         }
 
         /// <summary>
@@ -66,7 +66,7 @@
         /// </summary>
         public int PaletteDepth
         {
-            get { return _paletteDepth; }
+            get { return mPaletteDepth; }
         }
 
         /// <summary>
@@ -74,7 +74,7 @@
         /// </summary>
         public int Width
         {
-            get { return _width; }
+            get { return mWidth; }
         }
 
         /// <summary>
@@ -82,7 +82,7 @@
         /// </summary>
         public int Height
         {
-            get { return _height; }
+            get { return mHeight; }
         }
 
         /// <summary>
@@ -90,7 +90,7 @@
         /// </summary>
         public int BitsPerPixel
         {
-            get { return _bpp; }
+            get { return mBpp; }
         }
 
         /// <summary>
@@ -98,7 +98,7 @@
         /// </summary>
         public Color[] Palette
         {
-            get { return _palette; }
+            get { return mPalette; }
         }
 
         /// <summary>
@@ -106,73 +106,73 @@
         /// </summary>
         public byte[] PixelIndices
         {
-            get { return _paletteIndices; }
+            get { return mPaletteIndices; }
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TGAFile"/> class from the specified file.
+        /// Initializes a new instance of the <see cref="TgaFile"/> class from the specified file.
         /// </summary>
         /// <param name="filename">The tga file name and path.</param>
-        public TGAFile(string filename)
+        public TgaFile(string filename)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(filename)))
-                InternalRead(reader);
+                Read(reader);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TGAFile"/> class from the specified stream.
+        /// Initializes a new instance of the <see cref="TgaFile"/> class from the specified stream.
         /// </summary>
         /// <param name="stream">The data stream used to load the image.</param>
         /// <param name="leaveStreamOpen">Specifies if the stream shouldn't be disposed after use.</param>
-        public TGAFile(Stream stream, bool leaveStreamOpen = false)
+        public TgaFile(Stream stream, bool leaveStreamOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
-                InternalRead(reader);
+                Read(reader);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TGAFile"/> class from the specified bitmap file path, and encoding parameters to encode the bitmap with.
+        /// Initializes a new instance of the <see cref="TgaFile"/> class from the specified bitmap file path, and encoding parameters to encode the bitmap with.
         /// </summary>
         /// <param name="filename">The bitmap file path used for encoding.</param>
         /// <param name="encodingType">Specifies the pixel data encoding to use.</param>
         /// <param name="bitsPerPixel">Specifies the amount of bits per pixel. 
         /// 4 and 8 are reserved for indexed encodings, while 16, 24 and 32 are used for non-indexed images.</param>
-        /// <param name="paletteDepth">Specifies the amount of bits per color in the palette. Ignored if the encoding type is of an indexed encoding.</param>
-        public TGAFile(string filename, TGAEncoding encodingType = TGAEncoding.Indexed, int bitsPerPixel = 8, int paletteDepth = 32)
+        /// <param name="paletteDepth">Specifies the amount of bits per color in the palette. Ignored if the encoding id is of an indexed encoding.</param>
+        public TgaFile(string filename, TgaEncoding encodingType = TgaEncoding.Indexed, int bitsPerPixel = 8, int paletteDepth = 32)
             : this(new Bitmap(filename), encodingType, bitsPerPixel, paletteDepth)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TGAFile"/> class from the specified <see cref="Bitmap"/> class, and encoding parameters to encode the bitmap with.
+        /// Initializes a new instance of the <see cref="TgaFile"/> class from the specified <see cref="Bitmap"/> class, and encoding parameters to encode the bitmap with.
         /// </summary>
         /// <param name="bitmap">The bitmap instance used for encoding.</param>
         /// <param name="encodingType">Specifies the pixel data encoding to use.</param>
         /// <param name="bitsPerPixel">Specifies the amount of bits per pixel. 
         /// 4 and 8 are reserved for indexed encodings, while 16, 24 and 32 are used for non-indexed images.</param>
-        /// <param name="paletteDepth">Specifies the amount of bits per color in the palette. Ignored if the encoding type is of an indexed encoding.</param>
-        public TGAFile(Bitmap bitmap, TGAEncoding encodingType = TGAEncoding.Indexed, int bitsPerPixel = 8, int paletteDepth = 32)
+        /// <param name="paletteDepth">Specifies the amount of bits per color in the palette. Ignored if the encoding id is of an indexed encoding.</param>
+        public TgaFile(Bitmap bitmap, TgaEncoding encodingType = TgaEncoding.Indexed, int bitsPerPixel = 8, int paletteDepth = 32)
         {
             // set header
             SetHeaderInfo(bitmap.Width, bitmap.Height, bitsPerPixel, paletteDepth, encodingType);
 
-            // done if the encoding type is set to none
-            if (encodingType == TGAEncoding.None)
+            // done if the encoding id is set to none
+            if (encodingType == TgaEncoding.None)
                 return;
 
             // set bitmap data
             if (IsIndexed)
             {
-                BitmapHelper.QuantizeBitmap(bitmap, 1 << bitsPerPixel, out _paletteIndices, out _palette);
+                BitmapHelper.QuantizeBitmap(bitmap, 1 << bitsPerPixel, out mPaletteIndices, out mPalette);
             }
             else
             {
-                _pixels = BitmapHelper.GetColors(bitmap);
+                mPixels = BitmapHelper.GetColors(bitmap);
             }
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TGAFile"/> class from specified dimensions, color palette, pixel indices and encoding parameters that suit the provided image data.
+        /// Initializes a new instance of the <see cref="TgaFile"/> class from specified dimensions, color palette, pixel indices and encoding parameters that suit the provided image data.
         /// </summary>
         /// <param name="width">The width of the image.</param>
         /// <param name="height">The height of the image.</param>
@@ -181,15 +181,15 @@
         /// <param name="encodingType">Specifies the pixel data encoding to use.</param>
         /// <param name="bitsPerPixel">Specifies the amount of bits per pixel. 
         /// 4 and 8 are reserved for indexed encodings, while 16, 24 and 32 are used for non-indexed images.</param>
-        /// <param name="paletteDepth">Specifies the amount of bits per color in the palette. Ignored if the encoding type is of an indexed encoding.</param>
-        public TGAFile(int width, int height, Color[] palette, byte[] pixelIndices, 
-            TGAEncoding encodingType = TGAEncoding.Indexed, int bitsPerPixel = 8, int paletteDepth = 32)
+        /// <param name="paletteDepth">Specifies the amount of bits per color in the palette. Ignored if the encoding id is of an indexed encoding.</param>
+        public TgaFile(int width, int height, Color[] palette, byte[] pixelIndices, 
+            TgaEncoding encodingType = TgaEncoding.Indexed, int bitsPerPixel = 8, int paletteDepth = 32)
         {
             // set header
             SetHeaderInfo(width, height, bitsPerPixel, paletteDepth, encodingType);
 
-            // done if the encoding type is set to none
-            if (encodingType == TGAEncoding.None)
+            // done if the encoding id is set to none
+            if (encodingType == TgaEncoding.None)
                 return;
 
             /*
@@ -206,223 +206,223 @@
             {
                 if (palette.Length != (1 << bitsPerPixel))
                 {
-                    BitmapHelper.QuantizeBitmap(BitmapHelper.Create(palette, pixelIndices, width, height), 1 << bitsPerPixel, out _paletteIndices, out _palette);
+                    BitmapHelper.QuantizeBitmap(BitmapHelper.Create(palette, pixelIndices, width, height), 1 << bitsPerPixel, out mPaletteIndices, out mPalette);
                 }
                 else
                 {
                     // set palette and pixel data
-                    _palette = palette;
-                    _paletteIndices = pixelIndices;
+                    mPalette = palette;
+                    mPaletteIndices = pixelIndices;
                 }
             }
             else
             {
-                _pixels = BitmapHelper.GetColors(BitmapHelper.Create(palette, pixelIndices, width, height));
+                mPixels = BitmapHelper.GetColors(BitmapHelper.Create(palette, pixelIndices, width, height));
             }
         }
 
         /// <summary>
-        /// <para>Construct a bitmap from the data in this <see cref="TGAFile"/> instance.</para>
+        /// <para>Construct a bitmap from the data in this <see cref="TgaFile"/> instance.</para>
         /// <para>Subsequent calls to this method will return the same bitmap instance without constructing a new one.</para>
         /// </summary>
         public Bitmap GetBitmap()
         {
             // Check if the bitmap hasn't been created already
-            if (_bitmap == null || (_bitmap.Width != _width && _bitmap.Height != _height))
+            if (mBitmap == null || (mBitmap.Width != mWidth && mBitmap.Height != mHeight))
             {
                 CreateBitmap();
             }         
 
-            return _bitmap;
+            return mBitmap;
         }
 
 
         public Color[] GetPixels()
         {
-            if (IsIndexed && _pixels == null)
+            if (IsIndexed && mPixels == null)
             {
-                _pixels = new Color[_width * _height];
-                for (int y = 0; y < _height; y++)
-                    for (int x = 0; x < _width; x++)
-                        _pixels[x + y * _width] = _palette[_paletteIndices[x + y * _width]];
+                mPixels = new Color[mWidth * mHeight];
+                for (int y = 0; y < mHeight; y++)
+                    for (int x = 0; x < mWidth; x++)
+                        mPixels[x + y * mWidth] = mPalette[mPaletteIndices[x + y * mWidth]];
             }
 
-            return _pixels;
+            return mPixels;
         }
 
-        internal void InternalRead(BinaryReader reader)
+        internal void Read(BinaryReader reader)
         {
-            _idLength = reader.ReadByte();
-            _colorMapType = reader.ReadByte();
-            _dataType = (TGAEncoding)reader.ReadByte();
-            _paletteStartIndex = reader.ReadInt16();
-            _paletteLength = reader.ReadInt16();
-            _paletteDepth = reader.ReadByte();
-            _xOrigin = reader.ReadInt16();
-            _yOrigin = reader.ReadInt16();
-            _width = reader.ReadInt16();
-            _height = reader.ReadInt16();
-            _bpp = reader.ReadByte();
-            _imageDescriptor = reader.ReadByte();
+            mIdLength = reader.ReadByte();
+            mColorMapType = reader.ReadByte();
+            mDataType = (TgaEncoding)reader.ReadByte();
+            mPaletteStartIndex = reader.ReadInt16();
+            mPaletteLength = reader.ReadInt16();
+            mPaletteDepth = reader.ReadByte();
+            mXOrigin = reader.ReadInt16();
+            mYOrigin = reader.ReadInt16();
+            mWidth = reader.ReadInt16();
+            mHeight = reader.ReadInt16();
+            mBpp = reader.ReadByte();
+            mImageDescriptor = reader.ReadByte();
 
             // format check
-            if (EncodingUsesRLEOrCmp(_dataType) || _dataType == TGAEncoding.Grayscale)
+            if (EncodingUsesRleOrCmp(mDataType) || mDataType == TgaEncoding.Grayscale)
             {
-                throw new NotImplementedException($"Data type not supported: {_dataType}");
+                throw new NotImplementedException($"DataStructNode id not supported: {mDataType}");
             }
-            else if (_dataType == TGAEncoding.None)
+            else if (mDataType == TgaEncoding.None)
             {
                 return;
             }
 
             // skip user data
-            reader.Seek(_idLength, SeekOrigin.Current);
+            reader.Seek(mIdLength, SeekOrigin.Current);
 
             if (IsIndexed)
             {
                 // read palette and indices
-                _palette = ReadPalette(reader, _paletteLength, _bpp, _paletteDepth);
-                _paletteIndices = ReadIndices(reader, _dataType, _bpp, _width, _height);
+                mPalette = ReadPalette(reader, mPaletteLength, mBpp, mPaletteDepth);
+                mPaletteIndices = ReadIndices(reader, mDataType, mBpp, mWidth, mHeight);
             }
             else
             {
                 // read pixels
-                _pixels = ReadPixels(reader, _dataType, _bpp, _width, _height);
+                mPixels = ReadPixels(reader, mDataType, mBpp, mWidth, mHeight);
             }
         }
 
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
-            writer.Write(_idLength);
-            writer.Write(_colorMapType);
-            writer.Write((byte)_dataType);
-            writer.Write(_paletteStartIndex);
-            writer.Write(_paletteLength);
-            writer.Write(_paletteDepth);
-            writer.Write(_xOrigin);
-            writer.Write(_yOrigin);
-            writer.Write(_width);
-            writer.Write(_height);
-            writer.Write(_bpp);
-            writer.Write(_imageDescriptor);
+            writer.Write(mIdLength);
+            writer.Write(mColorMapType);
+            writer.Write((byte)mDataType);
+            writer.Write(mPaletteStartIndex);
+            writer.Write(mPaletteLength);
+            writer.Write(mPaletteDepth);
+            writer.Write(mXOrigin);
+            writer.Write(mYOrigin);
+            writer.Write(mWidth);
+            writer.Write(mHeight);
+            writer.Write(mBpp);
+            writer.Write(mImageDescriptor);
 
-            if (_dataType == TGAEncoding.None)
+            if (mDataType == TgaEncoding.None)
                 return;
 
             if (IsIndexed)
             {
                 // write palette and indices
-                WritePalette(writer, _palette, _paletteLength, _bpp, _paletteDepth);
-                WriteIndices(writer, _paletteIndices, _width, _height, _dataType, _bpp);
+                WritePalette(writer, mPalette, mPaletteLength, mBpp, mPaletteDepth);
+                WriteIndices(writer, mPaletteIndices, mWidth, mHeight, mDataType, mBpp);
             }
             else
             {
                 // write pixels
-                WritePixels(writer, _dataType, _pixels, _bpp, _width, _height, false);
+                WritePixels(writer, mDataType, mPixels, mBpp, mWidth, mHeight, false);
             }
         }
 
         // de/encoder delegate factory methdos
-        private static TGADataDecoder GetDecoder(TGAEncoding type)
+        private static TgaDataDecoder GetDecoder(TgaEncoding type)
         {
             switch (type)
             {
-                case TGAEncoding.IndexedRLE:
-                case TGAEncoding.RGBRLE:
-                case TGAEncoding.GrayScaleCmp:
-                case TGAEncoding.IndexedHDRLE:
-                case TGAEncoding.IndexedHDRLEQ:
-                    throw new NotImplementedException($"Decoder for data type: {type} is not implemented.");
+                case TgaEncoding.IndexedRLE:
+                case TgaEncoding.RGBRLE:
+                case TgaEncoding.GrayScaleCmp:
+                case TgaEncoding.IndexedHDRLE:
+                case TgaEncoding.IndexedHDRLEQ:
+                    throw new NotImplementedException($"Decoder for data id: {type} is not implemented.");
                 default:
-                    throw new ArgumentException($"Data type: {type} is not encoded.");
+                    throw new ArgumentException($"DataStructNode id: {type} is not encoded.");
             }
         }
 
-        private static TGADataEncoder GetEncoder(TGAEncoding type)
+        private static TgaDataEncoder GetEncoder(TgaEncoding type)
         {
             switch (type)
             {
-                case TGAEncoding.IndexedRLE:
-                case TGAEncoding.RGBRLE:
-                case TGAEncoding.GrayScaleCmp:
-                case TGAEncoding.IndexedHDRLE:
-                case TGAEncoding.IndexedHDRLEQ:
-                    throw new NotImplementedException($"Encoder for data type: {type} is not implemented.");
+                case TgaEncoding.IndexedRLE:
+                case TgaEncoding.RGBRLE:
+                case TgaEncoding.GrayScaleCmp:
+                case TgaEncoding.IndexedHDRLE:
+                case TgaEncoding.IndexedHDRLEQ:
+                    throw new NotImplementedException($"Encoder for data id: {type} is not implemented.");
                 default:
-                    throw new ArgumentException($"Data type: {type} is not encoded.");
+                    throw new ArgumentException($"DataStructNode id: {type} is not encoded.");
             }
         }
 
         // set header info on creation
-        private void SetHeaderInfo(int w, int h, int bpp, int palDepth, TGAEncoding enc)
+        private void SetHeaderInfo(int w, int h, int bpp, int palDepth, TgaEncoding enc)
         {
             // check if the encoding uses rle or compression and throw an exception if it does
-            if (EncodingUsesRLEOrCmp(enc))
+            if (EncodingUsesRleOrCmp(enc))
             { 
                 throw new NotImplementedException("Encodings using RLE encoding or compression are not supported.");
             }
-            else if (enc == TGAEncoding.Grayscale)
+            else if (enc == TgaEncoding.Grayscale)
             {
                 throw new NotImplementedException("Grayscale encoding is not supported.");
             }
 
             bool isIndexed = IsIndexedEncoding(enc);
 
-            _idLength = 0;
-            _colorMapType = isIndexed ? (byte)1 : (byte)0;
-            _dataType = enc;
+            mIdLength = 0;
+            mColorMapType = isIndexed ? (byte)1 : (byte)0;
+            mDataType = enc;
 
             if (isIndexed)
             {
-                _paletteStartIndex = 0;
-                _paletteLength = (short)(1 << bpp);
-                _paletteDepth = (byte)palDepth;
+                mPaletteStartIndex = 0;
+                mPaletteLength = (short)(1 << bpp);
+                mPaletteDepth = (byte)palDepth;
             }
 
-            _xOrigin = 0;
-            _yOrigin = 0;
-            _width = (short)w;
-            _height = (short)h;
-            _bpp = (byte)bpp;
-            _imageDescriptor = 0;
+            mXOrigin = 0;
+            mYOrigin = 0;
+            mWidth = (short)w;
+            mHeight = (short)h;
+            mBpp = (byte)bpp;
+            mImageDescriptor = 0;
         }
 
         private void CreateBitmap()
         {
             if (IsIndexed)
             {
-                _bitmap = BitmapHelper.Create(_palette, _paletteIndices, _width, _height);
+                mBitmap = BitmapHelper.Create(mPalette, mPaletteIndices, mWidth, mHeight);
             }
             else
             {
-                _bitmap = BitmapHelper.Create(_pixels, _width, _height);
+                mBitmap = BitmapHelper.Create(mPixels, mWidth, mHeight);
             }
         }
 
-        // encoding type checking helpers
-        private static bool EncodingUsesRLEOrCmp(TGAEncoding type)
+        // encoding id checking helpers
+        private static bool EncodingUsesRleOrCmp(TgaEncoding type)
         {
             switch (type)
             {
-                case TGAEncoding.IndexedRLE:
-                case TGAEncoding.RGBRLE:
-                case TGAEncoding.GrayScaleCmp:
-                case TGAEncoding.IndexedHDRLE:
-                case TGAEncoding.IndexedHDRLEQ:
+                case TgaEncoding.IndexedRLE:
+                case TgaEncoding.RGBRLE:
+                case TgaEncoding.GrayScaleCmp:
+                case TgaEncoding.IndexedHDRLE:
+                case TgaEncoding.IndexedHDRLEQ:
                     return true;
                 default:
                     return false;
             }
         }
 
-        private static bool IsIndexedEncoding(TGAEncoding encoding)
+        private static bool IsIndexedEncoding(TgaEncoding encoding)
         {
             switch (encoding)
             {
-                case TGAEncoding.Indexed:
-                case TGAEncoding.IndexedRLE:
-                case TGAEncoding.IndexedHDRLE:
-                case TGAEncoding.IndexedHDRLEQ:
+                case TgaEncoding.Indexed:
+                case TgaEncoding.IndexedRLE:
+                case TgaEncoding.IndexedHDRLE:
+                case TgaEncoding.IndexedHDRLEQ:
                     return true;
                 default:
                     return false;
@@ -487,13 +487,13 @@
             return indices;
         }
 
-        private static byte[] ReadIndices(BinaryReader reader, TGAEncoding type, int bpp, int width, int height)
+        private static byte[] ReadIndices(BinaryReader reader, TgaEncoding type, int bpp, int width, int height)
         {
             byte[] indices = reader.ReadBytes((int)((width * height) * ((float)bpp / 8)));
 
-            if (EncodingUsesRLEOrCmp(type))
+            if (EncodingUsesRleOrCmp(type))
             {
-                TGADataDecoder decoder = GetDecoder(type);
+                TgaDataDecoder decoder = GetDecoder(type);
                 throw new NotImplementedException();
             }
             else
@@ -504,9 +504,9 @@
             return indices;
         }
 
-        private static void WriteIndices(BinaryWriter writer, byte[] indices, int width, int height, TGAEncoding type, int bpp)
+        private static void WriteIndices(BinaryWriter writer, byte[] indices, int width, int height, TgaEncoding type, int bpp)
         {
-            if (EncodingUsesRLEOrCmp(type))
+            if (EncodingUsesRleOrCmp(type))
             {
                 throw new NotImplementedException();
             }
@@ -621,13 +621,13 @@
             return pixels;
         }
 
-        private static Color[] ReadPixels(BinaryReader reader, TGAEncoding type, int bpp, int width, int height)
+        private static Color[] ReadPixels(BinaryReader reader, TgaEncoding type, int bpp, int width, int height)
         {
             byte[] pixelData = reader.ReadBytes((int)((width * height) * ((float)bpp / 8)));
 
-            if (EncodingUsesRLEOrCmp(type))
+            if (EncodingUsesRleOrCmp(type))
             {
-                TGADataDecoder decoder = GetDecoder(type);
+                TgaDataDecoder decoder = GetDecoder(type);
                 throw new NotImplementedException();
             }
             else
@@ -636,9 +636,9 @@
             }
         }
 
-        private static void WritePixels(BinaryWriter writer, TGAEncoding type, Color[] pixels, int depth, int width, int height, bool palette)
+        private static void WritePixels(BinaryWriter writer, TgaEncoding type, Color[] pixels, int depth, int width, int height, bool palette)
         {
-            if (EncodingUsesRLEOrCmp(type))
+            if (EncodingUsesRleOrCmp(type))
             {
                 throw new NotImplementedException();
             }

@@ -8,39 +8,39 @@
     using IO;
     using Utilities;
 
-    public class TMXFile : BinaryFileBase, ITextureFile
+    public class TmxFile : BinaryBase, ITextureFile
     {
         private const byte HEADER_SIZE = 0x10;
         private const short FLAG = 0x0002;
         private const string TAG = "TMX0";
         private const byte COMMENT_MAX_LENGTH = 28;
 
-        private ushort _mipKL;
-        private byte _wrapModes;
-        private string _userComment;
-        private Bitmap _bitmap;
+        private ushort mMipKl;
+        private byte mWrapModes;
+        private string mUserComment;
+        private Bitmap mBitmap;
 
         /**********************/
         /**** Constructors ****/
         /**********************/
 
-        public TMXFile(Bitmap bitmap, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+        public TmxFile(Bitmap bitmap, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
         {
             Width = (ushort)bitmap.Width;
             Height = (ushort)bitmap.Height;
             PixelFormat = pixelFormat;
-            _wrapModes = byte.MaxValue;
+            mWrapModes = byte.MaxValue;
             UserComment = comment;
 
             switch (pixelFormat)
             {
-                case PS2PixelFormat.PSMCT32:
-                case PS2PixelFormat.PSMCT24:
-                case PS2PixelFormat.PSMCT16:
-                case PS2PixelFormat.PSMCT16S: // Non-indexed
+                case PS2PixelFormat.PSMTC32:
+                case PS2PixelFormat.PSMTC24:
+                case PS2PixelFormat.PSMTC16:
+                case PS2PixelFormat.PSMTC16S: // Non-indexed
                     PaletteFormat = 0;
                     Pixels = BitmapHelper.GetColors(bitmap);
-                    _bitmap = bitmap;
+                    mBitmap = bitmap;
                     break;
                 case PS2PixelFormat.PSMT8:
                 case PS2PixelFormat.PSMT8H:
@@ -56,39 +56,39 @@
             }
         }
 
-        public TMXFile(Stream stream, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+        public TmxFile(Stream stream, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
             : this(new Bitmap(stream), pixelFormat, comment)
         {
 
         }
 
-        public TMXFile(string path, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+        public TmxFile(string path, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
             : this(new Bitmap(path), pixelFormat, comment)
         {
 
         }
 
-        public TMXFile(string path)
+        public TmxFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-                InternalRead(reader);
+                Read(reader);
         }
 
-        public TMXFile(Stream stream)
+        public TmxFile(Stream stream, bool leaveOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream))
-                InternalRead(reader);
+                Read(reader);
         }
 
-        public TMXFile(byte[] data)
+        public TmxFile(byte[] data)
         {
             using (BinaryReader reader = new BinaryReader(new MemoryStream(data)))
-                InternalRead(reader);
+                Read(reader);
         }
 
-        internal TMXFile(BinaryReader reader)
+        internal TmxFile(BinaryReader reader)
         {
-            InternalRead(reader);
+            Read(reader);
         }
 
         /********************/
@@ -111,9 +111,9 @@
         {
             get
             {
-                if (_mipKL != ushort.MaxValue)
+                if (mMipKl != ushort.MaxValue)
                 {
-                    return ((float)(_mipKL & 0x0FFF)) / (1 << 4);
+                    return ((float)(mMipKl & 0x0FFF)) / (1 << 4);
                 }
                 else
                 {
@@ -126,9 +126,9 @@
         {
             get
             {
-                if (_mipKL != ushort.MaxValue)
+                if (mMipKl != ushort.MaxValue)
                 {
-                    return (byte)(_mipKL & 0xF000);
+                    return (byte)(mMipKl & 0xF000);
                 }
                 else
                 {
@@ -137,69 +137,69 @@
             }
         }
 
-        public TMXWrapMode HorizontalWrappingMode
+        public TmxWrapMode HorizontalWrappingMode
         {
             get
             {
-                if (_wrapModes != byte.MaxValue)
+                if (mWrapModes != byte.MaxValue)
                 {
-                    return (TMXWrapMode)((_wrapModes & 0xC) >> 2);
+                    return (TmxWrapMode)((mWrapModes & 0xC) >> 2);
                 }
                 else
                 {
-                    return TMXWrapMode.Repeat;
+                    return TmxWrapMode.Repeat;
                 }
             }
             set
             {
-                if (_wrapModes != byte.MaxValue)
+                if (mWrapModes != byte.MaxValue)
                 {
-                    _wrapModes = (byte)(_wrapModes & ~0xC);
-                    _wrapModes |= (byte)(((byte)value & 0x3) << 2);
+                    mWrapModes = (byte)(mWrapModes & ~0xC);
+                    mWrapModes |= (byte)(((byte)value & 0x3) << 2);
                 }
             }
         }
 
-        public TMXWrapMode VerticalWrappingMode
+        public TmxWrapMode VerticalWrappingMode
         {
             get
             {
-                if (_wrapModes != byte.MaxValue)
+                if (mWrapModes != byte.MaxValue)
                 {
-                    return (TMXWrapMode)(_wrapModes & 0x3);
+                    return (TmxWrapMode)(mWrapModes & 0x3);
                 }
                 else
                 {
-                    return TMXWrapMode.Repeat;
+                    return TmxWrapMode.Repeat;
                 }
             }
             set
             {
-                if (_wrapModes != byte.MaxValue)
+                if (mWrapModes != byte.MaxValue)
                 {
-                    _wrapModes = (byte)(_wrapModes & ~0x3);
-                    _wrapModes |= (byte)((byte)value & 0x3);
+                    mWrapModes = (byte)(mWrapModes & ~0x3);
+                    mWrapModes |= (byte)((byte)value & 0x3);
                 }
             }
         }
 
-        public int UserTextureID { get; set; }
+        public int UserTextureId { get; set; }
 
-        public int UserClutID { get; set; }
+        public int UserClutId { get; set; }
 
         public string UserComment
         {
             get
             {
-                return _userComment;
+                return mUserComment;
             }
             set
             {
-                _userComment = value;
+                mUserComment = value;
 
-                if (_userComment.Length > COMMENT_MAX_LENGTH)
+                if (mUserComment.Length > COMMENT_MAX_LENGTH)
                 {
-                    _userComment = _userComment.Remove(COMMENT_MAX_LENGTH-1);
+                    mUserComment = mUserComment.Remove(COMMENT_MAX_LENGTH-1);
                 }
             }
         }
@@ -225,16 +225,16 @@
         /**** Methods ****/
         /*****************/
 
-        public static TMXFile Load(string path)
+        public static TmxFile Load(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-                return new TMXFile(reader);
+                return new TmxFile(reader);
         }
 
-        public static TMXFile Load(Stream stream, bool leaveStreamOpen = false)
+        public static TmxFile Load(Stream stream, bool leaveStreamOpen = false)
         {
             using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveStreamOpen))
-                return new TMXFile(reader);
+                return new TmxFile(reader);
         }
 
         public Color[] GetPixels()
@@ -260,7 +260,7 @@
             if (mipMapIndex == -1)
             {
                 // Check if the bitmap hasn't been created already
-                if (_bitmap == null || paletteIndex != 0 || (_bitmap.Width != Width && _bitmap.Height != Height))
+                if (mBitmap == null || paletteIndex != 0 || (mBitmap.Width != Width && mBitmap.Height != Height))
                 {
                     CreateBitmap(paletteIndex, mipMapIndex);
                 }
@@ -270,10 +270,10 @@
                 CreateBitmap(paletteIndex, mipMapIndex);
             }
 
-            return _bitmap;
+            return mBitmap;
         }
 
-        internal override void InternalWrite(BinaryWriter writer)
+        internal override void Write(BinaryWriter writer)
         {
             int posFileStart = (int)writer.BaseStream.Position;
 
@@ -286,12 +286,12 @@
             writer.Write(Height);
             writer.Write((byte)PixelFormat);
             writer.Write(MipMapCount);
-            writer.Write(_mipKL);
+            writer.Write(mMipKl);
             writer.Write((byte)0);
-            writer.Write(_wrapModes);
-            writer.Write(UserTextureID);
-            writer.Write(UserClutID);
-            writer.WriteCString(_userComment, COMMENT_MAX_LENGTH);
+            writer.Write(mWrapModes);
+            writer.Write(UserTextureId);
+            writer.Write(UserClutId);
+            writer.WriteCString(mUserComment, COMMENT_MAX_LENGTH);
 
             // Check if there's any palettes and write them
             if (UsesPalette)
@@ -317,11 +317,11 @@
             writer.BaseStream.Seek(posFileEnd, SeekOrigin.Begin);
         }
 
-        private void InternalRead(BinaryReader reader)
+        private void Read(BinaryReader reader)
         {
             long posFileStart = reader.GetPosition();
             short flag = reader.ReadInt16();
-            short userID = reader.ReadInt16();
+            short userId = reader.ReadInt16();
             int length = reader.ReadInt32();
             string tag = reader.ReadCString(4);
             reader.AlignPosition(16);
@@ -337,11 +337,11 @@
             Height = reader.ReadUInt16();
             PixelFormat = (PS2PixelFormat)reader.ReadByte();
             MipMapCount = reader.ReadByte();
-            _mipKL = reader.ReadUInt16();
+            mMipKl = reader.ReadUInt16();
             byte reserved = reader.ReadByte();
-            _wrapModes = reader.ReadByte();
-            UserTextureID = reader.ReadInt32();
-            UserClutID = reader.ReadInt32();
+            mWrapModes = reader.ReadByte();
+            UserTextureId = reader.ReadInt32();
+            UserClutId = reader.ReadInt32();
             UserComment = reader.ReadCString(28);
 
             // Check if there's any palettes and read them
@@ -473,11 +473,11 @@
             {
                 if (mipIdx == -1)
                 {
-                    _bitmap = BitmapHelper.Create(Palettes[palIdx], PixelIndices, Width, Height);
+                    mBitmap = BitmapHelper.Create(Palettes[palIdx], PixelIndices, Width, Height);
                 }
                 else
                 {
-                    _bitmap = BitmapHelper.Create(Palettes[palIdx], MipMapPixelIndices[mipIdx],
+                    mBitmap = BitmapHelper.Create(Palettes[palIdx], MipMapPixelIndices[mipIdx],
                         GetMipDimension(Width, mipIdx), GetMipDimension(Height, mipIdx));
                 }
             }
@@ -485,11 +485,11 @@
             {
                 if (mipIdx == -1)
                 {
-                    _bitmap = BitmapHelper.Create(Pixels, Width, Height);
+                    mBitmap = BitmapHelper.Create(Pixels, Width, Height);
                 }
                 else
                 {
-                    _bitmap = BitmapHelper.Create(MipMapPixels[mipIdx], GetMipDimension(Width, mipIdx), GetMipDimension(Height, mipIdx));
+                    mBitmap = BitmapHelper.Create(MipMapPixels[mipIdx], GetMipDimension(Width, mipIdx), GetMipDimension(Height, mipIdx));
                 }
             }
         }

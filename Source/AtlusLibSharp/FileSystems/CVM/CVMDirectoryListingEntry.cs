@@ -11,7 +11,7 @@ namespace AtlusLibSharp.FileSystems.CVM
     internal struct DirectoryListingEntryHeader
     {
         public const int SIZE = 48;
-        public const int NAME_LENGTH = 32;
+        public const int NameLength = 32;
 
         [FieldOffset(0)]
         public short pad; // always 0
@@ -32,46 +32,46 @@ namespace AtlusLibSharp.FileSystems.CVM
         public byte unk0x0E;
 
         [FieldOffset(16)]
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = NAME_LENGTH)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = NameLength)]
         public string name;
     }
 
-    public class CVMDirectoryListingEntry
+    public class CvmDirectoryListingEntry
     {
-        private DirectoryListingEntryHeader _header;
-        private CVMDirectoryListing _originDirList;
-        private CVMDirectoryListing _dirList;
+        private DirectoryListingEntryHeader mHeader;
+        private CvmDirectoryListing mOriginDirList;
+        private CvmDirectoryListing mDirList;
 
-        internal CVMDirectoryListingEntry(BinaryReader reader, CVMDirectoryListing originDirList)
+        internal CvmDirectoryListingEntry(BinaryReader reader, CvmDirectoryListing originDirList)
         {
-            _originDirList = originDirList;
-            _header = reader.ReadStructure<DirectoryListingEntryHeader>(DirectoryListingEntryHeader.SIZE);
+            mOriginDirList = originDirList;
+            mHeader = reader.ReadStructure<DirectoryListingEntryHeader>(DirectoryListingEntryHeader.SIZE);
         }
 
         public int Size
         {
-            get { return _header.size; }
+            get { return mHeader.size; }
         }
 
         public int LBA
         {
-            get { return _header.LBA; }
+            get { return mHeader.LBA; }
         }
 
         public RecordFlags Flags
         {
-            get { return (RecordFlags)_header.flags; }
+            get { return (RecordFlags)mHeader.flags; }
         }
 
         public string Name
         {
-            get { return _header.name; }
+            get { return mHeader.name; }
         }
 
-        public CVMDirectoryListing DirectoryListing
+        public CvmDirectoryListing DirectoryListing
         {
-            get { return _dirList; }
-            internal set { _dirList = value; }
+            get { return mDirList; }
+            internal set { mDirList = value; }
         }
 
         public override string ToString()
@@ -81,22 +81,22 @@ namespace AtlusLibSharp.FileSystems.CVM
 
         internal void InternalWrite(BinaryWriter writer)
         {
-            writer.WriteStructure(_header);
+            writer.WriteStructure(mHeader);
         }
 
-        internal void Update(ISODirectoryRecord record)
+        internal void Update(IsoDirectoryRecord record)
         {
-            if (_header.name != record.Name)
+            if (mHeader.name != record.Name)
             {
-                Console.WriteLine("Warning: CVM entry name mismatch! Expected: \"{0}\" Got: \"{1}\"", _header.name, record.Name);
+                Console.WriteLine("Warning: CVM entry name mismatch! Expected: \"{0}\" Got: \"{1}\"", mHeader.name, record.Name);
             }
 
-            _header.size = record.Size;
-            _header.LBA = record.LBA;
+            mHeader.size = record.Size;
+            mHeader.LBA = record.LBA;
 
-            if (_dirList != null)
+            if (mDirList != null)
             {
-                _dirList.Update(record);
+                mDirList.Update(record);
             }
         }
     }

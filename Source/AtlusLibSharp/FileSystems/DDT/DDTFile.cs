@@ -5,27 +5,27 @@
     using AtlusLibSharp.Utilities;
     using System.IO;
 
-    public class DDTFile
+    public class DdtFile
     {
         internal const int IMG_BLOCKSIZE = 0x800;
 
-        private DDTDirectoryEntry _rootDirectory;
+        private DdtDirectoryEntry mRootDirectory;
 
-        public DDTDirectoryEntry RootDirectory
+        public DdtDirectoryEntry RootDirectory
         {
-            get { return _rootDirectory; }
+            get { return mRootDirectory; }
         }
 
-        public DDTFile(string path)
+        public DdtFile(string path)
         {
             using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
             {
-                _rootDirectory = (DDTDirectoryEntry)DDTEntryFactory.GetEntry(null, reader);
+                mRootDirectory = (DdtDirectoryEntry)DdtEntryFactory.GetEntry(null, reader);
             }
         }
     }
 
-    internal class DDTWritingContext
+    internal class DdtWritingContext
     {
         /*
         public BinaryWriter Writer;
@@ -35,14 +35,14 @@
         */
     }
 
-    public abstract class DDTEntry
+    public abstract class DdtEntry
     {
         internal const int SizeInBytes = 12;
 
-        protected int _nameOffset;
-        protected uint _dataOffset;
+        protected int NameOffset;
+        protected uint DataOffset;
         protected string _name;
-        protected DDTEntry _parent;
+        protected DdtEntry _parent;
 
         public string Name
         {
@@ -50,7 +50,7 @@
             set { _name = value; }
         }
 
-        public DDTEntry Parent
+        public DdtEntry Parent
         {
             get { return _parent; }
         }
@@ -62,32 +62,32 @@
 
         public abstract void Export(FileStream img, string rootPath);
 
-        internal abstract void InternalWrite(DDTWritingContext ctx);
+        internal abstract void InternalWrite(DdtWritingContext ctx);
     }
 
-    public class DDTDirectoryEntry : DDTEntry
+    public class DdtDirectoryEntry : DdtEntry
     {
-        private int _numChildren;
-        private DDTEntry[] _childEntries;
+        private int mNumChildren;
+        private DdtEntry[] mChildEntries;
 
-        public DDTEntry[] Entries
+        public DdtEntry[] Entries
         {
-            get { return _childEntries; }
+            get { return mChildEntries; }
         }
 
-        public DDTDirectoryEntry(BinaryReader reader, DDTEntry parent, int nameOffset, uint dataOffset, int numChildren)
+        public DdtDirectoryEntry(BinaryReader reader, DdtEntry parent, int nameOffset, uint dataOffset, int numChildren)
         {
             _parent = parent;
-            _nameOffset = nameOffset;
-            _dataOffset = dataOffset;
-            _name = reader.ReadCStringAtOffset(_nameOffset);
-            _numChildren = numChildren;
-            _childEntries = new DDTEntry[numChildren];
+            NameOffset = nameOffset;
+            DataOffset = dataOffset;
+            _name = reader.ReadCStringAtOffset(NameOffset);
+            mNumChildren = numChildren;
+            mChildEntries = new DdtEntry[numChildren];
 
             reader.Seek(dataOffset, SeekOrigin.Begin);
             for (int i = 0; i < numChildren; i++)
             {
-                _childEntries[i] = DDTEntryFactory.GetEntry(this, reader);
+                mChildEntries[i] = DdtEntryFactory.GetEntry(this, reader);
             }
         }
 
@@ -96,50 +96,50 @@
             Debug.WriteLine($"Exporting folder: {_name}");
             string newRootPath = rootPath + "//" + _name;
             Directory.CreateDirectory(newRootPath);
-            for (int i = 0; i < _numChildren; i++)
+            for (int i = 0; i < mNumChildren; i++)
             {
-                _childEntries[i].Export(img, newRootPath);
+                mChildEntries[i].Export(img, newRootPath);
             }
         }
 
-        internal override void InternalWrite(DDTWritingContext ctx)
+        internal override void InternalWrite(DdtWritingContext ctx)
         {
             throw new NotImplementedException();
         }
     }
 
-    public class DDTFileEntry : DDTEntry
+    public class DdtFileEntry : DdtEntry
     {
-        private int _size;
+        private int mSize;
 
-        public DDTFileEntry(BinaryReader reader, DDTEntry parent, int nameOffset, uint dataOffset, int size)
+        public DdtFileEntry(BinaryReader reader, DdtEntry parent, int nameOffset, uint dataOffset, int size)
         {
             _parent = parent;
-            _nameOffset = nameOffset;
-            _name = reader.ReadCStringAtOffset(_nameOffset);
-            _dataOffset = dataOffset * DDTFile.IMG_BLOCKSIZE;
-            _size = size;
+            NameOffset = nameOffset;
+            _name = reader.ReadCStringAtOffset(NameOffset);
+            DataOffset = dataOffset * DdtFile.IMG_BLOCKSIZE;
+            mSize = size;
         }
 
         public override void Export(FileStream img, string rootPath)
         {
             Debug.WriteLine($"Exporting file: {_name}");
-            byte[] data = new byte[_size];
-            img.Position = _dataOffset;
-            img.Read(data, 0, _size);
+            byte[] data = new byte[mSize];
+            img.Position = DataOffset;
+            img.Read(data, 0, mSize);
             Directory.CreateDirectory(rootPath);
             File.WriteAllBytes(rootPath + "\\" + _name, data);
         }
 
-        internal override void InternalWrite(DDTWritingContext ctx)
+        internal override void InternalWrite(DdtWritingContext ctx)
         {
             throw new NotImplementedException();
         }
     }
 
-    internal static class DDTEntryFactory
+    internal static class DdtEntryFactory
     {
-        public static DDTEntry GetEntry(DDTEntry parent, BinaryReader reader)
+        public static DdtEntry GetEntry(DdtEntry parent, BinaryReader reader)
         {
             int nameOffset = reader.ReadInt32();
             uint dataOffset = reader.ReadUInt32();
@@ -147,16 +147,16 @@
 
             long posNextEntry = reader.GetPosition();
 
-            DDTEntry entry;
+            DdtEntry entry;
 
             if (numData < 0)
             {
                 int numChildren = ~numData + 1;
-                entry = new DDTDirectoryEntry(reader, parent, nameOffset, dataOffset, numChildren);
+                entry = new DdtDirectoryEntry(reader, parent, nameOffset, dataOffset, numChildren);
             }
             else
             {
-                entry = new DDTFileEntry(reader, parent, nameOffset, dataOffset, numData);
+                entry = new DdtFileEntry(reader, parent, nameOffset, dataOffset, numData);
             }
 
             reader.Seek(posNextEntry, SeekOrigin.Begin);

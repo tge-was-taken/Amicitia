@@ -3,10 +3,10 @@
     using System.IO;
     using AtlusLibSharp.Utilities;
 
-    public class VIFUnpack : VIFPacket
+    public class VifUnpack : VifPacket
     {
         // Constructors
-        public VIFUnpack(VIFTag vt, BinaryReader reader)
+        public VifUnpack(VifTag vt, BinaryReader reader)
             : base(vt)
         {
             ReadElements(reader);
@@ -21,9 +21,9 @@
         }
 
         // Properties
-        public override PS2VIFCommand Command
+        public override PS2VifCommand Command
         {
-            get { return (PS2VIFCommand)(_command & 0xF0); }
+            get { return (PS2VifCommand)(_command & 0xF0); }
         }
 
         public ushort Address
@@ -125,7 +125,7 @@
         // Methods
         public override string ToString()
         {
-            return string.Format("{0} addr:{1} count:{2} numElements:{3} format:{4}", Command, Address, DataCount, ElementCount, ElementFormat);
+            return $"{Command} addr:{Address} count:{DataCount} numElements:{ElementCount} format:{ElementFormat}";
         }
 
         private void ReadElements(BinaryReader reader)

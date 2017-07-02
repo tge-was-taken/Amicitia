@@ -1,126 +1,79 @@
-﻿using System.Windows.Forms;
+﻿using System.IO;
+using System.Windows.Forms;
+using AtlusLibSharp.FileSystems.AMD;
 
 namespace Amicitia.ResourceWrappers
 {
-    using System.IO;
-    using System;
-    using System.ComponentModel;
-    using System.Collections.Generic;
-    using AtlusLibSharp.FileSystems.AMD;
-    using AtlusLibSharp.IO;
-
-    internal class AMDFileWrapper : ResourceWrapper
+    public class AmdFileWrapper : ResourceWrapper<AmdFile>
     {
-        /*********************/
-        /* File filter types */
-        /*********************/
-        public static readonly new SupportedFileType[] FileFilterTypes = new SupportedFileType[]
+        public AmdFileWrapper(string text, AmdFile resource) : base(text, resource)
         {
-            SupportedFileType.AMDFile
-        };
+        }
 
-        /*****************************************/
-        /* Import / Export delegate dictionaries */
-        /*****************************************/
-       public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ImportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+        protected override void Initialize()
         {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Add |
+                                       CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction(SupportedFileType.AmdFile, (res, path) => res.Save(path));
+            RegisterFileReplaceAction(SupportedFileType.AmdFile, (res, path) => new AmdFile(path));
+            RegisterFileAddAction(SupportedFileType.Resource, DefaultFileAddAction);
+            RegisterRebuildAction((wrap) =>
             {
-                SupportedFileType.AMDFile, (res, path) =>
-                res.WrappedObject = new AMDFile(path)
-            }
-        };
+                AmdFile file = new AmdFile();
 
-        public static readonly new Dictionary<SupportedFileType, Action<ResourceWrapper, string>> ExportDelegates = new Dictionary<SupportedFileType, Action<ResourceWrapper, string>>()
+                foreach (ResourceWrapper<AmdChunk> node in wrap.Nodes)
+                {
+                    file.Chunks.Add(node.Resource);
+                }
+
+                return file;
+            });
+        }
+
+        protected override void PopulateView()
         {
+            foreach (AmdChunk chunk in Resource.Chunks)
             {
-                SupportedFileType.AMDFile, (res, path) =>
-                (res as AMDFileWrapper).WrappedObject.Save(path)
-            },
-        };
-
-        /************************************/
-        /* Import / export method overrides */
-        /************************************/
-        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetImportDelegates()
-        {
-            return ImportDelegates;
-        }
-
-        protected override Dictionary<SupportedFileType, Action<ResourceWrapper, string>> GetExportDelegates()
-        {
-            return ExportDelegates;
-        }
-
-        protected override SupportedFileType[] GetSupportedFileTypes()
-        {
-            return FileFilterTypes;
-        }
-
-        /***************/
-        /* Constructor */
-        /***************/
-        public AMDFileWrapper(string text, AMDFile res) 
-            : base(text, res, SupportedFileType.AMDFile, true)
-        {
-            m_canAdd = true;
-
-            InitializeContextMenuStrip();
-        }
-
-        /*****************************/
-        /* Wrapped object properties */
-        /*****************************/
-        [Browsable(false)]
-        public new AMDFile WrappedObject
-        {
-            get { return (AMDFile)m_wrappedObject; }
-            set { SetProperty(ref m_wrappedObject, value); }
-        }
-
-        /*********************************/
-        /* Base wrapper method overrides */
-        /*********************************/
-        public override void Add(object sender, EventArgs e)
-        {
-            using (var openFileDialog = new OpenFileDialog())
-            {
-                if (openFileDialog.ShowDialog() != DialogResult.OK)
-                    return;
-
-                Nodes.Add(new AMDChunkWrapper(Path.GetFileName(openFileDialog.FileName),
-                    new AMDChunk(string.Empty, 0, File.ReadAllBytes(openFileDialog.FileName))));
-
-                RebuildWrappedObject();
+                Nodes.Add((TreeNode)ResourceWrapperFactory.GetResourceWrapper(chunk.Tag, new MemoryStream(chunk.Data)));
             }
         }
+    }
 
-        internal override void RebuildWrappedObject()
+    public class AmdChunkWrapper : ResourceWrapper<AmdChunk>
+    {
+        public new string Tag
         {
-            var archive = new AMDFile();
-            foreach (AMDChunkWrapper node in Nodes)
-            {
-                if (node.IsDirty)
-                    node.RebuildWrappedObject();
-
-                archive.Chunks.Add(node.WrappedObject);
-            }
-
-            WrappedObject = archive;
-            m_isDirty = false;
+            get { return Resource.Tag; }
+            set { SetProperty(Resource.Tag, value); }
         }
 
-        internal override void InitializeWrapper()
+        public int Flags
         {
-            Nodes.Clear();
+            get { return Resource.Flags; }
+            set { SetProperty(Resource.Flags, value); }
+        }
 
-            int idx = 0;
-            foreach (AMDChunk chunk in WrappedObject.Chunks)
-            {
-                var wrap = new AMDChunkWrapper(chunk.Tag, chunk);
-                Nodes.Add(wrap);
-            }
+        public int Size
+        {
+            get { return Resource.Size; }
+        }
 
-            base.InitializeWrapper();
+        public AmdChunkWrapper(string text, AmdChunk resource) : base(text, resource)
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
+                                       CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction(SupportedFileType.Resource, (res, path) => File.WriteAllBytes(path, res.Data));
+            RegisterFileReplaceAction(SupportedFileType.Resource, (res, path) => new AmdChunk(res.Tag, res.Flags, File.ReadAllBytes(path)));
+        }
+
+        protected override void PopulateView()
+        {
         }
     }
 }

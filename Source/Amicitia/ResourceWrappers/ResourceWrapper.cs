@@ -119,7 +119,7 @@ namespace Amicitia.ResourceWrappers
 #if DEBUG
             set { mNeedsRebuild = value; }
 #else
-		    protected set { mNeedsRebuild = value; }
+		    set { mNeedsRebuild = value; }
 #endif
         }
 

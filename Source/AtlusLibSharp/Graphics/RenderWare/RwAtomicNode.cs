@@ -66,7 +66,7 @@
         }
 
         public RwAtomicNode(RwNode parent, int frameIndex, int geometryIndex, int flag1 = 0, int flag2 = 0)
-            : base(RwNodeId.RwAtomicNode)
+            : base(RwNodeId.RwAtomicNode, parent)
         {
             mStructNode = new RwAtomicStructNode(frameIndex, geometryIndex, flag1, flag2, this);
             mExtensionNode = new RwExtensionNode(this);

@@ -23,7 +23,7 @@ namespace Amicitia
 #if DEBUG
         public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor} [DEBUG]";
 #else
-        public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor};
+        public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor}";
 #endif
 
         /// <summary>

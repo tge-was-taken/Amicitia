@@ -42,16 +42,16 @@
             return normals;
         }
 
-        public static int[] ToTriangleList(int[] triangleStrips, bool flip = true)
+        public static int[] ToTriangleList(IReadOnlyList<int> triangleStrips, bool flip = true)
         {
             List<int> triangles = new List<int>();
-            int numTris = triangleStrips.Length - 2;
+            int numTris = triangleStrips.Count - 2;
 
             int fa = triangleStrips[0];
             int fb = triangleStrips[1];
             int fc = 0;
 
-            for (int i = 2; i < triangleStrips.Length; i++)
+            for (int i = 2; i < triangleStrips.Count; i++)
             {
                 fc = triangleStrips[i];
                 flip = !flip;

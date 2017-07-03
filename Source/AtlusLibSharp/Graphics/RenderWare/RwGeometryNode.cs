@@ -48,7 +48,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         /// <summary>
         /// Gets if the mesh contains any vertex texture coordinates.
         /// </summary>
-        public bool HasTexCoords
+        public bool HasTextureCoordinates
         {
             get { return mStructNode.HasTexCoords; }
         }
@@ -244,11 +244,11 @@ namespace AtlusLibSharp.Graphics.RenderWare
             mExtensionNode = RwNodeFactory.GetNode<RwExtensionNode>(this, reader);
         }
 
-        public RwGeometryNode(RwNode parent, Assimp.Mesh mesh, Assimp.Material material, RwFrameListNode node, Matrix4x4[] inverseBoneMatrices, out bool singleWeight)
+        public RwGeometryNode(RwNode parent, Assimp.Mesh mesh, Assimp.Material material, RwFrameListNode frameList, Matrix4x4[] inverseBoneMatrices, out bool singleWeight)
             : base(RwNodeId.RwGeometryNode, parent)
         {
             bool forceSingleWeight = inverseBoneMatrices == null;
-            mStructNode = new RwGeometryStructNode(this, mesh, node, forceSingleWeight, out byte[][] skinBoneIndices, out float[][] skinBoneWeights, out singleWeight);
+            mStructNode = new RwGeometryStructNode(this, mesh, frameList, forceSingleWeight, out byte[][] skinBoneIndices, out float[][] skinBoneWeights, out singleWeight);
             Materials = new RwMaterialListNode(this, material);
 
             var materialSplit = new RwMeshListNode( this );

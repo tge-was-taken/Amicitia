@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
@@ -277,16 +278,37 @@ namespace Amicitia.ResourceWrappers
             RegisterFileExportAction(SupportedFileType.AssimpModelFile, (res, path) =>
             {
                 var scene = RwClumpNode.ToAssimpScene(res);
-                var ctx = new Assimp.AssimpContext();
-                ctx.ExportFile(scene, path, "collada");
+
+                using ( var ctx = new Assimp.AssimpContext() )
+                {
+                    var exportFormats = ctx.GetSupportedExportFormats();
+                    var extension = Path.GetExtension( path ).TrimStart('.');
+                    var exportFormat = exportFormats.SingleOrDefault( x => x.FileExtension.Equals( extension, System.StringComparison.InvariantCultureIgnoreCase ) );
+
+#if !DEBUG
+                    if ( exportFormat == null )
+                        throw new System.Exception( "Unsupported Assimp Export Format" );
+#else
+                    if ( exportFormat == null )
+                    {
+                        System.Console.WriteLine( "Unsupported Assimp Export Format" );
+                        return;
+                    }
+#endif
+
+                    ctx.ExportFile( scene, path, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs | Assimp.PostProcessSteps.JoinIdenticalVertices);
+                }
             });
             RegisterFileReplaceAction(SupportedFileType.RwClumpNode, (res, path) => (RwClumpNode) RwNode.Load(path));
             RegisterFileReplaceAction(SupportedFileType.AssimpModelFile, (res, path) =>
             {
-                var ctx = new Assimp.AssimpContext();
-                var scene = ctx.ImportFile(path);
-                res.ReplaceGeometries(scene);
-                return res;
+                using ( var ctx = new Assimp.AssimpContext() )
+                {
+                    ctx.SetConfig( new Assimp.Configs.MaxBoneCountConfig( 64 ) );
+                    var scene = ctx.ImportFile( path, Assimp.PostProcessSteps.SplitByBoneCount | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.FlipUVs);
+                    res.ReplaceGeometries( scene );
+                    return res;
+                }
             });
             RegisterRebuildAction((wrap) =>
             {

@@ -107,177 +107,232 @@ namespace AtlusLibSharp.Graphics.RenderWare
 
         public static Assimp.Scene ToAssimpScene(RwClumpNode clumpNode)
         {
-            Assimp.Scene aiScene = new Assimp.Scene();
+            // Scene
+            var aiScene = new Assimp.Scene();
 
-            int drawCallIdx = 0;
-            int materialIdx = 0;
-            int totalSplitIdx = 0;
-            List<int> meshStartIndices = new List<int>();
-            foreach (RwAtomicNode drawCall in clumpNode.Atomics)
+            // RootNode
+            var rootFrame = clumpNode.FrameList[0];
+            var aiRootNode = new Assimp.Node( "SceneRoot", null );
+            aiRootNode.Transform = new Assimp.Matrix4x4( rootFrame.Transform.M11, rootFrame.Transform.M21, rootFrame.Transform.M31, rootFrame.Transform.M41,
+                                                         rootFrame.Transform.M12, rootFrame.Transform.M22, rootFrame.Transform.M32, rootFrame.Transform.M42,
+                                                         rootFrame.Transform.M13, rootFrame.Transform.M23, rootFrame.Transform.M33, rootFrame.Transform.M43,
+                                                         rootFrame.Transform.M14, rootFrame.Transform.M24, rootFrame.Transform.M34, rootFrame.Transform.M44 );
+
+            aiScene.RootNode = aiRootNode;
+
+            for ( int i = 1; i < clumpNode.FrameList.Count - 1; i++ )
             {
-                meshStartIndices.Add(totalSplitIdx);
-                var mesh = clumpNode.GeometryList[drawCall.GeometryIndex];
-                var node = clumpNode.FrameList[drawCall.FrameIndex];
-                var skinPlugin = (RwSkinNode)mesh.ExtensionNodes.SingleOrDefault(x => x.Id == RwNodeId.RwSkinNode);
+                var frame = clumpNode.FrameList[i];
+                var frameName = frame.HAnimFrameExtensionNode.NameId.ToString();
 
-                int splitIdx = 0;
-                foreach (RwMesh split in mesh.MeshListNode.MaterialMeshes)
+                Assimp.Node aiParentNode = null;
+                if (frame.Parent != null)
                 {
-                    Assimp.Mesh aiMesh = new Assimp.Mesh(Assimp.PrimitiveType.Triangle)
+                    string parentName = "SceneRoot";
+                    if (frame.Parent.HasHAnimExtension)
                     {
-                        Name = $"AtomicNode{drawCallIdx.ToString("00")}_Split{splitIdx.ToString("00")}",
-                        MaterialIndex = split.MaterialIndex + materialIdx
-                    };
-
-                    // get split indices
-                    int[] indices = split.Indices;
-                    if (mesh.MeshListNode.PrimitiveType == RwPrimitiveType.TriangleStrip)
-                        indices = MeshUtilities.ToTriangleList(indices, false);
-
-                    // pos & nrm
-                    for (int i = 0; i < indices.Length; i++)
-                    {
-                        if (mesh.HasVertices)
-                        {
-                            var vert = Vector3.Transform(mesh.Vertices[indices[i]], node.WorldTransform);
-                            aiMesh.Vertices.Add(vert.ToAssimpVector3D());
-                        }
-                        if (mesh.HasNormals)
-                        {
-                            var nrm = Vector3.TransformNormal(mesh.Normals[indices[i]], node.WorldTransform);
-                            aiMesh.Normals.Add(nrm.ToAssimpVector3D());
-                        }
+                        parentName = frame.Parent.HAnimFrameExtensionNode.NameId.ToString();
                     }
 
-                    // tex coords
-                    if (mesh.HasTexCoords)
-                    {
-                        for (int i = 0; i < mesh.TextureCoordinateChannelCount; i++)
-                        {
-                            List<Assimp.Vector3D> texCoordChannel = new List<Assimp.Vector3D>();
+                    aiParentNode = aiRootNode.FindNode( parentName );
+                }
 
-                            for (int j = 0; j < indices.Length; j++)
+                var aiNode = new Assimp.Node( frameName, aiParentNode );
+                aiNode.Transform = new Assimp.Matrix4x4( frame.Transform.M11, frame.Transform.M21, frame.Transform.M31, frame.Transform.M41,
+                                                         frame.Transform.M12, frame.Transform.M22, frame.Transform.M32, frame.Transform.M42,
+                                                         frame.Transform.M13, frame.Transform.M23, frame.Transform.M33, frame.Transform.M43,
+                                                         frame.Transform.M14, frame.Transform.M24, frame.Transform.M34, frame.Transform.M44 );
+                aiParentNode.Children.Add( aiNode );
+            }
+
+            // Meshes, Materials
+            for ( int atomicIndex = 0; atomicIndex < clumpNode.Atomics.Count; atomicIndex++ )
+            {
+                var atomic   = clumpNode.Atomics[atomicIndex];
+                var geometry = clumpNode.GeometryList[atomic.GeometryIndex];
+                var frame    = clumpNode.FrameList[atomic.FrameIndex];
+
+                var aiNodeName = $"Atomic{atomicIndex}";
+                var aiNode = new Assimp.Node( aiNodeName, aiScene.RootNode );
+                var frameWorldTransform = frame.WorldTransform;
+                aiNode.Transform = new Assimp.Matrix4x4( frameWorldTransform.M11, frameWorldTransform.M21, frameWorldTransform.M31, frameWorldTransform.M41,
+                                                         frameWorldTransform.M12, frameWorldTransform.M22, frameWorldTransform.M32, frameWorldTransform.M42,
+                                                         frameWorldTransform.M13, frameWorldTransform.M23, frameWorldTransform.M33, frameWorldTransform.M43,
+                                                         frameWorldTransform.M14, frameWorldTransform.M24, frameWorldTransform.M34, frameWorldTransform.M44 );
+                aiScene.RootNode.Children.Add( aiNode );
+
+                bool hasVertexWeights = geometry.SkinNode != null;
+
+                for ( int meshIndex = 0; meshIndex < geometry.MeshListNode.MaterialMeshes.Length; meshIndex++ )
+                {
+                    var mesh = geometry.MeshListNode.MaterialMeshes[meshIndex];
+                    var aiMesh = new Assimp.Mesh( $"Atomic{atomicIndex}_Geometry{atomic.GeometryIndex}_Mesh{meshIndex}", Assimp.PrimitiveType.Triangle );
+
+                    // get triangle list indices
+                    int[] indices;
+
+                    if ( geometry.MeshListNode.PrimitiveType == RwPrimitiveType.TriangleList )
+                    {
+                        indices = mesh.Indices;
+                    }
+                    else
+                    {
+                        indices = MeshUtilities.ToTriangleList( mesh.Indices, false );
+                    }
+
+                    // Faces
+                    for ( int i = 0; i < indices.Length; i += 3 )
+                    {
+                        var faceIndices = new[] { i, i + 1, i + 2 };
+                        var aiFace = new Assimp.Face( faceIndices );
+                        aiMesh.Faces.Add( aiFace );
+                    }
+
+                    // TextureCoordinateChannels, VertexColorChannels, Vertices, MaterialIndex, Normals
+                    for ( int triIdx = 0; triIdx < indices.Length; triIdx += 3 )
+                    {
+                        for ( int triVertIdx = 0; triVertIdx < 3; triVertIdx++ )
+                        {
+                            int vertexIndex = indices[triIdx + triVertIdx];
+
+                            // TextureCoordinateChannels
+                            if ( geometry.HasTextureCoordinates )
                             {
-                                texCoordChannel.Add(mesh.TextureCoordinateChannels[i][indices[j]].ToAssimpVector3D(0));
-                            }
-
-                            aiMesh.TextureCoordinateChannels[i] = texCoordChannel;
-                        }
-                    }
-
-                    // colors
-                    if (mesh.HasColors)
-                    {
-                        List<Assimp.Color4D> vertColorChannel = new List<Assimp.Color4D>();
-
-                        for (int i = 0; i < indices.Length; i++)
-                        {
-                            var color = mesh.Colors[indices[i]];
-                            vertColorChannel.Add(new Assimp.Color4D(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f));
-                        }
-
-                        aiMesh.VertexColorChannels[0] = vertColorChannel;
-                    }
-
-                    // generate temporary face indices
-                    int[] tempIndices = new int[aiMesh.VertexCount];
-                    for (int i = 0; i < aiMesh.VertexCount; i++)
-                        tempIndices[i] = i;
-
-                    aiMesh.SetIndices(tempIndices, 3);
-
-                    // vertex weights
-                    if (skinPlugin != null)
-                    {
-                        var boneDictionary = new Dictionary<int, Assimp.Bone>();
-
-                        for (int i = 0; i < indices.Length; i++)
-                        {
-                            var skinWeights = skinPlugin.VertexBoneWeights[indices[i]];
-                            var skinBoneIds = skinPlugin.VertexBoneIndices[indices[i]]
-                                .Select(x => clumpNode.FrameList.GetFrameIndexByHierarchyIndex(x))
-                                .ToList();
-
-                            for (int j = 0; j < 4; j++)
-                            {
-                                if (skinWeights[j] != 0.0f)
+                                for ( int channelIdx = 0; channelIdx < geometry.TextureCoordinateChannelCount; channelIdx++ )
                                 {
-                                    Assimp.VertexWeight vertexWeight =
-                                        new Assimp.VertexWeight(indices[i], skinWeights[j]);
-
-                                    if (!boneDictionary.ContainsKey(skinBoneIds[j]))
-                                    {
-                                        boneDictionary[skinBoneIds[j]] =
-                                            new Assimp.Bone(
-                                                clumpNode.FrameList[skinBoneIds[j]].HAnimFrameExtensionNode.NameId.ToString(),
-                                                Assimp.Matrix3x3.Identity, new[] {vertexWeight});
-                                    }
-                                    else
-                                    {
-                                        boneDictionary[skinBoneIds[j]].VertexWeights.Add(vertexWeight);
-                                    }
+                                    var textureCoordinate = geometry.TextureCoordinateChannels[channelIdx][vertexIndex];
+                                    var aiTextureCoordinate = new Assimp.Vector3D( textureCoordinate.X, textureCoordinate.Y, 0f );
+                                    aiMesh.TextureCoordinateChannels[channelIdx].Add( aiTextureCoordinate );
                                 }
                             }
+
+                            // VertexColorChannels
+                            if ( geometry.HasColors )
+                            {
+                                var color = geometry.Colors[vertexIndex];
+                                var aiColor = new Assimp.Color4D( color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f );
+                                aiMesh.VertexColorChannels[0].Add( aiColor );
+                            }
+
+                            // Vertices
+                            if ( geometry.HasVertices )
+                            {
+                                var vertex = geometry.Vertices[vertexIndex];
+                                var aiVertex = new Assimp.Vector3D( vertex.X, vertex.Y, vertex.Z );
+                                aiMesh.Vertices.Add( aiVertex );
+                            }
+
+                            // Normals
+                            if ( geometry.HasNormals )
+                            {
+                                var normal = geometry.Normals[vertexIndex];
+                                var aiNormal = new Assimp.Vector3D( normal.X, normal.Y, normal.Z );
+                                aiMesh.Normals.Add( aiNormal );
+                            }
+                        }
+                    }
+
+                    // Bones
+                    if (hasVertexWeights)
+                    {
+                        var skinNode = geometry.SkinNode;
+                        var aiBoneMap = new Dictionary<int, Assimp.Bone>();
+
+                        for ( int i = 0; i < indices.Length; i++ )
+                        {
+                            var vertexIndex = indices[i];
+                            int realVertexIndex = i;
+
+                            for ( int j = 0; j < 4; j++ )
+                            {
+                                var boneIndex = skinNode.VertexBoneIndices[vertexIndex][j];
+                                var boneWeight = skinNode.VertexBoneWeights[vertexIndex][j];
+
+                                if ( boneWeight == 0.0f )
+                                    continue;
+
+                                if (!aiBoneMap.Keys.Contains( boneIndex ) )
+                                {
+                                    var aiBone = new Assimp.Bone();
+                                    var boneFrame = clumpNode.FrameList.GetFrameByHierarchyIndex( boneIndex );
+
+                                    aiBone.Name = boneFrame.HasHAnimExtension ? boneFrame.HAnimFrameExtensionNode.NameId.ToString() : "SceneRoot";
+                                    aiBone.VertexWeights.Add( new Assimp.VertexWeight( realVertexIndex, boneWeight ) );
+
+                                    Matrix4x4.Invert( frame.WorldTransform, out Matrix4x4 invertedFrameWorldTransform );
+                                    Matrix4x4.Invert( boneFrame.WorldTransform * invertedFrameWorldTransform, out Matrix4x4 offsetMatrix );
+                                    aiBone.OffsetMatrix = new Assimp.Matrix4x4( offsetMatrix.M11, offsetMatrix.M21, offsetMatrix.M31, offsetMatrix.M41,
+                                                                                offsetMatrix.M12, offsetMatrix.M22, offsetMatrix.M32, offsetMatrix.M42,
+                                                                                offsetMatrix.M13, offsetMatrix.M23, offsetMatrix.M33, offsetMatrix.M43,
+                                                                                offsetMatrix.M14, offsetMatrix.M24, offsetMatrix.M34, offsetMatrix.M44 );
+                                    aiBoneMap[boneIndex] = aiBone;
+                                }
+
+                                if ( !aiBoneMap[boneIndex].VertexWeights.Any( x => x.VertexID == realVertexIndex ) )
+                                    aiBoneMap[boneIndex].VertexWeights.Add( new Assimp.VertexWeight( realVertexIndex, boneWeight ) );
+                            }
                         }
 
-                        var bones = boneDictionary.Values.ToList();
-                        foreach (var bone in bones)
-                            aiMesh.Bones.Add(bone);
+                        aiMesh.Bones.AddRange( aiBoneMap.Values );
                     }
-
-                    // add the mesh to the listNode
-                    aiScene.Meshes.Add(aiMesh);
-
-                    splitIdx++;
-                }
-
-                totalSplitIdx += splitIdx;
-
-                foreach (RwMaterial mat in mesh.Materials)
-                {
-                    Assimp.Material aiMaterial = new Assimp.Material();
-                    aiMaterial.AddProperty(new Assimp.MaterialProperty(Assimp.Unmanaged.AiMatKeys.NAME, "MaterialNode" + (materialIdx++).ToString("00")));
-
-                    if (mat.IsTextured)
+                    else
                     {
-                        aiMaterial.AddProperty(new Assimp.MaterialProperty(Assimp.Unmanaged.AiMatKeys.TEXTURE_BASE, mat.TextureReferenceNode.ReferencedTextureName + ".png", Assimp.TextureType.Diffuse, 0));
+                        var aiBone = new Assimp.Bone();
+
+                        // Name
+                        aiBone.Name = frame.HasHAnimExtension ? frame.HAnimFrameExtensionNode.NameId.ToString() : "SceneRoot";
+
+                        // VertexWeights
+                        for ( int i = 0; i < aiMesh.Vertices.Count; i++ )
+                        {
+                            var aiVertexWeight = new Assimp.VertexWeight( i, 1f );
+                            aiBone.VertexWeights.Add( aiVertexWeight );
+                        }
+
+                        // OffsetMatrix
+                        /*
+                        Matrix4x4.Invert( frame.WorldTransform, out Matrix4x4 offsetMatrix );
+                        aiBone.OffsetMatrix = new Assimp.Matrix4x4( offsetMatrix.M11, offsetMatrix.M21, offsetMatrix.M31, offsetMatrix.M41,
+                                                                    offsetMatrix.M12, offsetMatrix.M22, offsetMatrix.M32, offsetMatrix.M42,
+                                                                    offsetMatrix.M13, offsetMatrix.M23, offsetMatrix.M33, offsetMatrix.M43,
+                                                                    offsetMatrix.M14, offsetMatrix.M24, offsetMatrix.M34, offsetMatrix.M44 );
+                        */
+                        aiBone.OffsetMatrix = Assimp.Matrix4x4.Identity;
+
+                        aiMesh.Bones.Add( aiBone );
                     }
 
-                    aiScene.Materials.Add(aiMaterial);
-                }
+                    var material = geometry.Materials[mesh.MaterialIndex];
+                    var aiMaterial = new Assimp.Material();
 
-                drawCallIdx++;
-            }
-
-            // store node lookup
-            Dictionary<RwFrame, Assimp.Node> nodeLookup = new Dictionary<RwFrame, Assimp.Node>();
-
-            // first create the root node
-            var rootNode = new Assimp.Node("Root") {Transform = clumpNode.FrameList[0].Transform.ToAssimpMatrix4x4()};
-            nodeLookup.Add(clumpNode.FrameList[0], rootNode);
-
-            for (int i = 1; i < clumpNode.FrameList.Count - 1; i++)
-            {
-                var node = clumpNode.FrameList[i];
-                string name = node.HAnimFrameExtensionNode.NameId.ToString();
-
-                var aiNode = new Assimp.Node(name) {Transform = node.Transform.ToAssimpMatrix4x4()};
-
-                // get the associated meshes for this node
-                var drawCalls = clumpNode.Atomics.FindAll(dc => dc.FrameIndex == i);
-                foreach (var drawCall in drawCalls)
-                {
-                    for (int j = 0; j < clumpNode.GeometryList[drawCall.GeometryIndex].MaterialCount; j++)
+                    if ( material.IsTextured )
                     {
-                        aiNode.MeshIndices.Add(meshStartIndices[clumpNode.Atomics.IndexOf(drawCall)] + j);
+                        // TextureDiffuse
+                        var texture = material.TextureReferenceNode;
+                        aiMaterial.TextureDiffuse = new Assimp.TextureSlot(
+                            texture.ReferencedTextureName, Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0 );
                     }
+
+                    // Name
+                    aiMaterial.Name = $"Geometry{atomic.GeometryIndex}_Material{mesh.MaterialIndex}";
+                    if ( material.IsTextured )
+                        aiMaterial.Name = material.TextureReferenceNode.ReferencedTextureName;
+
+                    aiMaterial.ShadingMode = Assimp.ShadingMode.Phong;
+
+                    // Add mesh to meshes
+                    aiScene.Meshes.Add( aiMesh );
+
+                    // Add material to materials
+                    aiScene.Materials.Add( aiMaterial );
+
+                    // MaterialIndex
+                    aiMesh.MaterialIndex = aiScene.Materials.Count - 1;
+
+                    // Add mesh index to node
+                    aiNode.MeshIndices.Add( aiScene.Meshes.Count - 1 );
                 }
-
-                nodeLookup[node.Parent].Children.Add(aiNode);
-                nodeLookup.Add(node, aiNode);
             }
-
-            aiScene.RootNode = rootNode;
 
             return aiScene;
         }
@@ -385,11 +440,35 @@ namespace AtlusLibSharp.Graphics.RenderWare
 
             for (var i = 0; i < scene.Meshes.Count; i++)
             {
-                var assimpMesh = scene.Meshes[i];
-                var rootNode = scene.RootNode.Children.SingleOrDefault(x => x.MeshIndices.Contains(i));
+                var assimpMesh = scene.Meshes[i];            
+
+                Assimp.Node RecursivelyFindRootNode(Assimp.Node node)
+                {
+                    if ( node.MeshIndices.Contains( i ) )
+                    {
+                        return node;
+                    }
+                    else
+                    {
+                        foreach ( var child in node.Children )
+                        {
+                            var result = RecursivelyFindRootNode( child );
+                            if ( result != null )
+                                return result;
+                        }
+                    }
+
+                    return null;
+                }
+
+                var rootNode = RecursivelyFindRootNode( scene.RootNode );
+                if (rootNode == null)
+                {
+                    rootNode = scene.RootNode;
+                }
 
                 if (rootNode != null)
-                {
+                { 
                     var worldTransform = GetWorldTransform(rootNode);
                     var worldTransformInv = worldTransform;
                     worldTransformInv.Transpose();
@@ -409,16 +488,6 @@ namespace AtlusLibSharp.Graphics.RenderWare
                             .TransformVecByMatrix4(ref vector, ref worldTransformInv);
                         assimpMesh.Normals[j] = vector;
                     }
-
-                    for (int j = 0; j < assimpMesh.TextureCoordinateChannelCount; j++)
-                    {
-                        for (int k = 0; k < assimpMesh.TextureCoordinateChannels[j].Count; k++)
-                        {
-                            var vector = assimpMesh.TextureCoordinateChannels[j][k];
-                            assimpMesh.TextureCoordinateChannels[j][k] =
-                                new Assimp.Vector3D(vector.X, -vector.Y, 0);
-                        }
-                    }
                 }
 
                 var geometryNode = new RwGeometryNode(this, assimpMesh, scene.Materials[assimpMesh.MaterialIndex], FrameList, inverseBoneMatrices, out bool singleWeight);
@@ -427,7 +496,14 @@ namespace AtlusLibSharp.Graphics.RenderWare
                 var atomicNode = new RwAtomicNode(this, 0, i, 5);
                 if (singleWeight)
                 {
-                    atomicNode.FrameIndex = FrameList.GetFrameIndexByName(assimpMesh.Bones[0].Name);
+                    if ( assimpMesh.Bones.Count != 0 )
+                    {
+                        atomicNode.FrameIndex = FrameList.GetFrameIndexByName( assimpMesh.Bones[0].Name );
+                    }
+                    else if ( rootNode != null )
+                    {
+                        atomicNode.FrameIndex = FrameList.GetFrameIndexByName( rootNode.Name );
+                    }
                 }
 
                 Atomics.Add( atomicNode );
@@ -439,7 +515,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
         private Assimp.Matrix4x4 GetWorldTransform(Assimp.Node node)
         {
             var matrix = node.Transform;
-            if (node.Parent != null)
+            if ( node.Parent != null )
                 matrix *= GetWorldTransform(node.Parent);
 
             return matrix;

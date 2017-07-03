@@ -431,7 +431,7 @@ namespace Amicitia.ModelViewer
                 if ( geom.HasNormals )
                     vtx.Nrm = new BasicVec3( SN.Vector3.TransformNormal( geom.Normals[i], transform ) );
 
-                if ( geom.HasTexCoords )
+                if ( geom.HasTextureCoordinates )
                     vtx.Tex = new BasicVec2( geom.TextureCoordinateChannels[0][i] );
 
                 if ( geom.HasColors )

@@ -4,6 +4,7 @@
     using System.IO;
     using System.Linq;
     using AtlusLibSharp.Utilities;
+    using ManagedNvTriStrip;
 
     public enum RwPrimitiveType
     {
@@ -98,9 +99,7 @@
 
                 if (primitiveType == RwPrimitiveType.TriangleStrip)
                 {
-                    ManagedNvTriStrip.PrimitiveGroup[] primitives = null;
-
-                    if (ManagedNvTriStrip.NvTriStripUtility.Stripify(matSplitIndices, ref primitives))
+                    if (NvTriStripUtility.GenerateStrips(matSplitIndices, out PrimitiveGroup[] primitives ) && primitives[0].Type == ManagedNvTriStrip.PrimitiveType.TriangleStrip)
                     {
                         matSplitIndices = primitives[0].Indices;
                         geometryNode.Flags |= RwGeometryFlags.CanTriStrip;

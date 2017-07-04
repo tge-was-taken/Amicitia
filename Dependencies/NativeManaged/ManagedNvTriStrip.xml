@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        "ManagedNvTriStrip"
+    </assembly>
+    <members>
+        <member name="M:ManagedNvTriStrip.NvTriStripUtility.GenerateStrips(System.UInt16[],ManagedNvTriStrip.PrimitiveGroup[]@,System.Boolean)">
+            <summary>
+Generates strips from the given triangle indices and returns an array of stripped, optimized primitive groups.
+</summary>
+        </member>
+        <member name="M:ManagedNvTriStrip.NvTriStripUtility.GenerateStrips(System.UInt16[],ManagedNvTriStrip.PrimitiveGroup[]@)">
+            <summary>
+Generates strips from the given triangle indices and returns an array of stripped, optimized primitive groups.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.NvTriStripUtility.ListsOnly">
+            <summary>
+If set to true, will return an optimized list, with no strips at all.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.NvTriStripUtility.MinStripSize">
+            <summary>
+Gets or sets the minimum acceptable size for a strip, in triangles.
+All strips generated which are shorter than this will be thrown into one big, separate list.
+Default is 0.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.NvTriStripUtility.StitchStrips">
+            <summary>
+Gets or sets if the utility should stitch the strips together into one huge strip or not.
+If set to true, you'll get back one huge strip stitched together using degenerate triangles.
+If set to false, you'll get back a large number of separate strips.
+Default is true.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.NvTriStripUtility.CacheSize">
+            <summary>
+Gets or sets the cache size which the stripifier uses to optimize the data.
+Controls the length of the generated individual strips.
+Default is 16.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.NvTriStripUtility.RestartValue">
+            <summary>
+Gets or sets the primitive restart value used if primitive restart is enabled.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.NvTriStripUtility.UseRestart">
+            <summary>
+Gets or sets if the utility should use primitive restarts. If restarting is enabled then stitching of the strips is forced.
+Default is true.
+</summary>
+        </member>
+        <member name="T:ManagedNvTriStrip.NvTriStripUtility">
+            <summary>
+Utility class providing methods for optimizing and stripping mesh indices.
+</summary>
+        </member>
+        <member name="M:ManagedNvTriStrip.PrimitiveGroup.#ctor(PrimitiveGroup*)">
+            <summary>
+Initialize a new instance using a pointer to the native primitive group.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.PrimitiveGroup.Indices">
+            <summary>
+Gets the indices of the group.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.PrimitiveGroup.IndexCount">
+            <summary>
+Gets the number of indices in the index array.
+</summary>
+        </member>
+        <member name="P:ManagedNvTriStrip.PrimitiveGroup.Type">
+            <summary>
+Gets the primitive type of the group.
+</summary>
+        </member>
+        <member name="T:ManagedNvTriStrip.PrimitiveGroup">
+            <summary>
+A primitive group contains optimized and/or stripped index data in a specified primitive format.
+</summary>
+        </member>
+        <member name="T:ManagedNvTriStrip.PrimitiveType">
+            <summary>
+Enumeration for the types of primitives used in primitive groups.
+</summary>
+        </member>
+    </members>
+</doc>

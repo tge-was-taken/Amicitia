@@ -224,7 +224,14 @@ namespace Amicitia.ModelViewer
             }
         }
 
-        public static bool IsSupported => GL.GetString(StringName.Version)[0] >= 4;
+        public static bool IsSupported
+        {
+            get
+            {
+                var version = GL.GetString( StringName.Version );
+                return version[0] >= '4' && version[2] >= '5'; // X.Y
+            }
+        }
 
         public ModelViewer(GLControl controller)
         {

@@ -48,12 +48,11 @@ namespace AtlusLibSharp.Graphics.RenderWare
 
             for (int i = 0; i < Count; i++)
             {
-                mExtensionNodes.Add(RwNodeFactory.GetNode<RwExtensionNode>(this, reader));
+                var extensionNode = RwNodeFactory.GetNode<RwExtensionNode>( this, reader );           
 
-                if (mExtensionNodes[i].Children != null && mExtensionNodes[i].Children.Count > 0)
-                {
-                    mStruct.FrameList[i].HAnimFrameExtensionNode = mExtensionNodes[i].Children[0] as RwHAnimFrameExtensionNode;
-                }
+                mStruct.FrameList[i].HAnimFrameExtensionNode = extensionNode.FindNode( RwNodeId.RwHAnimFrameExtensionNode ) as RwHAnimFrameExtensionNode;
+
+                mExtensionNodes.Add(extensionNode);
             }
         }
 

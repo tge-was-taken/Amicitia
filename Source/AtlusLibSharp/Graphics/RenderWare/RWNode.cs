@@ -15,7 +15,7 @@
         private RwNodeId mId;
         private uint mRawVersion;
         private RwNode mParent;
-        private List<RwNode> mChildren;
+        private List<RwNode> mChildren = new List<RwNode>();
         private byte[] mData;
         private uint mSize;
 

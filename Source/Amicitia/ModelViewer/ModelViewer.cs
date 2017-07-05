@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using OpenTK.Graphics;
 using OpenTK;
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
 using SN = System.Numerics;
@@ -229,7 +229,7 @@ namespace Amicitia.ModelViewer
             get
             {
                 var version = GL.GetString( StringName.Version );
-                return version[0] >= '4' && version[2] >= '5'; // X.Y
+                return version[0] >= '3' && version[2] >= '0'; // X.Y
             }
         }
 
@@ -370,17 +370,30 @@ namespace Amicitia.ModelViewer
                     pixels[i] = new BasicCol4( colorpixels[i] );
 
                 // create the texture
-                GL.CreateTextures( TextureTarget.Texture2D, 1, out int tex );
+                int tex = GL.GenTexture();
+                GL.BindTexture( TextureTarget.Texture2D, tex );
+
+                // GL 4.5
+                //GL.CreateTextures( TextureTarget.Texture2D, 1, out int tex );
 
                 // set up the params
-                GL.TextureParameter( tex, TextureParameterName.TextureWrapS, RwtoGlConversionHelper.WrapDictionary[texture.HorrizontalAddressingMode] );
-                GL.TextureParameter( tex, TextureParameterName.TextureWrapT, RwtoGlConversionHelper.WrapDictionary[texture.VerticalAddressingMode] );
-                GL.TextureParameter( tex, TextureParameterName.TextureMagFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
-                GL.TextureParameter( tex, TextureParameterName.TextureMinFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
+                GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureWrapS, RwtoGlConversionHelper.WrapDictionary[texture.HorrizontalAddressingMode] );
+                GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureWrapT, RwtoGlConversionHelper.WrapDictionary[texture.VerticalAddressingMode] );
+                GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
+                GL.TexParameter( TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
+
+                // GL 4.5
+                //GL.TextureParameter( tex, TextureParameterName.TextureWrapS, RwtoGlConversionHelper.WrapDictionary[texture.HorrizontalAddressingMode] );
+                //GL.TextureParameter( tex, TextureParameterName.TextureWrapT, RwtoGlConversionHelper.WrapDictionary[texture.VerticalAddressingMode] );
+                //GL.TextureParameter( tex, TextureParameterName.TextureMagFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
+                //GL.TextureParameter( tex, TextureParameterName.TextureMinFilter, RwtoGlConversionHelper.FilterDictionary[texture.FilterMode] );
 
                 // set up the bitmap data
-                GL.TextureStorage2D( tex, 1, SizedInternalFormat.Rgba8, texture.Width, texture.Height );
-                GL.TextureSubImage2D( tex, 0, 0, 0, texture.Width, texture.Height, PixelFormat.Rgba, PixelType.UnsignedByte, pixels );
+                GL.TexImage2D( TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, texture.Width, texture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixels );
+
+                // GL 4.5
+                //GL.TextureStorage2D( tex, 1, SizedInternalFormat.Rgba8, texture.Width, texture.Height );
+                //GL.TextureSubImage2D( tex, 0, 0, 0, texture.Width, texture.Height, PixelFormat.Rgba, PixelType.UnsignedByte, pixels );
 
                 // add a texture lookup for the processed texture
                 mTexLookup.Add( texture.Name, tex );

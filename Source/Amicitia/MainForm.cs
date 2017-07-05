@@ -90,26 +90,28 @@ namespace Amicitia
             // hide the picture box
             mainPictureBox.Visible = false;
             glControl1.Visible = false;
-            IResourceWrapper res = mainTreeView.SelectedNode as IResourceWrapper;
 
-            if ( res == null )
+            var resNode = mainTreeView.SelectedNode;
+            var resWrap = resNode as IResourceWrapper;
+
+            if ( resWrap == null )
             {
                 return;
             }
 
             try
             {
-                mainPropertyGrid.SelectedObject = res;
+                mainPropertyGrid.SelectedObject = resWrap;
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                mainPropertyGrid.SelectedObject = res;
+                mainPropertyGrid.SelectedObject = resWrap;
             }
 
             if (mViewer != null)
             {
-                if (res.FileType == SupportedFileType.RmdScene || res.FileType == SupportedFileType.RwClumpNode || res.FileType == SupportedFileType.RwGeometryNode || res.FileType == SupportedFileType.RwAtomicNode)
+                if (resWrap.FileType == SupportedFileType.RmdScene || resWrap.FileType == SupportedFileType.RwClumpNode || resWrap.FileType == SupportedFileType.RwGeometryNode || resWrap.FileType == SupportedFileType.RwAtomicNode)
                 {
                     glControl1.Visible = true;
 
@@ -117,31 +119,48 @@ namespace Amicitia
                     {
                         mViewer.DeleteScene();
 
-                        if ( res.FileType == SupportedFileType.RmdScene )
+                        if ( resWrap.FileType == SupportedFileType.RmdScene )
                         {
-                            mViewer.LoadScene( res.Resource as RmdScene );
+                            var scene = resWrap.Resource as RmdScene;
+
+                            // For field models
+                            if (!scene.HasTextureDictionary && resNode.Parent != null)
+                            {
+                                foreach ( TreeNode node in resNode.Parent.Nodes )
+                                {
+                                    if (node.Text.EndsWith("rws"))
+                                    {
+                                        var parentResWrap = ( IResourceWrapper )node;
+                                        var parentScene = parentResWrap.Resource as RmdScene;
+                                        if ( parentScene.HasTextureDictionary )
+                                            mViewer.LoadTextures( parentScene.TextureDictionary );
+                                    }
+                                }
+                            }
+
+                            mViewer.LoadScene( resWrap.Resource as RmdScene );
                         }
-                        else if ( res.FileType == SupportedFileType.RwClumpNode )
+                        else if ( resWrap.FileType == SupportedFileType.RwClumpNode )
                         {
-                            var model = ( RwClumpNode )res.Resource;
+                            var model = ( RwClumpNode )resWrap.Resource;
                             var scene = model.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
                             if ( scene != null && scene.TextureDictionary != null )
                                 mViewer.LoadTextures( scene.TextureDictionary );
 
                             mViewer.LoadModel( model );
                         }
-                        else if ( res.FileType == SupportedFileType.RwGeometryNode )
+                        else if ( resWrap.FileType == SupportedFileType.RwGeometryNode )
                         {
-                            var geometry = ( RwGeometryNode )res.Resource;
+                            var geometry = ( RwGeometryNode )resWrap.Resource;
                             var scene = geometry.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
                             if ( scene != null && scene.TextureDictionary != null )
                                 mViewer.LoadTextures( scene.TextureDictionary );
 
                             mViewer.LoadGeometry( geometry, Matrix4x4.Identity );
                         }
-                        else if ( res.FileType == SupportedFileType.RwAtomicNode )
+                        else if ( resWrap.FileType == SupportedFileType.RwAtomicNode )
                         {
-                            var atomicNode = ( RwAtomicNode )res.Resource;
+                            var atomicNode = ( RwAtomicNode )resWrap.Resource;
                             var clump = atomicNode.FindParentNode( RwNodeId.RwClumpNode ) as RwClumpNode;
                             var geometry = clump.GeometryList[atomicNode.GeometryIndex];
                             var frame = clump.FrameList[atomicNode.FrameIndex];
@@ -170,11 +189,11 @@ namespace Amicitia
             }
 
             // Check if the resource is a texture
-            if (res.Resource is ITextureFile)
+            if (resWrap.Resource is ITextureFile)
             {
                 // Unhide the picture box if we have a picture selected
                 mainPictureBox.Visible = true;
-                mainPictureBox.Image = ((ITextureFile)res.Resource).GetBitmap();
+                mainPictureBox.Image = ((ITextureFile)resWrap.Resource).GetBitmap();
             }
         }
 

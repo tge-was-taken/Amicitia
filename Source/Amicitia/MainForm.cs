@@ -144,7 +144,7 @@ namespace Amicitia
                         {
                             var model = ( RwClumpNode )resWrap.Resource;
                             var scene = model.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
-                            if ( scene != null && scene.TextureDictionary != null )
+                            if ( scene != null && scene.HasTextureDictionary )
                                 mViewer.LoadTextures( scene.TextureDictionary );
 
                             mViewer.LoadModel( model );

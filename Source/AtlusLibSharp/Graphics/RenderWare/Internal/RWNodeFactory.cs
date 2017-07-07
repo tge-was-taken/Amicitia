@@ -23,18 +23,23 @@
             return (T)GetNode(parent, reader);
         }
 
+        internal static RwNodeHeader ReadHeader(BinaryReader reader, RwNode parent)
+        {
+            return new RwNodeHeader
+            {
+                Id = ( RwNodeId )reader.ReadUInt32(),
+                Size = reader.ReadUInt32(),
+                Version = reader.ReadUInt32(),
+                Parent = parent
+            };
+        }
+
         internal static RwNode GetNode(RwNode parent, BinaryReader reader)
         {
 
             //Console.WriteLine("RWNode read at offset 0x{0}", reader.BaseStream.Position.ToString("X"));
 
-            RwNodeHeader header = new RwNodeHeader
-            {
-                Id = (RwNodeId)reader.ReadUInt32(),
-                Size = reader.ReadUInt32(),
-                Version = reader.ReadUInt32(),
-                Parent = parent
-            };
+            RwNodeHeader header = ReadHeader( reader, parent );
 
             //Console.WriteLine("Id: {0}        Size: {1}       Version: {2}\n", header.Id, header.Size, header.Version);
 

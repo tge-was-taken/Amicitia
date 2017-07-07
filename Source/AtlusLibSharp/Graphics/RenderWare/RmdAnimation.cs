@@ -10,7 +10,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
     /// </summary>
     public class RmdAnimation : RwNode, IList<RwNode>
     {
-        private readonly List<RwNode> mAnimationNodes;
+        private List<RwNode> mAnimationNodes;
 
         /// <summary>
         /// Initialize a new <see cref="RmdAnimation"/> instance using a <see cref="List{T}"/> of RenderWare nodes.
@@ -28,19 +28,35 @@ namespace AtlusLibSharp.Graphics.RenderWare
             }
         }
 
+        public RmdAnimation( Stream stream, bool leaveOpen = false )
+            : this(new BinaryReader(stream, System.Text.Encoding.Default, leaveOpen))
+        {
+        }
+
         /// <summary>
         /// Initializer only to be called in <see cref="RwNodeFactory"/>.
         /// </summary>
         internal RmdAnimation(RwNodeFactory.RwNodeHeader header, BinaryReader reader)
             : base(header)
         {
+            ReadBody( reader );
+        }
+
+        internal RmdAnimation(BinaryReader reader)
+            : base(RwNodeFactory.ReadHeader(reader, null))
+        {
+            ReadBody( reader );
+        }
+
+        protected internal override void ReadBody( BinaryReader reader )
+        {
             mAnimationNodes = new List<RwNode>();
 
-            var node = RwNodeFactory.GetNode(this, reader);
-            while (node.Id != RwNodeId.RmdAnimationTerminatorNode)
+            var node = RwNodeFactory.GetNode( this, reader );
+            while ( node.Id != RwNodeId.RmdAnimationTerminatorNode )
             {
-                mAnimationNodes.Add(node);
-                node = RwNodeFactory.GetNode(this, reader);
+                mAnimationNodes.Add( node );
+                node = RwNodeFactory.GetNode( this, reader );
             }
         }
 

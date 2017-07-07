@@ -287,7 +287,7 @@ namespace Amicitia
                 var menuItem = item as ToolStripMenuItem;
                 if ( menuItem != null )
                 {
-                    if (menuItem.ShortcutKeys.HasFlag(keys))
+                    if (menuItem.ShortcutKeys == keys)
                     {
                         menuItem.PerformClick();
                         handled = true;
@@ -305,7 +305,7 @@ namespace Amicitia
                     var menuItem = item as ToolStripMenuItem;
                     if (menuItem != null)
                     {
-                        if (menuItem.ShortcutKeys.HasFlag(keys))
+                        if (menuItem.ShortcutKeys == keys)
                             menuItem.PerformClick();
                     }
                 }

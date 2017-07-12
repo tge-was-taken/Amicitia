@@ -18,7 +18,7 @@ namespace Amicitia
 
         // increment VersionMinor each release
         public static int VersionMajor = 1;
-        public static int VersionMinor = 2;
+        public static int VersionMinor = 3;
 
 #if DEBUG
         public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor} [DEBUG]";

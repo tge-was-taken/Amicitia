@@ -8,6 +8,8 @@ namespace AtlusLibSharp.FileSystems.ACX
     public class AcxFile : BinaryBase
     {
         private const int MAGIC = 0;
+        private const int HEADER_SIZE = 8;
+        private const int ENTRYHEADER_SIZE = 8;
 
         public int EntryCount => Entries.Count;
 
@@ -39,10 +41,15 @@ namespace AtlusLibSharp.FileSystems.ACX
             Read( reader );
         }
 
+        private int Swap(int value)
+        {
+            value = ( int )( ( value << 8 ) & 0xFF00FF00 ) | ( ( value >> 8 ) & 0xFF00FF );
+            return ( value << 16 ) | ( ( value >> 16 ) & 0xFFFF );
+        }
+
         private int ReadBEInt( BinaryReader reader )
         {
-            var bytes = reader.ReadBytes( sizeof( int ) );
-            return bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+            return Swap( reader.ReadInt32() );
         }
 
         internal void Read( BinaryReader reader )
@@ -72,9 +79,7 @@ namespace AtlusLibSharp.FileSystems.ACX
 
         private void WriteBEInt(BinaryWriter writer, int value)
         {
-            uint valueU = ( uint )value;
-            int swapped = (int)(( valueU & 0xFF ) << 24 | ( valueU & 0xFF00 ) << 16 | ( valueU & 0xFF0000 ) << 8 | ( valueU & 0xFF000000 ));
-            writer.Write( swapped );
+            writer.Write( Swap( value ) );
         }
 
         internal override void Write(BinaryWriter writer)
@@ -83,7 +88,7 @@ namespace AtlusLibSharp.FileSystems.ACX
             WriteBEInt( writer, EntryCount );
 
             var entryOffsets = new int[EntryCount];
-            int entryOffset = AlignmentHelper.Align(8 + ( EntryCount * 8 ), 4);
+            int entryOffset = AlignmentHelper.Align( HEADER_SIZE + ( EntryCount * ENTRYHEADER_SIZE ), 4);
             for (int i = 0; i < Entries.Count; i++ )
             {
                 WriteBEInt( writer, entryOffset );

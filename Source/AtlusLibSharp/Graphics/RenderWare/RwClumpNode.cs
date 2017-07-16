@@ -387,13 +387,13 @@ namespace AtlusLibSharp.Graphics.RenderWare
                 Atomics.Add(RwNodeFactory.GetNode<RwAtomicNode>(this, reader));
             }
 
-            if (AtomicCount > 0)
+            if ( RwNodeFactory.PeekNode( reader ) == RwNodeId.RwExtensionNode )
             {
-                mExtensionNodeNode = RwNodeFactory.GetNode<RwExtensionNode>(this, reader);
+                mExtensionNodeNode = RwNodeFactory.GetNode<RwExtensionNode>( this, reader );
             }
             else
             {
-                mExtensionNodeNode = new RwExtensionNode(this);
+                mExtensionNodeNode = new RwExtensionNode( this );
             }
         }
 

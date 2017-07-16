@@ -30,7 +30,7 @@ namespace AtlusLibSharp.FileSystems.ACX
 
         public AcxFile( Stream stream, bool leaveOpen = false )
         {
-            using ( BinaryReader reader = new BinaryReader( stream ) )
+            using ( BinaryReader reader = new BinaryReader( stream, System.Text.Encoding.Default, leaveOpen ) )
             {
                 Read( reader );
             }

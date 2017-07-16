@@ -17,6 +17,16 @@
             public RwNode Parent;
         }
 
+        internal static RwNodeId PeekNode(BinaryReader reader)
+        {
+            if ( ( reader.BaseStream.Position + 12 ) > reader.BaseStream.Length )
+                return RwNodeId.None;
+
+            var header = ReadHeader( reader, null );
+            reader.Seek( -12, SeekOrigin.Current );
+            return header.Id;
+        }
+
         internal static T GetNode<T>(RwNode parent, BinaryReader reader)
             where T : RwNode
         {

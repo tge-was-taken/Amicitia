@@ -2,6 +2,7 @@
 {
     using System.IO;
     using AtlusLibSharp.Utilities;
+    using System.Drawing;
 
     public class SprKeyFrame
     {
@@ -24,10 +25,10 @@
         private int _unk0x48;
         private int _unk0x4C;
         private int _unk0x50;
-        private int _unk0x54;   // start time??
-        private int _unk0x58;   // interpolation time??
-        private int _unk0x5C;   // end time??
-        private int _unk0x60;   // speed?
+        private int mCoordX1;
+        private int mCoordY1;
+        private int mCoordX2;
+        private int mCoordY2;
         private int _unk0x64;   // argb color
         private int _unk0x68;   // argb color
         private int _unk0x6C;   // argb color
@@ -46,6 +47,12 @@
         {
             get { return mTextureIndex; }
             set { mTextureIndex = value; }
+        }
+
+        public Rectangle Coordinates
+        {
+            get { return new Rectangle(mCoordX1, mCoordY1, mCoordX2 - mCoordX1, mCoordY2 - mCoordY1); }
+            set { mCoordX1 = value.X; mCoordY1 = value.Y; mCoordX2 = value.Right; mCoordY2 = value.Bottom; }
         }
 
         public SprKeyFrame(string path)
@@ -87,10 +94,10 @@
             writer.Write(_unk0x48);
             writer.Write(_unk0x4C);
             writer.Write(_unk0x50);
-            writer.Write(_unk0x54);
-            writer.Write(_unk0x58);
-            writer.Write(_unk0x5C);
-            writer.Write(_unk0x60);
+            writer.Write(mCoordX1);
+            writer.Write(mCoordY1);
+            writer.Write(mCoordX2);
+            writer.Write(mCoordY2);
             writer.Write(_unk0x64);
             writer.Write(_unk0x68);
             writer.Write(_unk0x6C);
@@ -121,10 +128,10 @@
             _unk0x48 = reader.ReadInt32();
             _unk0x4C = reader.ReadInt32();
             _unk0x50 = reader.ReadInt32();
-            _unk0x54 = reader.ReadInt32();
-            _unk0x58 = reader.ReadInt32();
-            _unk0x5C = reader.ReadInt32();
-            _unk0x60 = reader.ReadInt32();
+            mCoordX1 = reader.ReadInt32();
+            mCoordY1 = reader.ReadInt32();
+            mCoordX2 = reader.ReadInt32();
+            mCoordY2 = reader.ReadInt32();
             _unk0x64 = reader.ReadInt32();
             _unk0x68 = reader.ReadInt32();
             _unk0x6C = reader.ReadInt32();

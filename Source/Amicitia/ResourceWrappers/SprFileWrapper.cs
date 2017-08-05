@@ -4,6 +4,7 @@ using AtlusLibSharp.Graphics.SPR;
 using AtlusLibSharp.Graphics.TGA;
 using AtlusLibSharp.Graphics.TMX;
 using AtlusLibSharp.IO;
+using System.Drawing;
 
 namespace Amicitia.ResourceWrappers
 {
@@ -98,6 +99,12 @@ namespace Amicitia.ResourceWrappers
         {
             get => Resource.TextureIndex;
             set => Resource.TextureIndex = value;
+        }
+
+        public Rectangle Coordinates
+        {
+            get => Resource.Coordinates;
+            set => Resource.Coordinates = value;
         }
 
         public SprKeyFrameWrapper(string text, SprKeyFrame resource) : base(text, resource)

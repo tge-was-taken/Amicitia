@@ -64,6 +64,22 @@ namespace Amicitia.ResourceWrappers
         MemoryStream GetResourceMemoryStream();
     }
 
+    public class ContextMenuAction
+    {
+        public string Name { get; }
+
+        public EventHandler OnClick { get; }
+
+        public Keys ShortcutKeys { get; }
+
+        public ContextMenuAction( string name, EventHandler onClick, Keys shortCutKeys )
+        {
+            Name = name;
+            OnClick = onClick;
+            ShortcutKeys = shortCutKeys;
+        }
+    }
+
     public abstract partial class ResourceWrapper<TResource> : TreeNode, IResourceWrapper
     {
         public static readonly Action<string, ResourceWrapper<TResource>> DefaultFileAddAction = (path, wrapper) =>
@@ -79,6 +95,7 @@ namespace Amicitia.ResourceWrappers
         private Dictionary<SupportedFileType, Action<TResource, string>> mFileExportActions;
         private Dictionary<SupportedFileType, Action<string, ResourceWrapper<TResource>>> mFileAddActions;
         private Func<ResourceWrapper<TResource>, TResource> mRebuildAction;
+        private List<ContextMenuAction> mCustomActions;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -425,6 +442,14 @@ namespace Amicitia.ResourceWrappers
             mRebuildAction = action;
         }
 
+        protected void RegisterCustomAction( string name, EventHandler onClick, Keys shortcutKeys )
+        {
+            if ( mCustomActions == null )
+                mCustomActions = new List<ContextMenuAction>();
+
+            mCustomActions.Add( new ContextMenuAction(name, onClick, shortcutKeys) );
+        }
+
         protected void SetField<T>(ref T field, T value, bool onlyParentNeedsRebuild = false, [CallerMemberName] string propertyName = null)
         {
             if (typeof(T).IsValueType)
@@ -535,6 +560,14 @@ namespace Amicitia.ResourceWrappers
         private void PopulateContextMenuStrip()
         {
             ContextMenuStrip = new ContextMenuStrip();
+
+            if ( mCustomActions != null )
+            {
+                foreach ( var item in mCustomActions )
+                {
+                    ContextMenuStrip.Items.Add( new ToolStripMenuItem( item.Name, null, item.OnClick, item.ShortcutKeys ) );
+                }
+            }
 
             if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Export))
             {

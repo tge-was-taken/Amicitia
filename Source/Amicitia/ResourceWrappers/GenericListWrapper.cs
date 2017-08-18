@@ -31,7 +31,17 @@ namespace Amicitia.ResourceWrappers
                 }
 
                 return list;
-            });         
+            });
+
+            PostInitialize();
+        }
+
+        /// <summary>
+        /// Executed after list is initialized. Can be used to add extra actions or the like.
+        /// </summary>
+        protected virtual void PostInitialize()
+        {
+
         }
 
         protected override void PopulateView()

@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Windows.Forms;
 using AtlusLibSharp.Graphics.RenderWare;
 using AtlusLibSharp.PS2.Graphics;
 
@@ -136,6 +137,27 @@ namespace Amicitia.ResourceWrappers
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
             RegisterFileExportAction(SupportedFileType.RwTextureDictionaryNode, (res, path) => res.Save(path));
+            RegisterCustomAction( "Export All", ( o, s ) =>
+            {
+                using ( FolderBrowserDialog dialog = new FolderBrowserDialog() )
+                {
+                    dialog.ShowNewFolderButton = true;
+
+                    if ( dialog.ShowDialog() != DialogResult.OK )
+                    {
+                        return;
+                    }
+
+                    foreach ( var texture in Resource.Textures )
+                    {
+                        var path = Path.Combine( dialog.SelectedPath, Path.ChangeExtension( texture.Name, "png" ) );
+                        var bitmap = texture.GetBitmap();
+
+                        bitmap.Save( path );
+                    }
+                }
+            },
+            0 );
             RegisterFileReplaceAction(SupportedFileType.RwTextureDictionaryNode, (res, path) => (RwTextureDictionaryNode)RwNode.Load(path));
             RegisterFileAddAction(SupportedFileType.RwTextureNativeNode, DefaultFileAddAction);
             RegisterFileAddAction(SupportedFileType.Bitmap, (path, wrap) =>
@@ -240,6 +262,29 @@ namespace Amicitia.ResourceWrappers
         public RwClumpNodeListWrapper(string text, List<RwClumpNode> resource) 
             : base(text, resource, (e, i) => $"Clump{i:0}")
         {
+        }
+
+        protected override void PostInitialize()
+        {
+            RegisterCustomAction( "Export All", ( o, s ) =>
+            {
+                using ( FolderBrowserDialog dialog = new FolderBrowserDialog() )
+                {
+                    dialog.ShowNewFolderButton = true;
+
+                    if ( dialog.ShowDialog() != DialogResult.OK )
+                    {
+                        return;
+                    }   
+
+                    foreach ( RwClumpNodeWrapper clumpNode in Nodes )
+                    {
+                        var path = Path.Combine( dialog.SelectedPath, Path.ChangeExtension( clumpNode.Text, "dae" ) );
+                        clumpNode.Export( path, SupportedFileType.AssimpModelFile );
+                    }
+                }
+            },
+            0 );
         }
     }
 

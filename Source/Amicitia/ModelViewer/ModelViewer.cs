@@ -229,7 +229,7 @@ namespace Amicitia.ModelViewer
             get
             {
                 var version = GL.GetString( StringName.Version );
-                return version[0] >= '4' && version[2] >= '5'; // X.Y
+                return version[0] >= '3' && version[2] >= '3'; // X.Y
             }
         }
 

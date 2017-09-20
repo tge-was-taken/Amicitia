@@ -26,9 +26,9 @@ namespace AtlusLibSharp.FileSystems.CVM
                 InternalRead(reader);
         }
 
-        public CvmFile(Stream stream)
+        public CvmFile(Stream stream, bool leaveOpen = false )
         {
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveOpen))
                 InternalRead(reader);
         }
 

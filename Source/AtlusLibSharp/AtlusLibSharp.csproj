@@ -201,6 +201,9 @@
     <Compile Include="Utilities\BitmapHelper.cs" />
     <Compile Include="Utilities\ColorHelper.cs" />
     <Compile Include="Utilities\DictionaryExtension.cs" />
+    <Compile Include="IO\EndianBinaryReader.cs" />
+    <Compile Include="IO\EndianBinaryWriter.cs" />
+    <Compile Include="IO\Endianness.cs" />
     <Compile Include="Utilities\EnumExtension.cs" />
     <Compile Include="Utilities\ICollectionExtension.cs" />
     <Compile Include="Utilities\IListExtension.cs" />
@@ -213,6 +216,8 @@
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFCodeEvaluator.cs" />
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFTag.cs" />
     <Compile Include="PS2\Graphics\Interfaces\VIF\VIFUnpack.cs" />
+    <Compile Include="IO\StringBinaryFormat.cs" />
+    <Compile Include="IO\Unsafe.cs" />
     <Compile Include="Utilities\Vector3Extension.cs" />
     <Compile Include="Utilities\StreamExtension.cs" />
     <Compile Include="Utilities\WuQuantizer\Box.cs" />

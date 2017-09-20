@@ -12,6 +12,7 @@ namespace AtlusLibSharp.FileSystems.ListArchive
     {
         // Fields
         private List<ListArchiveEntry> mEntries;
+        private bool mBigEndian;
 
         // Constructors
         public ListArchiveFile(string path)
@@ -21,7 +22,7 @@ namespace AtlusLibSharp.FileSystems.ListArchive
                 throw new InvalidDataException("Not a valid ListArchiveFile.");
             }
 
-            using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
+            using ( EndianBinaryReader reader = new EndianBinaryReader( File.OpenRead(path), Endianness.LittleEndian))
             {
                 Read(reader);
             }
@@ -34,7 +35,7 @@ namespace AtlusLibSharp.FileSystems.ListArchive
                 throw new InvalidDataException("Not a valid ListArchiveFile.");
             }
 
-            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, leaveOpen))
+            using (EndianBinaryReader reader = new EndianBinaryReader( stream, Encoding.Default, leaveOpen, Endianness.LittleEndian))
             {
                 Read(reader);
             }
@@ -107,35 +108,51 @@ namespace AtlusLibSharp.FileSystems.ListArchive
         private static bool InternalVerifyFileType(Stream stream)
         {
             // check stream length
-            if (stream.Length <= 4 + ListArchiveEntry.NAME_LENGTH + 4)
+            int entrySize = 36;
+            if ( stream.Length <= 4 + entrySize )
                 return false;
 
-            byte[] testData = new byte[4 + ListArchiveEntry.NAME_LENGTH + 4];
-            stream.Read(testData, 0, 4 + ListArchiveEntry.NAME_LENGTH + 4);
+            byte[] testData = new byte[4 + entrySize];
+            stream.Read( testData, 0, 4 + entrySize );
             stream.Position = 0;
 
-            int numOfFiles = BitConverter.ToInt32(testData, 0);
+            int numOfFiles = BitConverter.ToInt32( testData, 0 );
 
             // num of files sanity check
-            if (numOfFiles > 1024 || numOfFiles < 1)
-                return false;
+            if ( numOfFiles > 1024 || numOfFiles < 1 || ( numOfFiles * entrySize ) > stream.Length )
+            {
+                numOfFiles = ( int )( ( numOfFiles << 8 ) & 0xFF00FF00 ) | ( ( numOfFiles >> 8 ) & 0xFF00FF );
+                numOfFiles = ( numOfFiles << 16 ) | ( ( numOfFiles >> 16 ) & 0xFFFF );
+
+                if ( numOfFiles > 1024 || numOfFiles < 1 || ( numOfFiles * entrySize ) > stream.Length )
+                    return false;
+            }
 
             // check if the name field is correct
             bool nameTerminated = false;
-            for (int i = 0; i < ListArchiveEntry.NAME_LENGTH; i++)
+            for ( int i = 0; i < entrySize - 4; i++ )
             {
-                if (testData[4 + i] == 0x00)
-                    nameTerminated = true;
+                if ( testData[4 + i] == 0x00 )
+                {
+                    if ( i == 0 )
+                        return false;
 
-                if (testData[4 + i] != 0x00 && nameTerminated == true)
+                    nameTerminated = true;
+                }
+
+                if ( testData[4 + i] != 0x00 && nameTerminated == true )
                     return false;
             }
 
             // first entry length sanity check
-            int length = BitConverter.ToInt32(testData, 4 + ListArchiveEntry.NAME_LENGTH);
-            if (length >= (1024 * 1024 * 100) || length < 0)
+            int length = BitConverter.ToInt32( testData, entrySize );
+            if ( length >= stream.Length || length < 0 )
             {
-                return false;
+                length = ( int )( ( length << 8 ) & 0xFF00FF00 ) | ( ( length >> 8 ) & 0xFF00FF );
+                length = ( length << 16 ) | ( ( length >> 16 ) & 0xFFFF );
+
+                if ( length >= stream.Length || length < 0 )
+                    return false;
             }
 
             return true;
@@ -144,21 +161,39 @@ namespace AtlusLibSharp.FileSystems.ListArchive
         // instance methods
         internal override void Write(BinaryWriter writer)
         {
-            writer.Write(mEntries.Count);
+            int count = mEntries.Count;
+            if ( mBigEndian )
+                count = EndiannessHelper.Swap( count );
+
+            writer.Write( count );
             foreach (ListArchiveEntry entry in mEntries)
             {
                 entry.InternalWrite(writer);
             }
         }
 
-        private void Read(BinaryReader reader)
+        private void Read(EndianBinaryReader reader)
         {
             int numEntries = reader.ReadInt32();
+            if ( numEntries > 1024 || numEntries < 1 || ( numEntries * 36 ) > reader.BaseStream.Length )
+            {
+                numEntries = ( int )( ( numEntries << 8 ) & 0xFF00FF00 ) | ( ( numEntries >> 8 ) & 0xFF00FF );
+                numEntries = ( numEntries << 16 ) | ( ( numEntries >> 16 ) & 0xFFFF );
+
+                if ( reader.Endianness == Endianness.LittleEndian )
+                    reader.Endianness = Endianness.BigEndian;
+                else
+                    reader.Endianness = Endianness.LittleEndian;
+            }
+
             mEntries = new List<ListArchiveEntry>(numEntries);
             for (int i = 0; i < numEntries; i++)
             {
                 mEntries.Add(new ListArchiveEntry(reader));
-            }
+            } 
+
+            if ( reader.Endianness == Endianness.BigEndian )
+                mBigEndian = true;
         }
     }
 }

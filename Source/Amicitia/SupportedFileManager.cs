@@ -69,6 +69,7 @@ namespace Amicitia
             new SupportedFileInfo("Atlus RenderWare Animation",      SupportedFileType.RmdAnimation,    typeof(RmdAnimation),        ".rmdanim"),
             new SupportedFileInfo("RenderWare Geometry",             SupportedFileType.RwGeometryNode,  typeof(RwGeometryNode),      ".geo"),
             new SupportedFileInfo("RenderWare Atomic",               SupportedFileType.RwAtomicNode,    typeof(RwAtomicNode),        ".atm"),
+            new SupportedFileInfo("RenderWare Animation",            SupportedFileType.RwAnimationNode, typeof(RwAnimationNode),     ".anm"),
 
             // Field related formats
             new SupportedFileInfo("Field Camera Parameters",         SupportedFileType.CmrFile,         typeof(CmrFile),             ".cmr"),

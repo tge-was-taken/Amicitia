@@ -96,15 +96,6 @@ namespace AtlusLibSharp.Graphics.RenderWare
 
         #endregion
 
-        private static void WalkChildren(RwFrame rwNode, Assimp.Node parent)
-        {
-            foreach (RwFrame child in rwNode.Children)
-            {
-                string name = child.HAnimFrameExtensionNode.NameId.ToString();
-                Assimp.Node aiNode = new Assimp.Node(name, parent);
-            }
-        }
-
         public static Assimp.Scene ToAssimpScene(RwClumpNode clumpNode)
         {
             // Scene
@@ -120,10 +111,10 @@ namespace AtlusLibSharp.Graphics.RenderWare
 
             aiScene.RootNode = aiRootNode;
 
-            for ( int i = 1; i < clumpNode.FrameList.Count - 1; i++ )
+            for ( int i = 1; i < clumpNode.FrameList.Count; i++ )
             {
                 var frame = clumpNode.FrameList[i];
-                var frameName = frame.HAnimFrameExtensionNode.NameId.ToString();
+                var frameName = "_" + frame.HAnimFrameExtensionNode.NameId;
 
                 Assimp.Node aiParentNode = null;
                 if (frame.Parent != null)
@@ -131,7 +122,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
                     string parentName = "SceneRoot";
                     if (frame.Parent.HasHAnimExtension)
                     {
-                        parentName = frame.Parent.HAnimFrameExtensionNode.NameId.ToString();
+                        parentName = "_" + frame.Parent.HAnimFrameExtensionNode.NameId;
                     }
 
                     aiParentNode = aiRootNode.FindNode( parentName );
@@ -256,7 +247,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
                                     var aiBone = new Assimp.Bone();
                                     var boneFrame = clumpNode.FrameList.GetFrameByHierarchyIndex( boneIndex );
 
-                                    aiBone.Name = boneFrame.HasHAnimExtension ? boneFrame.HAnimFrameExtensionNode.NameId.ToString() : "SceneRoot";
+                                    aiBone.Name = boneFrame.HasHAnimExtension ? "_" + boneFrame.HAnimFrameExtensionNode.NameId : "SceneRoot";
                                     aiBone.VertexWeights.Add( new Assimp.VertexWeight( realVertexIndex, boneWeight ) );
 
                                     Matrix4x4.Invert( frame.WorldTransform, out Matrix4x4 invertedFrameWorldTransform );
@@ -280,7 +271,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
                         var aiBone = new Assimp.Bone();
 
                         // Name
-                        aiBone.Name = frame.HasHAnimExtension ? frame.HAnimFrameExtensionNode.NameId.ToString() : "SceneRoot";
+                        aiBone.Name = frame.HasHAnimExtension ? "_" + frame.HAnimFrameExtensionNode.NameId : "SceneRoot";
 
                         // VertexWeights
                         for ( int i = 0; i < aiMesh.Vertices.Count; i++ )

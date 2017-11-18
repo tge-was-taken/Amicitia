@@ -23,6 +23,7 @@ namespace Amicitia.ResourceWrappers
             RegisterRebuildAction((wrap) =>
             {
                 ListArchiveFile file = new ListArchiveFile();
+                file.BigEndian = wrap.Resource.BigEndian;
 
                 foreach (IResourceWrapper node in Nodes)
                 {

@@ -350,7 +350,9 @@ namespace Amicitia.ResourceWrappers
                 using ( var ctx = new Assimp.AssimpContext() )
                 {
                     ctx.SetConfig( new Assimp.Configs.MaxBoneCountConfig( 64 ) );
-                    var scene = ctx.ImportFile( path, Assimp.PostProcessSteps.SplitByBoneCount | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.FlipUVs);
+                    var scene = ctx.ImportFile( path, Assimp.PostProcessSteps.SplitByBoneCount | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.FlipUVs | 
+                                                      Assimp.PostProcessSteps.FindInvalidData | Assimp.PostProcessSteps.GenerateSmoothNormals | Assimp.PostProcessSteps.GenerateUVCoords | Assimp.PostProcessSteps.ImproveCacheLocality |
+                                                      Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.LimitBoneWeights | Assimp.PostProcessSteps.OptimizeMeshes );
                     res.ReplaceGeometries( scene );
                     return res;
                 }
@@ -616,8 +618,96 @@ namespace Amicitia.ResourceWrappers
             for (var i = 0; i < Resource.Count; i++)
             {
                 var node = Resource[i];
-                Nodes.Add(new RwNodeWrapperBase<RwNode>($"Node{i:00}", node));
+
+                if ( node is RwAnimationNode animationNode )
+                {
+                    Nodes.Add( new RwAnimationNodeWrapper( $"AnimationNode{i:00}", animationNode ) );
+                }
+                else
+                {
+                    Nodes.Add( new RwNodeWrapperBase<RwNode>( $"Node{i:00}", node ) );
+                }
             }
+        }
+    }
+
+    public class RwAnimationNodeWrapper : ResourceWrapper<RwAnimationNode>
+    {
+        public int Version
+        {
+            get => Resource.Version;
+            set => SetProperty( Resource, value );
+        }
+
+        public RwKeyFrameType KeyFrameType
+        {
+            get => Resource.KeyFrameType;
+            set => SetProperty( Resource, value );
+        }
+
+        public int Flags
+        {
+            get => Resource.Flags;
+            set => SetProperty( Resource, value );
+        }
+
+        public float Duration
+        {
+            get => Resource.Duration;
+            set => SetProperty( Resource, value );
+        }
+
+        public RwAnimationNodeWrapper( string text, RwAnimationNode resource ) : base( text, resource )
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
+                                       CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterCustomAction( "Change speed", ( o, s ) =>
+            {
+                using ( var dialog = new SimpleValueInputDialog( "Enter a speed value", "Speed multiplier", "1.0" ) )
+                {
+                    if ( dialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    if ( !float.TryParse( dialog.ValueText, out var multiplier ) )
+                        return;
+
+                    Duration *= multiplier;
+                    foreach ( var keyFrame in Resource.KeyFrames )
+                    {
+                        keyFrame.Time *= multiplier;
+                    }
+
+                }
+            }, Keys.None );
+            RegisterFileExportAction( SupportedFileType.RwAnimationNode, ( res, path ) => res.Save( path ) );
+            RegisterFileExportAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
+            {
+                var scene = ( RmdScene )res.FindParentNode( RwNodeId.RmdSceneNode );
+                var clump = scene.Clumps.FirstOrDefault();
+                if ( clump == null )
+                    return;
+
+                RwAnimationNode.SaveToCollada( res, clump.FrameList, path );
+            } );
+            RegisterFileReplaceAction( SupportedFileType.RwAnimationNode, ( res, path ) => ( RwAnimationNode ) RwNode.Load( path ) );
+            RegisterFileReplaceAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
+            {
+                var scene = (RmdScene)res.FindParentNode( RwNodeId.RmdSceneNode );
+                var clump = scene.Clumps.FirstOrDefault();
+                if ( clump == null )
+                    return res;
+
+                return RwAnimationNode.FromAssimpScene( res.Parent, clump.FrameList, path );
+            });
+        }
+
+        protected override void PopulateView()
+        {
         }
     }
 }

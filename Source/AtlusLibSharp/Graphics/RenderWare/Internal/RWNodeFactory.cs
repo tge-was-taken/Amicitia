@@ -94,8 +94,8 @@
                 case RwNodeId.RwGeometryListNode:
                     return new RwGeometryListNode(header, reader);
 
-                //case RwNodeId.AnimationNode:
-                //    return new RwAnimationNode(header, reader);
+                case RwNodeId.RwAnimationNode:
+                    return new RwAnimationNode(header, reader);
 
                 case RwNodeId.RwTextureDictionaryNode:
                     return new RwTextureDictionaryNode(header, reader);

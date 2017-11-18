@@ -83,7 +83,7 @@
   <ItemGroup>
     <Reference Include="AssimpNet, Version=3.3.1.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dependencies\Managed\AssimpNet.dll</HintPath>
+      <HintPath>..\..\..\..\Users\smart\Downloads\assimp-net-master\AssimpNet\bin\Net47-Debug\AssimpNet.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\Managed\OpenTK.dll</HintPath>
@@ -137,6 +137,12 @@
     <Compile Include="ResourceWrapperFactory.cs" />
     <Compile Include="ResourceWrappers\TgaFileWrapper.cs" />
     <Compile Include="ResourceWrappers\TmxFileWrapper.cs" />
+    <Compile Include="SimpleValueInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SimpleValueInputDialog.Designer.cs">
+      <DependentUpon>SimpleValueInputDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="SupportedFileManager.cs" />
     <Compile Include="SupportedFileInfo.cs" />
     <Compile Include="Utilities\DialogCenteringService.cs" />
@@ -155,6 +161,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SimpleValueInputDialog.resx">
+      <DependentUpon>SimpleValueInputDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

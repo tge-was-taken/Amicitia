@@ -14,6 +14,12 @@ namespace AtlusLibSharp.FileSystems.ListArchive
         private List<ListArchiveEntry> mEntries;
         private bool mBigEndian;
 
+        public bool BigEndian
+        {
+            get => mBigEndian;
+            set => mBigEndian = value;
+        }
+
         // Constructors
         public ListArchiveFile(string path)
         {
@@ -168,6 +174,11 @@ namespace AtlusLibSharp.FileSystems.ListArchive
             writer.Write( count );
             foreach (ListArchiveEntry entry in mEntries)
             {
+                if ( mBigEndian )
+                    entry.mBigEndian = true;
+                else
+                    entry.mBigEndian = false;
+
                 entry.InternalWrite(writer);
             }
         }

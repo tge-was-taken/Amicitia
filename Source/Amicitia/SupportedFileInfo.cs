@@ -52,6 +52,7 @@ namespace Amicitia
         FbnFile,
         HbnFile,
         RwAtomicNode,
-        AcxFile
+        AcxFile,
+        RwAnimationNode
     }
 }

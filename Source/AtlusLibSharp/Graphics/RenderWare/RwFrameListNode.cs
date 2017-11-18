@@ -163,7 +163,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             }
         }
 
-        private static int ExtractFrameIndexFromName(string name)
+        public static int ExtractFrameIndexFromName(string name)
         {
             var idPart = name.Substring( 4 );
             if ( !int.TryParse( idPart, out int id ) )
@@ -177,7 +177,7 @@ namespace AtlusLibSharp.Graphics.RenderWare
             return id;
         }
 
-        private static int ExtractHAnimNodeIdFromName(string name)
+        public static int ExtractHAnimNodeIdFromName(string name)
         {
             var fixedName = ExtractDigits( name );
             if ( !int.TryParse( fixedName, out int id ) )
@@ -186,6 +186,23 @@ namespace AtlusLibSharp.Graphics.RenderWare
             }
 
             return id;
+        }
+
+        public int GetNameIdByFrameIndex( int index )
+        {
+            return this[index].HAnimFrameExtensionNode.NameId;
+        }
+
+        public int GetNameIdByName( string name )
+        {
+            if ( name.StartsWith( "Bone", StringComparison.InvariantCultureIgnoreCase ) )
+            {
+                return GetNameIdByFrameIndex( ExtractFrameIndexFromName( name ) );
+            }
+            else
+            {
+                return ExtractHAnimNodeIdFromName( name );
+            }
         }
 
         private static string ExtractDigits(string original)

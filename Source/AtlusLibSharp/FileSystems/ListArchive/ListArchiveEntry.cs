@@ -12,7 +12,7 @@
         // Fields
         private string mName;
         private byte[] mData;
-        private bool mBigEndian;
+        internal bool mBigEndian;
 
         // Constructors
         public ListArchiveEntry(string filepath)
@@ -37,17 +37,6 @@
         {
             mName = reader.ReadCString(NAME_LENGTH);
             int dataLength = reader.ReadInt32();
-            if ( dataLength >= reader.BaseStream.Length || dataLength < 0 )
-            {
-                dataLength = ( int )( ( dataLength << 8 ) & 0xFF00FF00 ) | ( ( dataLength >> 8 ) & 0xFF00FF );
-                dataLength = ( dataLength << 16 ) | ( ( dataLength >> 16 ) & 0xFFFF );
-
-                if ( reader.Endianness == Endianness.LittleEndian )
-                    reader.Endianness = Endianness.BigEndian;
-                else
-                    reader.Endianness = Endianness.LittleEndian;
-            }
-
             mData = reader.ReadBytes(dataLength);
 
             if ( reader.Endianness == Endianness.BigEndian )

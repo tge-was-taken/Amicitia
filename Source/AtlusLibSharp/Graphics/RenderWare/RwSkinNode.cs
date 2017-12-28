@@ -147,26 +147,6 @@ namespace AtlusLibSharp.Graphics.RenderWare
             for (int i = 0; i < MeshBoneRemapIndices.Length; i++)
                 MeshBoneRemapIndices[i] = 0xFF;
 
-            /*
-            var runs = DetectRuns(mUsedBoneIndices);
-            mRLECount = runs.Count;
-
-            for (int i = 0; i < runs.Count; i++)
-            {
-                for (int j = 0; j < runs[i].SkinBoneIndexCount; j++)
-                {
-                    mMeshBoneRemapIndices[runs[i].BoneIndex + j] = (byte)j;
-                }
-            }
-
-            mMeshBoneRLECount = new[]
-                {new SkinSplitMeshRLECount {StartIndex = 0, Count = (byte)runs.Count }};
-
-            mMeshBoneRLE = new SkinSplitMeshBoneRLE[mRLECount];
-            for (int i = 0; i < mMeshBoneRLE.Length; i++)
-                mMeshBoneRLE[i] = runs[i];
-            */
-
             RleCount = UsedBoneCount;
 
             for (int i = 0; i < UsedBoneIndices.Length; i++)

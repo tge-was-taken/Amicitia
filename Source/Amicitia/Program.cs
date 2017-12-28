@@ -6,8 +6,6 @@ using System.Windows.Forms;
 
 namespace Amicitia
 {
-    public delegate void Loop();
-
     internal static class Program
     {
         public static Assembly Assembly = Assembly.GetExecutingAssembly();
@@ -16,14 +14,10 @@ namespace Amicitia
         public static DateTime BuildTime = Assembly.GetLinkerTime();
         public static Type[] Types = Assembly.GetTypes();
 
-        // increment VersionMinor each release
-        public static int VersionMajor = 1;
-        public static int VersionMinor = 6;
-
 #if DEBUG
-        public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor} [DEBUG]";
+        public static string TitleString = $"Amicitia v{Version.Major}.{Version.Minor}.{Version.Build} [DEBUG]";
 #else
-        public static string TitleString = $"Amicitia v{VersionMajor}.{VersionMinor}";
+        public static string TitleString = $"Amicitia v{Version.Major}.{Version.Minor}.{Version.Build}";
 #endif
 
         /// <summary>
@@ -35,23 +29,6 @@ namespace Amicitia
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm()); 
-
-            /*
-            MainForm form = new MainForm();
-            bool running = true;
-            form.FormClosed += (object sender, FormClosedEventArgs e) => { running = false; };
-            form.Show();
-            do
-            {
-                Application.DoEvents();
-
-                if(LoopFunctions.Count > 0)
-                    foreach (Loop func in LoopFunctions)
-                        func();
-
-                //System.Threading.Thread.Sleep(1);
-            } while (running);
-            */
         }
     }
 

@@ -35,7 +35,8 @@ namespace Amicitia.ResourceWrappers
         {
             foreach (AmdChunk chunk in Resource.Chunks)
             {
-                Nodes.Add((TreeNode)ResourceWrapperFactory.GetResourceWrapper(chunk.Tag, new MemoryStream(chunk.Data)));
+                var wrapper = new AmdChunkWrapper( chunk.Tag, chunk );
+                Nodes.Add( wrapper );
             }
         }
     }

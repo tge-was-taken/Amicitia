@@ -27,6 +27,12 @@
             return header.Id;
         }
 
+        internal static void SkipNode( BinaryReader reader )
+        {
+            var header = ReadHeader( reader, null );
+            reader.Seek( header.Size, SeekOrigin.Current );
+        }
+
         internal static T GetNode<T>(RwNode parent, BinaryReader reader)
             where T : RwNode
         {
@@ -73,8 +79,8 @@
                 case RwNodeId.RwMaterialListNode:
                     return new RwMaterialListNode(header, reader);
 
-                //case RWType.WorldNode:
-                //    return new RWWorld(header, reader);
+                case RwNodeId.RwWorldNode:
+                    return new RwWorld(header, reader);
 
                 case RwNodeId.RwFrameListNode:
                     return new RwFrameListNode(header, reader);
@@ -151,6 +157,12 @@
                 //case RWType.RMDParticleAnimation:
                 //    return new RMDParticleAnimation(header, reader);
 
+                case RwNodeId.RwPlaneSector:
+                    return new RwPlaneSector( header, reader );
+
+                case RwNodeId.RwAtomicSector:
+                    return new RwAtomicSector( header, reader );
+
                 default:
                     return new RwNode(header, reader);
             }
@@ -195,6 +207,15 @@
 
                 case RwNodeId.RwUVAnimationDictionaryNode:
                     return new RWUVAnimationDictionaryStructNode(header, reader);
+
+                case RwNodeId.RwWorldNode:
+                    return new RwWorldHeader( header, reader );
+
+                case RwNodeId.RwPlaneSector:
+                    return new RwPlaneSectorHeader( header, reader );
+
+                case RwNodeId.RwAtomicSector:
+                    return new RwAtomicSectorHeader( header, reader );
 
                 default:
                     return new RwNode(header, reader);

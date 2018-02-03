@@ -11,6 +11,8 @@ namespace AtlusLibSharp.Graphics.RenderWare
         RwTextureReferenceNode            = 0x00000006,
         RwMaterialNode                    = 0x00000007,
         RwMaterialListNode                = 0x00000008,
+        RwAtomicSector                    = 0x00000009,
+        RwPlaneSector                     = 0x0000000A,
         RwWorldNode                       = 0x0000000B, // found in some map files
         RwFrameListNode                   = 0x0000000E,
         RwGeometryNode                    = 0x0000000F,

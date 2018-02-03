@@ -94,8 +94,14 @@
     <Compile Include="FileSystems\ISimpleArchiveFile.cs" />
     <Compile Include="Graphics\RenderWare\RmdNodeLink.cs" />
     <Compile Include="Graphics\RenderWare\RwAnimationNode.cs" />
+    <Compile Include="Graphics\RenderWare\RwAtomicSector.cs" />
+    <Compile Include="Graphics\RenderWare\RwAtomicSectorHeader.cs" />
     <Compile Include="Graphics\RenderWare\RwHAnimHierarchy.cs" />
     <Compile Include="Graphics\RenderWare\RwMeshListNode.cs" />
+    <Compile Include="Graphics\RenderWare\RwPlaneSector.cs" />
+    <Compile Include="Graphics\RenderWare\RwPlaneSectorHeader.cs" />
+    <Compile Include="Graphics\RenderWare\RwWorld.cs" />
+    <Compile Include="Graphics\RenderWare\RwWorldHeader.cs" />
     <Compile Include="Graphics\SPR\ISprFile.cs" />
     <Compile Include="Graphics\TGA\TgaEncoding.cs" />
     <Compile Include="Graphics\TMX\TmxWrapMode.cs" />

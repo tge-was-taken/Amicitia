@@ -125,6 +125,7 @@
     <Compile Include="ResourceWrappers\ResourceWrapper.cs" />
     <Compile Include="ResourceWrappers\RmdSceneWrapper.cs" />
     <Compile Include="ResourceWrappers\PropertySorter.cs" />
+    <Compile Include="ResourceWrappers\RwWorldWrapper.cs" />
     <Compile Include="ResourceWrappers\SprFileWrapper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

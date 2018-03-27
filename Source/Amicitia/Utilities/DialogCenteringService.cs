@@ -15,50 +15,50 @@ namespace Amicitia.Utilities
         private readonly HookProc mHookProc;
         private readonly IntPtr mHHook = IntPtr.Zero;
 
-        public DialogCenteringService( IWin32Window owner )
+        public DialogCenteringService(IWin32Window owner)
         {
-            this.mOwner = owner ?? throw new ArgumentNullException( nameof(owner) );
+            this.mOwner = owner ?? throw new ArgumentNullException(nameof(owner));
             mHookProc = DialogHookProc;
 
-            mHHook = SetWindowsHookEx( WH_CALLWNDPROCRET, mHookProc, IntPtr.Zero, GetCurrentThreadId() );
+            mHHook = SetWindowsHookEx(WH_CALLWNDPROCRET, mHookProc, IntPtr.Zero, GetCurrentThreadId());
         }
 
-        private IntPtr DialogHookProc( int nCode, IntPtr wParam, IntPtr lParam )
+        private IntPtr DialogHookProc(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if ( nCode < 0 )
+            if (nCode < 0)
             {
-                return CallNextHookEx( mHHook, nCode, wParam, lParam );
+                return CallNextHookEx(mHHook, nCode, wParam, lParam);
             }
 
-            CWPRETSTRUCT msg = ( CWPRETSTRUCT )Marshal.PtrToStructure( lParam, typeof( CWPRETSTRUCT ) );
+            CWPRETSTRUCT msg = (CWPRETSTRUCT)Marshal.PtrToStructure(lParam, typeof(CWPRETSTRUCT));
             IntPtr hook = mHHook;
 
-            if ( msg.message == ( int )CbtHookAction.HCBT_ACTIVATE )
+            if (msg.message == (int)CbtHookAction.HCBT_ACTIVATE)
             {
                 try
                 {
-                    CenterWindow( msg.hwnd );
+                    CenterWindow(msg.hwnd);
                 }
                 finally
                 {
-                    UnhookWindowsHookEx( mHHook );
+                    UnhookWindowsHookEx(mHHook);
                 }
             }
 
-            return CallNextHookEx( hook, nCode, wParam, lParam );
+            return CallNextHookEx(hook, nCode, wParam, lParam);
         }
 
         public void Dispose()
         {
-            UnhookWindowsHookEx( mHHook );
+            UnhookWindowsHookEx(mHHook);
         }
 
-        private void CenterWindow( IntPtr hChildWnd )
+        private void CenterWindow(IntPtr hChildWnd)
         {
-            var recChild = new Rectangle( 0, 0, 0, 0 );
-            bool success = GetWindowRect( hChildWnd, ref recChild );
+            var recChild = new Rectangle(0, 0, 0, 0);
+            bool success = GetWindowRect(hChildWnd, ref recChild);
 
-            if ( !success )
+            if (!success)
             {
                 return;
             }
@@ -66,10 +66,10 @@ namespace Amicitia.Utilities
             int width = recChild.Width - recChild.X;
             int height = recChild.Height - recChild.Y;
 
-            var recParent = new Rectangle( 0, 0, 0, 0 );
-            success = GetWindowRect( mOwner.Handle, ref recParent );
+            var recParent = new Rectangle(0, 0, 0, 0);
+            success = GetWindowRect(mOwner.Handle, ref recParent);
 
-            if ( !success )
+            if (!success)
             {
                 return;
             }
@@ -88,21 +88,21 @@ namespace Amicitia.Utilities
             };
 
             //MoveWindow(hChildWnd, ptStart.X, ptStart.Y, width, height, false);
-            Task.Factory.StartNew( () => SetWindowPos( hChildWnd, ( IntPtr )0, ptStart.X, ptStart.Y, width, height, SetWindowPosFlags.SWP_ASYNCWINDOWPOS | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE | SetWindowPosFlags.SWP_NOOWNERZORDER | SetWindowPosFlags.SWP_NOZORDER ) );
+            Task.Factory.StartNew(() => SetWindowPos(hChildWnd, (IntPtr)0, ptStart.X, ptStart.Y, width, height, SetWindowPosFlags.SWP_ASYNCWINDOWPOS | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE | SetWindowPosFlags.SWP_NOOWNERZORDER | SetWindowPosFlags.SWP_NOZORDER));
         }
 
         // some p/invoke
 
         // ReSharper disable InconsistentNaming
-        public delegate IntPtr HookProc( int nCode, IntPtr wParam, IntPtr lParam );
+        public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
 
-        public delegate void TimerProc( IntPtr hWnd, uint uMsg, UIntPtr nIDEvent, uint dwTime );
+        public delegate void TimerProc(IntPtr hWnd, uint uMsg, UIntPtr nIDEvent, uint dwTime);
 
         private const int WH_CALLWNDPROCRET = 12;
 
         // ReSharper disable EnumUnderlyingTypeIsInt
         private enum CbtHookAction : int
-            // ReSharper restore EnumUnderlyingTypeIsInt
+        // ReSharper restore EnumUnderlyingTypeIsInt
         {
             // ReSharper disable UnusedMember.Local
             HCBT_MOVESIZE = 0,
@@ -117,10 +117,22 @@ namespace Amicitia.Utilities
             HCBT_SETFOCUS = 9
             // ReSharper restore UnusedMember.Local
         }
+#region GetCurrentThreadId
+        static int GetCurrentThreadId(){
+            Type t = Type.GetType("Mono.Runtime");
+            if (t != null)
+                return GetCurrentThreadIdMono();
+            else
+                return GetCurrentThreadIdWinNT();
+        }
 
         [DllImport( "kernel32.dll" )]
-        static extern int GetCurrentThreadId();
+        static extern int GetCurrentThreadIdWinNT();
 
+        static int GetCurrentThreadIdMono(){
+            return System.Threading.Thread.CurrentThread.ManagedThreadId;
+        }
+#endregion
         [DllImport( "user32.dll" )]
         private static extern bool GetWindowRect( IntPtr hWnd, ref Rectangle lpRect );
 

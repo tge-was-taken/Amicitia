@@ -49,7 +49,12 @@ namespace Amicitia
             InitializeComponent();
             InitializeMainForm();
 #if DEBUG
-            NativeMethods.AllocConsole();
+            Type t = Type.GetType("Mono.Runtime");
+            if (t != null)
+                Console.WriteLine("You are running with the Mono VM");
+            else
+                NativeMethods.AllocConsole();
+            
 #endif
         }
 
@@ -208,11 +213,10 @@ namespace Amicitia
             // hide file dropdown
             fileToolStripMenuItem.HideDropDown();
 
-            using ( var centeringService = new DialogCenteringService( this ) )
+            using (var centeringService = new DialogCenteringService(this))
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
                 openFileDlg.Filter = SupportedFileManager.FileFilter;
-
                 // Exit out if user didn't select a file
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
@@ -225,14 +229,15 @@ namespace Amicitia
 
         private void SaveToolStripMenuItemClickEventHandler(object sender, EventArgs e)
         {
-            if ( mainTreeView.Nodes.Count != 0 )
+            if (mainTreeView.Nodes.Count != 0)
             {
-                var wrapper = ( IResourceWrapper)mainTreeView.Nodes[0];
+                var wrapper = (IResourceWrapper)mainTreeView.Nodes[0];
                 var path = openToolStripMenuItem.DropDownItems[openToolStripMenuItem.DropDownItems.Count - 1].Text;
-                wrapper.Export( path, wrapper.FileType );
+                wrapper.Export(path, wrapper.FileType);
 
                 using (var centeringService = new DialogCenteringService(this))
-                    MessageBox.Show( "File has been saved successfully.", "Success" );
+                    MessageBox.Show("File has been saved successfully.", "Success");
+                
             }
         }
 
@@ -241,9 +246,9 @@ namespace Amicitia
             if ( mainTreeView.Nodes.Count != 0 )
             {
                 ( ( IResourceWrapper )mainTreeView.Nodes[0] ).Export();
-
-                using ( var centeringService = new DialogCenteringService( this ) )
-                    MessageBox.Show( "File has been saved successfully.", "Success" );
+                    using (var centeringService = new DialogCenteringService(this))
+                        MessageBox.Show("File has been saved successfully.", "Success");
+                
             }
         }
 

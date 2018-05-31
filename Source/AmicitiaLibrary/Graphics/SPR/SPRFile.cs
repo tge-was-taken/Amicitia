@@ -77,7 +77,7 @@ namespace AmicitiaLibrary.Graphics.SPR
 
     public abstract class SprFileBase : BinaryBase
     {
-        protected List<SprKeyFrame> keyFrames;
+        protected List<SprSprite> keyFrames;
         protected List<ITextureFile> textures;
 
         internal abstract string Tag
@@ -85,7 +85,7 @@ namespace AmicitiaLibrary.Graphics.SPR
             get;
         }
 
-        public abstract List<SprKeyFrame> KeyFrames
+        public abstract List<SprSprite> KeyFrames
         {
             get;
         }
@@ -110,7 +110,7 @@ namespace AmicitiaLibrary.Graphics.SPR
     {
         // Private Fields
         private IList<TmxFile> mTextures;
-        private IList<SprKeyFrame> mKeyFrames;
+        private IList<SprSprite> mKeyFrames;
 
         // Constructors
         internal SprFile(BinaryReader reader)
@@ -118,7 +118,7 @@ namespace AmicitiaLibrary.Graphics.SPR
             Read(reader);
         }
 
-        public SprFile(IList<TmxFile> textures, IList<SprKeyFrame> keyframes)
+        public SprFile(IList<TmxFile> textures, IList<SprSprite> keyframes)
         {
             mTextures = textures.ToList();
             mKeyFrames = keyframes.ToList();
@@ -146,7 +146,7 @@ namespace AmicitiaLibrary.Graphics.SPR
             get { return mTextures; }
         }
 
-        public IList<SprKeyFrame> KeyFrames
+        public IList<SprSprite> KeyFrames
         {
             get { return mKeyFrames; }
         }
@@ -247,11 +247,11 @@ namespace AmicitiaLibrary.Graphics.SPR
                 mTextures.Add(TmxFile.Load(stream, true));
             }
 
-            mKeyFrames = new List<SprKeyFrame>(header.numKeyFrames);
+            mKeyFrames = new List<SprSprite>(header.numKeyFrames);
             for (int i = 0; i < header.numKeyFrames; i++)
             {
                 stream.Seek(posFileStart + keyFramePointerTable[i].offset, SeekOrigin.Begin);
-                mKeyFrames.Add(new SprKeyFrame(reader));
+                mKeyFrames.Add(new SprSprite(reader));
             }
         }
     }

@@ -75,7 +75,7 @@ namespace Amicitia
         AssimpModelFile,
         RmdNodeLink,
         RmdNodeLinkList,
-        SprKeyFrame,
+        SprSprite,
         RwNode,
         RmdAnimation,
         RwGeometryNode,

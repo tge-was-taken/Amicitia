@@ -174,7 +174,7 @@
     <Compile Include="Graphics\MT\ABKeyType.cs" />
     <Compile Include="Graphics\SPR\SPR4File.cs" />
     <Compile Include="Graphics\SPR\SPRFile.cs" />
-    <Compile Include="Graphics\SPR\SPRKeyFrame.cs" />
+    <Compile Include="Graphics\SPR\SPRSprite.cs" />
     <Compile Include="Graphics\TXP\TBFile.cs" />
     <Compile Include="Graphics\TMX\TMXFile.cs" />
     <Compile Include="Compression\PointerRelocationTableCompression.cs" />

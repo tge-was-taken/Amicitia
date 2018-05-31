@@ -66,7 +66,7 @@ namespace AmicitiaLibrary.Graphics.SPR
     public class Spr4File : BinaryBase, ISprFile
     {
         private IList<TgaFile> mTextures;
-        private IList<SprKeyFrame> mKeyFrames;
+        private IList<SprSprite> mKeyFrames;
 
         internal Spr4File(BinaryReader reader)
         {
@@ -76,10 +76,10 @@ namespace AmicitiaLibrary.Graphics.SPR
         public Spr4File()
         {
             mTextures = new List<TgaFile>();
-            mKeyFrames = new List<SprKeyFrame>();
+            mKeyFrames = new List<SprSprite>();
         }
 
-        public Spr4File(IList<TgaFile> textures, IList<SprKeyFrame> keyframes)
+        public Spr4File(IList<TgaFile> textures, IList<SprSprite> keyframes)
         {
             mTextures = textures;
             mKeyFrames = keyframes;
@@ -106,7 +106,7 @@ namespace AmicitiaLibrary.Graphics.SPR
             get { return mTextures; }
         }
 
-        public IList<SprKeyFrame> KeyFrames
+        public IList<SprSprite> KeyFrames
         {
             get { return mKeyFrames; }
         }
@@ -205,11 +205,11 @@ namespace AmicitiaLibrary.Graphics.SPR
                 mTextures.Add(new TgaFile(stream, true));
             }
 
-            mKeyFrames = new List<SprKeyFrame>(header.numKeyFrames);
+            mKeyFrames = new List<SprSprite>(header.numKeyFrames);
             for (int i = 0; i < header.numKeyFrames; i++)
             {
                 stream.Seek(posFileStart + keyFramePointerTable[i].offset, SeekOrigin.Begin);
-                mKeyFrames.Add(new SprKeyFrame(reader));
+                mKeyFrames.Add(new SprSprite(reader));
             }
         }
     }

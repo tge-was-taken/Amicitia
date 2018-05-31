@@ -6,7 +6,7 @@ namespace AmicitiaLibrary.Graphics.SPR
     using AmicitiaLibrary.Utilities;
     using System.Drawing;
 
-    public class SprKeyFrame
+    public class SprSprite
     {
         // Private Fields
         private int _unk0x00;
@@ -57,20 +57,20 @@ namespace AmicitiaLibrary.Graphics.SPR
             set { mCoordX1 = value.X; mCoordY1 = value.Y; mCoordX2 = value.Right; mCoordY2 = value.Bottom; }
         }
 
-        public SprKeyFrame(string path)
+        public SprSprite(string path)
         {
             using (var reader = new BinaryReader(File.OpenRead(path)))
                 Read(reader);
         }
 
-        public SprKeyFrame( Stream stream, bool leaveOpen )
+        public SprSprite( Stream stream, bool leaveOpen )
         {
             using ( var reader = new BinaryReader( stream, Encoding.Default, leaveOpen ) )
                 Read( reader );
         }
 
         // Constructors
-        internal SprKeyFrame(BinaryReader reader)
+        internal SprSprite(BinaryReader reader)
         {
             Read(reader);
         }

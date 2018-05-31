@@ -13,14 +13,14 @@ namespace Amicitia.ResourceWrappers
         where TTexture : ITextureFile
     {
         [Browsable(false)]
-        public GenericListWrapper<SprKeyFrame> KeyFrameListWrapper { get; }
+        public GenericListWrapper<SprSprite> KeyFrameListWrapper { get; }
 
         [Browsable(false)]
         public GenericListWrapper<TTexture> TextureListWrapper { get; }
 
         public SprFileWrapper(string text, TFile resource) : base(text, resource)
         {
-            KeyFrameListWrapper = new GenericListWrapper<SprKeyFrame>("KeyFrames", resource.KeyFrames, (e, i) => $"KeyFrame{i:000}");
+            KeyFrameListWrapper = new GenericListWrapper<SprSprite>("KeyFrames", resource.KeyFrames, (e, i) => $"KeyFrame{i:000}");
             TextureListWrapper = GetTextureListWrapper();
             PopulateView();
         }
@@ -87,7 +87,7 @@ namespace Amicitia.ResourceWrappers
         }
     }
 
-    public class SprKeyFrameWrapper : ResourceWrapper<SprKeyFrame>
+    public class SprKeyFrameWrapper : ResourceWrapper<SprSprite>
     {
         public string Comment
         {
@@ -107,7 +107,7 @@ namespace Amicitia.ResourceWrappers
             set => Resource.Coordinates = value;
         }
 
-        public SprKeyFrameWrapper(string text, SprKeyFrame resource) : base(text, resource)
+        public SprKeyFrameWrapper(string text, SprSprite resource) : base(text, resource)
         {
         }
 
@@ -116,8 +116,8 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterFileExportAction(SupportedFileType.SprKeyFrame, (res, path) => res.Save(path));
-            RegisterFileReplaceAction(SupportedFileType.SprKeyFrame, (res, path) => new SprKeyFrame(path));
+            RegisterFileExportAction(SupportedFileType.SprSprite, (res, path) => res.Save(path));
+            RegisterFileReplaceAction(SupportedFileType.SprSprite, (res, path) => new SprSprite(path));
         }
 
         protected override void PopulateView()

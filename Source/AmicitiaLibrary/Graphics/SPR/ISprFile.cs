@@ -6,7 +6,7 @@ namespace AmicitiaLibrary.Graphics.SPR
     {
         int KeyFrameCount { get; }
 
-        IList<SprKeyFrame> KeyFrames { get; }
+        IList<SprSprite> KeyFrames { get; }
 
         int TextureCount { get; }
 

@@ -57,7 +57,7 @@ namespace Amicitia
             // Sprite
             new SupportedFileInfo("Atlus TMX Sprite Container",       SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o) => new SprFile(s, o),                 ".spr"),
             new SupportedFileInfo("Atlus TGA Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o) => new Spr4File(s, o),                ".spr4"),
-            new SupportedFileInfo("Atlus Sprite Key Frame",           SupportedFileType.SprKeyFrame,              typeof(SprKeyFrame),             null,                 (s, o) => new SprKeyFrame(s, o),             ".sprkf"),
+            new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o) => new SprSprite(s, o),               ".sprt"),
 
             // Model related formats
             new SupportedFileInfo("Atlus RenderWare Model Data",      SupportedFileType.RmdScene,                 typeof(RmdScene),                null,                 (s, o) => new RmdScene(s, o),                ".rmd", ".rws"),

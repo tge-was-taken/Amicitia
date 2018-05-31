@@ -5,9 +5,6 @@ namespace AmicitiaLibrary.Graphics.RenderWare
     using System.IO;
     using System.Numerics;
     using Utilities;
-    using System.Reflection;
-    using System;
-    using System.Linq;
 
     // This class needs some major refactoring
     public class RwSkinNode : RwNode

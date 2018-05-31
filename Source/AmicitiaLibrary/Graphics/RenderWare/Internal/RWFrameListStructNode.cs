@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-
-namespace AmicitiaLibrary.Graphics.RenderWare
+﻿namespace AmicitiaLibrary.Graphics.RenderWare
 {
     using System.Collections.Generic;
     using System.IO;

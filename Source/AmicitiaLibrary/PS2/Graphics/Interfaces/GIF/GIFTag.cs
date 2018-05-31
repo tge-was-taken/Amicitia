@@ -1,8 +1,5 @@
-﻿using AmicitiaLibrary.Utilities;
-
-namespace AmicitiaLibrary.PS2.Graphics.Interfaces.GIF
+﻿namespace AmicitiaLibrary.PS2.Graphics.Interfaces.GIF
 {
-    using System;
     using System.IO;
     using AmicitiaLibrary.Utilities;
 

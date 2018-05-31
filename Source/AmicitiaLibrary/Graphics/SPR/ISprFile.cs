@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AmicitiaLibrary.Graphics.TMX;
 
 namespace AmicitiaLibrary.Graphics.SPR
 {

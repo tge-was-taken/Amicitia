@@ -1,6 +1,4 @@
-﻿using AmicitiaLibrary.Utilities;
-
-namespace AmicitiaLibrary.FileSystems.BVP
+﻿namespace AmicitiaLibrary.FileSystems.BVP
 {
     using System.IO;
     using System.Collections.Generic;

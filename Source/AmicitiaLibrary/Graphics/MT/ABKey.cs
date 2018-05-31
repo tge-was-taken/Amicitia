@@ -1,6 +1,4 @@
-﻿using AmicitiaLibrary.Utilities;
-
-namespace AmicitiaLibrary.Graphics.MT
+﻿namespace AmicitiaLibrary.Graphics.MT
 {
     using System.IO;
     using AmicitiaLibrary.Utilities;

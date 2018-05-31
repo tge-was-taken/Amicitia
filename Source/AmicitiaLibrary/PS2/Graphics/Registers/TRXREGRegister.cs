@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using AmicitiaLibrary.Utilities;
 
 namespace AmicitiaLibrary.PS2.Graphics.Registers
 {

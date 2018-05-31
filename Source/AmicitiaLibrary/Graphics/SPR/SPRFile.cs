@@ -9,7 +9,6 @@ namespace AmicitiaLibrary.Graphics.SPR
     using IO;
     using System.Linq;
     using TMX;
-    using System;
 
     [StructLayout(LayoutKind.Explicit, Size = SIZE)]
     internal struct Spr0Header

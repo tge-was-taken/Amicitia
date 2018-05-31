@@ -1,6 +1,4 @@
-﻿using AmicitiaLibrary.Utilities;
-
-namespace AmicitiaLibrary.PS2.Graphics
+﻿namespace AmicitiaLibrary.PS2.Graphics
 {
     using System.IO;
     using System.Drawing;

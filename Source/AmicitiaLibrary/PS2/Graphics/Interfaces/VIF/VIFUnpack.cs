@@ -1,6 +1,4 @@
-﻿using AmicitiaLibrary.Utilities;
-
-namespace AmicitiaLibrary.PS2.Graphics.Interfaces.VIF
+﻿namespace AmicitiaLibrary.PS2.Graphics.Interfaces.VIF
 {
     using System.IO;
     using AmicitiaLibrary.Utilities;

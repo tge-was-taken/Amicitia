@@ -1,6 +1,5 @@
 ﻿namespace AmicitiaLibrary.Graphics
 {
-    using System;
     using System.Drawing;
 
     // TODO

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Windows.Forms;
 using AmicitiaLibrary.FileSystems.AMD;
 
 namespace Amicitia.ResourceWrappers

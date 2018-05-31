@@ -1,6 +1,4 @@
-﻿using AmicitiaLibrary.Utilities;
-
-namespace AmicitiaLibrary.Graphics.RenderWare
+﻿namespace AmicitiaLibrary.Graphics.RenderWare
 {
     using System;
     using System.Drawing;

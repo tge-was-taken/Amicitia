@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace AmicitiaLibrary.Graphics.RenderWare
+﻿namespace AmicitiaLibrary.Graphics.RenderWare
 {
     using System.Numerics;
     using System.Collections.Generic;

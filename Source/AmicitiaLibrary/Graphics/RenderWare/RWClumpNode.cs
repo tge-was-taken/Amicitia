@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace AmicitiaLibrary.Graphics.RenderWare
 {
     using Utilities;
     using System.Collections.Generic;
-    using System.Drawing;
     using System.IO;
     using System.Numerics;
 

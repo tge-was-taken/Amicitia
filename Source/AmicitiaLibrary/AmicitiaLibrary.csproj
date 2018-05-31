@@ -172,7 +172,6 @@
     <Compile Include="Graphics\MT\ABKey.cs" />
     <Compile Include="Graphics\MT\ABKeyInfo.cs" />
     <Compile Include="Graphics\MT\ABKeyType.cs" />
-    <Compile Include="FileSystems\DDT\DDTFile.cs" />
     <Compile Include="Graphics\SPR\SPR4File.cs" />
     <Compile Include="Graphics\SPR\SPRFile.cs" />
     <Compile Include="Graphics\SPR\SPRKeyFrame.cs" />

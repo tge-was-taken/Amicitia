@@ -12,53 +12,28 @@
     public class RwNode : BinaryBase
     {
         private const uint HEADER_SIZE = 12;
-        private RwNodeId mId;
-        private uint mRawVersion;
         private RwNode mParent;
         private List<RwNode> mChildren = new List<RwNode>();
-        private byte[] mData;
+        private readonly byte[] mData;
         private uint mSize;
 
         /// <summary>
         /// RenderWare version of nodes used by Persona 3, Persona 3 FES, and Persona 4.
         /// </summary>
-        public const uint VersionPersona3 = 0x1C020037;
+        public const uint VERSION_PERSONA3 = 0x1C020037;
 
         /// <summary>
-        /// RenderWare version used when exporting an <see cref="RwNode"/>. Set to <see cref="VersionPersona3"/> by default.
+        /// RenderWare version of nodes used by Persona 3, Persona 3 FES, and Persona 4. Used for RMD specific nodes.
         /// </summary>
-        public static uint ExportVersion = VersionPersona3;
+        public const uint VERSION_PERSONA3_ALT = 0x40000000;
 
         /// <summary>
         /// Gets the RenderWare node id.
         /// </summary>
-        public RwNodeId Id
-        {
-            get { return mId; }
-            internal set { mId = value; }
-        }
+        public RwNodeId Id { get; internal set; }
 
-        //public float Version
-        //{
-        //    get
-        //    {
-        //        return 3 + ((float)((_rawVersion & 0xFFFF0000) >> 16) / 10000);
-        //    }
-        //}
-
-        //public uint Revision
-        //{
-        //    get
-        //    {
-        //        return (_rawVersion & 0xFFFF);
-        //    }
-
-        //    set
-        //    {
-        //        _rawVersion = (_rawVersion & 0xFFFF0000) | value & 0xFFFF;
-        //    }
-        //}
-
+        public uint Version { get; set; }
+        
         /// <summary>
         /// Gets or sets the RenderWare parent node of this node.
         /// </summary>
@@ -101,9 +76,9 @@
         /// </summary>
         protected RwNode(RwNodeId id)
         {
-            mId = id;
+            Id = id;
             mSize = 0;
-            mRawVersion = ExportVersion;
+            Version = GetVersionForNode(id);
             mParent = null;
         }
 
@@ -112,9 +87,20 @@
         /// </summary>
         protected RwNode(RwNodeId id, RwNode parent)
         {
-            mId = id;
+            Id = id;
             mSize = 0;
-            mRawVersion = ExportVersion;
+            Version = GetVersionForNode( id );
+            Parent = parent;
+        }
+
+        /// <summary>
+        /// Initialize a RenderWare node using the given RenderWare node id and parent node.
+        /// </summary>
+        protected RwNode( RwNodeId id, RwNode parent, uint version )
+        {
+            Id = id;
+            mSize = 0;
+            Version = version;
             Parent = parent;
         }
 
@@ -123,9 +109,9 @@
         /// </summary>
         internal RwNode(RwNodeFactory.RwNodeHeader header)
         {
-            mId = header.Id;
+            Id = header.Id;
             mSize = header.Size;
-            mRawVersion = header.Version;
+            Version = header.Version;
             Parent = header.Parent;
         }
 
@@ -135,18 +121,27 @@
         /// </summary>
         internal RwNode(RwNodeFactory.RwNodeHeader header, BinaryReader reader)
         {
-            mId = header.Id;
+            Id = header.Id;
             mSize = header.Size;
-            mRawVersion = header.Version;
+            Version = header.Version;
             Parent = header.Parent;
             mData = reader.ReadBytes((int)mSize);
 
-            switch (mId)
+            switch (Id)
             {
                 case RwNodeId.RmdParticleListNode:
                     reader.AlignPosition(16);
                     break;
             }
+        }
+
+        private static uint GetVersionForNode( RwNodeId id )
+        {
+            var version = VERSION_PERSONA3;
+            if ( id >= RwNodeId.RmdAnimationPlaceholderNode )
+                version = VERSION_PERSONA3_ALT;
+
+            return version;
         }
 
         /// <summary>
@@ -238,9 +233,9 @@
 
             // Seek back to where the header should be, and write it using the calculated size.
             writer.BaseStream.Position = headerPosition;
-            writer.Write((uint)mId);
+            writer.Write((uint)Id);
             writer.Write(mSize);
-            writer.Write(ExportVersion);
+            writer.Write(Version);
 
             // Seek to the end of this node
             writer.BaseStream.Position = endPosition;

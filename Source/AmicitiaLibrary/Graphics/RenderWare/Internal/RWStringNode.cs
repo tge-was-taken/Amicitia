@@ -40,7 +40,10 @@
         protected internal override void WriteBody(BinaryWriter writer)
         {
             writer.WriteCString(Value);
-            writer.AlignPosition(4);
+            var alignedLength = AlignmentHelper.Align( Value.Length + 1, 4 );
+            var difference = alignedLength - ( Value.Length + 1 );
+            for ( int i = 0; i < difference; i++ )
+                writer.Write( ( byte ) 0 );
         }
     }
 }

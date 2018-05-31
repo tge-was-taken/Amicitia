@@ -9,7 +9,11 @@
     /// </summary>
     internal class RwMaterialStructNode : RwNode
     {
+        public int Field00 { get; set; }
+
         public Color Color { get; set; }
+
+        public int Field08 { get; set; }
 
         public bool IsTextured { get; set; }
 
@@ -35,9 +39,9 @@
         internal RwMaterialStructNode(RwNodeFactory.RwNodeHeader header, BinaryReader reader)
                 : base(header)
         {
-            reader.Seek(4, SeekOrigin.Current);
+            Field00 = reader.ReadInt32();
             Color = Color.FromArgb(reader.ReadInt32());
-            reader.Seek(4, SeekOrigin.Current);
+            Field08 = reader.ReadInt32();
             IsTextured = reader.ReadInt32() == 1;
             Ambient = reader.ReadSingle();
             Specular = reader.ReadSingle();
@@ -50,9 +54,9 @@
         /// <param name="writer">The <see cref="BinaryWriter"/> to write the data with.</param>
         protected internal override void WriteBody(BinaryWriter writer)
         {
-            writer.Seek(4, SeekOrigin.Current);
+            writer.Write( Field00 );
             writer.Write(Color);
-            writer.Seek(4, SeekOrigin.Current);
+            writer.Write( Field08 );
             writer.Write(IsTextured ? (int)1 : (int)0);
             writer.Write(Ambient);
             writer.Write(Specular);

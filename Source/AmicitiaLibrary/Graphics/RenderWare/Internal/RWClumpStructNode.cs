@@ -32,7 +32,7 @@
         }
 
         internal RwClumpStructNode(RwClumpNode clumpNode)
-            : base(new RwNodeFactory.RwNodeHeader { Parent = clumpNode, Id = RwNodeId.RwStructNode, Version = ExportVersion })
+            : base(RwNodeId.RwStructNode, clumpNode)
         {
             mAtomicCount = clumpNode.Atomics.Count;
             mLightCount = 0;

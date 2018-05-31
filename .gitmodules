@@ -1,0 +1,3 @@
+[submodule "Dependencies/AtlusFileSystemLibrary"]
+	path = Dependencies/AtlusFileSystemLibrary
+	url = https://github.com/TGEnigma/AtlusFileSystemLibrary

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using AtlusLibSharp.IO;
+using AmicitiaLibrary.IO;
 
 namespace Amicitia.ResourceWrappers
 {

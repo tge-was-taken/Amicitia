@@ -4,8 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AtlusLibSharp.Field;
-using AtlusLibSharp.IO;
+using AmicitiaLibrary.Field;
+using AmicitiaLibrary.IO;
 
 namespace Amicitia.ResourceWrappers
 {

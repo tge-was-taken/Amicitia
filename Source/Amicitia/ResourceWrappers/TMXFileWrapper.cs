@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
-using AtlusLibSharp.Graphics.TMX;
-using AtlusLibSharp.PS2.Graphics;
+using AmicitiaLibrary.Graphics.TMX;
+using AmicitiaLibrary.PS2.Graphics;
 
 namespace Amicitia.ResourceWrappers
 {

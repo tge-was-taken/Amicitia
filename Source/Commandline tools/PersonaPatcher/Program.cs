@@ -1,5 +1,5 @@
-﻿using AtlusLibSharp.FileSystems.CVM;
-using AtlusLibSharp.Utilities;
+﻿using AmicitiaLibrary.FileSystems.CVM;
+using AmicitiaLibrary.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;

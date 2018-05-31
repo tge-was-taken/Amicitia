@@ -1,5 +1,5 @@
 ﻿using System.Drawing.Imaging;
-using AtlusLibSharp.Graphics.TGA;
+using AmicitiaLibrary.Graphics.TGA;
 
 namespace Amicitia.ResourceWrappers
 {

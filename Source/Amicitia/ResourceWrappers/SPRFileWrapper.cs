@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
-using AtlusLibSharp.Graphics;
-using AtlusLibSharp.Graphics.SPR;
-using AtlusLibSharp.Graphics.TGA;
-using AtlusLibSharp.Graphics.TMX;
-using AtlusLibSharp.IO;
+using AmicitiaLibrary.Graphics;
+using AmicitiaLibrary.Graphics.SPR;
+using AmicitiaLibrary.Graphics.TGA;
+using AmicitiaLibrary.Graphics.TMX;
+using AmicitiaLibrary.IO;
 using System.Drawing;
 
 namespace Amicitia.ResourceWrappers

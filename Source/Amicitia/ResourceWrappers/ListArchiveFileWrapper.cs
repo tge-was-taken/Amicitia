@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Windows.Forms;
-using AtlusLibSharp.FileSystems.ListArchive;
+using AmicitiaLibrary.FileSystems.ListArchive;
 
 namespace Amicitia.ResourceWrappers
 {

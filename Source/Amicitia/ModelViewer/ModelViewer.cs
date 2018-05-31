@@ -5,8 +5,8 @@ using System.Windows.Forms;
 using OpenTK.Graphics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using AtlusLibSharp.Graphics.RenderWare;
-using AtlusLibSharp.PS2.Graphics;
+using AmicitiaLibrary.Graphics.RenderWare;
+using AmicitiaLibrary.PS2.Graphics;
 using SN = System.Numerics;
 
 namespace Amicitia.ModelViewer

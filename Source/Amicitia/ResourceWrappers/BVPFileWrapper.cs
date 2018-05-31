@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Windows.Forms;
-using AtlusLibSharp.FileSystems.BVP;
+using AmicitiaLibrary.FileSystems.BVP;
 
 namespace Amicitia.ResourceWrappers
 {

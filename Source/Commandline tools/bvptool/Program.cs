@@ -1,4 +1,4 @@
-﻿using AtlusLibSharp.FileSystems.BVP;
+﻿using AmicitiaLibrary.FileSystems.BVP;
 using System;
 using System.IO;
 

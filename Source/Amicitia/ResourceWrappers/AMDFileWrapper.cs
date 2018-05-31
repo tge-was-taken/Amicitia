@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Windows.Forms;
-using AtlusLibSharp.FileSystems.AMD;
+using AmicitiaLibrary.FileSystems.AMD;
 
 namespace Amicitia.ResourceWrappers
 {

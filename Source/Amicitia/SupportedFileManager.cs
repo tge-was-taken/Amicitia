@@ -1,4 +1,4 @@
-﻿using AtlusLibSharp.Field;
+﻿using AmicitiaLibrary.Field;
 
 namespace Amicitia
 {
@@ -9,18 +9,18 @@ namespace Amicitia
     using System.Reflection;
     using System.Drawing;
 
-    using AtlusLibSharp.Utilities;
-    using AtlusLibSharp.FileSystems.BVP;
-    using AtlusLibSharp.Graphics.RenderWare;
-    using AtlusLibSharp.FileSystems.ListArchive;
-    using AtlusLibSharp.FileSystems.PAKToolArchive;
-    using AtlusLibSharp.FileSystems.AMD;
-    using AtlusLibSharp.Graphics.TMX;
-    using AtlusLibSharp.Graphics.SPR;
-    using AtlusLibSharp.Graphics.TGA;
-    using AtlusLibSharp.IO;
+    using AmicitiaLibrary.Utilities;
+    using AmicitiaLibrary.FileSystems.BVP;
+    using AmicitiaLibrary.Graphics.RenderWare;
+    using AmicitiaLibrary.FileSystems.ListArchive;
+    using AmicitiaLibrary.FileSystems.PAKToolArchive;
+    using AmicitiaLibrary.FileSystems.AMD;
+    using AmicitiaLibrary.Graphics.TMX;
+    using AmicitiaLibrary.Graphics.SPR;
+    using AmicitiaLibrary.Graphics.TGA;
+    using AmicitiaLibrary.IO;
     using Assimp;
-    using AtlusLibSharp.FileSystems.ACX;
+    using AmicitiaLibrary.FileSystems.ACX;
 
     internal static class SupportedFileManager
     {

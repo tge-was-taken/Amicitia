@@ -4,7 +4,7 @@ namespace Amicitia
 {
     using ResourceWrappers;
     using System.IO;
-    using AtlusLibSharp.IO;
+    using AmicitiaLibrary.IO;
 
     internal static class ResourceWrapperFactory
     {

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
-using AtlusLibSharp.FileSystems.ACX;
-using AtlusLibSharp.IO;
+using AmicitiaLibrary.FileSystems.ACX;
+using AmicitiaLibrary.IO;
 
 namespace Amicitia.ResourceWrappers
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AtlusLibSharp.Graphics.RenderWare;
+using AmicitiaLibrary.Graphics.RenderWare;
 
 namespace Amicitia.ResourceWrappers
 {

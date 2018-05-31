@@ -6,8 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Windows.Forms;
-using AtlusLibSharp.Graphics.RenderWare;
-using AtlusLibSharp.PS2.Graphics;
+using AmicitiaLibrary.Graphics.RenderWare;
+using AmicitiaLibrary.PS2.Graphics;
 
 namespace Amicitia.ResourceWrappers
 {

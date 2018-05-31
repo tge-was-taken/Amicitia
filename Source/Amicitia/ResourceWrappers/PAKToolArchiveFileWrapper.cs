@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Windows.Forms;
-using AtlusLibSharp.FileSystems.PAKToolArchive;
+using AmicitiaLibrary.FileSystems.PAKToolArchive;
 
 namespace Amicitia.ResourceWrappers
 {

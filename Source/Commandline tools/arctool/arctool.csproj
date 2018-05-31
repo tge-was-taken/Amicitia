@@ -54,9 +54,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\AtlusLibSharp\AtlusLibSharp.csproj">
+    <ProjectReference Include="..\..\AmicitiaLibrary\AmicitiaLibrary.csproj">
       <Project>{adf5e4ca-d622-41a1-8a09-5ab964cbb411}</Project>
-      <Name>AtlusLibSharp</Name>
+      <Name>AmicitiaLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

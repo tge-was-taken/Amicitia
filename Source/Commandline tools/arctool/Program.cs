@@ -2,8 +2,8 @@
 {
     using System;
     using System.IO;
-    using AtlusLibSharp.FileSystems.ListArchive;
-    using AtlusLibSharp.FileSystems.PAKToolArchive;
+    using AmicitiaLibrary.FileSystems.ListArchive;
+    using AmicitiaLibrary.FileSystems.PAKToolArchive;
 
     class Program
     {

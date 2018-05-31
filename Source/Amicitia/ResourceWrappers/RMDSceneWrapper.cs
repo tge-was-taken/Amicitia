@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -50,7 +51,7 @@ namespace Amicitia.ResourceWrappers
     public class RmdSceneWrapper : RwNodeWrapperBase<RmdScene>
     {
         [Browsable(false)]
-        public RwTextureDictionaryNodeWrapper TextureDictionaryWrapper { get; private set; }
+        public RwTextureDictionaryNodeWrapper TextureDictionaryWrapper { get; internal set; }
 
         [Browsable(false)]
         public RwClumpNodeListWrapper ClumpsWrapper { get; private set; }
@@ -357,9 +358,34 @@ namespace Amicitia.ResourceWrappers
                         Assimp.PostProcessSteps.GenerateUVCoords | Assimp.PostProcessSteps.ImproveCacheLocality |
                         Assimp.PostProcessSteps.LimitBoneWeights | Assimp.PostProcessSteps.OptimizeMeshes );
                     res.ReplaceGeometries( scene );
-                    return res;
+
+                    var clumpList = Parent as RwClumpNodeListWrapper;
+                    var rmdScene = clumpList?.Parent as RmdSceneWrapper;
+                    var texDictionary = rmdScene?.TextureDictionaryWrapper.Resource;
+
+                    if ( texDictionary != null )
+                    {
+                        var textureNameLookup = new HashSet<string>( texDictionary.Textures.Select( x => x.Name ) );
+                        var textureExtensions = new HashSet<string>( SupportedFileManager.GetSupportedFileInfo( typeof( Bitmap ) ).Extensions );
+                        var pathDirectory = Path.GetDirectoryName( path ) ?? string.Empty;
+
+                        foreach ( var material in scene.Materials )
+                        {
+                            var texturePath = Path.Combine( pathDirectory, material.TextureDiffuse.FilePath );
+                            var textureName = Path.GetFileNameWithoutExtension( texturePath );
+                            var textureExt = Path.GetExtension( texturePath );
+
+                            if ( File.Exists( texturePath ) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.ContainsKey( textureName ) )
+                            {
+                                rmdScene.TextureDictionaryWrapper.Add( texturePath, SupportedFileType.Bitmap );
+                                textureNameLookup.Add( textureName );
+                            }
+                        }
+                    }
                 }
-            });
+
+                return res;
+            } );
             RegisterRebuildAction((wrap) =>
             {
                 var resource = new RwClumpNode(Resource.Parent);

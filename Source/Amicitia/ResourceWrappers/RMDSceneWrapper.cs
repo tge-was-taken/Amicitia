@@ -964,7 +964,7 @@ namespace Amicitia.ResourceWrappers
             RegisterFileExportAction( SupportedFileType.RwAnimationNode, ( res, path ) => res.Save( path ) );
             RegisterFileExportAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
             {
-                var scene = ( RmdScene )res.FindParentNode( RwNodeId.RmdSceneNode );
+                var scene = ( RmdScene )res.FindParent( RwNodeId.RmdSceneNode );
                 var clump = scene.Clumps.FirstOrDefault();
                 if ( clump == null )
                     return;
@@ -974,7 +974,7 @@ namespace Amicitia.ResourceWrappers
             RegisterFileReplaceAction( SupportedFileType.RwAnimationNode, ( res, path ) => ( RwAnimationNode ) RwNode.Load( path ) );
             RegisterFileReplaceAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
             {
-                var scene = (RmdScene)res.FindParentNode( RwNodeId.RmdSceneNode );
+                var scene = (RmdScene)res.FindParent( RwNodeId.RmdSceneNode );
                 var clump = scene.Clumps.FirstOrDefault();
                 if ( clump == null )
                     return res;

@@ -80,18 +80,16 @@ namespace AmicitiaLibrary.Graphics.RenderWare
 
         public RwUserDataList UserData
         {
-            get => ( RwUserDataList )mExtensionNode.Children.Find( x => x.Id == RwNodeId.RwUserDataPluginNode );
+            get => mExtensionNode.FindChild<RwUserDataList>( RwNodeId.RwUserDataPluginNode );
             set
             {
-                int index = mExtensionNode.Children.FindIndex( x => x.Id == RwNodeId.RwUserDataPluginNode );
-
-                if ( index != -1 )
+                if ( value == null )
                 {
-                    mExtensionNode.Children[index] = value;
+                    mExtensionNode.RemoveChild( RwNodeId.RwUserDataPluginNode );
                 }
                 else
                 {
-                    mExtensionNode.AddChild( value );
+                    mExtensionNode.AddOrReplaceChild( value );
                 }
             }
         }

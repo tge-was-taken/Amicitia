@@ -39,7 +39,7 @@
         /// </summary>
         public RwNode Parent
         {
-            get { return mParent; }
+            get => mParent;
             internal set
             {
                 if (value == null) return;
@@ -175,10 +175,66 @@
         public void AddChild( RwNode node )
         {
             node.Parent = this;
-            Children.Add( node );
         }
 
-        public RwNode FindParentNode(RwNodeId nodeId)
+        public void ReplaceChild( int index, RwNode node )
+        {
+            node.mParent = this;
+            Children[ index ] = node;
+        }
+
+        public bool ReplaceChild( RwNode node )
+        {
+            int index = Children.FindIndex( x => x.Id == node.Id );
+            if ( index != -1 )
+            {
+                ReplaceChild( index, node );
+                return true;
+            }
+
+            return false;
+        }
+
+        public void AddOrReplaceChild( RwNode node )
+        {
+            if ( !ReplaceChild( node ) )
+                AddChild( node );
+        }
+
+        public void RemoveChild( RwNodeId id )
+        {
+            Children.RemoveAll( x => x.Id == id );
+        }
+
+        public RwNode FindChild( RwNodeId nodeId )
+        {
+            RwNode FindChildNode( RwNode node )
+            {
+                foreach ( var child in node.Children )
+                {
+                    if ( child.Id == nodeId )
+                        return child;
+                }
+
+                foreach ( var child in node.Children )
+                {
+                    var foundNode = FindChildNode( child );
+                    if ( foundNode != null )
+                        return foundNode;
+                }
+
+                return null;
+            }
+
+            return FindChildNode( this );
+        }
+
+        public T FindChild<T>( RwNodeId id ) where T : RwNode
+        {
+            return FindChild( id ) as T;
+        }
+
+        public RwNode FindParent(RwNodeId nodeId)
         {
             RwNode node = this;
 
@@ -199,27 +255,9 @@
             }
         }
 
-        public RwNode FindNode(RwNodeId nodeId)
+        public T FindParent<T>( RwNodeId id ) where T : RwNode
         {
-            RwNode FindNode(RwNode node)
-            {
-                foreach ( var child in node.Children )
-                {
-                    if ( child.Id == nodeId )
-                        return child;
-                }
-
-                foreach ( var child in node.Children )
-                {
-                    var foundNode = FindNode(child);
-                    if ( foundNode != null )
-                        return foundNode;
-                }
-
-                return null;
-            }
-
-            return FindNode(this);
+            return FindParent( id ) as T;
         }
 
         /// <summary>

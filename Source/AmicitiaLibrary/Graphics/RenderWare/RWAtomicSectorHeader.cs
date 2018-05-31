@@ -45,7 +45,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             Unused1 = reader.ReadInt32();
             Unused2 = reader.ReadInt32();
 
-            var world = (RwWorld)FindParentNode( RwNodeId.RwWorldNode );
+            var world = FindParent< RwWorld >( RwNodeId.RwWorldNode );
             if ( world == null )
                 throw new System.Exception();
 

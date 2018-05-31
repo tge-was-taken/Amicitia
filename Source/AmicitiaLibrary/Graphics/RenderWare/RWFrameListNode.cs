@@ -50,7 +50,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             {
                 var extensionNode = RwNodeFactory.GetNode<RwExtensionNode>( this, reader );           
 
-                mStruct.FrameList[i].HAnimFrameExtensionNode = extensionNode.FindNode( RwNodeId.RwHAnimFrameExtensionNode ) as RwHAnimFrameExtensionNode;
+                mStruct.FrameList[i].HAnimFrameExtensionNode = extensionNode.FindChild<RwHAnimFrameExtensionNode>( RwNodeId.RwHAnimFrameExtensionNode );
 
                 mExtensionNodes.Add(extensionNode);
             }

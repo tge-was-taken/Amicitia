@@ -149,7 +149,7 @@ namespace Amicitia
                         else if ( resWrap.FileType == SupportedFileType.RwClumpNode )
                         {
                             var model = ( RwClumpNode )resWrap.Resource;
-                            var scene = model.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
+                            var scene = model.FindParent( RwNodeId.RmdSceneNode ) as RmdScene;
                             if ( scene != null && scene.HasTextureDictionary )
                                 mViewer.LoadTextures( scene.TextureDictionary );
 
@@ -158,7 +158,7 @@ namespace Amicitia
                         else if ( resWrap.FileType == SupportedFileType.RwGeometryNode )
                         {
                             var geometry = ( RwGeometryNode )resWrap.Resource;
-                            var scene = geometry.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
+                            var scene = geometry.FindParent( RwNodeId.RmdSceneNode ) as RmdScene;
                             if ( scene != null && scene.TextureDictionary != null )
                                 mViewer.LoadTextures( scene.TextureDictionary );
 
@@ -167,11 +167,11 @@ namespace Amicitia
                         else if ( resWrap.FileType == SupportedFileType.RwAtomicNode )
                         {
                             var atomicNode = ( RwAtomicNode )resWrap.Resource;
-                            var clump = atomicNode.FindParentNode( RwNodeId.RwClumpNode ) as RwClumpNode;
+                            var clump = atomicNode.FindParent( RwNodeId.RwClumpNode ) as RwClumpNode;
                             var geometry = clump.GeometryList[atomicNode.GeometryIndex];
                             var frame = clump.FrameList[atomicNode.FrameIndex];
 
-                            var scene = atomicNode.FindParentNode( RwNodeId.RmdSceneNode ) as RmdScene;
+                            var scene = atomicNode.FindParent( RwNodeId.RmdSceneNode ) as RmdScene;
                             if ( scene != null && scene.TextureDictionary != null )
                                 mViewer.LoadTextures( scene.TextureDictionary );
 

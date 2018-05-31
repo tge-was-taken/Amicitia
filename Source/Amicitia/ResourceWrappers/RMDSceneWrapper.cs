@@ -341,7 +341,7 @@ namespace Amicitia.ResourceWrappers
                     }
 #endif
 
-                    ctx.ExportFile( scene, path, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs | Assimp.PostProcessSteps.JoinIdenticalVertices);
+                    ctx.ExportFile( scene, path, exportFormat.FormatId, Assimp.PostProcessSteps.FlipUVs );
                 }
             });
             RegisterFileReplaceAction(SupportedFileType.RwClumpNode, (res, path) => (RwClumpNode) RwNode.Load(path));
@@ -350,9 +350,12 @@ namespace Amicitia.ResourceWrappers
                 using ( var ctx = new Assimp.AssimpContext() )
                 {
                     ctx.SetConfig( new Assimp.Configs.MaxBoneCountConfig( 64 ) );
-                    var scene = ctx.ImportFile( path, Assimp.PostProcessSteps.SplitByBoneCount | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.FlipUVs | 
-                                                      Assimp.PostProcessSteps.FindInvalidData | Assimp.PostProcessSteps.GenerateSmoothNormals | Assimp.PostProcessSteps.GenerateUVCoords | Assimp.PostProcessSteps.ImproveCacheLocality |
-                                                      Assimp.PostProcessSteps.JoinIdenticalVertices | Assimp.PostProcessSteps.LimitBoneWeights | Assimp.PostProcessSteps.OptimizeMeshes );
+                    var scene = ctx.ImportFile(
+                        path,
+                        Assimp.PostProcessSteps.SplitByBoneCount | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.FlipUVs |
+                        Assimp.PostProcessSteps.FindInvalidData | Assimp.PostProcessSteps.GenerateSmoothNormals |
+                        Assimp.PostProcessSteps.GenerateUVCoords | Assimp.PostProcessSteps.ImproveCacheLocality |
+                        Assimp.PostProcessSteps.LimitBoneWeights | Assimp.PostProcessSteps.OptimizeMeshes );
                     res.ReplaceGeometries( scene );
                     return res;
                 }

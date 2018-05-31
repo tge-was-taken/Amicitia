@@ -190,6 +190,7 @@ namespace Amicitia.ModelViewer
     public class ModelViewer
     {
         // view states
+        private bool mCanRender;
         private bool mIsViewReady;
         private bool mIsViewFocused;
 
@@ -235,6 +236,13 @@ namespace Amicitia.ModelViewer
 
         public ModelViewer(GLControl controller)
         {
+            mCanRender = false;
+
+            if ( !InitializeShaderProgram() )
+                return;
+
+            mCanRender = true;
+
             string version = GL.GetString(StringName.Version);
             Console.WriteLine( version );
 
@@ -259,26 +267,33 @@ namespace Amicitia.ModelViewer
             mIsViewReady = true;
             GL.Viewport(0, 0, controller.Width, controller.Height);
             mCamera = new Camera();
-
-            InitializeShaderProgram();
         }
 
-        private void InitializeShaderProgram()
+        private bool InitializeShaderProgram()
         {
-            // set up shader program
-            mShaderProg = new ShaderProgram( "shader" );
-            mShaderProg.AddUniform( "proj" );
-            mShaderProg.AddUniform( "view" );
-            mShaderProg.AddUniform( "tran" );
-            mShaderProg.AddUniform( "diffuse" );
-            mShaderProg.AddUniform( "diffuseColor" );
-            mShaderProg.AddUniform( "isTextured" ); //used like a bool but is actually an int because of glsl design limitations ¬~¬
-            mShaderProg.Bind();
+            try
+            {
+                // set up shader program
+                mShaderProg = new ShaderProgram( "shader" );
+                mShaderProg.AddUniform( "proj" );
+                mShaderProg.AddUniform( "view" );
+                mShaderProg.AddUniform( "tran" );
+                mShaderProg.AddUniform( "diffuse" );
+                mShaderProg.AddUniform( "diffuseColor" );
+                mShaderProg.AddUniform( "isTextured" ); //used like a bool but is actually an int because of glsl design limitations ¬~¬
+                mShaderProg.Bind();
+            }
+            catch ( Exception )
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private void Input(object sender, System.Windows.Forms.KeyPressEventArgs args )
         {
-            if (!mIsViewFocused)
+            if (!mIsViewFocused || !mCanRender )
                 return;
 
             Vector3 oldpos = mCamera.Position;
@@ -354,7 +369,7 @@ namespace Amicitia.ModelViewer
 
         public void LoadTextures(RwTextureDictionaryNode textures)
         {
-            if (textures == null)
+            if (textures == null || !mCanRender )
                 return;
 
             int textureIdx = 0;
@@ -402,6 +417,9 @@ namespace Amicitia.ModelViewer
 
         public void LoadModel(RwClumpNode clump)
         {
+            if ( !mCanRender )
+                return;
+
             Console.WriteLine( "geometry count: {0}", clump.GeometryCount );
 
             for ( var atomicIndex = 0; atomicIndex < clump.Atomics.Count; atomicIndex++ )
@@ -419,6 +437,9 @@ namespace Amicitia.ModelViewer
 
         public void LoadGeometry(RwGeometryNode geom, SN.Matrix4x4 transform)
         {
+            if ( !mCanRender )
+                return;
+
             if (geom.MeshListNode == null)
             {
                 geom.MeshListNode = new RwMeshListNode(geom);
@@ -516,6 +537,9 @@ namespace Amicitia.ModelViewer
 
         public void LoadScene(RmdScene rmdScene)
         {
+            if ( !mCanRender )
+                return;
+
             Console.WriteLine("loading scene");
             Console.WriteLine("num textures: {0} ", rmdScene.TextureDictionary != null ? rmdScene.TextureDictionary.TextureCount : 0);
 
@@ -529,6 +553,9 @@ namespace Amicitia.ModelViewer
 
         public void DeleteScene()
         {
+            if ( !mCanRender )
+                return;
+
             Console.WriteLine("deleting scene");
             EndBind();
             Console.WriteLine("unbind models");
@@ -649,7 +676,7 @@ namespace Amicitia.ModelViewer
 
         private void ModelViewerResize(object sender, EventArgs e)
         {
-            if (!mIsViewReady)
+            if (!mIsViewReady || !mCanRender )
                 return;
 
             GL.Viewport(0, 0, mViewerCtrl.Width, mViewerCtrl.Height);
@@ -657,7 +684,7 @@ namespace Amicitia.ModelViewer
 
         private void ModelViewerPaint(object sender, PaintEventArgs e)
         {
-            if (!mIsViewReady || !mViewerCtrl.Visible)
+            if (!mIsViewReady || !mViewerCtrl.Visible || !mCanRender )
                 return;
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);

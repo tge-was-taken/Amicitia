@@ -25,9 +25,9 @@ namespace Amicitia.ResourceWrappers
             {
                 List<TResource> list = new List<TResource>();
 
-                foreach (ResourceWrapper<TResource> node in Nodes)
+                foreach (IResourceWrapper node in Nodes)
                 {
-                    list.Add(node.Resource);
+                    list.Add((TResource)node.Resource);
                 }
 
                 return list;

@@ -84,6 +84,8 @@ namespace Amicitia
         HbnFile,
         RwAtomicNode,
         AcxFile,
-        RwAnimationNode
+        RwAnimationNode,
+        RwMaterial,
+        RwTextureReferenceNode
     }
 }

@@ -78,6 +78,36 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             get { return mExtensionNode.Children; }
         }
 
+        public RwUserDataList UserData
+        {
+            get => ( RwUserDataList )mExtensionNode.Children.Find( x => x.Id == RwNodeId.RwUserDataPluginNode );
+            set
+            {
+                int index = mExtensionNode.Children.FindIndex( x => x.Id == RwNodeId.RwUserDataPluginNode );
+
+                if ( index != -1 )
+                {
+                    mExtensionNode.Children[index] = value;
+                }
+                else
+                {
+                    mExtensionNode.AddChild( value );
+                }
+            }
+        }
+
+        public string Name
+        {
+            get => UserData?[ "name" ].StringValue;
+            set
+            {
+                if ( UserData == null )
+                    UserData = new RwUserDataList();
+
+                UserData[ "name" ] = new RwUserData( "name", value );
+            }
+        }
+
         /// <summary>
         /// Initializes a RenderWare material instance with default properties.
         /// </summary>
@@ -89,6 +119,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             mExtensionNode = new RwExtensionNode(this);
         }
 
+        public RwMaterial(string name, string textureName, RwNode parent = null) : this( textureName, parent )
+        {
+            Name = name;
+        }
+
         /// <summary>
         /// Initializes a RenderWare material instance with default properties and reference texture name set.
         /// </summary>
@@ -96,8 +131,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         public RwMaterial(string textureName, RwNode parent = null)
             : this(parent)
         {
-            mStructNode.IsTextured = true;
-            mTextureReferenceNode = new RwTextureReferenceNode(textureName, this);
+            if ( textureName != null )
+            {
+                mStructNode.IsTextured = true;
+                mTextureReferenceNode = new RwTextureReferenceNode( textureName, this );
+            }
         }
 
         /// <summary>

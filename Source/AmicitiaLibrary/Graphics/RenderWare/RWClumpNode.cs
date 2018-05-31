@@ -299,13 +299,13 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                         // TextureDiffuse
                         var texture = material.TextureReferenceNode;
                         aiMaterial.TextureDiffuse = new Assimp.TextureSlot(
-                            texture.ReferencedTextureName, Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0 );
+                            texture.Name, Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0 );
                     }
 
                     // Name
-                    aiMaterial.Name = $"Geometry{atomic.GeometryIndex}_Material{mesh.MaterialIndex}";
-                    if ( material.IsTextured )
-                        aiMaterial.Name = material.TextureReferenceNode.ReferencedTextureName;
+                    aiMaterial.Name = material.Name ?? $"Geometry{atomic.GeometryIndex}_Material{mesh.MaterialIndex}";
+                    if ( material.IsTextured && material.Name == null )
+                        aiMaterial.Name = material.TextureReferenceNode.Name;
 
                     aiMaterial.ShadingMode = Assimp.ShadingMode.Phong;
 

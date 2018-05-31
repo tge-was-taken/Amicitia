@@ -40,20 +40,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         {
             mMaterials = new List<RwMaterial>();
 
-            string textureName = Path.GetFileNameWithoutExtension(material.TextureDiffuse.FilePath);
-            if (textureName == null)
-            {
-                textureName = Path.GetFileNameWithoutExtension(material.Name);
-                if (textureName != null)
-                    mMaterials.Add(new RwMaterial(textureName, this));
-                else
-                    mMaterials.Add(new RwMaterial(this));
-            }
-            else
-            {
-                mMaterials.Add(new RwMaterial(Path.GetFileNameWithoutExtension(material.TextureDiffuse.FilePath), this));
-            }
-            
+            string textureName = null;
+            if (material.HasTextureDiffuse)
+                textureName = Path.GetFileNameWithoutExtension( material.TextureDiffuse.FilePath );
+
+            mMaterials.Add( new RwMaterial( material.Name, textureName, this ) );
             mStructNode = new RwMaterialListStructNode(this);
         }
 

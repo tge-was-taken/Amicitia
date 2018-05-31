@@ -36,44 +36,46 @@ namespace Amicitia
 
         // Properties
         public static SupportedFileInfo[] SupportedFileInfos { get; } =
-        {   //                     Description                        File Type Enum                              Type                             Validator              Instanciator                                Extensions
+        {   //                     Description                        File Type Enum                              Type                             Validator              Instanciator                                        Extensions
             // Generic formats
-            new SupportedFileInfo("Raw data",                         SupportedFileType.Resource,                 typeof(BinaryFile),              null,                  (s, o) => new BinaryFile(s, o),             ".*"),
-            new SupportedFileInfo("Bitmap",                           SupportedFileType.Bitmap,                   typeof(Bitmap),                  null,                  (s, o) => new Bitmap(s),                    ".png", ".bmp", ".gif", ".ico", ".jpg", ".jpeg", ".jif", ".jfif", ".jfi", ".tiff", ".tif"),
-            new SupportedFileInfo("Truevision TARGA",                 SupportedFileType.TgaFile,                  typeof(TgaFile),                 null,                  (s, o) => new TgaFile(s, o),                ".tga"),
-            new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                       Assimp.Unmanaged.AssimpLibrary.Instance.GetExtensionList()),
+            new SupportedFileInfo("Raw data",                         SupportedFileType.Resource,                 typeof(BinaryFile),              null,                  (s, o) => new BinaryFile(s, o),                     ".*"),
+            new SupportedFileInfo("Bitmap",                           SupportedFileType.Bitmap,                   typeof(Bitmap),                  null,                  (s, o) => new Bitmap(s),                            ".png", ".bmp", ".gif", ".ico", ".jpg", ".jpeg", ".jif", ".jfif", ".jfi", ".tiff", ".tif"),
+            new SupportedFileInfo("Truevision TARGA",                 SupportedFileType.TgaFile,                  typeof(TgaFile),                 null,                  (s, o) => new TgaFile(s, o),                        ".tga"),
+            new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                               Assimp.Unmanaged.AssimpLibrary.Instance.GetExtensionList()),
 
             // Archive formats
-            new SupportedFileInfo("Atlus Generic Archive",            SupportedFileType.PakArchiveFile,           typeof(PAKFileSystem),           PAKFileSystem.IsValid, OpenPAKFileSystemFile,                      ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se", ".arc", ".abin", ".se", ".pse"),
-            new SupportedFileInfo("Persona 3/4 Battle Voice Package", SupportedFileType.BvpArchiveFile,           typeof(BvpFile),                 null,                  (s, o) => new BvpFile(s, o),                ".bvp"),
-            new SupportedFileInfo("Atlus Vita Resource Container",    SupportedFileType.AmdFile,                  typeof(AmdFile),                 null,                  (s, o) => new AmdFile(s, o),                ".amd"),
-            new SupportedFileInfo("CRIWare Sound Container",          SupportedFileType.AcxFile,                  typeof(ACXFileSystem),           null,                  OpenACXFileSystemFile,                      ".acx"),
+            new SupportedFileInfo("Atlus Generic Archive",            SupportedFileType.PakArchiveFile,           typeof(PAKFileSystem),           PAKFileSystem.IsValid, OpenPAKFileSystemFile,                              ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se", ".arc", ".abin", ".se", ".pse"),
+            new SupportedFileInfo("Persona 3/4 Battle Voice Package", SupportedFileType.BvpArchiveFile,           typeof(BvpFile),                 null,                  (s, o) => new BvpFile(s, o),                        ".bvp"),
+            new SupportedFileInfo("Atlus Vita Resource Container",    SupportedFileType.AmdFile,                  typeof(AmdFile),                 null,                  (s, o) => new AmdFile(s, o),                        ".amd"),
+            new SupportedFileInfo("CRIWare Sound Container",          SupportedFileType.AcxFile,                  typeof(ACXFileSystem),           null,                  OpenACXFileSystemFile,                              ".acx"),
 
             // Texture (container) formats
-            new SupportedFileInfo("Atlus PS2 Texture",                SupportedFileType.TmxFile,                  typeof(TmxFile),                 null,                 (s, o) => new TmxFile(s, o),                 ".tmx"),
-            new SupportedFileInfo("RenderWare PS2 Texture Container", SupportedFileType.RwTextureDictionaryNode,  typeof(RwTextureDictionaryNode), null,                 (s, o) => new RwTextureDictionaryNode(s, o), ".txd"),
-            new SupportedFileInfo("RenderWare PS2 Texture",           SupportedFileType.RwTextureNativeNode,      typeof(RwTextureNativeNode),     null,                 (s, o) => new RwTextureNativeNode(s, o),     ".txn"),
+            new SupportedFileInfo("Atlus PS2 Texture",                SupportedFileType.TmxFile,                  typeof(TmxFile),                 null,                 (s, o) => new TmxFile(s, o),                         ".tmx"),
+            new SupportedFileInfo("RenderWare PS2 Texture Container", SupportedFileType.RwTextureDictionaryNode,  typeof(RwTextureDictionaryNode), null,                 RwNode.Load,                                         ".txd"),
+            new SupportedFileInfo("RenderWare PS2 Texture",           SupportedFileType.RwTextureNativeNode,      typeof(RwTextureNativeNode),     null,                 RwNode.Load,                                         ".txn"),
 
             // Sprite
-            new SupportedFileInfo("Atlus TMX Sprite Container",       SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o) => new SprFile(s, o),                 ".spr"),
-            new SupportedFileInfo("Atlus TGA Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o) => new Spr4File(s, o),                ".spr4"),
-            new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o) => new SprSprite(s, o),               ".sprt"),
+            new SupportedFileInfo("Atlus TMX Sprite Container",       SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o) => new SprFile(s, o),                         ".spr"),
+            new SupportedFileInfo("Atlus TGA Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o) => new Spr4File(s, o),                        ".spr4"),
+            new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o) => new SprSprite(s, o),                       ".sprt"),
 
             // Model related formats
-            new SupportedFileInfo("Atlus RenderWare Model Data",      SupportedFileType.RmdScene,                 typeof(RmdScene),                null,                 (s, o) => new RmdScene(s, o),                ".rmd", ".rws"),
-            new SupportedFileInfo("RenderWare Clump",                 SupportedFileType.RwClumpNode,              typeof(RwClumpNode),             null,                 (s, o) => new RwClumpNode(s, o),             ".dff"),
-            new SupportedFileInfo("Atlus RenderWare Node Link",       SupportedFileType.RmdNodeLink,              typeof(RmdNodeLink),             null,                 (s, o) => new RmdNodeLink(s),                ".nl"),
-            new SupportedFileInfo("Atlus RenderWare Node Link List",  SupportedFileType.RmdNodeLinkList,          typeof(RmdNodeLinkListNode),     null,                 (s, o) => new RmdNodeLinkListNode(s),        ".nll"),
-            new SupportedFileInfo("RenderWare Node",                  SupportedFileType.RwNode,                   typeof(RwNode),                  null,                 RwNode.Load,                                 ".rwn"),
-            new SupportedFileInfo("Atlus RenderWare Animation",       SupportedFileType.RmdAnimation,             typeof(RmdAnimation),            null,                 (s, o) => new RmdAnimation(s, o),            ".rmdanim"),
-            new SupportedFileInfo("RenderWare Geometry",              SupportedFileType.RwGeometryNode,           typeof(RwGeometryNode),          null,                 RwNode.Load,                                 ".geo"),
-            new SupportedFileInfo("RenderWare Atomic",                SupportedFileType.RwAtomicNode,             typeof(RwAtomicNode),            null,                 RwNode.Load,                                 ".atm"),
-            new SupportedFileInfo("RenderWare Animation",             SupportedFileType.RwAnimationNode,          typeof(RwAnimationNode),         null,                 (s, o) => new RwAnimationNode(s, o),         ".anm"),
+            new SupportedFileInfo("Atlus RenderWare Model Data",      SupportedFileType.RmdScene,                 typeof(RmdScene),                null,                 (s, o) => new RmdScene(s, o),                        ".rmd", ".rws"),
+            new SupportedFileInfo("RenderWare Clump",                 SupportedFileType.RwClumpNode,              typeof(RwClumpNode),             null,                 RwNode.Load,                                         ".dff"),
+            new SupportedFileInfo("Atlus RenderWare Node Link",       SupportedFileType.RmdNodeLink,              typeof(RmdNodeLink),             null,                 (s, o) => new RmdNodeLink(s),                        ".nl"),
+            new SupportedFileInfo("Atlus RenderWare Node Link List",  SupportedFileType.RmdNodeLinkList,          typeof(RmdNodeLinkListNode),     null,                 (s, o) => new RmdNodeLinkListNode(s),                ".nll"),
+            new SupportedFileInfo("RenderWare Node",                  SupportedFileType.RwNode,                   typeof(RwNode),                  null,                 RwNode.Load,                                         ".rwn"),
+            new SupportedFileInfo("Atlus RenderWare Animation",       SupportedFileType.RmdAnimation,             typeof(RmdAnimation),            null,                 (s, o) => new RmdAnimation(s, o),                    ".rmdanm"),
+            new SupportedFileInfo("RenderWare Geometry",              SupportedFileType.RwGeometryNode,           typeof(RwGeometryNode),          null,                 RwNode.Load,                                         ".geo"),
+            new SupportedFileInfo("RenderWare Atomic",                SupportedFileType.RwAtomicNode,             typeof(RwAtomicNode),            null,                 RwNode.Load,                                         ".atm"),
+            new SupportedFileInfo("RenderWare Animation",             SupportedFileType.RwAnimationNode,          typeof(RwAnimationNode),         null,                 RwNode.Load,                                         ".anm"),
+            new SupportedFileInfo("RenderWare Material",              SupportedFileType.RwMaterial,               typeof(RwMaterial),              null,                 RwNode.Load,                                         ".mat"),
+            new SupportedFileInfo("RenderWare Texture Reference",     SupportedFileType.RwTextureReferenceNode,   typeof(RwTextureReferenceNode),  null,                 RwNode.Load,                                         ".trf"),
 
             // Field related formats
-            new SupportedFileInfo("Field Camera Parameters",          SupportedFileType.CmrFile,                  typeof(CmrFile),                 null,                 (s, o) => new CmrFile(s, o),                 ".cmr"),
-            new SupportedFileInfo("Field Object Placement",           SupportedFileType.FbnFile,                  typeof(FbnFile),                 null,                 (s, o) => new FbnFile(s, o),                 ".fbn"),
-            new SupportedFileInfo("Field Hit Placement",              SupportedFileType.HbnFile,                  typeof(HbnFile),                 null,                 (s, o) => new HbnFile(s, o),                 ".hbn"),
+            new SupportedFileInfo("Field Camera Parameters",          SupportedFileType.CmrFile,                  typeof(CmrFile),                 null,                 (s, o) => new CmrFile(s, o),                         ".cmr"),
+            new SupportedFileInfo("Field Object Placement",           SupportedFileType.FbnFile,                  typeof(FbnFile),                 null,                 (s, o) => new FbnFile(s, o),                         ".fbn"),
+            new SupportedFileInfo("Field Hit Placement",              SupportedFileType.HbnFile,                  typeof(HbnFile),                 null,                 (s, o) => new HbnFile(s, o),                         ".hbn"),
         };
 
         public static string FileFilter { get; }

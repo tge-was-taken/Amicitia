@@ -137,6 +137,7 @@
     <Compile Include="ResourceWrapperFactory.cs" />
     <Compile Include="ResourceWrappers\TGAFileWrapper.cs" />
     <Compile Include="ResourceWrappers\TMXFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\Vector3Wrapper.cs" />
     <Compile Include="SimpleValueInputDialog.cs">
       <SubType>Form</SubType>
     </Compile>

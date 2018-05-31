@@ -121,8 +121,8 @@
                 case RwNodeId.RwHAnimFrameExtensionNode:
                     return new RwHAnimFrameExtensionNode(header, reader);
 
-                //case RWType.UserDataPluginNode:
-                //    return new RWUserDataPlugin(header, reader);
+                case RwNodeId.RwUserDataPluginNode:
+                    return new RwUserDataList( header, reader);
 
                 //case RWType.Maestro2DNode:
                 //    return new RWMaestro2D(header, reader);

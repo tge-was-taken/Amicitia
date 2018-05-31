@@ -22,82 +22,59 @@
         /// <summary>
         /// Gets if the mesh contains any vertices.
         /// </summary>
-        public bool HasVertices
-        {
-            get { return mStructNode.HasVertices; }
-        }
+        public bool HasVertices => mStructNode.HasVertices;
 
         /// <summary>
         /// Gets if the mesh contains any vertex normals.
         /// </summary>
-        public bool HasNormals
-        {
-            get { return mStructNode.HasNormals; }
-        }
+        public bool HasNormals => mStructNode.HasNormals;
 
         /// <summary>
         /// Gets if the mesh contains any vertex colors.
         /// </summary>
-        public bool HasColors
-        {
-            get { return mStructNode.HasColors; }
-        }
+        public bool HasColors => mStructNode.HasColors;
 
         /// <summary>
         /// Gets if the mesh contains any vertex texture coordinates.
         /// </summary>
-        public bool HasTextureCoordinates
-        {
-            get { return mStructNode.HasTexCoords; }
-        }
+        public bool HasTextureCoordinates => mStructNode.HasTexCoords;
 
         /// <summary>
         /// Gets the <see cref="RwGeometryFlags"/> of the mesh.
         /// </summary>
         public RwGeometryFlags Flags
         {
-            get { return mStructNode.Flags; }
-            internal set { mStructNode.Flags = value; }
+            get => mStructNode.Flags;
+            set => mStructNode.Flags = value;
         }
 
         /// <summary>
         /// Gets the number of texture coordinate channels in the mesh.
         /// </summary>
-        public int TextureCoordinateChannelCount
-        {
-            get { return mStructNode.TextureCoordinateChannelCount; }
-        }
+        public int TextureCoordinateChannelCount => mStructNode.TextureCoordinateChannelCount;
 
         /// <summary>
         /// Gets the <see cref="RwGeometryNativeFlag"/> of the mesh.
         /// </summary>
-        public RwGeometryNativeFlag NativeFlag
-        {
-            get { return mStructNode.NativeFlag; }
-        }
+        public RwGeometryNativeFlag NativeFlag => mStructNode.NativeFlag;
 
         /// <summary>
         /// Gets the number of triangles in the mesh.
         /// </summary>
-        public int TriangleCount
-        {
-            get { return mStructNode.TriangleCount; }
-        }
+        public int TriangleCount => mStructNode.TriangleCount;
 
         /// <summary>
         /// Gets the number of vertices in the mesh.
         /// </summary>
-        public int VertexCount
-        {
-            get { return mStructNode.VertexCount; }
-        }
+        public int VertexCount => mStructNode.VertexCount;
 
         /// <summary>
         /// Gets the array of vertex colors in the mesh.
         /// </summary>
         public Color[] Colors
         {
-            get { return mStructNode.Colors; }
+            get => mStructNode.Colors;
+            set => mStructNode.Colors = value;
         }
 
         /// <summary>
@@ -105,7 +82,8 @@
         /// </summary>
         public Vector2[][] TextureCoordinateChannels
         {
-            get { return mStructNode.TextureCoordinateChannels; }
+            get => mStructNode.TextureCoordinateChannels;
+            set => mStructNode.TextureCoordinateChannels = value;
         }
 
         /// <summary>
@@ -113,7 +91,8 @@
         /// </summary>
         public RwTriangle[] Triangles
         {
-            get { return mStructNode.Triangles; }
+            get => mStructNode.Triangles;
+            set => mStructNode.Triangles = value;
         }
 
         /// <summary>
@@ -121,8 +100,8 @@
         /// </summary>
         public RwBoundingSphere BoundingSphere
         {
-            get { return mStructNode.BoundingSphere; }
-            set { mStructNode.BoundingSphere = value; }
+            get => mStructNode.BoundingSphere;
+            set => mStructNode.BoundingSphere = value;
         }
 
         /// <summary>
@@ -130,7 +109,8 @@
         /// </summary>
         public Vector3[] Vertices
         {
-            get { return mStructNode.Vertices; }
+            get => mStructNode.Vertices;
+            set => mStructNode.Vertices = value;
         }
 
         /// <summary>
@@ -138,7 +118,8 @@
         /// </summary>
         public Vector3[] Normals
         {
-            get { return mStructNode.Normals; }
+            get => mStructNode.Normals;
+            set => mStructNode.Normals = value;
         }
 
         /***************************************/
@@ -148,10 +129,7 @@
         /// <summary>
         /// Gets the number of materials in the mesh.
         /// </summary>
-        public int MaterialCount
-        {
-            get { return Materials.Count; }
-        }
+        public int MaterialCount => Materials.Count;
 
         /// <summary>
         /// Gets the array of materials in the mesh.
@@ -220,10 +198,7 @@
         /// <summary>
         /// Gets the extension nodes of the mesh.
         /// </summary>
-        public List<RwNode> ExtensionNodes
-        {
-            get { return mExtensionNode.Children; }
-        }
+        public List<RwNode> ExtensionNodes => mExtensionNode.Children;
 
         /****************************************************************************************/
         /* TODO: add the skin plugin and mesh strip plugin here instead of the extension itself */
@@ -259,6 +234,13 @@
             {
                 mExtensionNode = new RwExtensionNode( this, materialSplit );
             }
+        }
+
+        public void SetVertexColors( Color color )
+        {
+            Colors = new Color[VertexCount];
+            for ( int i = 0; i < Colors.Length; i++ )
+                Colors[i] = color;
         }
 
         /// <summary>

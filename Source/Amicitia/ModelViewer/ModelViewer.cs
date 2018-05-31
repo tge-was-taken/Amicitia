@@ -522,7 +522,7 @@ namespace Amicitia.ModelViewer
             for ( int i = 0; i < texname.Length; i++ )
             {
                 texname[i] = geom.MaterialCount > 0 && geom.Materials[geom.MeshListNode.MaterialMeshes[i].MaterialIndex].IsTextured ?
-                        geom.Materials[geom.MeshListNode.MaterialMeshes[i].MaterialIndex].TextureReferenceNode.ReferencedTextureName
+                        geom.Materials[geom.MeshListNode.MaterialMeshes[i].MaterialIndex].TextureReferenceNode.Name
                         : string.Empty;
 
                 colors[i] = geom.MaterialCount > 0

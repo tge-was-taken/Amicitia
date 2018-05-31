@@ -12,91 +12,91 @@
     {
         private const int SUPPORTED_MORPH_COUNT = 1;
 
-        private RwGeometryFlags mGeoFlags;
-        private RwGeometryNativeFlag mNativeFlag;
         private Color[] mClrArray;
         private Vector2[][] mTexCoordSets;
-        private RwTriangle[] mTriArray;
-        private RwBoundingSphere mBSphere;
         private Vector3[] mPosArray;
         private Vector3[] mNrmArray;
 
-        public RwGeometryFlags Flags
-        {
-            get { return mGeoFlags; }
-            internal set { mGeoFlags = value;}
-        }
+        public RwGeometryFlags Flags { get; set; }
 
-        public int TextureCoordinateChannelCount
-        {
-            get { return mTexCoordSets == null ? 0 : mTexCoordSets.Length; }
-        }
+        public int TextureCoordinateChannelCount => mTexCoordSets?.Length ?? 0;
 
-        public RwGeometryNativeFlag NativeFlag
-        {
-            get { return mNativeFlag; }
-        }
+        public RwGeometryNativeFlag NativeFlag { get; private set; }
 
-        public int TriangleCount
-        {
-            get { return mTriArray.Length; }
-        }
+        public int TriangleCount => Triangles.Length;
 
-        public int VertexCount
-        {
-            get { return mPosArray.Length; }
-        }
+        public int VertexCount => mPosArray.Length;
 
         public Color[] Colors
         {
-            get { return mClrArray; }
+            get => mClrArray;
+            set
+            {
+                mClrArray = value;
+                Flags &= ~RwGeometryFlags.HasColors;
+
+                if (value != null)
+                    Flags |= RwGeometryFlags.HasColors;
+            }
         }
 
         public Vector2[][] TextureCoordinateChannels
         {
-            get { return mTexCoordSets; }
+            get => mTexCoordSets;
+            set
+            {
+                mTexCoordSets = value;
+                Flags &= RwGeometryFlags.HasTexCoord1;
+                Flags &= RwGeometryFlags.HasTexCoord2;
+
+                if ( mTexCoordSets != null && mTexCoordSets.Length > 0 )
+                {
+                    if ( mTexCoordSets.Length >= 1 )
+                        Flags |= RwGeometryFlags.HasTexCoord1;
+
+                    if ( mTexCoordSets.Length >= 2 )
+                        Flags |= RwGeometryFlags.HasTexCoord2;
+                }
+            }
         }
 
-        public RwTriangle[] Triangles
-        {
-            get { return mTriArray; }
-        }
+        public RwTriangle[] Triangles { get; set; }
 
-        public RwBoundingSphere BoundingSphere
-        {
-            get { return mBSphere; }
-            set { mBSphere = value; }
-        }
+        public RwBoundingSphere BoundingSphere { get; set; }
 
         public Vector3[] Vertices
         {
-            get { return mPosArray; }
+            get => mPosArray;
+            set
+            {
+                mPosArray = value;
+                Flags &= ~RwGeometryFlags.HasVertices;
+
+                if ( value != null )
+                    Flags |= RwGeometryFlags.HasVertices;
+            }
         }
 
         public Vector3[] Normals
         {
-            get { return mNrmArray; }
+            get => mNrmArray;
+            set
+            {
+                mNrmArray = value;
+                Flags &= ~RwGeometryFlags.HasNormals;
+
+                if ( value != null )
+                    Flags |= RwGeometryFlags.HasNormals;
+            }
         }
 
-        public bool HasVertices
-        {
-            get { return mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasVertices); }
-        }
+        public bool HasVertices => Flags.HasFlagUnchecked(RwGeometryFlags.HasVertices);
 
-        public bool HasNormals
-        {
-            get { return mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasNormals); }
-        }
+        public bool HasNormals => Flags.HasFlagUnchecked(RwGeometryFlags.HasNormals);
 
-        public bool HasColors
-        {
-            get { return mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasColors); }
-        }
+        public bool HasColors => Flags.HasFlagUnchecked(RwGeometryFlags.HasColors);
 
-        public bool HasTexCoords
-        {
-            get { return mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasTexCoord1); }
-        }
+        public bool HasTexCoords => Flags.HasFlagUnchecked(RwGeometryFlags.HasTexCoord1);
 
         // TODO:
         // 1. Implement support for multiple texture coords for newly generated models
@@ -275,9 +275,9 @@
         internal RwGeometryStructNode(RwNodeFactory.RwNodeHeader header, BinaryReader reader)
             : base(header)
         {
-            mGeoFlags = (RwGeometryFlags)reader.ReadUInt16();
+            Flags = (RwGeometryFlags)reader.ReadUInt16();
             byte numTexCoord = reader.ReadByte();
-            mNativeFlag = (RwGeometryNativeFlag)reader.ReadByte();
+            NativeFlag = (RwGeometryNativeFlag)reader.ReadByte();
             int numTris = reader.ReadInt32();
             int numVerts = reader.ReadInt32();
             int numMorphTargets = reader.ReadInt32();
@@ -287,13 +287,13 @@
                 throw new NotImplementedException("More than 1 morph target are not implemented");
             }
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasColors))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasColors))
             {
                 mClrArray = reader.ReadColorArray(numVerts);
             }
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasTexCoord1) ||
-               (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasTexCoord2)))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasTexCoord1) ||
+               (Flags.HasFlagUnchecked(RwGeometryFlags.HasTexCoord2)))
             {
                 mTexCoordSets = new Vector2[numTexCoord][];
 
@@ -303,20 +303,20 @@
                 }
             }
 
-            mTriArray = new RwTriangle[numTris];
+            Triangles = new RwTriangle[numTris];
             for (int i = 0; i < numTris; i++)
             {
-                mTriArray[i] = new RwTriangle(reader);
+                Triangles[i] = new RwTriangle(reader);
             }
 
-            mBSphere = new RwBoundingSphere(reader);
+            BoundingSphere = new RwBoundingSphere(reader);
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasVertices))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasVertices))
             {
                 mPosArray = reader.ReadVector3Array(numVerts);
             }
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasNormals))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasNormals))
             {
                 mNrmArray = reader.ReadVector3Array(numVerts);
             }
@@ -324,20 +324,20 @@
 
         protected internal override void WriteBody(BinaryWriter writer)
         {
-            writer.Write((ushort)mGeoFlags);
+            writer.Write((ushort)Flags);
             writer.Write((byte)TextureCoordinateChannelCount);
-            writer.Write((byte)mNativeFlag);
+            writer.Write((byte)NativeFlag);
             writer.Write(TriangleCount);
             writer.Write(VertexCount);
             writer.Write(SUPPORTED_MORPH_COUNT);
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasColors))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasColors))
             {
                 writer.Write(mClrArray);
             }
 
-            if (mGeoFlags.HasFlag(RwGeometryFlags.HasTexCoord1) || 
-               (mGeoFlags.HasFlag(RwGeometryFlags.HasTexCoord2)))
+            if (Flags.HasFlag(RwGeometryFlags.HasTexCoord1) || 
+               (Flags.HasFlag(RwGeometryFlags.HasTexCoord2)))
             {
                 for (int i = 0; i < TextureCoordinateChannelCount; i++)
                 {
@@ -347,17 +347,17 @@
 
             for (int i = 0; i < TriangleCount; i++)
             {
-                mTriArray[i].InternalWrite(writer);
+                Triangles[i].InternalWrite(writer);
             }
 
-            mBSphere.Write(writer);
+            BoundingSphere.Write(writer);
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasVertices))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasVertices))
             {
                 writer.Write(mPosArray);
             }
 
-            if (mGeoFlags.HasFlagUnchecked(RwGeometryFlags.HasNormals))
+            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasNormals))
             {
                 writer.Write(mNrmArray);
             }
@@ -378,26 +378,26 @@
             IReadOnlyList<Vector2[]> textureCoordinateSets, IReadOnlyList<Color> vertexColors,
             ref byte[][] skinBoneIndices, ref float[][] skinBoneWeights)
         {
-            mGeoFlags =
+            Flags =
                 RwGeometryFlags.HasVertices |
                 RwGeometryFlags.HasVertexLighting;
 
             if (vertexNormals != null)
             {
-                mGeoFlags |= RwGeometryFlags.HasNormals;
+                Flags |= RwGeometryFlags.HasNormals;
             }
 
             if (textureCoordinateSets != null)
             {
                 if (textureCoordinateSets.Count >= 1)
-                    mGeoFlags |= RwGeometryFlags.HasTexCoord1;
+                    Flags |= RwGeometryFlags.HasTexCoord1;
 
                 //if (textureCoordinateSets.Length >= 2)
                     //mGeoFlags |= RwGeometryFlags.HasTexCoord2;
             }
 
             if (vertexColors != null)
-                mGeoFlags |= RwGeometryFlags.HasColors | RwGeometryFlags.ModulateMatColor;
+                Flags |= RwGeometryFlags.HasColors | RwGeometryFlags.ModulateMatColor;
 
             OptimizeData(
                 vertexPositions, vertexNormals,
@@ -405,11 +405,11 @@
                 triangleMaterialIDs,
                 ref skinBoneIndices, ref skinBoneWeights);
 
-            mTriArray = Triangles.OrderBy(tri => tri.MatId).ToArray();
+            Triangles = Triangles.OrderBy(tri => tri.MatId).ToArray();
 
-            mBSphere = RwBoundingSphere.Calculate(mPosArray);
+            BoundingSphere = RwBoundingSphere.Calculate(mPosArray);
 
-            mNativeFlag = RwGeometryNativeFlag.Default;
+            NativeFlag = RwGeometryNativeFlag.Default;
         }
 
         private void OptimizeData(
@@ -592,7 +592,7 @@
                 boneWeights = newBoneWeights.ToArray();
             }
 
-            mTriArray = newTriangles.ToArray();
+            Triangles = newTriangles.ToArray();
             mPosArray = newPositions.ToArray();
             mNrmArray = newNormals.ToArray();
         }

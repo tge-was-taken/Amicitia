@@ -99,6 +99,8 @@
     <Compile Include="Graphics\RenderWare\RWMeshListNode.cs" />
     <Compile Include="Graphics\RenderWare\RWPlaneSector.cs" />
     <Compile Include="Graphics\RenderWare\RWPlaneSectorHeader.cs" />
+    <Compile Include="Graphics\RenderWare\RwUserData.cs" />
+    <Compile Include="Graphics\RenderWare\RwUserDataList.cs" />
     <Compile Include="Graphics\RenderWare\RWWorld.cs" />
     <Compile Include="Graphics\RenderWare\RWWorldHeader.cs" />
     <Compile Include="Graphics\SPR\ISprFile.cs" />

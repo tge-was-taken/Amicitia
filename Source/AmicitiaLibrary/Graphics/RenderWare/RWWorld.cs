@@ -55,7 +55,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                         var material = Materials[ i ];
                         mtlWriter.WriteLine( $"newmtl Material{i}" );
                         if ( material.IsTextured )
-                            mtlWriter.WriteLine( $"map_Kd {material.TextureReferenceNode.ReferencedTextureName + ".png"}" );
+                            mtlWriter.WriteLine( $"map_Kd {material.TextureReferenceNode.Name + ".png"}" );
                     }
                 }
 
@@ -146,14 +146,14 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                     // TextureDiffuse
                     var texture = material.TextureReferenceNode;
                     aiMaterial.TextureDiffuse = new Assimp.TextureSlot(
-                        texture.ReferencedTextureName + ".png", Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add,
+                        texture.Name + ".png", Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add,
                         Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0 );
                 }
 
                 // Name
                 aiMaterial.Name = $"Material{i}";
                 if ( material.IsTextured )
-                    aiMaterial.Name = material.TextureReferenceNode.ReferencedTextureName;
+                    aiMaterial.Name = material.TextureReferenceNode.Name;
 
                 aiMaterial.ShadingMode = Assimp.ShadingMode.Phong;
                 aiScene.Materials.Add( aiMaterial );

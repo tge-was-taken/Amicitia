@@ -63,16 +63,16 @@
         /// <summary>
         /// Gets and sets the name of the referenced texture.
         /// </summary>
-        public string ReferencedTextureName
+        public string Name
         {
-            get { return mRefTexName.Value; }
-            set { mRefTexName = new RwStringNode(value, this);  }
+            get => mRefTexName.Value;
+            set => mRefTexName = new RwStringNode(value, this);
         }
 
         /// <summary>
         /// (Unused) Gets and sets the name of the referenced texture alpha mask.
         /// </summary>
-        public string ReferencedTextureMaskName
+        public string MaskName
         {
             get { return mRefTexMaskName.Value; }
             set { mRefTexMaskName = new RwStringNode(value, this); }

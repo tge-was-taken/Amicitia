@@ -110,9 +110,9 @@ namespace Amicitia.ResourceWrappers
         {
             TextureDictionaryWrapper = new RwTextureDictionaryNodeWrapper("Textures", Resource.TextureDictionary ?? new RwTextureDictionaryNode());
             ClumpsWrapper = new RwClumpNodeListWrapper("Clumps", Resource.Clumps ?? new List<RwClumpNode>());
-            NodeLinksWrapper = new RmdNodeLinkListNodeWrapper("NodeLinks", Resource.NodeLinks ?? new RmdNodeLinkListNode());
+            NodeLinksWrapper = new RmdNodeLinkListNodeWrapper("Node Links", Resource.NodeLinks ?? new RmdNodeLinkListNode());
             AnimationsWrapper = new RmdAnimationsWrapper("Animations", Resource.Animations ?? new List<RmdAnimation>());
-            MiscNodesWrapper = new GenericListWrapper<RwNode>("MiscNodes", Resource.MiscNodes ?? new List<RwNode>(), (e, i) => e.Id.ToString());
+            MiscNodesWrapper = new GenericListWrapper<RwNode>("Misc Nodes", Resource.MiscNodes ?? new List<RwNode>(), (e, i) => e.Id.ToString());
 
             Nodes.Add(TextureDictionaryWrapper);
             Nodes.Add(ClumpsWrapper);
@@ -261,7 +261,7 @@ namespace Amicitia.ResourceWrappers
     public class RwClumpNodeListWrapper : GenericListWrapper<RwClumpNode>
     {
         public RwClumpNodeListWrapper(string text, List<RwClumpNode> resource) 
-            : base(text, resource, (e, i) => $"Clump{i:0}")
+            : base(text, resource, (e, i) => $"Clump {i:0}")
         {
         }
 
@@ -320,6 +320,18 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
+            RegisterCustomAction( "Set vertex color", ( o, s ) =>
+            {
+                using ( var dialog = new ColorDialog() )
+                {
+                    if ( dialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    foreach ( var geometryNode in GeometryListWrapper.Resource )
+                        geometryNode.SetVertexColors( dialog.Color );
+
+                }
+            }, Keys.None );
             RegisterFileExportAction(SupportedFileType.RwClumpNode, (res, path) => res.Save(path));
             RegisterFileExportAction(SupportedFileType.AssimpModelFile, (res, path) =>
             {
@@ -375,7 +387,7 @@ namespace Amicitia.ResourceWrappers
                             var textureName = Path.GetFileNameWithoutExtension( texturePath );
                             var textureExt = Path.GetExtension( texturePath );
 
-                            if ( File.Exists( texturePath ) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.ContainsKey( textureName ) )
+                            if ( File.Exists( texturePath ) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.Contains( textureName ) )
                             {
                                 rmdScene.TextureDictionaryWrapper.Add( texturePath, SupportedFileType.Bitmap );
                                 textureNameLookup.Add( textureName );
@@ -419,14 +431,11 @@ namespace Amicitia.ResourceWrappers
         protected override void PopulateView()
         {
             FrameListWrapper = new GenericListWrapper<RwFrame>("Frames", Resource.FrameList, (e, i) => e.HAnimFrameExtensionNode?.NameId.ToString() ?? "Root");
-
             GeometryListWrapper =
                 new GenericListWrapper<RwGeometryNode>("Geometries", Resource.GeometryList,
-                    (e, i) => $"Geometry{i:00}");
-
-            AtomicsWrapper = new GenericListWrapper<RwAtomicNode>("Atomics", Resource.Atomics, (e, i) => $"Atomic{i:00}");
-
-            ExtensionsWrapper = new GenericListWrapper<RwNode>("Extensions", Resource.Extensions ?? new List<RwNode>(), (e, i) => $"Extension{i:00}");
+                    (e, i) => $"Geometry {i:00}");
+            AtomicsWrapper = new GenericListWrapper<RwAtomicNode>("Atomics", Resource.Atomics, (e, i) => $"Atomic {i:00}");
+            ExtensionsWrapper = new GenericListWrapper<RwNode>("Extensions", Resource.Extensions ?? new List<RwNode>(), (e, i) => $"Extension {i:00}");
 
             Nodes.Add(FrameListWrapper);
             Nodes.Add(GeometryListWrapper);
@@ -466,22 +475,25 @@ namespace Amicitia.ResourceWrappers
     public class RwGeometryNodeWrapper : RwNodeWrapperBase<RwGeometryNode>
     {
         [Browsable(false)]
-        public GenericListWrapper<Vector3> VerticesWrapper { get; }
+        public GenericListWrapper<Vector3> VerticesWrapper { get; private set; }
 
         [Browsable(false)]
-        public GenericListWrapper<Vector3> NormalsWrapper { get; }
+        public GenericListWrapper<Vector3> NormalsWrapper { get; private set; }
 
         [Browsable(false)]
-        public GenericListWrapper<Color> ColorsWrapper { get; }
+        public GenericListWrapper<Color> ColorsWrapper { get; private set; }
 
         [Browsable(false)]
-        public GenericListWrapper<GenericListWrapper<Vector2>> TextureCoordinateChannelsWrapper { get; }
+        public GenericListWrapper<GenericListWrapper<Vector2>> TextureCoordinateChannelsWrapper { get; private set; }
 
         [Browsable(false)]
-        public GenericListWrapper<RwTriangle> TrianglesWrapper { get; }
+        public GenericListWrapper<RwTriangle> TrianglesWrapper { get; private set; }
 
         [Browsable(false)]
-        public GenericListWrapper<RwNode> ExtensionWrapper { get; }
+        public GenericListWrapper<RwNode> ExtensionsWrapper { get; private set; }
+
+        [Browsable(false)]
+        public GenericListWrapper<RwMaterial> MaterialsWrapper { get; private set; }
 
         public RwGeometryFlags Flags => Resource.Flags;
 
@@ -505,6 +517,242 @@ namespace Amicitia.ResourceWrappers
         {
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterCustomAction( "Set vertex color", ( o, s ) =>
+            {
+                using ( var dialog = new ColorDialog() )
+                {
+                    if ( dialog.ShowDialog() != DialogResult.OK )
+                        return;
+
+                    Resource.SetVertexColors( dialog.Color );
+                }
+            }, Keys.None );
+            RegisterFileExportAction( SupportedFileType.RwGeometryNode, ( res, p ) => res.Save( p ) );
+            RegisterFileReplaceAction( SupportedFileType.RwGeometryNode, ( res, path ) => ( RwGeometryNode ) RwNode.Load( path ) );
+            RegisterRebuildAction( ( wrap ) =>
+            {
+                var resource = Resource;
+
+                resource.Materials.Clear();
+                foreach ( RwMaterialWrapper materialWrapper in MaterialsWrapper.Nodes )
+                    resource.Materials.Add( materialWrapper.Resource );
+
+                resource.ExtensionNodes.Clear();
+                foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                    resource.ExtensionNodes.Add( ( RwNode )node.Resource );
+
+                return resource;
+            } );
+        }
+
+        protected override void PopulateView()
+        {
+            //VerticesWrapper = new GenericListWrapper<Vector3>( "Vertices", Resource.Vertices, ( v, i ) => $"Vertex {i:D4}" );
+
+            //NormalsWrapper = new GenericListWrapper<Vector3>( "Normals", Resource.Normals ?? new Vector3[0], ( v, i ) => $"Normal {i:D4}" );
+            //Nodes.Add( NormalsWrapper );
+
+            //ColorsWrapper = new GenericListWrapper<Color>( "Colors", Resource.Colors ?? new Color[0], ( v, i ) => $"Color {i:D4}" );
+            //Nodes.Add( ColorsWrapper );
+
+            //var channelsNode = new TreeNode( "UV Channels" );
+            //Nodes.Add( channelsNode );
+
+            //if ( Resource.HasTextureCoordinates )
+            //{
+            //    for ( int i = 0; i < Resource.TextureCoordinateChannels.Length; i++ )
+            //    {
+            //        var channelWrapper = new GenericListWrapper<Vector2>( $"Channel {i}", Resource.TextureCoordinateChannels[ i ], ( v, j ) => $"UV {j:D4}" );
+            //        channelsNode.Nodes.Add( channelWrapper );
+            //    }
+            //}
+
+            //TrianglesWrapper = new GenericListWrapper<RwTriangle>( "Triangles", Resource.Triangles, ( v, i ) => $"Triangle {i:D4}" );
+            //Nodes.Add( TrianglesWrapper );
+
+            ExtensionsWrapper = new GenericListWrapper<RwNode>( "Extensions", Resource.ExtensionNodes ?? new List<RwNode>(), ( e, i ) => $"Extension {i:00}" );
+            Nodes.Add( ExtensionsWrapper );
+
+            MaterialsWrapper = new GenericListWrapper<RwMaterial>( "Materials", Resource.Materials, ( v, i ) => $"Material {i}" );
+            Nodes.Add( MaterialsWrapper );
+        }
+    }
+
+    public class RwMaterialWrapper : RwNodeWrapperBase<RwMaterial>
+    {
+        [Browsable( false )]
+        public GenericListWrapper<RwNode> ExtensionsWrapper { get; private set; }
+
+        [Browsable(false)]
+        public RwTextureReferenceNodeWrapper TextureReferenceNodeWrapper { get; private set; }
+
+        public Color Color
+        {
+            get => Resource.Color;
+            set => SetProperty( Resource, value );
+        }
+
+        public bool IsTextured => Resource.IsTextured;
+
+        public float Ambient
+        {
+            get => Resource.Ambient;
+            set => SetProperty( Resource, value );
+        }
+
+        public float Specular
+        {
+            get => Resource.Specular;
+            set => SetProperty( Resource, value );
+        }
+
+        public float Diffuse
+        {
+            get => Resource.Diffuse;
+            set => SetProperty( Resource, value );
+        }
+
+        public string MaterialName
+        {
+            get => Resource.Name;
+            set => SetProperty( Resource, value, false, nameof( Resource.Name ) );
+        }
+
+        public RwMaterialWrapper(string text, RwMaterial resource) : base( resource.Name ?? text, resource)
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
+                                       CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction( SupportedFileType.RwMaterial, ( res, p ) => res.Save( p ) );
+            RegisterFileReplaceAction( SupportedFileType.RwMaterial, ( res, path ) => ( RwMaterial )RwNode.Load( path ) );
+            RegisterRebuildAction( ( wrap ) =>
+            {
+                var resource = Resource;
+
+                if ( TextureReferenceNodeWrapper != null )
+                {
+                    if ( Nodes.Contains( TextureReferenceNodeWrapper ) )
+                        resource.TextureReferenceNode = TextureReferenceNodeWrapper.Resource;
+                    else
+                        resource.TextureReferenceNode = null;
+                }
+
+                resource.Extension.Clear();
+                foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                    resource.Extension.Add( ( RwNode )node.Resource );
+
+                return resource;
+            });
+        }
+
+        protected override void PopulateView()
+        {
+            ExtensionsWrapper = new GenericListWrapper<RwNode>( "Extensions", Resource.Extension ?? new List<RwNode>(), ( e, i ) => $"Extension {i:00}" );
+            Nodes.Add( ExtensionsWrapper );
+
+            if ( IsTextured )
+            {
+                TextureReferenceNodeWrapper = new RwTextureReferenceNodeWrapper( "Texture Reference", Resource.TextureReferenceNode );
+                Nodes.Add( TextureReferenceNodeWrapper );
+            }
+        }
+    }
+
+    public class RwTextureReferenceNodeWrapper : RwNodeWrapperBase<RwTextureReferenceNode>
+    {
+        [Browsable( false )]
+        public GenericListWrapper<RwNode> ExtensionsWrapper { get; private set; }
+
+        /// <summary>
+        /// Gets and sets the <see cref="FilterMode"/> of the referenced texture.
+        /// </summary>
+        public PS2FilterMode FilterMode
+        {
+            get => Resource.FilterMode;
+            set => SetProperty( Resource, value );
+        }
+
+        /// <summary>
+        /// Gets and sets the horizontal (x-axis) <see cref="PS2AddressingMode"/> of the referenced texture.
+        /// </summary>
+        public PS2AddressingMode HorizontalAddressingMode
+        {
+            get => Resource.HorizontalAddressingMode;
+            set => SetProperty( Resource, value );
+        }
+
+        /// <summary>
+        /// Gets and sets the vertical (y-axis) <see cref="PS2AddressingMode"/> of the referenced texture.
+        /// </summary>
+        public PS2AddressingMode VerticalAddressingMode
+        {
+            get => Resource.VerticalAddressingMode;
+            set => SetProperty( Resource, value );
+        }
+
+        /// <summary>
+        /// Gets and sets the boolean value indicating whether or not the referenced texture uses mipmaps.
+        /// </summary>
+        public bool HasMipMaps
+        {
+            get => Resource.HasMipMaps;
+            set => SetProperty( Resource, value );
+        }
+
+        /*********************************/
+        /* RWString forwarded properties */
+        /*********************************/
+
+        /// <summary>
+        /// Gets and sets the name of the referenced texture.
+        /// </summary>
+        public string TextureName
+        {
+            get => Resource.Name;
+            set => SetProperty( Resource, value, false, nameof( Resource.Name ) );
+        }
+
+        /// <summary>
+        /// (Unused) Gets and sets the name of the referenced texture alpha mask.
+        /// </summary>
+        public string MaskName
+        {
+            get => Resource.MaskName;
+            set => SetProperty( Resource, value );
+        }
+
+        public RwTextureReferenceNodeWrapper( string text, RwTextureReferenceNode resource ) : base( text, resource )
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
+                                       CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterFileExportAction( SupportedFileType.RwTextureReferenceNode, ( res, p ) => res.Save( p ) );
+            RegisterFileReplaceAction( SupportedFileType.RwTextureReferenceNode, ( res, path ) => ( RwTextureReferenceNode )RwNode.Load( path ) );
+            RegisterRebuildAction( ( wrap ) =>
+            {
+                var resource = Resource;
+
+                resource.Extensions.Clear();
+                foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                    resource.Extensions.Add( ( RwNode )node.Resource );
+
+                return resource;
+            } );
+        }
+
+        protected override void PopulateView()
+        {
+            ExtensionsWrapper = new GenericListWrapper<RwNode>( "Extensions", Resource.Extensions ?? new List<RwNode>(), ( e, i ) => $"Extension {i:00}" );
+            Nodes.Add( ExtensionsWrapper );
         }
     }
 
@@ -556,7 +804,7 @@ namespace Amicitia.ResourceWrappers
 
         protected override void PopulateView()
         {
-            ExtensionsWrapper = new GenericListWrapper<RwNode>("Extensions", Resource.Extensions ?? new List<RwNode>(), (e, i) => $"Extension{i:00}");
+            ExtensionsWrapper = new GenericListWrapper<RwNode>("Extensions", Resource.Extensions ?? new List<RwNode>(), (e, i) => $"Extension {i:00}");
 
             Nodes.Add(ExtensionsWrapper);
         }
@@ -565,7 +813,7 @@ namespace Amicitia.ResourceWrappers
     public class RmdNodeLinkListNodeWrapper : GenericListWrapper<RmdNodeLink>
     {
         public RmdNodeLinkListNodeWrapper(string text, IList<RmdNodeLink> resource)
-            : base(text, resource, (e, i) => $"NodeLink{i:0}")
+            : base(text, resource, (e, i) => $"NodeLink {i:0}")
         {
         }
     }
@@ -611,7 +859,7 @@ namespace Amicitia.ResourceWrappers
     public class RmdAnimationsWrapper : GenericListWrapper<RmdAnimation>
     {
         public RmdAnimationsWrapper(string text, IList<RmdAnimation> resource) 
-            : base(text, resource, (e, i) => $"Animation{i:00}")
+            : base(text, resource, (e, i) => $"Animation {i:00}")
         {
         }
     }
@@ -650,11 +898,11 @@ namespace Amicitia.ResourceWrappers
 
                 if ( node is RwAnimationNode animationNode )
                 {
-                    Nodes.Add( new RwAnimationNodeWrapper( $"AnimationNode{i:00}", animationNode ) );
+                    Nodes.Add( new RwAnimationNodeWrapper( $"AnimationNode {i:00}", animationNode ) );
                 }
                 else
                 {
-                    Nodes.Add( new RwNodeWrapperBase<RwNode>( $"Node{i:00}", node ) );
+                    Nodes.Add( new RwNodeWrapperBase<RwNode>( $"Node {i:00}", node ) );
                 }
             }
         }
@@ -733,6 +981,83 @@ namespace Amicitia.ResourceWrappers
 
                 return RwAnimationNode.FromAssimpScene( res.Parent, clump.FrameList, path );
             });
+        }
+
+        protected override void PopulateView()
+        {
+        }
+    }
+
+    public class RwUserDataListWrapper : RwNodeWrapperBase<RwUserDataList>
+    {
+        public RwUserDataListWrapper( string text, RwUserDataList resource )
+            : base( "User Data", resource )
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+            RegisterRebuildAction( wrap =>
+            {
+                var list = new RwUserDataList();
+
+                foreach ( RwUserDataWrapper node in Nodes )
+                {
+                    list.Add( node.Resource );
+                }
+
+                return list;
+            } );
+        }
+
+        protected override void PopulateView()
+        {
+            foreach ( var res in Resource )
+            {
+                Nodes.Add( new RwUserDataWrapper( res.Name, res ) );
+            }
+        }
+    }
+
+    public class RwUserDataWrapper : ResourceWrapper<RwUserData>
+    {
+        public string Key
+        {
+            get => Resource.Name;
+            set => SetProperty( Resource, value, false, nameof( Resource.Name ) );
+        }
+
+        public int? IntValue
+        {
+            get => Resource.Format == RwUserDataFormat.Int32 ? (int?)Resource.IntValue : null;
+            set => SetProperty( Resource, value, false, nameof( Resource.Value ) );
+        }
+
+        public float? FloatValue
+        {
+            get => Resource.Format == RwUserDataFormat.Float ? ( float? )Resource.FloatValue : null;
+            set => SetProperty( Resource, value, false, nameof( Resource.Value ) );
+        }
+
+        public string StringValue
+        {
+            get => Resource.Format == RwUserDataFormat.String ? Resource.StringValue : null;
+            set => SetProperty( Resource, value, false, nameof(Resource.Value) );
+        }
+
+        public RwUserDataWrapper( string text, RwUserData resource ) : base( text, resource )
+        {
+        }
+
+        protected override void Initialize()
+        {
+            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+            RegisterRebuildAction( ( wrap ) =>
+            {
+                wrap.Resource.Name = wrap.Text;
+                return wrap.Resource;
+            } );
         }
 
         protected override void PopulateView()

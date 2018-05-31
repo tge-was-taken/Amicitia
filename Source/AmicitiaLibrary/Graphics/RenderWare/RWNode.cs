@@ -172,6 +172,12 @@
             return Load(new MemoryStream(data), false);
         }
 
+        public void AddChild( RwNode node )
+        {
+            node.Parent = this;
+            Children.Add( node );
+        }
+
         public RwNode FindParentNode(RwNodeId nodeId)
         {
             RwNode node = this;

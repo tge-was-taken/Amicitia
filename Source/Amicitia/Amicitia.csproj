@@ -111,15 +111,14 @@
   <ItemGroup>
     <Compile Include="ModelViewer\ModelViewer.cs" />
     <Compile Include="ModelViewer\ShaderProgram.cs" />
-    <Compile Include="ResourceWrappers\ACXFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\ACXFileSystemWrapper.cs" />
     <Compile Include="ResourceWrappers\AMDFileWrapper.cs" />
     <Compile Include="ResourceWrappers\BVPFileWrapper.cs" />
     <Compile Include="ResourceWrappers\CMRFileWrapper.cs" />
     <Compile Include="ResourceWrappers\FBNFileWrapper.cs" />
     <Compile Include="ResourceWrappers\GenericListWrapper.cs" />
     <Compile Include="ResourceWrappers\HBNFileWrapper.cs" />
-    <Compile Include="ResourceWrappers\ListArchiveFileWrapper.cs" />
-    <Compile Include="ResourceWrappers\PAKToolArchiveFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\PAKFileSystemWrapper.cs" />
     <Compile Include="ResourceWrappers\BitmapWrapper.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapperHideProperties.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapper.cs" />
@@ -201,6 +200,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Dependencies\AtlusFileSystemLibrary\Source\AtlusFileSystemLibrary\AtlusFileSystemLibrary.csproj">
+      <Project>{9960b785-6207-44e8-ba42-ec7f6f785344}</Project>
+      <Name>AtlusFileSystemLibrary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AmicitiaLibrary\AmicitiaLibrary.csproj">
       <Project>{adf5e4ca-d622-41a1-8a09-5ab964cbb411}</Project>
       <Name>AmicitiaLibrary</Name>

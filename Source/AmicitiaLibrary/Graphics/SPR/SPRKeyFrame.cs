@@ -1,4 +1,6 @@
-﻿namespace AmicitiaLibrary.Graphics.SPR
+﻿using System.Text;
+
+namespace AmicitiaLibrary.Graphics.SPR
 {
     using System.IO;
     using AmicitiaLibrary.Utilities;
@@ -59,6 +61,12 @@
         {
             using (var reader = new BinaryReader(File.OpenRead(path)))
                 Read(reader);
+        }
+
+        public SprKeyFrame( Stream stream, bool leaveOpen )
+        {
+            using ( var reader = new BinaryReader( stream, Encoding.Default, leaveOpen ) )
+                Read( reader );
         }
 
         // Constructors

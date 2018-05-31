@@ -1,12 +1,12 @@
 ﻿using System.Windows.Forms;
-using AmicitiaLibrary.FileSystems.ACX;
 using AmicitiaLibrary.IO;
+using AtlusFileSystemLibrary.FileSystems.ACX;
 
 namespace Amicitia.ResourceWrappers
 {
-    public class AcxFileWrapper : ResourceWrapper<AcxFile>
+    public class ACXFileSystemWrapper : ResourceWrapper<ACXFileSystem>
     {
-        public AcxFileWrapper( string text, AcxFile resource ) : base( text, resource )
+        public ACXFileSystemWrapper( string text, ACXFileSystem resource ) : base( text, resource )
         {
         }
 
@@ -16,15 +16,20 @@ namespace Amicitia.ResourceWrappers
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
             RegisterFileExportAction( SupportedFileType.AcxFile, ( res, path ) => res.Save( path ) );
-            RegisterFileReplaceAction( SupportedFileType.AcxFile, ( res, path ) => new AcxFile( path ) );
+            RegisterFileReplaceAction( SupportedFileType.AcxFile, ( res, path ) =>
+            {
+                var acx = new ACXFileSystem();
+                acx.Load( path );
+                return acx;
+            } );
             RegisterFileAddAction( SupportedFileType.Resource, DefaultFileAddAction );
             RegisterRebuildAction( ( wrap ) =>
             {
-                AcxFile file = new AcxFile();
+                var file = new ACXFileSystem();
 
                 foreach ( IResourceWrapper entry in Nodes )
                 {
-                    file.Entries.Add( new BinaryFile(entry.GetResourceBytes()) );
+                    file.AddFile( entry.GetResourceMemoryStream() );
                 }
 
                 return file;
@@ -33,9 +38,9 @@ namespace Amicitia.ResourceWrappers
 
         protected override void PopulateView()
         {
-            for (int i = 0; i < Resource.Entries.Count; i++ )
+            foreach ( int file in Resource.EnumerateFiles() )
             {
-                Nodes.Add( ( TreeNode )ResourceWrapperFactory.GetResourceWrapper( $"Sound{i:D2}.adx", Resource.Entries[i] ) );
+                Nodes.Add( ( TreeNode )ResourceWrapperFactory.GetResourceWrapper( $"Sound{file:D2}.adx", Resource.OpenFile(file) ) );
             }
         }
     }

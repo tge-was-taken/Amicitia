@@ -86,7 +86,6 @@
     <Compile Include="Field\CMRFile.cs" />
     <Compile Include="Field\FBNFile.cs" />
     <Compile Include="Field\HBNFile.cs" />
-    <Compile Include="FileSystems\ACX\ACXArchive.cs" />
     <Compile Include="FileSystems\AMD\AMDChunk.cs" />
     <Compile Include="FileSystems\AMD\AMDFile.cs" />
     <Compile Include="FileSystems\ISO\Enums.cs" />
@@ -106,10 +105,6 @@
     <Compile Include="Graphics\TGA\TGAEncoding.cs" />
     <Compile Include="Graphics\TMX\TMXWrapMode.cs" />
     <Compile Include="IO\BinaryBase.cs" />
-    <Compile Include="FileSystems\PAKToolArchive\PAKToolArchiveEntry.cs" />
-    <Compile Include="FileSystems\PAKToolArchive\PAKToolArchiveFile.cs" />
-    <Compile Include="FileSystems\ListArchive\ListArchiveFile.cs" />
-    <Compile Include="FileSystems\ListArchive\ListArchiveEntry.cs" />
     <Compile Include="IO\BinaryFile.cs" />
     <Compile Include="Graphics\TGA\TGAFile.cs" />
     <Compile Include="Graphics\ITextureFile.cs" />
@@ -256,6 +251,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Graphics\MD\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Dependencies\AtlusFileSystemLibrary\Source\AtlusFileSystemLibrary\AtlusFileSystemLibrary.csproj">
+      <Project>{9960b785-6207-44e8-ba42-ec7f6f785344}</Project>
+      <Name>AtlusFileSystemLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">

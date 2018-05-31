@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Amicitia
 {
@@ -7,13 +8,15 @@ namespace Amicitia
         public string Description;
         public SupportedFileType EnumType;
         public Type ClassType;
+        public Func<Stream, bool, object> Instantiator;
         public string[] Extensions;
 
-        public SupportedFileInfo(string description, SupportedFileType type, Type classType, params string[] extensions)
+        public SupportedFileInfo(string description, SupportedFileType type, Type classType, Func<Stream, bool, object> instantiator, params string[] extensions)
         {
             Description = description;
             EnumType = type;
             ClassType = classType;
+            Instantiator = instantiator;
             Extensions = extensions;
         }
     }

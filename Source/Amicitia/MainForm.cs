@@ -356,8 +356,8 @@ namespace Amicitia
             {
 #endif
                 // Get the resource from the factory and it to the tree view
-                using (var fileStream = File.OpenRead(path))
-                    treeNode = (TreeNode)ResourceWrapperFactory.GetResourceWrapper(Path.GetFileName(path), fileStream, supportedFileIndex);
+                var fileStream = File.OpenRead( path );
+                treeNode = (TreeNode)ResourceWrapperFactory.GetResourceWrapper(Path.GetFileName(path), fileStream, supportedFileIndex);
 #if !DEBUG
             }
             catch (InvalidDataException)

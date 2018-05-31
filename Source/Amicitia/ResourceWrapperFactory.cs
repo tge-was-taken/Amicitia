@@ -31,8 +31,7 @@ namespace Amicitia
             }
 
             var supportedFileInfo = SupportedFileManager.GetSupportedFileInfo(supportedFileIndex);
-            var resourceType = supportedFileInfo.ClassType;
-            var resource = Activator.CreateInstance(resourceType, stream, false);
+            var resource = supportedFileInfo.Instantiator( stream, false );
 
             return GetResourceWrapper(text, resource);
         }

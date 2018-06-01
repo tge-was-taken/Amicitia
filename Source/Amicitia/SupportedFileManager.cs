@@ -41,7 +41,7 @@ namespace Amicitia
             new SupportedFileInfo("Raw data",                         SupportedFileType.Resource,                 typeof(BinaryFile),              null,                  (s, o) => new BinaryFile(s, o),                     ".*"),
             new SupportedFileInfo("Bitmap",                           SupportedFileType.Bitmap,                   typeof(Bitmap),                  null,                  (s, o) => new Bitmap(s),                            ".png", ".bmp", ".gif", ".ico", ".jpg", ".jpeg", ".jif", ".jfif", ".jfi", ".tiff", ".tif"),
             new SupportedFileInfo("Truevision TARGA",                 SupportedFileType.TgaFile,                  typeof(TgaFile),                 null,                  (s, o) => new TgaFile(s, o),                        ".tga"),
-            new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                               Assimp.Unmanaged.AssimpLibrary.Instance.GetExtensionList()),
+            new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                               ".fbx", ".dae", ".obj"),
 
             // Archive formats
             new SupportedFileInfo("Atlus Generic Archive",            SupportedFileType.PakArchiveFile,           typeof(PAKFileSystem),           PAKFileSystem.IsValid, OpenPAKFileSystemFile,                              ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se", ".arc", ".abin", ".se", ".pse"),
@@ -71,6 +71,7 @@ namespace Amicitia
             new SupportedFileInfo("RenderWare Animation",             SupportedFileType.RwAnimationNode,          typeof(RwAnimationNode),         null,                 RwNode.Load,                                         ".anm"),
             new SupportedFileInfo("RenderWare Material",              SupportedFileType.RwMaterial,               typeof(RwMaterial),              null,                 RwNode.Load,                                         ".mat"),
             new SupportedFileInfo("RenderWare Texture Reference",     SupportedFileType.RwTextureReferenceNode,   typeof(RwTextureReferenceNode),  null,                 RwNode.Load,                                         ".trf"),
+            new SupportedFileInfo("RenderWare User Data List",        SupportedFileType.RwUserDataList,           typeof(RwUserDataList),          null,                 RwNode.Load,                                         ".udl"),
 
             // Field related formats
             new SupportedFileInfo("Field Camera Parameters",          SupportedFileType.CmrFile,                  typeof(CmrFile),                 null,                 (s, o) => new CmrFile(s, o),                         ".cmr"),

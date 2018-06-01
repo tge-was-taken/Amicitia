@@ -96,7 +96,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
 
         public string Name
         {
-            get => UserData?[ "name" ].StringValue;
+            get => UserData?[ "name" ]?.StringValue;
             set
             {
                 if ( UserData == null )

@@ -75,7 +75,23 @@ namespace Amicitia.ResourceWrappers
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
             RegisterFileExportAction(SupportedFileType.RmdScene, (res, path) => res.Save(path));
+            RegisterFileExportAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
+            {
+                if ( ClumpsWrapper.Count == 0 )
+                    return;
+
+                ( ( RwClumpNodeWrapper )ClumpsWrapper.Nodes[0] ).Export( path, SupportedFileType.AssimpModelFile );
+            } );
             RegisterFileReplaceAction(SupportedFileType.RmdScene, (res, path) => new RmdScene(path));
+            RegisterFileReplaceAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
+            {
+                if ( ClumpsWrapper.Count == 0 )
+                    return res;
+
+                ( ( RwClumpNodeWrapper ) ClumpsWrapper.Nodes[ 0 ] ).Replace( path, SupportedFileType.AssimpModelFile );
+
+                return res;
+            } );
             RegisterRebuildAction((wrap) =>
             {
                 var scene = new RmdScene();
@@ -138,7 +154,7 @@ namespace Amicitia.ResourceWrappers
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
             RegisterFileExportAction(SupportedFileType.RwTextureDictionaryNode, (res, path) => res.Save(path));
-            RegisterCustomAction( "Export All", ( o, s ) =>
+            RegisterCustomAction( "Export All", Keys.None, ( o, s ) =>
             {
                 using ( FolderBrowserDialog dialog = new FolderBrowserDialog() )
                 {
@@ -157,8 +173,7 @@ namespace Amicitia.ResourceWrappers
                         bitmap.Save( path );
                     }
                 }
-            },
-            0 );
+            });
             RegisterFileReplaceAction(SupportedFileType.RwTextureDictionaryNode, (res, path) => (RwTextureDictionaryNode)RwNode.Load(path));
             RegisterFileAddAction(SupportedFileType.RwTextureNativeNode, DefaultFileAddAction);
             RegisterFileAddAction(SupportedFileType.Bitmap, (path, wrap) =>
@@ -267,7 +282,7 @@ namespace Amicitia.ResourceWrappers
 
         protected override void PostInitialize()
         {
-            RegisterCustomAction( "Export All", ( o, s ) =>
+            RegisterCustomAction( "Export All", Keys.None, ( o, s ) =>
             {
                 using ( FolderBrowserDialog dialog = new FolderBrowserDialog() )
                 {
@@ -284,8 +299,7 @@ namespace Amicitia.ResourceWrappers
                         clumpNode.Export( path, SupportedFileType.AssimpModelFile );
                     }
                 }
-            },
-            0 );
+            });
         }
     }
 
@@ -320,7 +334,7 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterCustomAction( "Set vertex color", ( o, s ) =>
+            RegisterCustomAction( "Set vertex color", Keys.None, ( o, s ) =>
             {
                 using ( var dialog = new ColorDialog() )
                 {
@@ -331,7 +345,7 @@ namespace Amicitia.ResourceWrappers
                         geometryNode.SetVertexColors( dialog.Color );
 
                 }
-            }, Keys.None );
+            } );
             RegisterFileExportAction(SupportedFileType.RwClumpNode, (res, path) => res.Save(path));
             RegisterFileExportAction(SupportedFileType.AssimpModelFile, (res, path) =>
             {
@@ -518,7 +532,7 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterCustomAction( "Set vertex color", ( o, s ) =>
+            RegisterCustomAction( "Set vertex color", Keys.None, ( o, s ) =>
             {
                 using ( var dialog = new ColorDialog() )
                 {
@@ -527,7 +541,7 @@ namespace Amicitia.ResourceWrappers
 
                     Resource.SetVertexColors( dialog.Color );
                 }
-            }, Keys.None );
+            } );
             RegisterFileExportAction( SupportedFileType.RwGeometryNode, ( res, p ) => res.Save( p ) );
             RegisterFileReplaceAction( SupportedFileType.RwGeometryNode, ( res, path ) => ( RwGeometryNode ) RwNode.Load( path ) );
             RegisterRebuildAction( ( wrap ) =>
@@ -630,6 +644,10 @@ namespace Amicitia.ResourceWrappers
 
             RegisterFileExportAction( SupportedFileType.RwMaterial, ( res, p ) => res.Save( p ) );
             RegisterFileReplaceAction( SupportedFileType.RwMaterial, ( res, path ) => ( RwMaterial )RwNode.Load( path ) );
+            RegisterCustomAction( "Add user data", Keys.None, ( o, s ) =>
+            {
+                ExtensionsWrapper.AddNode( new RwUserDataListWrapper( null, new RwUserDataList() ) );
+            } );
             RegisterRebuildAction( ( wrap ) =>
             {
                 var resource = Resource;
@@ -876,7 +894,31 @@ namespace Amicitia.ResourceWrappers
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
             RegisterFileExportAction(SupportedFileType.RmdAnimation, (res, path) => res.Save(path));
+            RegisterFileExportAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
+            {
+                foreach ( RwNodeWrapper node in Nodes )
+                {
+                    if ( node.RwNodeId == RwNodeId.RwAnimationNode )
+                    {
+                        node.Export( path, SupportedFileType.AssimpModelFile );
+                        break;
+                    }
+                }
+            } );
             RegisterFileReplaceAction(SupportedFileType.RmdAnimation, (res, path) => (RmdAnimation)RwNode.Load(path));
+            RegisterFileReplaceAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
+            {
+                foreach ( RwNodeWrapper node in Nodes )
+                {
+                    if ( node.RwNodeId == RwNodeId.RwAnimationNode )
+                    {
+                        node.Replace( path, SupportedFileType.AssimpModelFile );
+                        break;
+                    }
+                }
+
+                return res;
+            } );
             RegisterFileAddAction(SupportedFileType.RmdAnimation, DefaultFileAddAction);
             RegisterRebuildAction(wrap =>
             {
@@ -898,11 +940,38 @@ namespace Amicitia.ResourceWrappers
 
                 if ( node is RwAnimationNode animationNode )
                 {
-                    Nodes.Add( new RwAnimationNodeWrapper( $"AnimationNode {i:00}", animationNode ) );
+                    Nodes.Add( new RwAnimationNodeWrapper( $"AnimationNode", animationNode ) );
                 }
                 else
                 {
-                    Nodes.Add( new RwNodeWrapperBase<RwNode>( $"Node {i:00}", node ) );
+                    string name = "Node";
+
+                    if ( node.Id == RwNodeId.RmdAnimationInstanceNode )
+                    {
+                        name = "InstanceNode";
+                    }
+                    else if ( node.Id == RwNodeId.RmdAnimationPlaceholderNode )
+                    {
+                        name = "PlaceholderNode";
+                    }
+                    else if ( node.Id == RwNodeId.RmdVisibilityAnimNode )
+                    {
+                        name = "VisibilityAnimationNode";
+                    }
+                    else if ( node.Id == RwNodeId.RmdParticleAnimationNode )
+                    {
+                        name = "ParticleAnimationNode";
+                    }
+                    else if ( node.Id == RwNodeId.RwUVAnimationDictionaryNode )
+                    {
+                        name = "UVAnimationDictionaryNode";
+                    }
+                    else if ( node.Id == RwNodeId.RmdTransformOverrideNode )
+                    {
+                        name = "TransformOverrideNode";
+                    }
+
+                    Nodes.Add( new RwNodeWrapperBase<RwNode>( name, node ) );
                 }
             }
         }
@@ -943,7 +1012,7 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterCustomAction( "Change speed", ( o, s ) =>
+            RegisterCustomAction( "Change speed", Keys.None, ( o, s ) =>
             {
                 using ( var dialog = new SimpleValueInputDialog( "Enter a speed value", "Speed multiplier", "1.0" ) )
                 {
@@ -960,7 +1029,7 @@ namespace Amicitia.ResourceWrappers
                     }
 
                 }
-            }, Keys.None );
+            } );
             RegisterFileExportAction( SupportedFileType.RwAnimationNode, ( res, path ) => res.Save( path ) );
             RegisterFileExportAction( SupportedFileType.AssimpModelFile, ( res, path ) =>
             {
@@ -997,7 +1066,12 @@ namespace Amicitia.ResourceWrappers
 
         protected override void Initialize()
         {
-            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete | CommonContextMenuOptions.Export;
+            RegisterFileExportAction( SupportedFileType.RwUserDataList, ( res, path ) => res.Save( path ) );
+            RegisterCustomAction( "Add user data", Keys.None, ( o, s ) =>
+            {
+                AddNode( new RwUserDataWrapper( string.Empty, new RwUserData( $"User Data {Nodes.Count}", null ) ) );
+            });
             RegisterRebuildAction( wrap =>
             {
                 var list = new RwUserDataList();
@@ -1025,7 +1099,11 @@ namespace Amicitia.ResourceWrappers
         public string Key
         {
             get => Resource.Name;
-            set => SetProperty( Resource, value, false, nameof( Resource.Name ) );
+            set
+            {
+                Text = value;
+                SetProperty( Resource, value, false, nameof( Resource.Name ) );
+            }
         }
 
         public int? IntValue
@@ -1046,7 +1124,7 @@ namespace Amicitia.ResourceWrappers
             set => SetProperty( Resource, value, false, nameof(Resource.Value) );
         }
 
-        public RwUserDataWrapper( string text, RwUserData resource ) : base( text, resource )
+        public RwUserDataWrapper( string text, RwUserData resource ) : base( resource.Name, resource )
         {
         }
 

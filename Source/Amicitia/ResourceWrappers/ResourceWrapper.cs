@@ -132,12 +132,7 @@ namespace Amicitia.ResourceWrappers
         public bool NeedsRebuild
         {
             get { return mNeedsRebuild; }
-
-#if DEBUG
             set { mNeedsRebuild = value; }
-#else
-		    set { mNeedsRebuild = value; }
-#endif
         }
 
 
@@ -332,6 +327,12 @@ namespace Amicitia.ResourceWrappers
             Resource = fileReplaceAction.Invoke(Resource, path);
         }
 
+        public void AddNode( TreeNode node )
+        {
+            SetRebuildFlag( this );
+            Nodes.Add( node );
+        }
+
         public void Add()
         {
             if (mFileAddActions == null)
@@ -442,7 +443,7 @@ namespace Amicitia.ResourceWrappers
             mRebuildAction = action;
         }
 
-        protected void RegisterCustomAction( string name, EventHandler onClick, Keys shortcutKeys )
+        protected void RegisterCustomAction( string name, Keys shortcutKeys, EventHandler onClick )
         {
             if ( mCustomActions == null )
                 mCustomActions = new List<ContextMenuAction>();
@@ -505,9 +506,9 @@ namespace Amicitia.ResourceWrappers
                 if (node == null)
                     return;
 
-                if (node is IResourceWrapper)
+                if (node is IResourceWrapper wrapper)
                 {
-                    (node as IResourceWrapper).NeedsRebuild = true;
+                    wrapper.NeedsRebuild = true;
                 }
 
                 node = node.Parent;
@@ -567,6 +568,8 @@ namespace Amicitia.ResourceWrappers
                 {
                     ContextMenuStrip.Items.Add( new ToolStripMenuItem( item.Name, null, item.OnClick, item.ShortcutKeys ) );
                 }
+
+                ContextMenuStrip.Items.Add( new ToolStripSeparator() );
             }
 
             if (CommonContextMenuOptions.HasFlag(CommonContextMenuOptions.Export))

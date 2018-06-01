@@ -86,6 +86,7 @@ namespace Amicitia
         AcxFile,
         RwAnimationNode,
         RwMaterial,
-        RwTextureReferenceNode
+        RwTextureReferenceNode,
+        RwUserDataList
     }
 }

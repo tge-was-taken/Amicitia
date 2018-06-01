@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AmicitiaLibrary.IO;
 
 namespace AmicitiaLibrary.Graphics.RenderWare
 {
@@ -101,7 +102,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
 
             // RootNode
             var rootFrame = clumpNode.FrameList[0];
-            var aiRootNode = new Assimp.Node( "SceneRoot", null );
+            var aiRootNode = new Assimp.Node( "RootNode", null );
             aiRootNode.Transform = new Assimp.Matrix4x4( rootFrame.Transform.M11, rootFrame.Transform.M21, rootFrame.Transform.M31, rootFrame.Transform.M41,
                                                          rootFrame.Transform.M12, rootFrame.Transform.M22, rootFrame.Transform.M32, rootFrame.Transform.M42,
                                                          rootFrame.Transform.M13, rootFrame.Transform.M23, rootFrame.Transform.M33, rootFrame.Transform.M43,
@@ -117,7 +118,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                 Assimp.Node aiParentNode = null;
                 if (frame.Parent != null)
                 {
-                    string parentName = "SceneRoot";
+                    string parentName = "RootNode";
                     if (frame.Parent.HasHAnimExtension)
                     {
                         parentName = "_" + frame.Parent.HAnimFrameExtensionNode.NameId;
@@ -245,7 +246,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                                     var aiBone = new Assimp.Bone();
                                     var boneFrame = clumpNode.FrameList.GetFrameByHierarchyIndex( boneIndex );
 
-                                    aiBone.Name = boneFrame.HasHAnimExtension ? "_" + boneFrame.HAnimFrameExtensionNode.NameId : "SceneRoot";
+                                    aiBone.Name = boneFrame.HasHAnimExtension ? "_" + boneFrame.HAnimFrameExtensionNode.NameId : "RootNode";
                                     aiBone.VertexWeights.Add( new Assimp.VertexWeight( realVertexIndex, boneWeight ) );
 
                                     Matrix4x4.Invert( frame.WorldTransform, out Matrix4x4 invertedFrameWorldTransform );
@@ -269,7 +270,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                         var aiBone = new Assimp.Bone();
 
                         // Name
-                        aiBone.Name = frame.HasHAnimExtension ? "_" + frame.HAnimFrameExtensionNode.NameId : "SceneRoot";
+                        aiBone.Name = frame.HasHAnimExtension ? "_" + frame.HAnimFrameExtensionNode.NameId : "RootNode";
 
                         // VertexWeights
                         for ( int i = 0; i < aiMesh.Vertices.Count; i++ )
@@ -386,35 +387,12 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             }
         }
 
+        /// <summary>
+        /// Replace the geometries in the scene with the ones contained in the given Assimp scene.
+        /// </summary>
+        /// <param name="scene"></param>
         public void ReplaceGeometries(Assimp.Scene scene)
         {
-            // replace meshes
-            Matrix4x4[] inverseBoneMatrices = null;
-            for (var i = 0; i < GeometryList.Count; i++)
-            {
-                var mesh = GeometryList[i];
-
-                if (mesh.ExtensionNodes.Count != 0)
-                {
-                    var skinPlugin =
-                        (RwSkinNode) mesh.ExtensionNodes.SingleOrDefault(x => x.Id == RwNodeId.RwSkinNode);
-
-                    if (skinPlugin != null)
-                    {
-                        for (int j = 0; j < skinPlugin.SkinToBoneMatrices.Length; j++)
-                        {
-                            Matrix4x4.Invert(skinPlugin.SkinToBoneMatrices[j], out Matrix4x4 boneMatrix);
-                            boneMatrix *= FrameList[Atomics.Find(x => x.GeometryIndex == i).FrameIndex].WorldTransform;
-                            Matrix4x4.Invert(boneMatrix, out boneMatrix);
-                            skinPlugin.SkinToBoneMatrices[j] = boneMatrix;
-                        }
-
-                        inverseBoneMatrices = skinPlugin.SkinToBoneMatrices;
-                        break;
-                    }
-                }
-            }
-
             GeometryList.Clear();
             Atomics.Clear();
 
@@ -422,55 +400,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             {
                 var assimpMesh = scene.Meshes[i];            
 
-                Assimp.Node RecursivelyFindRootNode(Assimp.Node node)
-                {
-                    if ( node.MeshIndices.Contains( i ) )
-                    {
-                        return node;
-                    }
-                    else
-                    {
-                        foreach ( var child in node.Children )
-                        {
-                            var result = RecursivelyFindRootNode( child );
-                            if ( result != null )
-                                return result;
-                        }
-                    }
+                var rootNode = FindMeshRootNode( scene.RootNode, i ) ?? scene.RootNode;
+                TransformMeshVertices( assimpMesh, rootNode );
 
-                    return null;
-                }
-
-                var rootNode = RecursivelyFindRootNode( scene.RootNode );
-                if (rootNode == null)
-                {
-                    rootNode = scene.RootNode;
-                }
-
-                if (rootNode != null)
-                { 
-                    var worldTransform = GetWorldTransform(rootNode);
-                    var worldTransformInv = worldTransform;
-                    worldTransformInv.Transpose();
-                    worldTransformInv.Inverse();
-
-                    for (int j = 0; j < assimpMesh.Vertices.Count; j++)
-                    {
-                        var vector = assimpMesh.Vertices[j];
-                        Assimp.Unmanaged.AssimpLibrary.Instance.TransformVecByMatrix4(ref vector, ref worldTransform);
-                        assimpMesh.Vertices[j] = vector;
-                    }
-
-                    for (int j = 0; j < assimpMesh.Normals.Count; j++)
-                    {
-                        var vector = assimpMesh.Normals[j];
-                        Assimp.Unmanaged.AssimpLibrary.Instance
-                            .TransformVecByMatrix4(ref vector, ref worldTransformInv);
-                        assimpMesh.Normals[j] = vector;
-                    }
-                }
-
-                var geometryNode = new RwGeometryNode(this, assimpMesh, scene.Materials[assimpMesh.MaterialIndex], FrameList, inverseBoneMatrices, out bool singleWeight);
+                var skinToBoneMatrices = ComputeSkinToBoneMatrices( scene, FrameList );
+                var geometryNode = new RwGeometryNode(this, assimpMesh, scene.Materials[assimpMesh.MaterialIndex], FrameList, skinToBoneMatrices, out bool singleWeight);
                 GeometryList.Add( geometryNode );
 
                 var atomicNode = new RwAtomicNode(this, 0, i, 5);
@@ -492,13 +426,92 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             mStructNode = new RwClumpStructNode(this);
         }
 
-        private Assimp.Matrix4x4 GetWorldTransform(Assimp.Node node)
+        /// <summary>
+        /// Get the world transform for the given Assimp node.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private static Assimp.Matrix4x4 GetWorldTransform( Assimp.Node node )
         {
             var matrix = node.Transform;
             if ( node.Parent != null )
-                matrix *= GetWorldTransform(node.Parent);
+                matrix *= GetWorldTransform( node.Parent );
 
             return matrix;
+        }
+
+        /// <summary>
+        /// Compute the skin to bone matrix AKA inverse bind matrix for each bone.
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="frameList"></param>
+        /// <returns></returns>
+        private static Matrix4x4[] ComputeSkinToBoneMatrices( Assimp.Scene scene, RwFrameListNode frameList )
+        {
+            var animationNodes = frameList.AnimationRootNode.HAnimFrameExtensionNode.Hierarchy.Nodes;
+            var inverseBoneMatrices = new Matrix4x4[animationNodes.Count];
+            foreach ( var node in animationNodes )
+            {
+                var aiNode = scene.RootNode.FindNode( "_" + node.NodeId );
+                var transform = Matrix4x4.Transpose( Unsafe.ReinterpretCast<Assimp.Matrix4x4, Matrix4x4>( GetWorldTransform( aiNode ) ) );
+                Matrix4x4.Invert( transform, out var inverseTransform );
+                inverseBoneMatrices[node.Index] = inverseTransform;
+            }
+
+            return inverseBoneMatrices;
+        }
+
+        /// <summary>
+        /// Find the root node of the mesh.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="geometryIndex"></param>
+        /// <returns></returns>
+        private static Assimp.Node FindMeshRootNode( Assimp.Node node, int geometryIndex )
+        {
+            if ( node.MeshIndices.Contains( geometryIndex ) )
+            {
+                return node;
+            }
+            else
+            {
+                foreach ( var child in node.Children )
+                {
+                    var result = FindMeshRootNode( child, geometryIndex );
+                    if ( result != null )
+                        return result;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Transform the vertex positions and normals in the mesh by the transform of the root node.
+        /// </summary>
+        /// <param name="assimpMesh"></param>
+        /// <param name="rootNode"></param>
+        private static void TransformMeshVertices( Assimp.Mesh assimpMesh, Assimp.Node rootNode )
+        {
+            var worldTransform = GetWorldTransform( rootNode );
+            var worldTransformInv = worldTransform;
+            worldTransformInv.Transpose();
+            worldTransformInv.Inverse();
+
+            for ( int j = 0; j < assimpMesh.Vertices.Count; j++ )
+            {
+                var vector = assimpMesh.Vertices[j];
+                Assimp.Unmanaged.AssimpLibrary.Instance.TransformVecByMatrix4( ref vector, ref worldTransform );
+                assimpMesh.Vertices[j] = vector;
+            }
+
+            for ( int j = 0; j < assimpMesh.Normals.Count; j++ )
+            {
+                var vector = assimpMesh.Normals[j];
+                Assimp.Unmanaged.AssimpLibrary.Instance
+                      .TransformVecByMatrix4( ref vector, ref worldTransformInv );
+                assimpMesh.Normals[j] = vector;
+            }
         }
 
         /// <summary>

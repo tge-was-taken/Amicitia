@@ -141,7 +141,7 @@ namespace Amicitia.ModelViewer
         {
             // default settings
             Target = new Vector3( 0, 100, 0 );
-            Position = new Vector3(0, 100, 150);
+            Position = new Vector3(0, 100, 250);
             Forward = Vector3.Normalize( Target - Position );
             Up = new Vector3(0, 1, 0);
         }

@@ -96,26 +96,39 @@ namespace Amicitia.ResourceWrappers
             {
                 var scene = new RmdScene();
 
-                scene.TextureDictionary = TextureDictionaryWrapper.Resource;
+                if (Nodes.Contains( TextureDictionaryWrapper ) )
+                    scene.TextureDictionary = TextureDictionaryWrapper.Resource;
 
-                foreach (var node in ClumpsWrapper.Resource)
+                if ( Nodes.Contains( ClumpsWrapper ) )
                 {
-                    scene.Clumps.Add(node);
+                    foreach ( var node in ClumpsWrapper.Resource )
+                    {
+                        scene.Clumps.Add( node );
+                    }
                 }
 
-                foreach (var nodeLink in NodeLinksWrapper.Resource)
+                if ( Nodes.Contains( NodeLinksWrapper ) )
                 {
-                    scene.NodeLinks.Add(nodeLink);
+                    foreach ( var nodeLink in NodeLinksWrapper.Resource )
+                    {
+                        scene.NodeLinks.Add( nodeLink );
+                    }
                 }
 
-                foreach (var animationNodeList in AnimationsWrapper.Resource)
+                if ( Nodes.Contains( AnimationsWrapper ) )
                 {
-                    scene.Animations.Add(animationNodeList);
+                    foreach ( var animationNodeList in AnimationsWrapper.Resource )
+                    {
+                        scene.Animations.Add( animationNodeList );
+                    }
                 }
 
-                foreach (var node in MiscNodesWrapper.Resource)
+                if ( Nodes.Contains( MiscNodesWrapper ) )
                 {
-                    scene.MiscNodes.Add(node);
+                    foreach ( var node in MiscNodesWrapper.Resource )
+                    {
+                        scene.MiscNodes.Add( node );
+                    }
                 }
                 
                 return scene;
@@ -416,26 +429,38 @@ namespace Amicitia.ResourceWrappers
             {
                 var resource = new RwClumpNode(Resource.Parent);
 
-                for (var i = 0; i < FrameListWrapper.Nodes.Count; i++)
+                if ( Nodes.Contains( FrameListWrapper ) )
                 {
-                    var node = (RwFrameWrapper) FrameListWrapper.Nodes[i];
-                    resource.FrameList.Add(node.Resource);
-                    resource.FrameList.Extensions[i] = Resource.FrameList.Extensions[i];
+                    for ( var i = 0; i < FrameListWrapper.Nodes.Count; i++ )
+                    {
+                        var node = ( RwFrameWrapper ) FrameListWrapper.Nodes[ i ];
+                        resource.FrameList.Add( node.Resource );
+                        resource.FrameList.Extensions[ i ] = Resource.FrameList.Extensions[ i ];
+                    }
                 }
 
-                foreach (RwGeometryNodeWrapper node in GeometryListWrapper.Nodes)
+                if ( Nodes.Contains( GeometryListWrapper ) )
                 {
-                    resource.GeometryList.Add(node.Resource);
+                    foreach ( RwGeometryNodeWrapper node in GeometryListWrapper.Nodes )
+                    {
+                        resource.GeometryList.Add( node.Resource );
+                    }
                 }
 
-                foreach (RwAtomicNodeWrapper node in AtomicsWrapper.Nodes)
+                if ( Nodes.Contains( AtomicsWrapper ) )
                 {
-                    resource.Atomics.Add(node.Resource);
+                    foreach ( RwAtomicNodeWrapper node in AtomicsWrapper.Nodes )
+                    {
+                        resource.Atomics.Add( node.Resource );
+                    }
                 }
 
-                foreach (IResourceWrapper node in ExtensionsWrapper.Nodes)
+                if ( Nodes.Contains( ExtensionsWrapper ) )
                 {
-                    resource.Extensions.Add((RwNode)node.Resource);
+                    foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                    {
+                        resource.Extensions.Add( ( RwNode )node.Resource );
+                    }
                 }
 
                 return resource;
@@ -549,12 +574,19 @@ namespace Amicitia.ResourceWrappers
                 var resource = Resource;
 
                 resource.Materials.Clear();
-                foreach ( RwMaterialWrapper materialWrapper in MaterialsWrapper.Nodes )
-                    resource.Materials.Add( materialWrapper.Resource );
+
+                if ( Nodes.Contains( MaterialsWrapper ) )
+                {
+                    foreach ( RwMaterialWrapper materialWrapper in MaterialsWrapper.Nodes )
+                        resource.Materials.Add( materialWrapper.Resource );
+                }
 
                 resource.ExtensionNodes.Clear();
-                foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
-                    resource.ExtensionNodes.Add( ( RwNode )node.Resource );
+                if ( Nodes.Contains( ExtensionsWrapper ) )
+                {
+                    foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                        resource.ExtensionNodes.Add( ( RwNode )node.Resource );
+                }
 
                 return resource;
             } );
@@ -661,8 +693,11 @@ namespace Amicitia.ResourceWrappers
                 }
 
                 resource.Extension.Clear();
-                foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
-                    resource.Extension.Add( ( RwNode )node.Resource );
+                if ( Nodes.Contains( ExtensionsWrapper ) )
+                {
+                    foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                        resource.Extension.Add( ( RwNode ) node.Resource );
+                }
 
                 return resource;
             });
@@ -760,8 +795,11 @@ namespace Amicitia.ResourceWrappers
                 var resource = Resource;
 
                 resource.Extensions.Clear();
-                foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
-                    resource.Extensions.Add( ( RwNode )node.Resource );
+                if ( Nodes.Contains( ExtensionsWrapper ) )
+                {
+                    foreach ( IResourceWrapper node in ExtensionsWrapper.Nodes )
+                        resource.Extensions.Add( ( RwNode ) node.Resource );
+                }
 
                 return resource;
             } );

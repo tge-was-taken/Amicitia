@@ -145,54 +145,14 @@
         /// </summary>
         public RwMeshListNode MeshListNode
         {
-            get
-            {
-                int matSplitIdx;
-                if (mExtensionNode.TryGetExtensionIndexOfType(RwNodeId.RwMeshListNode, out matSplitIdx))
-                {
-                    return (RwMeshListNode)mExtensionNode.Children[matSplitIdx];
-                }
-
-                return null;
-                /*
-                else
-                {
-                    var splitData = new RWGeometryMaterialSplitMeshData(this, RWPrimitiveType.TriangleStrip, _extension);
-                    return splitData;
-                }
-                */
-            }
-            set
-            {
-                int matSplitIdx;
-                if (mExtensionNode.TryGetExtensionIndexOfType(RwNodeId.RwMeshListNode, out matSplitIdx))
-                {
-                    mExtensionNode.Children[matSplitIdx] = value;
-                }
-                else
-                {
-                    value.Parent = mExtensionNode;
-                    mExtensionNode.Children.Add(value);
-                }
-            }
+            get => mExtensionNode.FindChild<RwMeshListNode>( RwNodeId.RwMeshListNode );
+            set => mExtensionNode.AddOrReplaceChild( value );
         }
 
         public RwSkinNode SkinNode
         {
-            get { return (RwSkinNode) mExtensionNode.Children.Find(x => x.Id == RwNodeId.RwSkinNode); }
-            set
-            {
-                int index = mExtensionNode.Children.FindIndex(x => x.Id == RwNodeId.RwSkinNode);
-                if (index != -1)
-                {
-                    mExtensionNode.Children[index] = value;
-                }
-                else
-                {
-                    value.Parent = mExtensionNode;
-                    mExtensionNode.Children.Add(value);
-                }
-            }
+            get => mExtensionNode.FindChild<RwSkinNode>( RwNodeId.RwSkinNode );
+            set => mExtensionNode.AddOrReplaceChild( value );
         }
 
         /// <summary>
@@ -224,15 +184,17 @@
             mStructNode = new RwGeometryStructNode(this, mesh, frameList, forceSingleWeight, out byte[][] skinBoneIndices, out float[][] skinBoneWeights, out singleWeight);
             Materials = new RwMaterialListNode(this, material);
 
-            var materialSplit = new RwMeshListNode( this );
+            //var materialSplit = new RwMeshListNode( this );
             if ( !singleWeight )
             {
                 var skinPlugin = new RwSkinNode( skinBoneIndices, skinBoneWeights, inverseBoneMatrices );
-                mExtensionNode = new RwExtensionNode( this, skinPlugin, materialSplit );
+                //mExtensionNode = new RwExtensionNode( this, skinPlugin, materialSplit );
+                mExtensionNode = new RwExtensionNode( this, skinPlugin );
             }
             else
             {
-                mExtensionNode = new RwExtensionNode( this, materialSplit );
+                //mExtensionNode = new RwExtensionNode( this, materialSplit );
+                mExtensionNode = new RwExtensionNode( this );
             }
         }
 

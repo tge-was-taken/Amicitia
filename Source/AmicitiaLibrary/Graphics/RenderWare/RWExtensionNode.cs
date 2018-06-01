@@ -38,10 +38,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         {
             index = Children.FindIndex(n => n.Id == id);
 
-            if (index != -1)
-                return true;
-            else
-                return false;
+            return index != -1;
         }
 
         protected internal override void WriteBody(BinaryWriter writer)

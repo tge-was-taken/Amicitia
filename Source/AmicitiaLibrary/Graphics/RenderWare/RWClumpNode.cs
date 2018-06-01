@@ -393,17 +393,18 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         /// <param name="scene"></param>
         public void ReplaceGeometries(Assimp.Scene scene)
         {
+            var skinToBoneMatrices = ComputeSkinToBoneMatrices( scene );
+
             GeometryList.Clear();
             Atomics.Clear();
 
-            for (var i = 0; i < scene.Meshes.Count; i++)
+            for ( var i = 0; i < scene.Meshes.Count; i++)
             {
                 var assimpMesh = scene.Meshes[i];            
 
                 var rootNode = FindMeshRootNode( scene.RootNode, i ) ?? scene.RootNode;
                 TransformMeshVertices( assimpMesh, rootNode );
 
-                var skinToBoneMatrices = ComputeSkinToBoneMatrices( scene, FrameList );
                 var geometryNode = new RwGeometryNode(this, assimpMesh, scene.Materials[assimpMesh.MaterialIndex], FrameList, skinToBoneMatrices, out bool singleWeight);
                 GeometryList.Add( geometryNode );
 
@@ -431,11 +432,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        private static Assimp.Matrix4x4 GetWorldTransform( Assimp.Node node )
+        private static Assimp.Matrix4x4 ComputeWorldTransform( Assimp.Node node )
         {
             var matrix = node.Transform;
             if ( node.Parent != null )
-                matrix *= GetWorldTransform( node.Parent );
+                matrix *= ComputeWorldTransform( node.Parent );
 
             return matrix;
         }
@@ -446,19 +447,53 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         /// <param name="scene"></param>
         /// <param name="frameList"></param>
         /// <returns></returns>
-        private static Matrix4x4[] ComputeSkinToBoneMatrices( Assimp.Scene scene, RwFrameListNode frameList )
+        private Matrix4x4[] ComputeSkinToBoneMatrices( Assimp.Scene scene )
         {
-            var animationNodes = frameList.AnimationRootNode.HAnimFrameExtensionNode.Hierarchy.Nodes;
+            if ( FrameList.AnimationRootNode == null )
+                return null;
+
+            var animationNodes = FrameList.AnimationRootNode.HAnimFrameExtensionNode.Hierarchy.Nodes;
             var inverseBoneMatrices = new Matrix4x4[animationNodes.Count];
             foreach ( var node in animationNodes )
             {
                 var aiNode = scene.RootNode.FindNode( "_" + node.NodeId );
-                var transform = Matrix4x4.Transpose( Unsafe.ReinterpretCast<Assimp.Matrix4x4, Matrix4x4>( GetWorldTransform( aiNode ) ) );
+                var transform = Matrix4x4.Transpose( Unsafe.ReinterpretCast<Assimp.Matrix4x4, Matrix4x4>( ComputeWorldTransform( aiNode ) ) );
                 Matrix4x4.Invert( transform, out var inverseTransform );
                 inverseBoneMatrices[node.Index] = inverseTransform;
             }
 
             return inverseBoneMatrices;
+        }
+
+        private Matrix4x4[] ComputeSkinToBoneMatricesFromExistingSkin()
+        {
+            for ( var i = 0; i < GeometryList.Count; i++ )
+            {
+                var mesh = GeometryList[i];
+
+                if ( mesh.ExtensionNodes.Count != 0 )
+                {
+                    var skinPlugin =
+                        ( RwSkinNode )mesh.ExtensionNodes.SingleOrDefault( x => x.Id == RwNodeId.RwSkinNode );
+
+                    if ( skinPlugin != null )
+                    {
+                        var rootFrameWorldTransform = FrameList[Atomics.Find( x => x.GeometryIndex == i ).FrameIndex].WorldTransform;
+
+                        for ( int j = 0; j < skinPlugin.SkinToBoneMatrices.Length; j++ )
+                        {
+                            Matrix4x4.Invert( skinPlugin.SkinToBoneMatrices[j], out Matrix4x4 boneMatrix );
+                            boneMatrix *= rootFrameWorldTransform;
+                            Matrix4x4.Invert( boneMatrix, out boneMatrix );
+                            skinPlugin.SkinToBoneMatrices[j] = boneMatrix;
+                        }
+
+                        return skinPlugin.SkinToBoneMatrices;
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -493,7 +528,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
         /// <param name="rootNode"></param>
         private static void TransformMeshVertices( Assimp.Mesh assimpMesh, Assimp.Node rootNode )
         {
-            var worldTransform = GetWorldTransform( rootNode );
+            var worldTransform = ComputeWorldTransform( rootNode );
             var worldTransformInv = worldTransform;
             worldTransformInv.Transpose();
             worldTransformInv.Inverse();

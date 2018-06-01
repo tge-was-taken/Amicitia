@@ -54,8 +54,6 @@ namespace Amicitia
                 Console.WriteLine("You are running with the Mono VM");
             else
                 NativeMethods.AllocConsole();
-
-            OpenFile( @"D:\Modding\Persona 3 & 4\Persona4\CVM_DATA\MODEL\PACK\BC001.RMD" );
 #endif
         }
 
@@ -273,6 +271,9 @@ namespace Amicitia
             mainTreeView.AfterLabelEdit += MainTreeViewAfterLabelEditEventHandler;
             mainTreeView.NodeMouseClick += MainTreeViewNodeMouseClickEventHandler;
             //mainTreeView.SizeChanged += MainTreeView_SizeChanged;
+            mainTreeView.AllowDrop = true;
+            mainTreeView.DragDrop += MainFormDragDropEventHandler;
+            mainTreeView.DragEnter += MainFormDragEnterEventHandler;
             
             // mainPictureBox
             mainPictureBox.Visible = false;

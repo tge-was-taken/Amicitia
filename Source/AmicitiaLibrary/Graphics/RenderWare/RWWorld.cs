@@ -39,6 +39,14 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             Extension = RwNodeFactory.GetNode<RwExtensionNode>( this, reader );
         }
 
+        protected internal override void WriteBody( BinaryWriter writer )
+        {
+            Header.Write( writer );
+            Materials.Write( writer );
+            PlaneSector.Write( writer );
+            Extension.Write( writer );
+        }
+
         public void ExportToObj( string path )
         {
             using ( var writer = File.CreateText( path ) )

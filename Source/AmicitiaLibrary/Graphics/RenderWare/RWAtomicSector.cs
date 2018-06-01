@@ -17,5 +17,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             Header = RwNodeFactory.GetNode< RwAtomicSectorHeader >( this, reader );
             Extension = RwNodeFactory.GetNode< RwExtensionNode >( this, reader );
         }
+
+        protected internal override void WriteBody( BinaryWriter writer )
+        {
+            Header.Write( writer );
+            Extension.Write( writer );
+        }
     }
 }

@@ -58,7 +58,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                 Normals = new Vector3[VertexCount];
                 for ( int i = 0; i < VertexCount; i++ )
                 {
-                    Normals[i] = new Vector3( reader.ReadByte(), reader.ReadByte(), reader.ReadByte() );
+                    Normals[i] = new Vector3( reader.ReadSByte() / 128f, reader.ReadSByte() / 128f, reader.ReadSByte() / 128f );
                     reader.BaseStream.Position += 1; // padding
                 }
             }
@@ -89,6 +89,48 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                 var materialId = reader.ReadInt16();
 
                 Triangles[ i ] = new RwTriangle( v1, v2, v3, materialId );
+            }
+        }
+
+        protected internal override void WriteBody( BinaryWriter writer )
+        {
+            writer.Write( MaterialIdBase );
+            writer.Write( TriangleCount );
+            writer.Write( VertexCount );
+            writer.Write( Min );
+            writer.Write( Max );
+            writer.Write( Unused1 );
+            writer.Write( Unused2 );
+            writer.Write( Positions );
+
+            if ( Normals != null )
+            {
+                foreach ( var normal in Normals )
+                {
+                    writer.Write( ( sbyte ) ( normal.X * 128f ) );
+                    writer.Write( ( sbyte ) ( normal.Y * 128f ) );
+                    writer.Write( ( sbyte ) ( normal.Z * 128f ) );
+                    writer.Write( ( byte ) 0 );
+                }
+            }
+
+            if ( Colors != null )
+                writer.Write( Colors );
+
+            if ( TextureCoordinateChannels != null )
+            {
+                foreach ( var channel in TextureCoordinateChannels )
+                {
+                    writer.Write( channel );
+                }
+            }
+
+            foreach ( var triangle in Triangles )
+            {
+                writer.Write( triangle.A );
+                writer.Write( triangle.B );
+                writer.Write( triangle.C );
+                writer.Write( triangle.MatId );
             }
         }
     }

@@ -36,8 +36,11 @@ namespace AmicitiaLibrary.Graphics.RenderWare
 
         internal RwWorldHeader( RwNodeFactory.RwNodeHeader header, BinaryReader reader ) : base( header )
         {
-            long start = reader.BaseStream.Position;
+            ReadBody( reader );
+        }
 
+        protected internal override void ReadBody( BinaryReader reader )
+        {
             RootIsWorldSector = reader.ReadInt32();
             Ambient = reader.ReadInt32();
             Specular = reader.ReadInt32();
@@ -50,9 +53,25 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             Format = ( RwWorldFormatFlags )reader.ReadInt32();
             Min = new Vector3( reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle() );
             Max = new Vector3( reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle() );
+        }
 
-            if ( reader.BaseStream.Position - start != 0x40 )
-                throw new Exception();
+        protected internal override void WriteBody( BinaryWriter writer )
+        {
+            writer.Write( RootIsWorldSector );
+            writer.Write( Ambient );
+            writer.Write( Specular );
+            writer.Write( Diffuse );
+            writer.Write( TriangleCount );
+            writer.Write( VertexCount );
+            writer.Write( PlaneSectorCount );
+            writer.Write( ColSectorSize );
+            writer.Write( (int)Format );
+            writer.Write( Min.X );
+            writer.Write( Min.Y );
+            writer.Write( Min.Z );
+            writer.Write( Max.X );
+            writer.Write( Max.Y );
+            writer.Write( Max.Z );
         }
     }
 

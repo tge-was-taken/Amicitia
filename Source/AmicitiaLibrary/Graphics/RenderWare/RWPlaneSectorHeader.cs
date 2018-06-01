@@ -29,5 +29,15 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             LeftValue = reader.ReadSingle();
             RightValue = reader.ReadSingle();
         }
+
+        protected internal override void WriteBody( BinaryWriter writer )
+        {
+            writer.Write( SectorType );
+            writer.Write( Value );
+            writer.Write( LeftIsWorldSector ? 1 : 0 );
+            writer.Write( RightIsWorldSector ? 1 : 0 );
+            writer.Write( LeftValue );
+            writer.Write( RightValue );
+        }
     }
 }

@@ -21,5 +21,14 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                 RwNodeFactory.GetNode( this, reader );
             }
         }
+
+        protected internal override void WriteBody( BinaryWriter writer )
+        {
+            Header.Write( writer );
+            foreach ( var node in Children )
+            {
+                node.Write( writer );
+            }
+        }
     }
 }

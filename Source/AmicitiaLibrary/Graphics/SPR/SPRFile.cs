@@ -146,7 +146,7 @@ namespace AmicitiaLibrary.Graphics.SPR
             get { return mTextures; }
         }
 
-        public IList<SprSprite> KeyFrames
+        public IList<SprSprite> Sprites
         {
             get { return mKeyFrames; }
         }

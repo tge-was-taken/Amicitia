@@ -1,4 +1,6 @@
-﻿namespace AmicitiaLibrary.Graphics.TMX
+﻿using System.Text;
+
+namespace AmicitiaLibrary.Graphics.TMX
 {
     using System;
     using System.IO;
@@ -76,7 +78,7 @@
 
         public TmxFile(Stream stream, bool leaveOpen = false)
         {
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new BinaryReader(stream, Encoding.Default, leaveOpen))
                 Read(reader);
         }
 

@@ -13,22 +13,22 @@ namespace Amicitia.ResourceWrappers
         where TTexture : ITextureFile
     {
         [Browsable(false)]
-        public GenericListWrapper<SprSprite> KeyFrameListWrapper { get; }
+        public GenericListWrapper<SprSprite> SpriteListWrapper { get; }
 
         [Browsable(false)]
         public GenericListWrapper<TTexture> TextureListWrapper { get; }
 
         public SprFileWrapper(string text, TFile resource) : base(text, resource)
         {
-            KeyFrameListWrapper = new GenericListWrapper<SprSprite>("KeyFrames", resource.KeyFrames, (e, i) => $"KeyFrame{i:000}");
+            SpriteListWrapper = new GenericListWrapper<SprSprite>("Sprites", resource.Sprites, (e, i) => !string.IsNullOrEmpty( e.Comment ) ? $"Sprite [{e.Comment}]" : $"Sprite {i:00}" );
             TextureListWrapper = GetTextureListWrapper();
             PopulateView();
         }
 
         protected override void PopulateView()
         {
-            if ( KeyFrameListWrapper != null )
-                Nodes.Add(KeyFrameListWrapper);
+            if ( SpriteListWrapper != null )
+                Nodes.Add(SpriteListWrapper);
 
             if ( TextureListWrapper != null )
                 Nodes.Add(TextureListWrapper);
@@ -41,13 +41,13 @@ namespace Amicitia.ResourceWrappers
     {
         public SprFileWrapper(string text, SprFile resource) : base(text, resource)
         {
-            RegisterRebuildAction((wrap) => new SprFile(TextureListWrapper.Resource, KeyFrameListWrapper.Resource));
+            RegisterRebuildAction((wrap) => new SprFile(TextureListWrapper.Resource, SpriteListWrapper.Resource));
         }
 
         protected override GenericListWrapper<TmxFile> GetTextureListWrapper()
         {
             return new GenericListWrapper<TmxFile>("Textures", Resource.Textures,
-                (tex, i) => !string.IsNullOrEmpty(tex.UserComment) ? tex.UserComment : $"Texture{i:00}");
+                (tex, i) => !string.IsNullOrEmpty(tex.UserComment) ? tex.UserComment : $"Texture {i:00}");
         }
 
         protected override void Initialize()
@@ -65,12 +65,12 @@ namespace Amicitia.ResourceWrappers
     {
         public Spr4FileWrapper(string text, Spr4File resource) : base(text, resource)
         {
-            RegisterRebuildAction((wrap) => new Spr4File(TextureListWrapper.Resource, KeyFrameListWrapper.Resource));
+            RegisterRebuildAction((wrap) => new Spr4File(TextureListWrapper.Resource, SpriteListWrapper.Resource));
         }
 
         protected override GenericListWrapper<TgaFile> GetTextureListWrapper()
         {
-            return new GenericListWrapper<TgaFile>("Textures", Resource.Textures, (tex, i) => $"Texture{i:00}");
+            return new GenericListWrapper<TgaFile>("Textures", Resource.Textures, (tex, i) => $"Texture {i:00}");
         }
 
         protected override void Initialize()
@@ -82,12 +82,12 @@ namespace Amicitia.ResourceWrappers
             RegisterFileReplaceAction(SupportedFileType.SprFile, (res, path) => Spr4File.Load(path));
             RegisterFileAddAction(SupportedFileType.Resource, DefaultFileAddAction);
 
-            Nodes.Add(KeyFrameListWrapper);
+            Nodes.Add(SpriteListWrapper);
             Nodes.Add(TextureListWrapper);
         }
     }
 
-    public class SprKeyFrameWrapper : ResourceWrapper<SprSprite>
+    public class SprSpriteWrapper : ResourceWrapper<SprSprite>
     {
         public string Comment
         {
@@ -107,7 +107,7 @@ namespace Amicitia.ResourceWrappers
             set => Resource.Coordinates = value;
         }
 
-        public SprKeyFrameWrapper(string text, SprSprite resource) : base(text, resource)
+        public SprSpriteWrapper(string text, SprSprite resource) : base(text, resource)
         {
         }
 

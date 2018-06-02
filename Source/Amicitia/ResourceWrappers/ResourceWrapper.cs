@@ -41,23 +41,23 @@ namespace Amicitia.ResourceWrappers
 
         void Rename();
 
-        void Export();
+        bool Export();
 
-        void Export(string path);
+        bool Export(string path);
 
-        void Export(string path, SupportedFileType type);
+        bool Export(string path, SupportedFileType type);
 
-        void Replace();
+        bool Replace();
 
-        void Replace( string path );
+        bool Replace( string path );
 
-        void Replace( string path, SupportedFileType type );
+        bool Replace( string path, SupportedFileType type );
 
-        void Add();
+        bool Add();
 
-        void Add( string path );
+        bool Add( string path );
 
-        void Add( string path, SupportedFileType type );
+        bool Add( string path, SupportedFileType type );
 
         byte[] GetResourceBytes();
 
@@ -241,10 +241,10 @@ namespace Amicitia.ResourceWrappers
             NeedsRebuild = true;
         }
 
-        public void Export()
+        public bool Export()
         {
             if (mFileExportActions == null)
-                return;
+                return false;
 
             using (var saveFileDlg = new SaveFileDialog())
             {
@@ -260,33 +260,34 @@ namespace Amicitia.ResourceWrappers
 
                 if (saveFileDlg.ShowDialog() != DialogResult.OK)
                 {
-                    return;
+                    return false;
                 }
 
                 var fileType = GetCorrectedSupportedFileType( saveFileDlg.FilterIndex - 1, saveFileDlg.FileName, fileTypes );
-                Export(saveFileDlg.FileName, fileType);
+                return Export(saveFileDlg.FileName, fileType);
             }
         }
 
-        public void Export(string path)
+        public bool Export(string path)
         {
             var fileInfo = SupportedFileManager.GetSupportedFileInfo( Path.GetExtension( path ) );
-            Export(path, fileInfo.EnumType);
+            return Export(path, fileInfo.EnumType);
         }
 
-        public void Export(string path, SupportedFileType type)
+        public bool Export(string path, SupportedFileType type)
         {
             if (mFileExportActions == null)
-                return;
+                return false;
 
             var fileExportAction = mFileExportActions[type];
             fileExportAction.Invoke(Resource, path);
+            return true;
         }
 
-        public void Replace()
+        public bool Replace()
         {
             if (mFileReplaceActions == null)
-                return;
+                return false;
 
             using (var openFileDlg = new OpenFileDialog())
             {
@@ -304,27 +305,28 @@ namespace Amicitia.ResourceWrappers
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
-                    return;
+                    return false;
                 }
 
                 var fileType = GetCorrectedSupportedFileType(openFileDlg.FilterIndex - 1, openFileDlg.FileName, fileTypes);
-                Replace(openFileDlg.FileName, fileType);
+                return Replace(openFileDlg.FileName, fileType);
             }
         }
 
-        public void Replace(string path)
+        public bool Replace(string path)
         {
             var fileInfo = SupportedFileManager.GetSupportedFileInfo( Path.GetExtension( path ) );
-            Replace(path, fileInfo.EnumType);
+            return Replace(path, fileInfo.EnumType);
         }
 
-        public void Replace(string path, SupportedFileType type)
+        public bool Replace(string path, SupportedFileType type)
         {
             if (mFileReplaceActions == null)
-                return;
+                return false;
 
             var fileReplaceAction = mFileReplaceActions[type];
             Resource = fileReplaceAction.Invoke(Resource, path);
+            return true;
         }
 
         public void AddNode( TreeNode node )
@@ -333,10 +335,12 @@ namespace Amicitia.ResourceWrappers
             Nodes.Add( node );
         }
 
-        public void Add()
+        public bool Add()
         {
             if (mFileAddActions == null)
-                return;
+                return false;
+
+            bool hasAdded = false;
 
             using (OpenFileDialog openFileDlg = new OpenFileDialog())
             {
@@ -353,29 +357,32 @@ namespace Amicitia.ResourceWrappers
 
                 if (openFileDlg.ShowDialog() != DialogResult.OK)
                 {
-                    return;
+                    return false;
                 }
 
                 foreach (string fileName in openFileDlg.FileNames)
                 {
                     var fileType = GetCorrectedSupportedFileType( openFileDlg.FilterIndex - 1, fileName, fileTypes );
-                    Add( fileName, fileType );
+                    hasAdded |= Add( fileName, fileType );
                 }          
             }
+
+            return hasAdded;
         }
 
-        public void Add(string path)
+        public bool Add(string path)
         {
             var fileInfo = SupportedFileManager.GetSupportedFileInfo( Path.GetExtension( path ) );
-            Add(path, fileInfo.EnumType);
+            return Add(path, fileInfo.EnumType);
         }
 
-        public void Add(string path, SupportedFileType type)
+        public bool Add(string path, SupportedFileType type)
         {
             var fileAddAction = mFileAddActions[type];
             fileAddAction.Invoke(path, this);
 
             NeedsRebuild = true;
+            return true;
         }
 
         protected void MoveUpEventHandler(object sender, EventArgs e)

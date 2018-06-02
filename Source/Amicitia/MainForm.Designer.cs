@@ -95,6 +95,7 @@
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
             this.optionsToolStripMenuItem.Click += new System.EventHandler(this.OptionsToolStripMenuItem_Click);
+            this.optionsToolStripMenuItem.Visible = false;
             // 
             // mainTreeView
             // 

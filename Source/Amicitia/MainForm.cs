@@ -228,26 +228,28 @@ namespace Amicitia
 
         private void SaveToolStripMenuItemClickEventHandler(object sender, EventArgs e)
         {
-            if (mainTreeView.Nodes.Count != 0)
-            {
-                var wrapper = (IResourceWrapper)mainTreeView.Nodes[0];
-                var path = openToolStripMenuItem.DropDownItems[openToolStripMenuItem.DropDownItems.Count - 1].Text;
-                wrapper.Export(path, wrapper.FileType);
+            if ( mainTreeView.Nodes.Count == 0 )
+                return;
 
-                using (var centeringService = new DialogCenteringService(this))
-                    MessageBox.Show("File has been saved successfully.", "Success");
-                
+            var wrapper = (IResourceWrapper)mainTreeView.Nodes[0];
+            var path = openToolStripMenuItem.DropDownItems[openToolStripMenuItem.DropDownItems.Count - 1].Text;
+
+            if ( wrapper.Export( path, wrapper.FileType ) )
+            {
+                using ( var centeringService = new DialogCenteringService( this ) )
+                    MessageBox.Show( "File has been saved successfully.", "Success" );
             }
         }
 
         private void SaveAsToolStripMenuItemClickEventHandler( object sender, EventArgs e )
         {
-            if ( mainTreeView.Nodes.Count != 0 )
+            if ( mainTreeView.Nodes.Count == 0 )
+                return;
+
+            if ( ( ( IResourceWrapper )mainTreeView.Nodes[0] ).Export() )
             {
-                ( ( IResourceWrapper )mainTreeView.Nodes[0] ).Export();
-                    using (var centeringService = new DialogCenteringService(this))
-                        MessageBox.Show("File has been saved successfully.", "Success");
-                
+                using ( var centeringService = new DialogCenteringService( this ) )
+                    MessageBox.Show( "File has been saved successfully.", "Success" );
             }
         }
 
@@ -362,7 +364,7 @@ namespace Amicitia
                 treeNode = (TreeNode)ResourceWrapperFactory.GetResourceWrapper(Path.GetFileName(path), fileStream, supportedFileIndex);
 #if !DEBUG
             }
-            catch (InvalidDataException)
+            catch (Exception)
             {
                 using (var centeringService = new DialogCenteringService(this))
                     MessageBox.Show("Can't open this file format.", "Open file error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);

@@ -94,8 +94,8 @@
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
-            this.optionsToolStripMenuItem.Click += new System.EventHandler(this.OptionsToolStripMenuItem_Click);
             this.optionsToolStripMenuItem.Visible = false;
+            this.optionsToolStripMenuItem.Click += new System.EventHandler(this.OptionsToolStripMenuItem_Click);
             // 
             // mainTreeView
             // 
@@ -103,7 +103,6 @@
             this.mainTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.mainTreeView.Location = new System.Drawing.Point(12, 24);
-            this.mainTreeView.MaximumSize = new System.Drawing.Size(400, 900);
             this.mainTreeView.Name = "mainTreeView";
             this.mainTreeView.Size = new System.Drawing.Size(300, 551);
             this.mainTreeView.TabIndex = 1;

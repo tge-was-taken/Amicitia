@@ -80,7 +80,7 @@ namespace Amicitia.ResourceWrappers
         }
     }
 
-    public abstract partial class ResourceWrapper<TResource> : TreeNode, IResourceWrapper
+    public abstract partial class ResourceWrapper<TResource> : TreeNode, IResourceWrapper, IDisposable
     {
         public static readonly Action<string, ResourceWrapper<TResource>> DefaultFileAddAction = (path, wrapper) =>
         {
@@ -167,6 +167,7 @@ namespace Amicitia.ResourceWrappers
         /// </summary>
         public new void Remove()
         {
+            Dispose();
             SetRebuildFlag(Parent);
             base.Remove();
         }
@@ -228,6 +229,7 @@ namespace Amicitia.ResourceWrappers
 
         public void Delete()
         {
+            Dispose();
             Remove();
         }
 
@@ -322,7 +324,14 @@ namespace Amicitia.ResourceWrappers
                 return false;
 
             var fileReplaceAction = mFileReplaceActions[type];
-            Resource = fileReplaceAction.Invoke(Resource, path);
+            var res = Resource;
+            var newRes = fileReplaceAction.Invoke( res, path);
+
+            if ( !newRes.Equals(res) && res is IDisposable disposable )
+                disposable.Dispose();
+
+            Resource = newRes;
+
             return true;
         }
 
@@ -636,6 +645,12 @@ namespace Amicitia.ResourceWrappers
                 Resource = mRebuildAction.Invoke(this);
                 SetRebuildFlag(Parent);
             }
+        }
+
+        public virtual void Dispose()
+        {
+            if ( Resource is IDisposable disposable )
+                disposable.Dispose();
         }
     }
 

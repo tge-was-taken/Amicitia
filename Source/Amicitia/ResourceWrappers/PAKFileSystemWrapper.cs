@@ -18,7 +18,10 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Add |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterFileExportAction(SupportedFileType.PakArchiveFile, (res, path) => res.Save(path));
+            RegisterFileExportAction(SupportedFileType.PakArchiveFile, ( res, path ) =>
+            {
+                res.Save( path );
+            });
             RegisterFileReplaceAction( SupportedFileType.PakArchiveFile, ( res, path ) =>
             {
                 var pak = new PAKFileSystem();

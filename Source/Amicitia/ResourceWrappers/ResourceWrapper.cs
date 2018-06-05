@@ -152,16 +152,13 @@ namespace Amicitia.ResourceWrappers
 
         public byte[] GetResourceBytes()
         {
-            var binaryFileBase = Resource as BinaryBase;
-
-            return binaryFileBase?.GetBytes();
+            return GetResourceMemoryStream().ToArray();
         }
 
         public MemoryStream GetResourceMemoryStream()
         {
-            var binaryFileBase = Resource as BinaryBase;
-
-            return binaryFileBase?.GetMemoryStream();
+            var info = SupportedFileManager.GetSupportedFileInfo( typeof( TResource ) );
+            return info.GetStream( Resource );
         }
 
 

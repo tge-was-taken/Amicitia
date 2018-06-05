@@ -15,15 +15,15 @@ namespace Amicitia
         public static IResourceWrapper GetResourceWrapper(string path)
         {
             using (var stream = File.OpenRead(path))
-                return GetResourceWrapper(Path.GetFileName(path), stream);
+                return GetResourceWrapper(Path.GetFileName(path), stream, path);
         }
 
-        public static IResourceWrapper GetResourceWrapper(string text, Stream stream)
+        public static IResourceWrapper GetResourceWrapper(string text, Stream stream, string filePath = null)
         {
-            return GetResourceWrapper(text, stream, SupportedFileManager.GetSupportedFileIndex(text, stream));
+            return GetResourceWrapper(text, stream, SupportedFileManager.GetSupportedFileIndex(text, stream), filePath ?? text);
         }
 
-        public static IResourceWrapper GetResourceWrapper(string text, Stream stream, int supportedFileIndex)
+        public static IResourceWrapper GetResourceWrapper(string text, Stream stream, int supportedFileIndex, string filePath = null)
         {
             if (supportedFileIndex == -1)
             {
@@ -31,7 +31,7 @@ namespace Amicitia
             }
 
             var supportedFileInfo = SupportedFileManager.GetSupportedFileInfo(supportedFileIndex);
-            var resource = supportedFileInfo.Instantiator( stream, false );
+            var resource = supportedFileInfo.Instantiator( stream, false, filePath);
 
             return GetResourceWrapper(text, resource);
         }

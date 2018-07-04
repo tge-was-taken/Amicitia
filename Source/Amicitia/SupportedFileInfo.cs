@@ -98,6 +98,10 @@ namespace Amicitia
         RwAnimationNode,
         RwMaterial,
         RwTextureReferenceNode,
-        RwUserDataList
+        RwUserDataList,
+        SpdFile,
+        SpdTexture,
+        SpdSprite,
+        DDS
     }
 }

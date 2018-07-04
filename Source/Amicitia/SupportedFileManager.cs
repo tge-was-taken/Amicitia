@@ -1,4 +1,5 @@
 ﻿using AmicitiaLibrary.Field;
+using AmicitiaLibrary.Graphics.SPD;
 using AtlusFileSystemLibrary;
 using AtlusFileSystemLibrary.FileSystems.ACX;
 
@@ -40,6 +41,7 @@ namespace Amicitia
         {   //                     Description                        File Type Enum                              Type                             Validator              Instanciator                                        Get Stream                                            Extensions
             // Generic formats
             new SupportedFileInfo("Raw data",                         SupportedFileType.Resource,                 typeof(BinaryFile),              null,                  (s, o, f) => new BinaryFile(s, o),                  o => ((BinaryBase)o).GetMemoryStream(),               ".*"),
+            new SupportedFileInfo("DDS image",                        SupportedFileType.DDS,                      typeof(BinaryFile),              null,                  (s, o, f) => new BinaryFile(s, o),                  o => ((BinaryBase)o).GetMemoryStream(),               ".dds"),
             new SupportedFileInfo("Bitmap",                           SupportedFileType.Bitmap,                   typeof(Bitmap),                  null,                  (s, o, f) => new Bitmap(s),                         o => ((BinaryBase)o).GetMemoryStream(),               ".png", ".bmp", ".gif", ".ico", ".jpg", ".jpeg", ".jif", ".jfif", ".jfi", ".tiff", ".tif"),
             new SupportedFileInfo("Truevision TARGA",                 SupportedFileType.TgaFile,                  typeof(TgaFile),                 null,                  (s, o, f) => new TgaFile(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".tga"),
             new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                               o => ((BinaryBase)o).GetMemoryStream(),               ".fbx", ".dae", ".obj"),
@@ -59,6 +61,9 @@ namespace Amicitia
             new SupportedFileInfo("Atlus TMX Sprite Container",       SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o, f) => new SprFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".spr"),
             new SupportedFileInfo("Atlus TGA Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o, f) => new Spr4File(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".spr4"),
             new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o, f) => new SprSprite(s, o),                    o => ((BinaryBase)o).GetMemoryStream(),               ".sprt"),
+            new SupportedFileInfo("Atlus P5 Sprite Container",        SupportedFileType.SpdFile,                  typeof(SpdFile),                 null,                 (s, o, f) => new SpdFile(s, o),                      o => ((SpdFile)o).Save(),                             ".spd"),
+            new SupportedFileInfo("Atlus P5 Sprite",                  SupportedFileType.SpdSprite,                typeof(SpdSprite),               null,                 (s, o, f) => new SpdSprite(s, o),                    o => ((SpdSprite)o).Save(),                           ".spdspr"),
+            new SupportedFileInfo("Atlus P5 Sprite Texture",          SupportedFileType.SpdTexture,               typeof(SpdTexture),              null,                 (s, o, f) => new SpdTexture(s, o),                   o => ((SpdTexture)o).Save(),                          ".spdtex"),
 
             // Model related formats
             new SupportedFileInfo("Atlus RenderWare Model Data",      SupportedFileType.RmdScene,                 typeof(RmdScene),                null,                 (s, o, f) => new RmdScene(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".rmd", ".rws"),
@@ -107,9 +112,20 @@ namespace Amicitia
             return SupportedFileInfos[index];
         }
 
+        /// <summary>
+        /// Get supported file info by type. Supports 1 level of inheritance.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static SupportedFileInfo GetSupportedFileInfo( Type type )
         {
-            return SupportedFileInfos.Single( x => x.ClassType == type );
+            var info = SupportedFileInfos.FirstOrDefault( x => x.ClassType == type );
+            while ( info == null )
+            {
+                info = SupportedFileInfos.FirstOrDefault( x => x.ClassType.BaseType == type );
+            }
+
+            return info;
         }
 
         public static SupportedFileInfo GetSupportedFileInfo( SupportedFileType type )

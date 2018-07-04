@@ -282,11 +282,6 @@
             int numVerts = reader.ReadInt32();
             int numMorphTargets = reader.ReadInt32();
 
-            if (numMorphTargets != SUPPORTED_MORPH_COUNT)
-            {
-                throw new NotImplementedException("More than 1 morph target are not implemented");
-            }
-
             if (Flags.HasFlagUnchecked(RwGeometryFlags.HasColors))
             {
                 mClrArray = reader.ReadColorArray(numVerts);
@@ -309,16 +304,23 @@
                 Triangles[i] = new RwTriangle(reader);
             }
 
-            BoundingSphere = new RwBoundingSphere(reader);
-
-            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasVertices))
+            for ( int i = 0; i < numMorphTargets; i++ )
             {
-                mPosArray = reader.ReadVector3Array(numVerts);
-            }
+                BoundingSphere = new RwBoundingSphere( reader );
 
-            if (Flags.HasFlagUnchecked(RwGeometryFlags.HasNormals))
-            {
-                mNrmArray = reader.ReadVector3Array(numVerts);
+                if ( Flags.HasFlagUnchecked( RwGeometryFlags.HasVertices ) )
+                {
+                    var positions = reader.ReadVector3Array( numVerts );
+                    if ( i == 0 )
+                        mPosArray = positions;
+                }
+
+                if ( Flags.HasFlagUnchecked( RwGeometryFlags.HasNormals ) )
+                {
+                    var normals = reader.ReadVector3Array( numVerts );
+                    if ( i == 0 )
+                        mNrmArray = normals;
+                }
             }
         }
 

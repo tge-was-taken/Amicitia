@@ -15,5 +15,17 @@
         {
             return (value + (alignment - 1)) & ~(alignment - 1);
         }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static int GetAlignedDifference( long value, int alignment )
+        {
+            return ( int )( ( ( value + ( alignment - 1 ) ) & ~( alignment - 1 ) ) - value );
+        }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static int GetAlignedDifference( int value, int alignment )
+        {
+            return ( ( value + ( alignment - 1 ) ) & ~( alignment - 1 ) ) - value;
+        }
     }
 }

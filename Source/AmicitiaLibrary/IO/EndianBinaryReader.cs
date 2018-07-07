@@ -96,6 +96,15 @@ namespace AmicitiaLibrary.IO
                 ReadAtOffset( offset, action );
         }
 
+        public void ReadOffset( int count, Action action )
+        {
+            ReadOffset( () =>
+            {
+                for ( int i = 0; i < count; ++i )
+                    action();
+            } );
+        }
+
         public void ReadAtOffset( long offset, Action action )
         {
             long current = Position;
@@ -332,11 +341,15 @@ namespace AmicitiaLibrary.IO
                             throw new ArgumentException("Invalid fixed length specified");
 
                         byte b;
+                        bool terminated = false;
                         for (int i = 0; i < fixedLength; i++)
                         {
                             b = ReadByte();
-                            if (b != 0)
-                                mStringBuilder.Append((char)b);
+                            if ( b == 0 )
+                                terminated = true;
+
+                            if ( !terminated )
+                                mStringBuilder.Append( ( char ) b );
                         }
                     }
                     break;

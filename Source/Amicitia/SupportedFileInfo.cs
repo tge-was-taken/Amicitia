@@ -102,6 +102,10 @@ namespace Amicitia
         SpdFile,
         SpdTexture,
         SpdSprite,
-        DDS
+        DDS,
+        Spr6File,
+        Spr6Texture,
+        Spr6Sprite,
+        Spr6Panel
     }
 }

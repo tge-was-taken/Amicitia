@@ -66,15 +66,9 @@
     <Reference Include="ColorMine, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\Nuget\ColorMine.1.1.3.0\lib\ColorMine.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpImageLibrary, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Dependencies\Nuget\CSharpImageLibrary.4.2.0\lib\net462\CSharpImageLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="ManagedNvTriStrip, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\NativeManaged\ManagedNvTriStrip.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\Dependencies\Nuget\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -88,15 +82,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Dependencies\Managed\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\Dependencies\Nuget\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="UsefulThings, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\Dependencies\Nuget\UsefulCSharpThings.1.7.3\lib\net462\UsefulThings.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Field\CMRFile.cs" />
@@ -107,8 +92,14 @@
     <Compile Include="FileSystems\ISO\Enums.cs" />
     <Compile Include="FileSystems\IArchiveEntry.cs" />
     <Compile Include="FileSystems\ISimpleArchiveFile.cs" />
-    <Compile Include="Graphics\DDS\DDSDecoder.cs" />
-    <Compile Include="Graphics\DDS\DDSEncoder.cs" />
+    <Compile Include="Graphics\DDS\DDSCodec.cs" />
+    <Compile Include="Graphics\DDS\DDSFormatDetails.cs" />
+    <Compile Include="Graphics\DDS\DDSHeader.cs" />
+    <Compile Include="Graphics\DDS\DDSHeaderCaps.cs" />
+    <Compile Include="Graphics\DDS\DDSHeaderFlags.cs" />
+    <Compile Include="Graphics\DDS\DDSPixelFormat.cs" />
+    <Compile Include="Graphics\DDS\DDSPixelFormatFlags.cs" />
+    <Compile Include="Graphics\DDS\DDSPixelFormatFourCC.cs" />
     <Compile Include="Graphics\RenderWare\RMDNodeLink.cs" />
     <Compile Include="Graphics\RenderWare\RWAnimationNode.cs" />
     <Compile Include="Graphics\RenderWare\RWAtomicSector.cs" />
@@ -122,6 +113,7 @@
     <Compile Include="Graphics\RenderWare\RWWorld.cs" />
     <Compile Include="Graphics\RenderWare\RWWorldHeader.cs" />
     <Compile Include="Graphics\SPD\SpdFile.cs" />
+    <Compile Include="Graphics\SPR6\Spr6File.cs" />
     <Compile Include="Graphics\SPR\ISprFile.cs" />
     <Compile Include="Graphics\TGA\TGAEncoding.cs" />
     <Compile Include="Graphics\TMX\TMXWrapMode.cs" />

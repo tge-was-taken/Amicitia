@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AmicitiaLibrary.Graphics.DDS;
 using AmicitiaLibrary.IO;
 using AmicitiaLibrary.Utilities;
-using CSharpImageLibrary.Headers;
 
 namespace AmicitiaLibrary.Graphics.SPD
 {
@@ -42,7 +39,10 @@ namespace AmicitiaLibrary.Graphics.SPD
         public void Save( Stream stream, bool leaveOpen )
         {
             using ( var writer = new EndianBinaryWriter( stream, Encoding.Default, leaveOpen, Endianness.LittleEndian ) )
+            {
                 Write( writer );
+                writer.PerformScheduledWrites();
+            }
         }
 
         public void Save( string filepath ) => Save( File.Create( filepath ), false );
@@ -102,7 +102,6 @@ namespace AmicitiaLibrary.Graphics.SPD
             writer.Write( (short)Sprites.Count );
             writer.ScheduleOffsetWrite( () => Textures.ForEach( x => x.Write( writer ) ) );
             writer.ScheduleOffsetWrite( () => Sprites.ForEach( x => x.Write( writer ) ) );
-            writer.PerformScheduledWrites();
         }
     }
 
@@ -137,7 +136,7 @@ namespace AmicitiaLibrary.Graphics.SPD
 
         public SpdTexture( byte[] ddsData )
         {
-            var ddsHeader = new DDS_Header( new MemoryStream( ddsData ) );
+            var ddsHeader = new DDSHeader( new MemoryStream( ddsData ) );
 
             Id = 1;
             Field04 = 0;
@@ -158,7 +157,7 @@ namespace AmicitiaLibrary.Graphics.SPD
             Field18 = 0;
             Field1C = 0;
             Description = "Created with <3 by Amicitia";
-            Data = DDSEncoder.Encode( bitmap );
+            Data = DDSCodec.CompressImage( bitmap );
         }
 
         public SpdTexture( string filepath ) : this( File.OpenRead( filepath ), false ) { }
@@ -172,7 +171,10 @@ namespace AmicitiaLibrary.Graphics.SPD
         public void Save( Stream stream, bool leaveOpen )
         {
             using ( var writer = new EndianBinaryWriter( stream, Encoding.Default, leaveOpen, Endianness.LittleEndian ) )
+            {
                 Write( writer );
+                writer.PerformScheduledWrites();
+            }
         }
 
         public void Save( string filepath ) => Save( File.Create( filepath ), false );
@@ -186,7 +188,7 @@ namespace AmicitiaLibrary.Graphics.SPD
 
         public Bitmap GetBitmap()
         {
-            return mBitmap ?? ( mBitmap = DDSDecoder.Decode( Data ) );
+            return mBitmap ?? ( mBitmap = DDSCodec.DecompressImage( Data ) );
         }
 
         internal void Read( EndianBinaryReader reader )

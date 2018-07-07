@@ -1,5 +1,6 @@
 ﻿using AmicitiaLibrary.Field;
 using AmicitiaLibrary.Graphics.SPD;
+using AmicitiaLibrary.Graphics.SPR6;
 using AtlusFileSystemLibrary;
 using AtlusFileSystemLibrary.FileSystems.ACX;
 
@@ -58,8 +59,12 @@ namespace Amicitia
             new SupportedFileInfo("RenderWare PS2 Texture",           SupportedFileType.RwTextureNativeNode,      typeof(RwTextureNativeNode),     null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".txn"),
 
             // Sprite
-            new SupportedFileInfo("Atlus TMX Sprite Container",       SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o, f) => new SprFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".spr"),
-            new SupportedFileInfo("Atlus TGA Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o, f) => new Spr4File(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".spr4"),
+            new SupportedFileInfo("Atlus P3/P4 Sprite Container",     SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o, f) => new SprFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".spr"),
+            new SupportedFileInfo("Atlus P4D Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o, f) => new Spr4File(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".spr4"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Container",    SupportedFileType.Spr6File,                 typeof(Spr6File),                null,                 (s, o, f) => new Spr6File(s, o),                     o => ((Spr6File)o).Save(),                            ".spr6"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Texture",      SupportedFileType.Spr6Sprite,               typeof(Spr6Sprite),              null,                 (s, o, f) => new Spr6Sprite(s, o),                   o => ((Spr6Sprite)o).Save(),                          ".spr6spr"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Panel",        SupportedFileType.Spr6Panel,                typeof(Spr6Panel),               null,                 (s, o, f) => new Spr6Panel(s, o),                    o => ((Spr6Panel)o).Save(),                           ".spr6pnl"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Texture",      SupportedFileType.Spr6Texture,              typeof(Spr6Texture),             null,                 (s, o, f) => new Spr6Texture(s, o),                  o => ((Spr6Texture)o).Save(),                         ".spr6tex"),
             new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o, f) => new SprSprite(s, o),                    o => ((BinaryBase)o).GetMemoryStream(),               ".sprt"),
             new SupportedFileInfo("Atlus P5 Sprite Container",        SupportedFileType.SpdFile,                  typeof(SpdFile),                 null,                 (s, o, f) => new SpdFile(s, o),                      o => ((SpdFile)o).Save(),                             ".spd"),
             new SupportedFileInfo("Atlus P5 Sprite",                  SupportedFileType.SpdSprite,                typeof(SpdSprite),               null,                 (s, o, f) => new SpdSprite(s, o),                    o => ((SpdSprite)o).Save(),                           ".spdspr"),

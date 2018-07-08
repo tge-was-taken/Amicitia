@@ -14,8 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bvptool", "Commandline tool
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commandline tools", "Commandline tools", "{27DF8CE2-0297-4B9E-90E1-0014201F6F4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonaPatcher", "Commandline tools\PersonaPatcher\PersonaPatcher.csproj", "{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{08DFD4B9-528B-4F45-96C1-61045EF60921}"
 	ProjectSection(SolutionItems) = preProject
 		nuget.config = nuget.config
@@ -57,14 +55,6 @@ Global
 		{BF5999DE-5F3E-44F5-B082-156FFEB29A2A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF5999DE-5F3E-44F5-B082-156FFEB29A2A}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF5999DE-5F3E-44F5-B082-156FFEB29A2A}.Release|x86.Build.0 = Release|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Debug|x86.Build.0 = Debug|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Release|Any CPU.Build.0 = Release|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Release|x86.ActiveCfg = Release|Any CPU
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50}.Release|x86.Build.0 = Release|Any CPU
 		{9960B785-6207-44E8-BA42-EC7F6F785344}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9960B785-6207-44E8-BA42-EC7F6F785344}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9960B785-6207-44E8-BA42-EC7F6F785344}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -79,7 +69,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BF5999DE-5F3E-44F5-B082-156FFEB29A2A} = {27DF8CE2-0297-4B9E-90E1-0014201F6F4E}
-		{667A2CC2-5BFE-4ED1-85BC-D90933B31C50} = {27DF8CE2-0297-4B9E-90E1-0014201F6F4E}
 		{9960B785-6207-44E8-BA42-EC7F6F785344} = {968970D1-BEE8-4AC2-8327-8FCDCEED73CF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -16,17 +16,19 @@ namespace AmicitiaLibrary.IO
 
             public Func<long> Action { get; }
 
-            public ScheduledWrite( long position, Func<long> action )
+            public int Priority { get; }
+
+            public ScheduledWrite( long position, Func<long> action, int priority )
             {
                 Position = position;
                 Action = action;
+                Priority = priority;
             }
         }
 
         private Endianness mEndianness;
         private Encoding mEncoding;
         private LinkedList<ScheduledWrite> mScheduledWrites;
-        private LinkedList<ScheduledWrite> mScheduledLateWrites;
         private LinkedList<long> mScheduledFileSizeWrites;
         private List<long> mOffsetPositions;
         private Stack<long> mBaseOffset;
@@ -76,7 +78,6 @@ namespace AmicitiaLibrary.IO
             Endianness = endianness;
             mEncoding = encoding;
             mScheduledWrites = new LinkedList<ScheduledWrite>();
-            mScheduledLateWrites = new LinkedList<ScheduledWrite>();
             mScheduledFileSizeWrites = new LinkedList<long>();
             mOffsetPositions = new List<long>();
             mBaseOffset = new Stack<long>();
@@ -308,9 +309,9 @@ namespace AmicitiaLibrary.IO
             WritePadding( AlignmentHelper.GetAlignedDifference( Position, alignment ) );
         }
 
-        public void ScheduleOffsetWrite( Action action, bool late = false )
+        public void ScheduleOffsetWrite( Action action )
         {
-            ScheduleOffsetWrite( () =>
+            ScheduleOffsetWrite( 0, () =>
             {
                 long offset = BaseStream.Position;
                 action();
@@ -318,9 +319,19 @@ namespace AmicitiaLibrary.IO
             } );
         }
 
-        public void ScheduleOffsetWrite( int alignment, Action action, bool late = false )
+        public void ScheduleOffsetWrite( int priority, Action action )
         {
-            ScheduleOffsetWrite( () =>
+            ScheduleOffsetWrite( priority, () =>
+            {
+                long offset = BaseStream.Position;
+                action();
+                return offset;
+            } );
+        }
+
+        public void ScheduleOffsetWriteAligned( int alignment, Action action )
+        {
+            ScheduleOffsetWrite( 0, () =>
             {
                 WriteAlignmentPadding( alignment );
                 long offset = BaseStream.Position;
@@ -335,40 +346,45 @@ namespace AmicitiaLibrary.IO
             Write( 0 );
         }
 
-        private void ScheduleOffsetWrite( Func<long> action, bool late = false )
+        private void ScheduleOffsetWrite( int priority, Func<long> action )
         {
-            if (!late )
-                mScheduledWrites.AddLast( new ScheduledWrite( BaseStream.Position, action ) );
-            else
-                mScheduledLateWrites.AddLast( new ScheduledWrite( BaseStream.Position, action ) );
-
+            mScheduledWrites.AddLast( new ScheduledWrite( BaseStream.Position, action, priority ) );
             Write( 0 );
         }
 
         public void PerformScheduledWrites()
         {
             DoScheduledOffsetWrites();
-            DoScheduledLateOffsetWrites();
             DoScheduledFileSizeWrites();
         }
 
         private void DoScheduledOffsetWrites()
         {
-            var current = mScheduledWrites.First;
-            while ( current != null )
-            {
-                DoScheduledWrite( current.Value );
-                current = current.Next;
-            }
-        }
+            int curPriority = 0;
 
-        private void DoScheduledLateOffsetWrites()
-        {
-            var current = mScheduledLateWrites.First;
-            while ( current != null )
+            while ( mScheduledWrites.Count > 0 )
             {
-                DoScheduledWrite( current.Value );
-                current = current.Next;
+                var anyWritesDone = false;
+                var current = mScheduledWrites.First;
+
+                while ( current != null )
+                {
+                    var next = current.Next;
+
+                    if ( current.Value.Priority == curPriority )
+                    {
+                        DoScheduledWrite( current.Value );
+                        mScheduledWrites.Remove( current );
+                        anyWritesDone = true;
+                    }
+
+                    current = next;
+                }
+
+                if ( anyWritesDone || curPriority == 0 )
+                    ++curPriority;
+                else
+                    --curPriority;
             }
         }
 

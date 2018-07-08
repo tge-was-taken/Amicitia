@@ -156,7 +156,7 @@ namespace Amicitia
 
         public static int GetSupportedFileIndex( string name, Stream stream )
         {
-            var extension = Path.GetExtension( name )?.ToLowerInvariant();
+            var extension = Path.GetExtension( name )?.Trim().ToLowerInvariant();
             var matches = Array.FindAll( SupportedFileInfos, s => s.Extensions.Contains( extension ) );
 
             // No matches were found

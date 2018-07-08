@@ -201,8 +201,8 @@ namespace Amicitia.ResourceWrappers
         public int Field30 { get => Resource.Field30; set => SetProperty( Resource, value ); }
         public int Field34 { get => Resource.Field34; set => SetProperty( Resource, value ); }
         public int Field38 { get => Resource.Field38; set => SetProperty( Resource, value ); }
-        public int Field3C { get => Resource.Field3C; set => SetProperty( Resource, value ); }
-        public int Field40 { get => Resource.Field40; set => SetProperty( Resource, value ); }
+        public int Width { get => Resource.Width; set => SetProperty( Resource, value ); }
+        public int Height { get => Resource.Height; set => SetProperty( Resource, value ); }
         public int Field44 { get => Resource.Field44; set => SetProperty( Resource, value ); }
         public int Field48 { get => Resource.Field48; set => SetProperty( Resource, value ); }
         public int Field4C { get => Resource.Field4C; set => SetProperty( Resource, value ); }

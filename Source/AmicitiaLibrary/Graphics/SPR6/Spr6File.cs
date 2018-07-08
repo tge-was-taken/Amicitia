@@ -119,7 +119,7 @@ namespace AmicitiaLibrary.Graphics.SPR6
         private TgaFile mTga;
         private Bitmap mBitmap;
 
-        public string Description       { get; set; }
+        public string Description{ get; set; }
         public int    Field00    { get; set; }
         public int    Field04    { get; set; }
         public short  Field08    { get; set; }
@@ -194,7 +194,7 @@ namespace AmicitiaLibrary.Graphics.SPR6
             writer.Write( Field0A );
             writer.Write( Data.Length );
             writer.Write( Field14 );
-            writer.ScheduleOffsetWrite( () => writer.Write( Data ) );
+            writer.ScheduleOffsetWrite( 1, () => writer.Write( Data ) );
         }
 
         public TgaFile GetTgaFile()
@@ -215,7 +215,7 @@ namespace AmicitiaLibrary.Graphics.SPR6
 
     public class Spr6Panel
     {
-        public string Description    { get; set; }
+        public string Description { get; set; }
         public short  Field08 { get; set; }
         public short  Field0A { get; set; }
         public short  Field0C { get; set; }
@@ -288,8 +288,8 @@ namespace AmicitiaLibrary.Graphics.SPR6
         public int Field30 { get; set; }
         public int Field34 { get; set; }
         public int Field38 { get; set; }
-        public int Field3C { get; set; }
-        public int Field40 { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public int Field44 { get; set; }
         public int Field48 { get; set; }
         public int Field4C { get; set; }
@@ -309,8 +309,8 @@ namespace AmicitiaLibrary.Graphics.SPR6
             Field30 = 0;
             Field34 = 1;
             Field38 = 1;
-            Field3C = 85;
-            Field40 = 76;
+            Width = 85;
+            Height = 76;
             Field44 = -1;
             Field44 = -1;
             Field48 = -1;
@@ -357,8 +357,8 @@ namespace AmicitiaLibrary.Graphics.SPR6
             Field30 = reader.ReadInt32();
             Field34 = reader.ReadInt32();
             Field38 = reader.ReadInt32();
-            Field3C = reader.ReadInt32();
-            Field40 = reader.ReadInt32();
+            Width = reader.ReadInt32();
+            Height = reader.ReadInt32();
             Field44 = reader.ReadInt32();
             Field48 = reader.ReadInt32();
             Field4C = reader.ReadInt32();
@@ -379,8 +379,8 @@ namespace AmicitiaLibrary.Graphics.SPR6
             writer.Write( Field30 );
             writer.Write( Field34 );
             writer.Write( Field38 );
-            writer.Write( Field3C );
-            writer.Write( Field40 );
+            writer.Write( Width );
+            writer.Write( Height );
             writer.Write( Field44 );
             writer.Write( Field48 );
             writer.Write( Field4C );

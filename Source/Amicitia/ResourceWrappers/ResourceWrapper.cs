@@ -251,7 +251,7 @@ namespace Amicitia.ResourceWrappers
             
                 saveFileDlg.AutoUpgradeEnabled = true;
                 saveFileDlg.CheckPathExists = true;
-                saveFileDlg.FileName = Text;
+                saveFileDlg.FileName = Text.Trim();
                 saveFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
                 saveFileDlg.OverwritePrompt = true;
                 saveFileDlg.Title = "Select a file to export to";

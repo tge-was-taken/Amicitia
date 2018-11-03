@@ -22,7 +22,7 @@
 
         public static byte ScaleHalfRangeAlphaToFullRange(byte original)
         {
-            return (byte)((original / 128.0f) * 255);
+            return (byte)Math.Min((original / 128.0f) * 255, 255);
         }
 
         public static byte ScaleFullRangeAlphaToHalfRange(byte original)
@@ -308,34 +308,15 @@
         public static void ReadPSMCT32(BinaryReader reader, int width, int height, out Color[] colorArray)
         {
             colorArray = new Color[height * width];
-            int maxAlpha = -1;
 
             for (int i = 0; i < colorArray.Length; i++)
             {
                 uint color = reader.ReadUInt32();
                 colorArray[i] = Color.FromArgb(
-                    (byte)(((color >> 24) & byte.MaxValue)),
+                    (byte)((color >> 24) & byte.MaxValue),
                     (byte)(color & byte.MaxValue),
-                    (byte)((color >> 8)   & byte.MaxValue),
-                    (byte)((color >> 16)  & byte.MaxValue));
-
-                if (colorArray[i].A > maxAlpha)
-                {
-                    maxAlpha = colorArray[i].A;
-                }
-            }
-
-            // Check if the alpha value wasn't already in the 0x00 - 0xFF range
-            if (!(maxAlpha > 0x80))
-            {
-                for (int i = 0; i < colorArray.Length; i++)
-                {
-                    colorArray[i] = Color.FromArgb(
-                        ScaleHalfRangeAlphaToFullRange(colorArray[i].A),
-                        colorArray[i].R,
-                        colorArray[i].G,
-                        colorArray[i].B);
-                }
+                    (byte)((color >> 8) & byte.MaxValue),
+                    (byte)((color >> 16) & byte.MaxValue));
             }
         }
 
@@ -413,7 +394,7 @@
         {
             foreach (Color color in colorArray)
             {
-                uint colorData = (uint)(color.R | (color.G << 8) | (color.B << 16) | (ScaleFullRangeAlphaToHalfRange(color.A) << 24));
+                uint colorData = (uint)(color.R | (color.G << 8) | (color.B << 16) | (color.A << 24));
                 writer.Write(colorData);
             }
         }

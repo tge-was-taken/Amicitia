@@ -101,6 +101,18 @@ namespace Amicitia.ResourceWrappers
             set => Resource.TextureIndex = value;
         }
 
+        public int OffsetX
+        {
+            get => Resource.OffsetX;
+            set => Resource.OffsetX = value;
+        }
+
+        public int OffsetY
+        {
+            get => Resource.OffsetY;
+            set => Resource.OffsetY = value;
+        }
+
         public Rectangle Coordinates
         {
             get => Resource.Coordinates;

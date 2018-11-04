@@ -476,7 +476,7 @@ namespace AmicitiaLibrary.Graphics.TMX
                 Color[][] palettes;
 
                 if (PaletteFormat == PS2PixelFormat.PSMTC32)
-                    palettes = ScalePSMCT32PaletteToFullAlphaRange();
+                    palettes = ScalePSMCT32PaletteToFullAlphaRange(Palettes);
                 else
                     palettes = Palettes;
 
@@ -516,19 +516,20 @@ namespace AmicitiaLibrary.Graphics.TMX
             PixelIndices = temp;
         }
 
-        private Color[][] ScalePSMCT32PaletteToFullAlphaRange()
+        private static Color[][] ScalePSMCT32PaletteToFullAlphaRange(Color[][] palettes)
         {
-            Color[][] palettes = new Color[PaletteCount][];
+            int palettesCount = palettes.Length;
+            Color[][] scaledPalettes = new Color[palettesCount][];
 
-            for (int p = 0; p < PaletteCount; p++)
+            for (int p = 0; p < palettesCount; p++)
             {
-                palettes[p] = ScalePSMCT32PixelsToFullAlphaRange(Palettes[p]);
+                scaledPalettes[p] = ScalePSMCT32PixelsToFullAlphaRange(palettes[p]);
             }
 
-            return palettes;
+            return scaledPalettes;
         }
 
-        private Color[] ScalePSMCT32PixelsToFullAlphaRange(Color[] colors)
+        private static Color[] ScalePSMCT32PixelsToFullAlphaRange(Color[] colors)
         {
             int colorCount = colors.Length;
             Color[] scaledColors = new Color[colorCount];

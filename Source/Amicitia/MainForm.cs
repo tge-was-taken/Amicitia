@@ -340,7 +340,7 @@ namespace Amicitia
             }
         }
 
-        private void OpenFile(string path)
+        public void OpenFile(string path)
         {
             // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
             int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(path);

@@ -1,4 +1,5 @@
-﻿using AmicitiaLibrary.Utilities;
+﻿using System.Linq;
+using AmicitiaLibrary.Utilities;
 
 namespace AmicitiaLibrary.Graphics.RenderWare
 {
@@ -305,11 +306,15 @@ namespace AmicitiaLibrary.Graphics.RenderWare
 
             if (IsIndexed)
             {
-                mBitmap = BitmapHelper.Create(Palette, PixelIndices, Width, Height);
+                mBitmap =
+                    BitmapHelper.Create( Palette.Select( x => Color.FromArgb( PS2PixelFormatHelper.ScaleHalfRangeAlphaToFullRange( x.A ), x.R, x.G, x.B ) ).ToArray(),
+                                         PixelIndices, Width, Height );
             }
             else
             {
-                mBitmap = BitmapHelper.Create(Pixels, Width, Height);
+                mBitmap =
+                    BitmapHelper.Create( Pixels.Select( x => Color.FromArgb( PS2PixelFormatHelper.ScaleHalfRangeAlphaToFullRange( x.A ), x.R, x.G, x.B ) ).ToArray(),
+                                         Width, Height );
             }
 
             return mBitmap;
@@ -320,9 +325,15 @@ namespace AmicitiaLibrary.Graphics.RenderWare
             if (IsIndexed && mRasterStructNode.DataStructNode.Pixels == null)
             {
                 mRasterStructNode.DataStructNode.Pixels = new Color[Width * Height];
-                for (int y = 0; y < Height; y++)
-                    for (int x = 0; x < Width; x++)
-                        mRasterStructNode.DataStructNode.Pixels[x + y * Width] = Palette[PixelIndices[x + y * Width]];
+                for ( int y = 0; y < Height; y++ )
+                {
+                    for ( int x = 0; x < Width; x++ )
+                    {
+                        var color = Palette[ PixelIndices[ x + y * Width ] ];
+                        mRasterStructNode.DataStructNode.Pixels[ x + y * Width ] =
+                            Color.FromArgb( PS2PixelFormatHelper.ScaleHalfRangeAlphaToFullRange( color.A ), color.R, color.G, color.B );
+                    }
+                }
             }
 
             return mRasterStructNode.DataStructNode.Pixels;

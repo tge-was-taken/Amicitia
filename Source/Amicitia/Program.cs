@@ -27,13 +27,15 @@ namespace Amicitia
         static void Main( string[] args )
         {
             Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetCompatibleTextRenderingDefault( false );
 
-            var mainForm = new MainForm();
-            if ( args.Length > 0 && File.Exists( args[0] ) )
-                mainForm.OpenFile( args[0] );
+            using ( var mainForm = new MainForm() )
+            {
+                if ( args.Length > 0 && File.Exists( args[0] ) )
+                    mainForm.OpenFile( args[0] );
 
-            Application.Run( mainForm );
+                Application.Run( mainForm );
+            }
         }
     }
 

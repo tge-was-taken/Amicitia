@@ -300,7 +300,7 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                         // TextureDiffuse
                         var texture = material.TextureReferenceNode;
                         aiMaterial.TextureDiffuse = new Assimp.TextureSlot(
-                            texture.Name, Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0 );
+                            texture.Name + ".png", Assimp.TextureType.Diffuse, 0, Assimp.TextureMapping.FromUV, 0, 0, Assimp.TextureOperation.Add, Assimp.TextureWrapMode.Wrap, Assimp.TextureWrapMode.Wrap, 0 );
                     }
 
                     // Name

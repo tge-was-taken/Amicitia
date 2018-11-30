@@ -81,10 +81,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AssimpNet, Version=3.3.1.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Users\smart\Downloads\assimp-net-master\AssimpNet\bin\Net47-Debug\AssimpNet.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\Managed\OpenTK.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -98,15 +94,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelViewer\ModelViewer.cs" />
@@ -212,7 +201,11 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="AssimpNet">
+      <Version>4.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

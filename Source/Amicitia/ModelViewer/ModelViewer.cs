@@ -316,13 +316,13 @@ namespace Amicitia.ModelViewer
                 inputWasHandled = true;
             }
 
-            if (state[Key.A])
+            if (state[Key.D])
             {
                 mCamera.Position -= Vector3.Cross(mCamera.Forward, new Vector3(0, 1.0f, 0)) * moveSpeed; // tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
                 inputWasHandled = true;
             }
 
-            if (state[Key.D])
+            if (state[Key.A])
             {
                 mCamera.Position += Vector3.Cross(mCamera.Forward, new Vector3(0, 1.0f, 0)) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
                 inputWasHandled = true;

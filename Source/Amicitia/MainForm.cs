@@ -5,6 +5,7 @@ using System.IO;
 using Amicitia.ResourceWrappers;
 using AmicitiaLibrary.Graphics;
 using OpenTK;
+using OpenTK.Input;
 using System.Runtime.InteropServices;
 using AmicitiaLibrary.Graphics.RenderWare;
 using System.Drawing;
@@ -442,7 +443,6 @@ namespace Amicitia
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AllocConsole();
-
         public static bool GetAsyncKey(Keys key)
         {
             if (MainForm.GLControl.Focused)

@@ -54,7 +54,12 @@ namespace Amicitia.Utilities
 
         public void Dispose()
         {
-            UnhookWindowsHookEx(mHHook);
+            //similar to the check monyarm implemented, just disables this function so files can be opened with mono runtime.
+            Type t = Type.GetType("Mono.Runtime");
+            if (t == null)
+            {
+                UnhookWindowsHookEx(mHHook);
+            }
         }
 
         private void CenterWindow(IntPtr hChildWnd)

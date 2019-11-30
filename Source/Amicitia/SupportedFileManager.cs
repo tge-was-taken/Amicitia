@@ -285,12 +285,12 @@ namespace Amicitia
             if ( stream is FileStream )
             {
                 // Hack: close stream & load as file
-                stream.Dispose();
+                fs.Dispose();
                 fs.Load( fileName );
             }
             else
             {
-                fs.Load( stream, leaveOpen );
+                fs.Load( stream, ownsStream: !leaveOpen );
             }
         }
     }

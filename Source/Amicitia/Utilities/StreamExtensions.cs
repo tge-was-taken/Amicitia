@@ -7,6 +7,7 @@ namespace Amicitia.Utilities
         public static MemoryStream ToMemoryStream(this Stream stream, bool leaveOpen)
         {
             var mstream = new MemoryStream();
+            stream.Position = 0;
             stream.CopyTo( mstream );
             mstream.Position = 0;
 
@@ -20,6 +21,7 @@ namespace Amicitia.Utilities
         {
             using (var fstream = File.Create( filePath ))
             {
+                stream.Position = 0;
                 stream.CopyTo( fstream );
             }
 

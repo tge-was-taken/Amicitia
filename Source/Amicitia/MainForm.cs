@@ -367,7 +367,6 @@ namespace Amicitia
             }
             catch (Exception)
             {
-                fileStream.Dispose();
                 using (var centeringService = new DialogCenteringService(this))
                     MessageBox.Show("Can't open this file format.", "Open file error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 return;

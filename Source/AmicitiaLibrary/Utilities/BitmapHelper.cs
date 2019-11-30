@@ -213,23 +213,23 @@ namespace AmicitiaLibrary.Utilities
             indices = GetIndices(quantBitmap);
         }
 
-        public static int GetSimilarColorCount(Bitmap bitmap, double threshold = ColorHelper.SIMILARITY_THRESHOLD_STRICT)
-        {
-            return GetSimilarColorCount(GetColors(bitmap), threshold);
-        }
+        //public static int GetSimilarColorCount(Bitmap bitmap, double threshold = ColorHelper.SIMILARITY_THRESHOLD_STRICT)
+        //{
+        //    return GetSimilarColorCount(GetColors(bitmap), threshold);
+        //}
 
-        public static int GetSimilarColorCount(Color[] colors, double threshold = ColorHelper.SIMILARITY_THRESHOLD_STRICT )
-        {
-            List<Color> uniqueColors = new List<Color>();
+        //public static int GetSimilarColorCount(Color[] colors, double threshold = ColorHelper.SIMILARITY_THRESHOLD_STRICT )
+        //{
+        //    List<Color> uniqueColors = new List<Color>();
 
-            foreach (var color in colors)
-            {
-                if (!uniqueColors.Any(x => x.IsSimilar(color, threshold)))
-                    uniqueColors.Add(color);
-            }
+        //    foreach (var color in colors)
+        //    {
+        //        if (!uniqueColors.Any(x => x.IsSimilar(color, threshold)))
+        //            uniqueColors.Add(color);
+        //    }
 
-            return uniqueColors.Count;
-        }
+        //    return uniqueColors.Count;
+        //}
 
         private static Bitmap ConvertTo32Bpp(Image img)
         {

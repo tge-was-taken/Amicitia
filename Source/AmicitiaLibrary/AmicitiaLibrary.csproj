@@ -1,273 +1,54 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ADF5E4CA-D622-41A1-8A09-5AB964CBB411}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AmicitiaLibrary</RootNamespace>
-    <AssemblyName>AmicitiaLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Description>Library for parsing Atlus game formats.</Description>
+    <Copyright>Copyright © Atlus, TGE 2019</Copyright>
+    <Version>1.9.0.0</Version>
+    <RepositoryUrl>https://github.com/TGEnigma/Amicitia</RepositoryUrl>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\Build\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>
-    </DocumentationFile>
+    <OutputPath>../../Build/Release/</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\Build\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>..\..\Build\Release\AmicitiaLibrary.xml</DocumentationFile>
+    <OutputPath>../../Build/Debug/</OutputPath>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="ManagedNvTriStrip, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dependencies\NativeManaged\ManagedNvTriStrip.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dependencies\Managed\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Compile Remove="Graphics\MD\**" />
+    <EmbeddedResource Remove="Graphics\MD\**" />
+    <None Remove="Graphics\MD\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="FileSystems\CVM\CVMFileRewrite.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AssimpNet" Version="4.1.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0-preview3.19551.4" />
+    <PackageReference Include="System.Drawing.Common" Version="4.6.1" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0-preview3.19551.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Dependencies\NvTriStrip.Net\NvTriStripDotNet\NvTriStripDotNet.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="OpenTK">
+      <HintPath>..\..\Dependencies\Managed\OpenTK.dll</HintPath>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Field\CMRFile.cs" />
-    <Compile Include="Field\FBNFile.cs" />
-    <Compile Include="Field\HBNFile.cs" />
-    <Compile Include="FileSystems\AMD\AMDChunk.cs" />
-    <Compile Include="FileSystems\AMD\AMDFile.cs" />
-    <Compile Include="FileSystems\ISO\Enums.cs" />
-    <Compile Include="FileSystems\IArchiveEntry.cs" />
-    <Compile Include="FileSystems\ISimpleArchiveFile.cs" />
-    <Compile Include="Graphics\DDS\DDSCodec.cs" />
-    <Compile Include="Graphics\DDS\DDSFormatDetails.cs" />
-    <Compile Include="Graphics\DDS\DDSHeader.cs" />
-    <Compile Include="Graphics\DDS\DDSHeaderCaps.cs" />
-    <Compile Include="Graphics\DDS\DDSHeaderFlags.cs" />
-    <Compile Include="Graphics\DDS\DDSPixelFormat.cs" />
-    <Compile Include="Graphics\DDS\DDSPixelFormatFlags.cs" />
-    <Compile Include="Graphics\DDS\DDSPixelFormatFourCC.cs" />
-    <Compile Include="Graphics\RenderWare\RMDNodeLink.cs" />
-    <Compile Include="Graphics\RenderWare\RWAnimationNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWAtomicSector.cs" />
-    <Compile Include="Graphics\RenderWare\RWAtomicSectorHeader.cs" />
-    <Compile Include="Graphics\RenderWare\RWHAnimHierarchy.cs" />
-    <Compile Include="Graphics\RenderWare\RWMeshListNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWPlaneSector.cs" />
-    <Compile Include="Graphics\RenderWare\RWPlaneSectorHeader.cs" />
-    <Compile Include="Graphics\RenderWare\RwUserData.cs" />
-    <Compile Include="Graphics\RenderWare\RwUserDataList.cs" />
-    <Compile Include="Graphics\RenderWare\RWWorld.cs" />
-    <Compile Include="Graphics\RenderWare\RWWorldHeader.cs" />
-    <Compile Include="Graphics\SPD\SpdFile.cs" />
-    <Compile Include="Graphics\SPR6\Spr6File.cs" />
-    <Compile Include="Graphics\SPR\ISprFile.cs" />
-    <Compile Include="Graphics\TGA\TGAEncoding.cs" />
-    <Compile Include="Graphics\TMX\TMXWrapMode.cs" />
-    <Compile Include="IO\BinaryBase.cs" />
-    <Compile Include="IO\BinaryFile.cs" />
-    <Compile Include="Graphics\TGA\TGAFile.cs" />
-    <Compile Include="Graphics\ITextureFile.cs" />
-    <Compile Include="FileSystems\BVP\BVPFile.cs" />
-    <Compile Include="FileSystems\BVP\BVPEntry.cs" />
-    <Compile Include="FileSystems\CVM\CVMDirectoryListing.cs" />
-    <Compile Include="FileSystems\CVM\CVMDirectoryListingEntry.cs" />
-    <Compile Include="FileSystems\CVM\CVMExecutableListing.cs" />
-    <Compile Include="FileSystems\CVM\CVMFile.cs" />
-    <Compile Include="FileSystems\ISO\ISODirectoryRecord.cs" />
-    <Compile Include="Graphics\RenderWare\RMDAnimation.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationCountNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationPlaceholderNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationReferenceNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RMDAnimationTerminatorNode.cs" />
-    <Compile Include="Graphics\RenderWare\RMDNodeLinkListNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWAtomicNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWAtomicStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWBoundingSphere.cs" />
-    <Compile Include="Graphics\RenderWare\RWClumpNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWClumpStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWEnum.cs" />
-    <Compile Include="Graphics\RenderWare\RWExtensionNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWFrame.cs" />
-    <Compile Include="Graphics\RenderWare\RWFrameListNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWFrameListStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWGeometryNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWGeometryListNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWGeometryListStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWGeometryStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWBoneHierarchyNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWHAnimFrameExtensionNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWMaterialNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWMaterialListNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWMaterialListStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWMaterialStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWNodeFactory.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWRasterStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWRasterDataStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWRasterInfoStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RMDScene.cs" />
-    <Compile Include="Graphics\RenderWare\RWSkinNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWSkyMipMapValueNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWStringNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWTextureDictionaryNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWTextureDictionaryStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWTextureNativeNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWTextureNativeStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWTextureReferenceNode.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWTextureReferenceStructNode.cs" />
-    <Compile Include="Graphics\RenderWare\RWTriangle.cs" />
-    <Compile Include="Graphics\RenderWare\RWUVAnimationDictionary.cs" />
-    <Compile Include="Graphics\RenderWare\Internal\RWUVAnimationDictionaryStructNode.cs" />
-    <Compile Include="IO\EndianBinaryReader.cs" />
-    <Compile Include="IO\EndianBinaryWriter.cs" />
-    <Compile Include="PS2\Graphics\Interfaces\GIF\GIFTag.cs" />
-    <Compile Include="PS2\Graphics\Registers\MipTBPRegister.cs" />
-    <Compile Include="PS2\Graphics\Registers\Tex0Register.cs" />
-    <Compile Include="PS2\Graphics\Registers\Tex1Register.cs" />
-    <Compile Include="PS2\Graphics\Registers\TRXDIRRegister.cs" />
-    <Compile Include="PS2\Graphics\Registers\TRXPOSRegister.cs" />
-    <Compile Include="PS2\Graphics\Registers\TRXREGRegister.cs" />
-    <Compile Include="PS2\Graphics\PS2StandardImageHeader.cs" />
-    <Compile Include="Graphics\MT\ABAnimation.cs" />
-    <Compile Include="Graphics\MT\ABFile.cs" />
-    <Compile Include="Graphics\MT\ABKey.cs" />
-    <Compile Include="Graphics\MT\ABKeyInfo.cs" />
-    <Compile Include="Graphics\MT\ABKeyType.cs" />
-    <Compile Include="Graphics\SPR\SPR4File.cs" />
-    <Compile Include="Graphics\SPR\SPRFile.cs" />
-    <Compile Include="Graphics\SPR\SPRSprite.cs" />
-    <Compile Include="Graphics\TXP\TBFile.cs" />
-    <Compile Include="Graphics\TMX\TMXFile.cs" />
-    <Compile Include="Compression\PointerRelocationTableCompression.cs" />
-    <Compile Include="Utilities\AlignmentHelper.cs" />
-    <Compile Include="Utilities\BinaryIOExtension.cs" />
-    <Compile Include="Utilities\BitHelper.cs" />
-    <Compile Include="Utilities\BitmapHelper.cs" />
-    <Compile Include="Utilities\ColorHelper.cs" />
-    <Compile Include="Utilities\DictionaryExtension.cs" />
-    <Compile Include="IO\Endianness.cs" />
-    <Compile Include="Utilities\EncodingCache.cs" />
-    <Compile Include="Utilities\EnumExtension.cs" />
-    <Compile Include="Utilities\ICollectionExtension.cs" />
-    <Compile Include="Utilities\IListExtension.cs" />
-    <Compile Include="Utilities\MatrixExtension.cs" />
-    <Compile Include="Utilities\MeshUtilities.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PS2\Graphics\Enums.cs" />
-    <Compile Include="PS2\Graphics\PS2PixelFormatHelper.cs" />
-    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFPacket.cs" />
-    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFCodeEvaluator.cs" />
-    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFTag.cs" />
-    <Compile Include="PS2\Graphics\Interfaces\VIF\VIFUnpack.cs" />
-    <Compile Include="IO\StringBinaryFormat.cs" />
-    <Compile Include="IO\Unsafe.cs" />
-    <Compile Include="Utilities\Vector3Extension.cs" />
-    <Compile Include="Utilities\StreamExtension.cs" />
-    <Compile Include="Utilities\WuQuantizer\Box.cs" />
-    <Compile Include="Utilities\WuQuantizer\ColorData.cs" />
-    <Compile Include="Utilities\WuQuantizer\CubeCut.cs" />
-    <Compile Include="Utilities\WuQuantizer\IWuQuantizer.cs" />
-    <Compile Include="Utilities\WuQuantizer\Lookup.cs" />
-    <Compile Include="Utilities\WuQuantizer\LookupData.cs" />
-    <Compile Include="Utilities\WuQuantizer\Pixel.cs" />
-    <Compile Include="Utilities\WuQuantizer\QuantizationException.cs" />
-    <Compile Include="Utilities\WuQuantizer\QuantizedPalette.cs" />
-    <Compile Include="Utilities\WuQuantizer\WuQuantizer.cs" />
-    <Compile Include="Utilities\WuQuantizer\WuQuantizerBase.cs" />
+    <Folder Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Graphics\MD\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AssimpNet">
-      <Version>4.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="ColorMine">
-      <Version>1.1.3</Version>
-    </PackageReference>
-    <PackageReference Include="System.Numerics.Vectors">
-      <Version>4.3.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <PostBuildEvent>xcopy /y "$(SolutionDir)..\Dependencies\Managed\Assimp32.dll" "$(ProjectDir)$(OutDir)"
-xcopy /y "$(SolutionDir)..\Dependencies\Managed\Assimp64.dll" "$(ProjectDir)$(OutDir)"</PostBuildEvent>
-  </PropertyGroup>
-  <Import Project="..\..\..\..\..\Users\smart\Documents\Visual Studio 2017\Projects\dump_rmd\packages\AssimpNet.4.1.0\build\AssimpNet.targets" Condition="Exists('..\..\..\..\..\Users\smart\Documents\Visual Studio 2017\Projects\dump_rmd\packages\AssimpNet.4.1.0\build\AssimpNet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <!-- Don't know what this does, but it breaks the build on linux <Error Condition="!Exists('..\..\..\..\..\Users\smart\Documents\Visual Studio 2017\Projects\dump_rmd\packages\AssimpNet.4.1.0\build\AssimpNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\Users\smart\Documents\Visual Studio 2017\Projects\dump_rmd\packages\AssimpNet.4.1.0\build\AssimpNet.targets'))" />-->
-  </Target>
-  <PropertyGroup>
-    <PostBuildEvent />
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

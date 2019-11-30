@@ -1,3 +1,6 @@
 [submodule "Dependencies/AtlusFileSystemLibrary"]
 	path = Dependencies/AtlusFileSystemLibrary
 	url = https://github.com/TGEnigma/AtlusFileSystemLibrary
+[submodule "Dependencies/NvTriStrip.Net"]
+	path = Dependencies/NvTriStrip.Net
+	url = https://github.com/TGEnigma/NvTriStrip.Net

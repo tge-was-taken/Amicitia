@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿using System.IO;
+using System.Windows.Forms;
+using Amicitia.Utilities;
 using AmicitiaLibrary.IO;
 using AtlusFileSystemLibrary.FileSystems.ACX;
 
@@ -15,12 +17,16 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Add |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterFileExportAction( SupportedFileType.AcxFile, ( res, path ) => res.Save( path ) );
-            RegisterFileReplaceAction( SupportedFileType.AcxFile, ( res, path ) =>
+            RegisterFileExportAction( SupportedFileType.PakArchiveFile, ( res, path ) =>
             {
-                var acx = new ACXFileSystem();
-                acx.Load( path );
-                return acx;
+                res.Save().SaveToFile( leaveOpen: false, path );
+
+            } );
+            RegisterFileReplaceAction( SupportedFileType.PakArchiveFile, ( res, path ) =>
+            {
+                var pak = new ACXFileSystem();
+                pak.Load( File.OpenRead( path ).ToMemoryStream( leaveOpen: false ), true );
+                return pak;
             } );
             RegisterFileAddAction( SupportedFileType.Resource, DefaultFileAddAction );
             RegisterRebuildAction( ( wrap ) =>

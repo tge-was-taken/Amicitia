@@ -5,6 +5,7 @@ namespace Amicitia
     using ResourceWrappers;
     using System.IO;
     using AmicitiaLibrary.IO;
+    using Amicitia.Utilities;
 
     internal static class ResourceWrapperFactory
     {
@@ -25,12 +26,17 @@ namespace Amicitia
 
         public static IResourceWrapper GetResourceWrapper(string text, Stream stream, int supportedFileIndex, string filePath = null)
         {
+            if ( stream is FileStream fileStream )
+            {
+                stream = fileStream.ToMemoryStream( leaveOpen: false );
+            }
+
             if (supportedFileIndex == -1)
             {
                 return new BinaryFileWrapper(text, new BinaryFile(stream));
             }
 
-            var supportedFileInfo = SupportedFileManager.GetSupportedFileInfo(supportedFileIndex);
+            var supportedFileInfo = SupportedFileManager.GetSupportedFileInfo(supportedFileIndex);      
             var resource = supportedFileInfo.Instantiator( stream, false, filePath);
 
             return GetResourceWrapper(text, resource);

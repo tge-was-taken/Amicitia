@@ -278,6 +278,7 @@ namespace Amicitia.ResourceWrappers
             if (mFileExportActions == null)
                 return false;
 
+
             var fileExportAction = mFileExportActions[type];
             fileExportAction.Invoke(Resource, path);
             return true;

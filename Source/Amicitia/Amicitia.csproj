@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Amicitia</RootNamespace>
     <AssemblyName>Amicitia</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -126,6 +126,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceWrapperFactory.cs" />
+    <Compile Include="Utilities\StreamExtensions.cs" />
     <Compile Include="ResourceWrappers\TGAFileWrapper.cs" />
     <Compile Include="ResourceWrappers\TMXFileWrapper.cs" />
     <Compile Include="ResourceWrappers\Vector3Wrapper.cs" />
@@ -196,9 +197,8 @@
       <Name>AtlusFileSystemLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\AmicitiaLibrary\AmicitiaLibrary.csproj">
-      <Project>{adf5e4ca-d622-41a1-8a09-5ab964cbb411}</Project>
+      <Project>{57cac588-5780-4938-bc49-1fe3170dc113}</Project>
       <Name>AmicitiaLibrary</Name>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

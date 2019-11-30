@@ -156,6 +156,7 @@ namespace Amicitia
 
         public static int GetSupportedFileIndex( string name, Stream stream )
         {
+            var originalStreamPosition = stream.Position;
             var extension = Path.GetExtension( name )?.Trim().ToLowerInvariant();
             var matches = Array.FindAll( SupportedFileInfos, s => s.Extensions.Contains( extension ) );
 
@@ -163,17 +164,24 @@ namespace Amicitia
             if ( matches.Length == 0 )
                 return -1;
 
-            if ( matches.Length > 1 )
+            try
             {
-                foreach ( var match in matches )
+                if ( matches.Length > 1 )
                 {
-                    if ( match.Validator( stream, name ) )
-                        Array.IndexOf( SupportedFileInfos, match );
+                    foreach ( var match in matches )
+                    {
+                        if ( match.Validator( stream, name ) )
+                            return Array.IndexOf( SupportedFileInfos, match );
+                    }
+                }
+                else if ( matches[0].Validator( stream, name ) )
+                {
+                    return Array.IndexOf( SupportedFileInfos, matches[0] );
                 }
             }
-            else if ( matches[0].Validator(stream, name ) )
+            finally
             {
-                return Array.IndexOf( SupportedFileInfos, matches[0] );
+                stream.Position = originalStreamPosition;
             }
 
             return -1;
@@ -285,8 +293,9 @@ namespace Amicitia
             if ( stream is FileStream )
             {
                 // Hack: close stream & load as file
-                fs.Dispose();
-                fs.Load( fileName );
+                //fs.Dispose();
+                //fs.Load( fileName );
+                fs.Load( stream, ownsStream: !leaveOpen );
             }
             else
             {

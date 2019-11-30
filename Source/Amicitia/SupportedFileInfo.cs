@@ -37,7 +37,8 @@ namespace Amicitia
             {
                 try
                 {
-                    info.Instantiator( stream, true, fileName );
+                    var obj = info.Instantiator( stream, true, fileName );
+                    ( obj as IDisposable )?.Dispose();
                 }
                 catch ( Exception )
                 {

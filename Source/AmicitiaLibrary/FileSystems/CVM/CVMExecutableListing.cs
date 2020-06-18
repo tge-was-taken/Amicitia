@@ -17,9 +17,9 @@ namespace AmicitiaLibrary.FileSystems.CVM
                 mRootDirectoryListing = new CvmDirectoryListing(reader, null);
         }
 
-        public CvmExecutableListing(Stream stream)
+        public CvmExecutableListing(Stream stream, bool leaveOpen = false)
         {
-            using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, true))
+            using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default, leaveOpen ) )
                 mRootDirectoryListing = new CvmDirectoryListing(reader, null);
         }
 

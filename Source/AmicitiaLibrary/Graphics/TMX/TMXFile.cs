@@ -96,6 +96,7 @@ namespace AmicitiaLibrary.Graphics.TMX
         /********************/
         /**** Properties ****/
         /********************/
+        public short UserId { get; set; }
 
         public byte PaletteCount { get; private set; }
 
@@ -138,6 +139,8 @@ namespace AmicitiaLibrary.Graphics.TMX
                 }
             }
         }
+
+        public byte Reserved { get; set; }
 
         public TmxWrapMode HorizontalWrappingMode
         {
@@ -289,7 +292,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             writer.Write((byte)PixelFormat);
             writer.Write(MipMapCount);
             writer.Write(mMipKl);
-            writer.Write((byte)0);
+            writer.Write(Reserved);
             writer.Write(mWrapModes);
             writer.Write(UserTextureId);
             writer.Write(UserClutId);
@@ -311,7 +314,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             // Seek back to the chunk header and write it
             writer.BaseStream.Seek(posFileStart, SeekOrigin.Begin);
             writer.Write(FLAG);
-            writer.Write((short)0); // userID
+            writer.Write(UserId); // userID
             writer.Write(length);
             writer.WriteCString(TAG, 4);
 
@@ -323,7 +326,7 @@ namespace AmicitiaLibrary.Graphics.TMX
         {
             long posFileStart = reader.GetPosition();
             short flag = reader.ReadInt16();
-            short userId = reader.ReadInt16();
+            UserId = reader.ReadInt16();
             int length = reader.ReadInt32();
             string tag = reader.ReadCString(4);
             reader.AlignPosition(16);
@@ -340,7 +343,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             PixelFormat = (PS2PixelFormat)reader.ReadByte();
             MipMapCount = reader.ReadByte();
             mMipKl = reader.ReadUInt16();
-            byte reserved = reader.ReadByte();
+            Reserved = reader.ReadByte();
             mWrapModes = reader.ReadByte();
             UserTextureId = reader.ReadInt32();
             UserClutId = reader.ReadInt32();

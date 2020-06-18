@@ -28,6 +28,9 @@ namespace Amicitia
         {
             if ( stream is FileStream fileStream )
             {
+                if ( filePath == null )
+                    filePath = fileStream.Name;
+
                 stream = fileStream.ToMemoryStream( leaveOpen: false );
             }
 

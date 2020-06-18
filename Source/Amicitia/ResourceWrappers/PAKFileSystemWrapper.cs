@@ -22,8 +22,7 @@ namespace Amicitia.ResourceWrappers
 
             RegisterFileExportAction(SupportedFileType.PakArchiveFile, ( res, path ) =>
             {
-                res.Save().SaveToFile( leaveOpen: false, path );
-
+                res.Save( path );
             } );
             RegisterFileReplaceAction( SupportedFileType.PakArchiveFile, ( res, path ) =>
             {

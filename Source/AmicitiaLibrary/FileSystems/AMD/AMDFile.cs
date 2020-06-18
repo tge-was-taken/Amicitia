@@ -3,6 +3,7 @@
     using IO;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
     using Utilities;
 
     public class AmdFile : BinaryBase
@@ -65,7 +66,7 @@
         /// <param name="path">The path pointing to the the file to load.</param>
         public AmdFile(Stream stream, bool leaveOpen = false)
         {
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new BinaryReader( stream, Encoding.Default, leaveOpen ) )
             {
                 Read(reader);
             }

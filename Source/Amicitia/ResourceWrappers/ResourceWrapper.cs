@@ -96,6 +96,8 @@ namespace Amicitia.ResourceWrappers
         private Dictionary<SupportedFileType, Action<string, ResourceWrapper<TResource>>> mFileAddActions;
         private Func<ResourceWrapper<TResource>, TResource> mRebuildAction;
         private List<ContextMenuAction> mCustomActions;
+        private Dictionary<Type, ContextMenuStrip> mContextMenuStripCache
+            = new Dictionary<Type, ContextMenuStrip>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -574,6 +576,13 @@ namespace Amicitia.ResourceWrappers
         /// </summary>
         private void PopulateContextMenuStrip()
         {
+            var type = GetType();
+            if (mContextMenuStripCache.TryGetValue( type, out var temp ) )
+            {
+                ContextMenuStrip = temp;
+                return;
+            }
+
             ContextMenuStrip = new ContextMenuStrip();
 
             if ( mCustomActions != null )
@@ -629,6 +638,8 @@ namespace Amicitia.ResourceWrappers
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteEventHandler, Keys.Control | Keys.Delete));
             }
+
+            mContextMenuStripCache[type] = ContextMenuStrip;
         }
 
         /// <summary>

@@ -112,7 +112,7 @@ namespace Amicitia.ResourceWrappers
             RegisterFileExportAction(SupportedFileType.TmxFile, (res, path) => res.Save(path));
             RegisterFileExportAction(SupportedFileType.Bitmap, (res, path) => res.GetBitmap().Save(path, ImageFormat.Png));
             RegisterFileReplaceAction(SupportedFileType.TmxFile, (res, path) => TmxFile.Load(path));
-            RegisterFileReplaceAction(SupportedFileType.Bitmap, (res, path) => new TmxFile(new Bitmap(path), res.PixelFormat, res.UserComment));
+            RegisterFileReplaceAction(SupportedFileType.Bitmap, (res, path) => new TmxFile(new Bitmap(path), res.UserId, res.PixelFormat, res.UserComment));
         }
 
         protected override void PopulateView()

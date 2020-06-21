@@ -26,8 +26,9 @@ namespace AmicitiaLibrary.Graphics.TMX
         /**** Constructors ****/
         /**********************/
 
-        public TmxFile(Bitmap bitmap, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+        public TmxFile(Bitmap bitmap, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
         {
+            UserId = userId;
             Width = (ushort)bitmap.Width;
             Height = (ushort)bitmap.Height;
             PixelFormat = pixelFormat;
@@ -42,6 +43,7 @@ namespace AmicitiaLibrary.Graphics.TMX
                 case PS2PixelFormat.PSMTC16S: // Non-indexed
                     PaletteFormat = 0;
                     Pixels = BitmapHelper.GetColors(bitmap);
+                    ScalePSMCT32PixelsToHalfAlphaRange( Pixels );
                     mBitmap = bitmap;
                     break;
                 case PS2PixelFormat.PSMT8:
@@ -58,14 +60,14 @@ namespace AmicitiaLibrary.Graphics.TMX
             }
         }
 
-        public TmxFile(Stream stream, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
-            : this(new Bitmap(stream), pixelFormat, comment)
+        public TmxFile(Stream stream, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+            : this(new Bitmap(stream), userId, pixelFormat, comment)
         {
 
         }
 
-        public TmxFile(string path, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
-            : this(new Bitmap(path), pixelFormat, comment)
+        public TmxFile(string path, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+            : this(new Bitmap(path), userId, pixelFormat, comment)
         {
 
         }
@@ -517,6 +519,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             byte[] temp;
             BitmapHelper.QuantizeBitmap(bitmap, paletteColorCount, out temp, out Palettes[0]);
             PixelIndices = temp;
+            ScalePSMCT32PaletteToHalfAlphaRange( Palettes );
         }
 
         private static Color[][] ScalePSMCT32PaletteToFullAlphaRange(Color[][] palettes)
@@ -547,6 +550,24 @@ namespace AmicitiaLibrary.Graphics.TMX
             }
 
             return scaledColors;
+        }
+
+        private static void ScalePSMCT32PaletteToHalfAlphaRange( Color[][] palettes )
+        {
+            for ( int p = 0; p < palettes.Length; p++ )
+                ScalePSMCT32PixelsToHalfAlphaRange( palettes[p] );
+        }
+
+        private static void ScalePSMCT32PixelsToHalfAlphaRange( Color[] colors )
+        {
+            for ( int c = 0; c < colors.Length; c++ )
+            {
+                colors[c] = Color.FromArgb(
+                    PS2PixelFormatHelper.ScaleFullRangeAlphaToHalfRange( colors[c].A ),
+                    colors[c].R,
+                    colors[c].G,
+                    colors[c].B );
+            }
         }
     }
 }

@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>Library for parsing Atlus game formats.</Description>
     <Copyright>Copyright © Atlus, TGE 2019</Copyright>
-    <Version>1.9.2.0</Version>
+    <Version>1.9.3.0</Version>
     <RepositoryUrl>https://github.com/TGEnigma/Amicitia</RepositoryUrl>
   </PropertyGroup>
 

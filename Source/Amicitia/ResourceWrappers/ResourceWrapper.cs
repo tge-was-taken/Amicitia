@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -144,6 +145,7 @@ namespace Amicitia.ResourceWrappers
         protected ResourceWrapper(string text, TResource resource)
             : base(text)
         {
+            Console.WriteLine( $"{this}: Creating wrapper for {resource}" );
             Resource = resource;
             FileType = SupportedFileManager.GetSupportedFileType(typeof(TResource));
 
@@ -564,6 +566,7 @@ namespace Amicitia.ResourceWrappers
         /// </summary>
         private void PopulateViewFully()
         {
+            Console.WriteLine( $"{this}: Populating view" );
             if (mInitialized)
                 Nodes.Clear();
 
@@ -654,6 +657,7 @@ namespace Amicitia.ResourceWrappers
 
             if (mRebuildAction != null)
             {
+                Console.WriteLine( $"{this}: Rebuilding" );
                 Resource = mRebuildAction.Invoke(this);
                 SetRebuildFlag(Parent);
             }
@@ -662,7 +666,10 @@ namespace Amicitia.ResourceWrappers
         public virtual void Dispose()
         {
             if ( Resource is IDisposable disposable )
+            {
+                Console.WriteLine( $"{this}: Disposing" );
                 disposable.Dispose();
+            }
         }
     }
 

@@ -109,7 +109,7 @@
             long posFileStart = writer.GetPosition();
 
             // Precalculate the first offset
-            long posPrevDataEnd = (Entries.Count + 1) * BvpEntry.SIZE;
+            long posPrevDataEnd = (Entries.Count) * BvpEntry.SIZE;
 
             // Write the entry table
             for (int i = 0; i < Entries.Count; i++)
@@ -127,12 +127,9 @@
                 posPrevDataEnd = Entries[i].FileDataOffset + Entries[i].DataLength;
             }
 
-            // Write empty terminator entry
-            writer.Write(0, BvpEntry.SIZE);
-
             // Seek to the last data write position, and align the file to 64 bytes
             writer.BaseStream.Seek(posPrevDataEnd, SeekOrigin.Begin);
-            writer.AlignPosition(64);
+            writer.AlignPosition(32);
         }
 
         private void InternalRead(BinaryReader reader)

@@ -41,7 +41,7 @@
             FileDataOffset = reader.ReadInt32();
             int length = reader.ReadInt32();
 
-            if (length > reader.BaseStream.Length)
+            if (length > reader.BaseStream.Length || FileDataOffset < reader.BaseStream.Position)
             {
                 Flag = 0;
                 FileDataOffset = 0;

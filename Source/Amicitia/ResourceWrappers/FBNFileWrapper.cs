@@ -50,7 +50,7 @@ namespace Amicitia.ResourceWrappers
 
                 file.Objects.AddRange( ObjectsWrapper.Resource );
                 file.Entries2.AddRange( Entries2Wrapper.Resource );
-
+                file.FooterData = Resource.FooterData;
                 return file;
             } );
         }

@@ -135,6 +135,7 @@ namespace Amicitia.ResourceWrappers
                     file.Entries8.Add( node );
                 }
 
+                file.FooterData = Resource.FooterData;
                 return file;
             } );
         }

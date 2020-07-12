@@ -66,6 +66,8 @@ namespace AmicitiaLibrary.Field
 
         public int   Field6C { get; set; }
 
+        public byte[] FooterData { get; set; }
+
         public CmrFile( string filepath ) : this(File.OpenRead(filepath), false) { }
 
         public CmrFile( Stream stream, bool leaveOpen = false )
@@ -109,6 +111,7 @@ namespace AmicitiaLibrary.Field
             Field64 = reader.ReadSingle();
             Field68 = reader.ReadInt32();
             Field6C = reader.ReadInt32();
+            FooterData = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
         }
 
         internal override void Write( BinaryWriter writer )
@@ -143,6 +146,8 @@ namespace AmicitiaLibrary.Field
             writer.Write( Field64 );
             writer.Write( Field68 );
             writer.Write( Field6C );
+            if (FooterData != null)
+                writer.Write(FooterData);
         }
     }
 }

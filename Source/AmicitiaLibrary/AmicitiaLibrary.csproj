@@ -4,8 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>Library for parsing Atlus game formats.</Description>
-    <Copyright>Copyright © Atlus, TGE 2019</Copyright>
-    <Version>1.9.4.0</Version>
+    <Copyright>Copyright © Atlus, TGE 2020</Copyright>
+    <Version>1.9.5.0</Version>
     <RepositoryUrl>https://github.com/TGEnigma/Amicitia</RepositoryUrl>
   </PropertyGroup>
 

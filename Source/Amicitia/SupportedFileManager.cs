@@ -88,6 +88,8 @@ namespace Amicitia
             new SupportedFileInfo("Field Camera Parameters",          SupportedFileType.CmrFile,                  typeof(CmrFile),                 null,                 (s, o, f) => new CmrFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".cmr"),
             new SupportedFileInfo("Field Object Placement",           SupportedFileType.FbnFile,                  typeof(FbnFile),                 null,                 (s, o, f) => new FbnFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".fbn"),
             new SupportedFileInfo("Field Hit Placement",              SupportedFileType.HbnFile,                  typeof(HbnFile),                 null,                 (s, o, f) => new HbnFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".hbn"),
+
+            new SupportedFileInfo("Atlus Message Script",             SupportedFileType.MessageScript,            typeof(BinaryFile),              null,                 (s, o, f) => new BinaryFile(s, o),                  o => ((BinaryBase)o).GetMemoryStream(),                ".bmd"),
         };
 
         public static string FileFilter { get; }

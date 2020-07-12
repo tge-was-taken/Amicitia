@@ -107,6 +107,8 @@ namespace Amicitia
         Spr6File,
         Spr6Texture,
         Spr6Sprite,
-        Spr6Panel
+        Spr6Panel,
+
+        MessageScript,
     }
 }

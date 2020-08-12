@@ -239,21 +239,21 @@ namespace AmicitiaLibrary.Graphics.SPD
         /// Starts at 1.
         /// </summary>
         public int Id { get; set; }
-        public int Field04 { get; set; }
+        public int AttachedToTextureId { get; set; }
         public int Field08 { get; set; }
         public int Field0C { get; set; }
         public int Field10 { get; set; }
         public int Field14 { get; set; }
         public int Field18 { get; set; }
         public int Field1C { get; set; }
-        public int Field20 { get; set; }
-        public int Field24 { get; set; }
-        public int Field28 { get; set; }
-        public int Field2C { get; set; }
+        public int X1Coordinate { get; set; }
+        public int Y1Coordinate { get; set; }
+        public int X1Length { get; set; }
+        public int Y1Length { get; set; }
         public int Field30 { get; set; }
         public int Field34 { get; set; }
-        public int Field38 { get; set; }
-        public int Field3C { get; set; }
+        public int X2Length { get; set; }
+        public int Y2Length { get; set; }
         public int Field40 { get; set; }
         public int Field44 { get; set; }
         public int Field48 { get; set; }
@@ -296,21 +296,21 @@ namespace AmicitiaLibrary.Graphics.SPD
         internal void Read( EndianBinaryReader reader )
         {
             Id = reader.ReadInt32();
-            Field04 = reader.ReadInt32();
+            AttachedToTextureId = reader.ReadInt32();
             Field08 = reader.ReadInt32();
             Field0C = reader.ReadInt32();
             Field10 = reader.ReadInt32();
             Field14 = reader.ReadInt32();
             Field18 = reader.ReadInt32();
             Field1C = reader.ReadInt32();
-            Field20 = reader.ReadInt32();
-            Field24 = reader.ReadInt32();
-            Field28 = reader.ReadInt32();
-            Field2C = reader.ReadInt32();
+            X1Coordinate = reader.ReadInt32();
+            Y1Coordinate = reader.ReadInt32();
+            X1Length = reader.ReadInt32();
+            Y1Length = reader.ReadInt32();
             Field30 = reader.ReadInt32();
             Field34 = reader.ReadInt32();
-            Field38 = reader.ReadInt32();
-            Field3C = reader.ReadInt32();
+            X2Length = reader.ReadInt32();
+            Y2Length = reader.ReadInt32();
             Field40 = reader.ReadInt32();
             Field44 = reader.ReadInt32();
             Field48 = reader.ReadInt32();
@@ -329,21 +329,21 @@ namespace AmicitiaLibrary.Graphics.SPD
         internal void Write( EndianBinaryWriter writer )
         {
             writer.Write( Id );
-            writer.Write( Field04 );
+            writer.Write( AttachedToTextureId );
             writer.Write( Field08 );
             writer.Write( Field0C );
             writer.Write( Field10 );
             writer.Write( Field14 );
             writer.Write( Field18 );
             writer.Write( Field1C );
-            writer.Write( Field20 );
-            writer.Write( Field24 );
-            writer.Write( Field28 );
-            writer.Write( Field2C );
+            writer.Write( X1Coordinate );
+            writer.Write( Y1Coordinate );
+            writer.Write( X1Length );
+            writer.Write( Y1Length );
             writer.Write( Field30 );
             writer.Write( Field34 );
-            writer.Write( Field38 );
-            writer.Write( Field3C );
+            writer.Write( X2Length );
+            writer.Write( Y2Length );
             writer.Write( Field40 );
             writer.Write( Field44 );
             writer.Write( Field48 );

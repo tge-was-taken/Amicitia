@@ -147,21 +147,21 @@ namespace Amicitia.ResourceWrappers
             set => SetProperty( Resource, value );
         }
 
-        public int Field04 { get => Resource.Field04; set => SetProperty( Resource, value ); }
+        public int Field04 { get => Resource.AttachedToTextureId; set => SetProperty( Resource, value ); }
         public int Field08 { get => Resource.Field08; set => SetProperty( Resource, value ); }
         public int Field0C { get => Resource.Field0C; set => SetProperty( Resource, value ); }
         public int Field10 { get => Resource.Field10; set => SetProperty( Resource, value ); }
         public int Field14 { get => Resource.Field14; set => SetProperty( Resource, value ); }
         public int Field18 { get => Resource.Field18; set => SetProperty( Resource, value ); }
         public int Field1C { get => Resource.Field1C; set => SetProperty( Resource, value ); }
-        public int Field20 { get => Resource.Field20; set => SetProperty( Resource, value ); }
-        public int Field24 { get => Resource.Field24; set => SetProperty( Resource, value ); }
-        public int Field28 { get => Resource.Field28; set => SetProperty( Resource, value ); }
-        public int Field2C { get => Resource.Field2C; set => SetProperty( Resource, value ); }
+        public int Field20 { get => Resource.X1Coordinate; set => SetProperty( Resource, value ); }
+        public int Field24 { get => Resource.Y1Coordinate; set => SetProperty( Resource, value ); }
+        public int Field28 { get => Resource.X1Length; set => SetProperty( Resource, value ); }
+        public int Field2C { get => Resource.Y1Length; set => SetProperty( Resource, value ); }
         public int Field30 { get => Resource.Field30; set => SetProperty( Resource, value ); }
         public int Field34 { get => Resource.Field34; set => SetProperty( Resource, value ); }
-        public int Field38 { get => Resource.Field38; set => SetProperty( Resource, value ); }
-        public int Field3C { get => Resource.Field3C; set => SetProperty( Resource, value ); }
+        public int Field38 { get => Resource.X2Length; set => SetProperty( Resource, value ); }
+        public int Field3C { get => Resource.Y2Length; set => SetProperty( Resource, value ); }
         public int Field40 { get => Resource.Field40; set => SetProperty( Resource, value ); }
         public int Field44 { get => Resource.Field44; set => SetProperty( Resource, value ); }
         public int Field48 { get => Resource.Field48; set => SetProperty( Resource, value ); }

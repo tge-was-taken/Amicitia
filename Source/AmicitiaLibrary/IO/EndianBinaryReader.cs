@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Numerics;
 
 namespace AmicitiaLibrary.IO
 {
@@ -10,9 +11,8 @@ namespace AmicitiaLibrary.IO
     {
         private StringBuilder mStringBuilder;
         private Endianness mEndianness;
-        private bool mSwap;
         private Encoding mEncoding;
-        private Queue<long> mPosQueue;
+        private Stack<long> mBaseOffset;
 
         public Endianness Endianness
         {
@@ -20,29 +20,23 @@ namespace AmicitiaLibrary.IO
             set
             {
                 if (value != EndiannessHelper.SystemEndianness)
-                    mSwap = true;
+                    SwapBytes = true;
                 else
-                    mSwap = false;
+                    SwapBytes = false;
 
                 mEndianness = value;
             }
         }
 
-        public bool EndiannessNeedsSwapping
-        {
-            get { return mSwap; }
-        }
+        public bool SwapBytes { get; private set; }
 
         public long Position
         {
-            get { return BaseStream.Position; }
-            set { BaseStream.Position = value; }
+            get => BaseStream.Position;
+            set => BaseStream.Position = value;
         }
 
-        public long BaseStreamLength
-        {
-            get { return BaseStream.Length; }
-        }
+        public long Length => BaseStream.Length;
 
         public EndianBinaryReader(Stream input, Endianness endianness)
             : base(input)
@@ -66,8 +60,9 @@ namespace AmicitiaLibrary.IO
         {
             mStringBuilder = new StringBuilder();
             mEncoding = encoding;
-            mPosQueue = new Queue<long>();
             Endianness = endianness;
+            mBaseOffset = new Stack<long>();
+            mBaseOffset.Push( 0 );
         }
 
         public void Seek(long offset, SeekOrigin origin)
@@ -90,30 +85,32 @@ namespace AmicitiaLibrary.IO
             BaseStream.Seek(offset, SeekOrigin.End);
         }
 
-        public void EnqueuePosition()
+        public void PushBaseOffset( long baseOffset ) => mBaseOffset.Push( baseOffset );
+
+        public void PopBaseOffset() => mBaseOffset.Pop();
+
+        public void ReadOffset( Action action )
         {
-            mPosQueue.Enqueue(Position);
+            var offset = ReadInt32() + mBaseOffset.Peek();
+            if ( offset != 0 )
+                ReadAtOffset( offset, action );
         }
 
-        public long PeekEnqueuedPosition()
+        public void ReadOffset( int count, Action action )
         {
-            return mPosQueue.Peek();
+            ReadOffset( () =>
+            {
+                for ( int i = 0; i < count; ++i )
+                    action();
+            } );
         }
 
-        public void EnqueuePositionAndSeekBegin(long offset)
+        public void ReadAtOffset( long offset, Action action )
         {
-            mPosQueue.Enqueue(Position);
-            SeekBegin(offset);
-        }
-
-        public void SeekBeginToDequedPosition()
-        {
-            SeekBegin(mPosQueue.Dequeue());
-        }
-
-        public long DequeuePosition()
-        {
-            return mPosQueue.Dequeue();
+            long current = Position;
+            SeekBegin( offset );
+            action();
+            SeekBegin( current );
         }
 
         public sbyte[] ReadSBytes(int count)
@@ -136,10 +133,9 @@ namespace AmicitiaLibrary.IO
 
         public override short ReadInt16()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadInt16());
-            else
-                return base.ReadInt16();
+            return base.ReadInt16();
         }
 
         public short[] ReadInt16s(int count)
@@ -155,10 +151,9 @@ namespace AmicitiaLibrary.IO
 
         public override ushort ReadUInt16()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadUInt16());
-            else
-                return base.ReadUInt16();
+            return base.ReadUInt16();
         }
 
         public ushort[] ReadUInt16s(int count)
@@ -174,10 +169,9 @@ namespace AmicitiaLibrary.IO
 
         public override decimal ReadDecimal()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadDecimal());
-            else
-                return base.ReadDecimal();
+            return base.ReadDecimal();
         }
 
         public decimal[] ReadDecimals(int count)
@@ -193,10 +187,9 @@ namespace AmicitiaLibrary.IO
 
         public override double ReadDouble()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadDouble());
-            else
-                return base.ReadDouble();
+            return base.ReadDouble();
         }
 
         public double[] ReadDoubles(int count)
@@ -212,10 +205,9 @@ namespace AmicitiaLibrary.IO
 
         public override int ReadInt32()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadInt32());
-            else
-                return base.ReadInt32();
+            return base.ReadInt32();
         }
 
         public int[] ReadInt32s(int count)
@@ -231,10 +223,9 @@ namespace AmicitiaLibrary.IO
 
         public override long ReadInt64()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadInt64());
-            else
-                return base.ReadInt64();
+            return base.ReadInt64();
         }
 
         public long[] ReadInt64s(int count)
@@ -250,10 +241,9 @@ namespace AmicitiaLibrary.IO
 
         public override float ReadSingle()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadSingle());
-            else
-                return base.ReadSingle();
+            return base.ReadSingle();
         }
 
         public float[] ReadSingles(int count)
@@ -269,10 +259,9 @@ namespace AmicitiaLibrary.IO
 
         public override uint ReadUInt32()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadUInt32());
-            else
-                return base.ReadUInt32();
+            return base.ReadUInt32();
         }
 
         public uint[] ReadUInt32s(int count)
@@ -288,10 +277,9 @@ namespace AmicitiaLibrary.IO
 
         public override ulong ReadUInt64()
         {
-            if (mSwap)
+            if (SwapBytes)
                 return EndiannessHelper.Swap(base.ReadUInt64());
-            else
-                return base.ReadUInt64();
+            return base.ReadUInt64();
         }
 
         public ulong[] ReadUInt64s(int count)
@@ -301,6 +289,34 @@ namespace AmicitiaLibrary.IO
             {
                 array[i] = ReadUInt64();
             }
+
+            return array;
+        }
+
+        public Vector2 ReadVector2()
+        {
+            return new Vector2( ReadSingle(), ReadSingle() );
+        }
+
+        public Vector2[] ReadVector2s( int count )
+        {
+            var array = new Vector2[count];
+            for ( int i = 0; i < array.Length; i++ )
+                array[i] = ReadVector2();
+
+            return array;
+        }
+
+        public Vector3 ReadVector3()
+        {
+            return new Vector3( ReadSingle(), ReadSingle(), ReadSingle() );
+        }
+
+        public Vector3[] ReadVector3s(int count)
+        {
+            var array = new Vector3[count];
+            for ( int i = 0; i < array.Length; i++ )
+                array[i] = ReadVector3();
 
             return array;
         }
@@ -325,11 +341,15 @@ namespace AmicitiaLibrary.IO
                             throw new ArgumentException("Invalid fixed length specified");
 
                         byte b;
+                        bool terminated = false;
                         for (int i = 0; i < fixedLength; i++)
                         {
                             b = ReadByte();
-                            if (b != 0)
-                                mStringBuilder.Append((char)b);
+                            if ( b == 0 )
+                                terminated = true;
+
+                            if ( !terminated )
+                                mStringBuilder.Append( ( char ) b );
                         }
                     }
                     break;
@@ -365,6 +385,13 @@ namespace AmicitiaLibrary.IO
             return mStringBuilder.ToString();
         }
 
+        public string ReadString( long offset, StringBinaryFormat format, int fixedLength = -1 )
+        {
+            string str = null;
+            ReadAtOffset( offset, () => str = ReadString( format, fixedLength ) );
+            return str;
+        }
+
         public string[] ReadStrings(int count, StringBinaryFormat format, int fixedLength = -1)
         {
             string[] value = new string[count];
@@ -374,50 +401,11 @@ namespace AmicitiaLibrary.IO
             return value;
         }
 
-        public T ReadStruct<T>()
-            where T : struct
+        public string[] ReadStrings( long offset, int count, StringBinaryFormat format, int fixedLength = -1 )
         {
-            T obj;
-
-            var bytes = ReadBytes(Marshal.SizeOf<T>());
-
-            unsafe
-            {
-                fixed (byte* ptr = bytes)
-                {
-                    obj = Marshal.PtrToStructure<T>((IntPtr)ptr);
-                }
-            }
-
-            if (mSwap)
-                obj = EndiannessHelper.Swap(obj);
-
-            return obj;
-        }
-
-        public T[] ReadStruct<T>(int count)
-            where T : struct
-        {
-            T[] objects = new T[count];
-
-            int typeSize = Marshal.SizeOf<T>();
-            var bytes = ReadBytes(typeSize * count);
-
-            unsafe
-            {
-                fixed (byte* ptr = bytes)
-                {
-                    for (int i = 0; i < objects.Length; i++)
-                    {
-                        if (mSwap)
-                            objects[i] = EndiannessHelper.Swap(Marshal.PtrToStructure<T>((IntPtr)(ptr + (i * typeSize))));
-                        else
-                            objects[i] = Marshal.PtrToStructure<T>((IntPtr)(ptr + (i * typeSize)));
-                    }
-                }
-            }
-
-            return objects;
+            string[] str = null;
+            ReadAtOffset( offset, () => str = ReadStrings( count, format, fixedLength ) );
+            return str;
         }
     }
 }

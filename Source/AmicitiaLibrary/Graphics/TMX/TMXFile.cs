@@ -26,8 +26,9 @@ namespace AmicitiaLibrary.Graphics.TMX
         /**** Constructors ****/
         /**********************/
 
-        public TmxFile(Bitmap bitmap, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+        public TmxFile(Bitmap bitmap, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
         {
+            UserId = userId;
             Width = (ushort)bitmap.Width;
             Height = (ushort)bitmap.Height;
             PixelFormat = pixelFormat;
@@ -42,6 +43,7 @@ namespace AmicitiaLibrary.Graphics.TMX
                 case PS2PixelFormat.PSMTC16S: // Non-indexed
                     PaletteFormat = 0;
                     Pixels = BitmapHelper.GetColors(bitmap);
+                    ScalePSMCT32PixelsToHalfAlphaRange( Pixels );
                     mBitmap = bitmap;
                     break;
                 case PS2PixelFormat.PSMT8:
@@ -58,14 +60,14 @@ namespace AmicitiaLibrary.Graphics.TMX
             }
         }
 
-        public TmxFile(Stream stream, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
-            : this(new Bitmap(stream), pixelFormat, comment)
+        public TmxFile(Stream stream, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+            : this(new Bitmap(stream), userId, pixelFormat, comment)
         {
 
         }
 
-        public TmxFile(string path, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
-            : this(new Bitmap(path), pixelFormat, comment)
+        public TmxFile(string path, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = "")
+            : this(new Bitmap(path), userId, pixelFormat, comment)
         {
 
         }
@@ -96,6 +98,7 @@ namespace AmicitiaLibrary.Graphics.TMX
         /********************/
         /**** Properties ****/
         /********************/
+        public short UserId { get; set; }
 
         public byte PaletteCount { get; private set; }
 
@@ -138,6 +141,8 @@ namespace AmicitiaLibrary.Graphics.TMX
                 }
             }
         }
+
+        public byte Reserved { get; set; }
 
         public TmxWrapMode HorizontalWrappingMode
         {
@@ -289,7 +294,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             writer.Write((byte)PixelFormat);
             writer.Write(MipMapCount);
             writer.Write(mMipKl);
-            writer.Write((byte)0);
+            writer.Write(Reserved);
             writer.Write(mWrapModes);
             writer.Write(UserTextureId);
             writer.Write(UserClutId);
@@ -311,7 +316,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             // Seek back to the chunk header and write it
             writer.BaseStream.Seek(posFileStart, SeekOrigin.Begin);
             writer.Write(FLAG);
-            writer.Write((short)0); // userID
+            writer.Write(UserId); // userID
             writer.Write(length);
             writer.WriteCString(TAG, 4);
 
@@ -323,7 +328,7 @@ namespace AmicitiaLibrary.Graphics.TMX
         {
             long posFileStart = reader.GetPosition();
             short flag = reader.ReadInt16();
-            short userId = reader.ReadInt16();
+            UserId = reader.ReadInt16();
             int length = reader.ReadInt32();
             string tag = reader.ReadCString(4);
             reader.AlignPosition(16);
@@ -340,7 +345,7 @@ namespace AmicitiaLibrary.Graphics.TMX
             PixelFormat = (PS2PixelFormat)reader.ReadByte();
             MipMapCount = reader.ReadByte();
             mMipKl = reader.ReadUInt16();
-            byte reserved = reader.ReadByte();
+            Reserved = reader.ReadByte();
             mWrapModes = reader.ReadByte();
             UserTextureId = reader.ReadInt32();
             UserClutId = reader.ReadInt32();
@@ -473,13 +478,20 @@ namespace AmicitiaLibrary.Graphics.TMX
         {
             if (UsesPalette)
             {
+                Color[][] palettes;
+
+                if (PaletteFormat == PS2PixelFormat.PSMTC32)
+                    palettes = ScalePSMCT32PaletteToFullAlphaRange(Palettes);
+                else
+                    palettes = Palettes;
+
                 if (mipIdx == -1)
                 {
-                    mBitmap = BitmapHelper.Create(Palettes[palIdx], PixelIndices, Width, Height);
+                    mBitmap = BitmapHelper.Create(palettes[palIdx], PixelIndices, Width, Height);
                 }
                 else
                 {
-                    mBitmap = BitmapHelper.Create(Palettes[palIdx], MipMapPixelIndices[mipIdx],
+                    mBitmap = BitmapHelper.Create(palettes[palIdx], MipMapPixelIndices[mipIdx],
                         GetMipDimension(Width, mipIdx), GetMipDimension(Height, mipIdx));
                 }
             }
@@ -487,11 +499,13 @@ namespace AmicitiaLibrary.Graphics.TMX
             {
                 if (mipIdx == -1)
                 {
-                    mBitmap = BitmapHelper.Create(Pixels, Width, Height);
+                    Color[] pixels = PixelFormat == PS2PixelFormat.PSMTC32 ? ScalePSMCT32PixelsToFullAlphaRange(Pixels) : Pixels;
+                    mBitmap = BitmapHelper.Create(pixels, Width, Height);
                 }
                 else
                 {
-                    mBitmap = BitmapHelper.Create(MipMapPixels[mipIdx], GetMipDimension(Width, mipIdx), GetMipDimension(Height, mipIdx));
+                    Color[] pixels = PixelFormat == PS2PixelFormat.PSMTC32 ? ScalePSMCT32PixelsToFullAlphaRange(MipMapPixels[mipIdx]) : MipMapPixels[mipIdx];
+                    mBitmap = BitmapHelper.Create(pixels, GetMipDimension(Width, mipIdx), GetMipDimension(Height, mipIdx));
                 }
             }
         }
@@ -505,6 +519,55 @@ namespace AmicitiaLibrary.Graphics.TMX
             byte[] temp;
             BitmapHelper.QuantizeBitmap(bitmap, paletteColorCount, out temp, out Palettes[0]);
             PixelIndices = temp;
+            ScalePSMCT32PaletteToHalfAlphaRange( Palettes );
+        }
+
+        private static Color[][] ScalePSMCT32PaletteToFullAlphaRange(Color[][] palettes)
+        {
+            int palettesCount = palettes.Length;
+            Color[][] scaledPalettes = new Color[palettesCount][];
+
+            for (int p = 0; p < palettesCount; p++)
+            {
+                scaledPalettes[p] = ScalePSMCT32PixelsToFullAlphaRange(palettes[p]);
+            }
+
+            return scaledPalettes;
+        }
+
+        private static Color[] ScalePSMCT32PixelsToFullAlphaRange(Color[] colors)
+        {
+            int colorCount = colors.Length;
+            Color[] scaledColors = new Color[colorCount];
+
+            for (int c = 0; c < colorCount; c++)
+            {
+                scaledColors[c] = Color.FromArgb(
+                    PS2PixelFormatHelper.ScaleHalfRangeAlphaToFullRange(colors[c].A),
+                    colors[c].R,
+                    colors[c].G,
+                    colors[c].B);
+            }
+
+            return scaledColors;
+        }
+
+        private static void ScalePSMCT32PaletteToHalfAlphaRange( Color[][] palettes )
+        {
+            for ( int p = 0; p < palettes.Length; p++ )
+                ScalePSMCT32PixelsToHalfAlphaRange( palettes[p] );
+        }
+
+        private static void ScalePSMCT32PixelsToHalfAlphaRange( Color[] colors )
+        {
+            for ( int c = 0; c < colors.Length; c++ )
+            {
+                colors[c] = Color.FromArgb(
+                    PS2PixelFormatHelper.ScaleFullRangeAlphaToHalfRange( colors[c].A ),
+                    colors[c].R,
+                    colors[c].G,
+                    colors[c].B );
+            }
         }
     }
 }

@@ -4,7 +4,6 @@
     using System.IO;
     using System.Linq;
     using AmicitiaLibrary.Utilities;
-    using ManagedNvTriStrip;
 
     public enum RwPrimitiveType
     {
@@ -17,6 +16,8 @@
     /// </summary>
     public class RwMeshListNode : RwNode
     {
+        private static readonly NvTriStripDotNet.NvStripifier sStripifier = new NvTriStripDotNet.NvStripifier(){};
+
         private RwPrimitiveType mPrimitiveType;
         private int mPrimitiveCount;
         private RwMesh[] mMeshes;
@@ -99,7 +100,7 @@
 
                 if (primitiveType == RwPrimitiveType.TriangleStrip)
                 {
-                    if (NvTriStripUtility.GenerateStrips(matSplitIndices, out PrimitiveGroup[] primitives ) && primitives[0].Type == ManagedNvTriStrip.PrimitiveType.TriangleStrip)
+                    if (sStripifier.GenerateStrips(matSplitIndices, out var primitives ) && primitives[0].Type == NvTriStripDotNet.PrimitiveType.TriangleStrip)
                     {
                         matSplitIndices = primitives[0].Indices;
                         geometryNode.Flags |= RwGeometryFlags.CanTriStrip;

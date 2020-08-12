@@ -95,7 +95,7 @@
         /// <summary>
         /// Initialize a texture reference instance with a referenced texture name.
         /// </summary>
-        /// <param name="refTextureName">Name of the referenced texture.</param>
+        /// <param name="refTextureName">Description of the referenced texture.</param>
         /// <param name="parent">Parent of the texture reference node. Value is null if not specified.</param>
         public RwTextureReferenceNode(string refTextureName, RwNode parent = null)
             : base(RwNodeId.RwTextureReferenceNode, parent)

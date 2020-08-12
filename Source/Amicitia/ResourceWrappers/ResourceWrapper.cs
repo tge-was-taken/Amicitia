@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -80,7 +81,7 @@ namespace Amicitia.ResourceWrappers
         }
     }
 
-    public abstract partial class ResourceWrapper<TResource> : TreeNode, IResourceWrapper
+    public abstract partial class ResourceWrapper<TResource> : TreeNode, IResourceWrapper, IDisposable
     {
         public static readonly Action<string, ResourceWrapper<TResource>> DefaultFileAddAction = (path, wrapper) =>
         {
@@ -96,6 +97,8 @@ namespace Amicitia.ResourceWrappers
         private Dictionary<SupportedFileType, Action<string, ResourceWrapper<TResource>>> mFileAddActions;
         private Func<ResourceWrapper<TResource>, TResource> mRebuildAction;
         private List<ContextMenuAction> mCustomActions;
+        private Dictionary<Type, ContextMenuStrip> mContextMenuStripCache
+            = new Dictionary<Type, ContextMenuStrip>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -142,6 +145,7 @@ namespace Amicitia.ResourceWrappers
         protected ResourceWrapper(string text, TResource resource)
             : base(text)
         {
+            Console.WriteLine( $"{this}: Creating wrapper for {resource}" );
             Resource = resource;
             FileType = SupportedFileManager.GetSupportedFileType(typeof(TResource));
 
@@ -152,16 +156,13 @@ namespace Amicitia.ResourceWrappers
 
         public byte[] GetResourceBytes()
         {
-            var binaryFileBase = Resource as BinaryBase;
-
-            return binaryFileBase?.GetBytes();
+            return GetResourceMemoryStream().ToArray();
         }
 
         public MemoryStream GetResourceMemoryStream()
         {
-            var binaryFileBase = Resource as BinaryBase;
-
-            return binaryFileBase?.GetMemoryStream();
+            var info = SupportedFileManager.GetSupportedFileInfo( typeof( TResource ) );
+            return info.GetStream( Resource );
         }
 
 
@@ -170,6 +171,7 @@ namespace Amicitia.ResourceWrappers
         /// </summary>
         public new void Remove()
         {
+            Dispose();
             SetRebuildFlag(Parent);
             base.Remove();
         }
@@ -231,6 +233,7 @@ namespace Amicitia.ResourceWrappers
 
         public void Delete()
         {
+            Dispose();
             Remove();
         }
 
@@ -252,7 +255,7 @@ namespace Amicitia.ResourceWrappers
             
                 saveFileDlg.AutoUpgradeEnabled = true;
                 saveFileDlg.CheckPathExists = true;
-                saveFileDlg.FileName = Text;
+                saveFileDlg.FileName = Text.Trim();
                 saveFileDlg.Filter = SupportedFileManager.GetFilteredFileFilter(fileTypes);
                 saveFileDlg.OverwritePrompt = true;
                 saveFileDlg.Title = "Select a file to export to";
@@ -278,6 +281,7 @@ namespace Amicitia.ResourceWrappers
         {
             if (mFileExportActions == null)
                 return false;
+
 
             var fileExportAction = mFileExportActions[type];
             fileExportAction.Invoke(Resource, path);
@@ -325,7 +329,14 @@ namespace Amicitia.ResourceWrappers
                 return false;
 
             var fileReplaceAction = mFileReplaceActions[type];
-            Resource = fileReplaceAction.Invoke(Resource, path);
+            var res = Resource;
+            var newRes = fileReplaceAction.Invoke( res, path);
+
+            if ( !newRes.Equals(res) && res is IDisposable disposable )
+                disposable.Dispose();
+
+            Resource = newRes;
+
             return true;
         }
 
@@ -555,6 +566,7 @@ namespace Amicitia.ResourceWrappers
         /// </summary>
         private void PopulateViewFully()
         {
+            Console.WriteLine( $"{this}: Populating view" );
             if (mInitialized)
                 Nodes.Clear();
 
@@ -567,6 +579,13 @@ namespace Amicitia.ResourceWrappers
         /// </summary>
         private void PopulateContextMenuStrip()
         {
+            var type = GetType();
+            if (mContextMenuStripCache.TryGetValue( type, out var temp ) )
+            {
+                ContextMenuStrip = temp;
+                return;
+            }
+
             ContextMenuStrip = new ContextMenuStrip();
 
             if ( mCustomActions != null )
@@ -622,6 +641,8 @@ namespace Amicitia.ResourceWrappers
             {
                 ContextMenuStrip.Items.Add(new ToolStripMenuItem("&Delete", null, DeleteEventHandler, Keys.Control | Keys.Delete));
             }
+
+            mContextMenuStripCache[type] = ContextMenuStrip;
         }
 
         /// <summary>
@@ -636,8 +657,18 @@ namespace Amicitia.ResourceWrappers
 
             if (mRebuildAction != null)
             {
+                Console.WriteLine( $"{this}: Rebuilding" );
                 Resource = mRebuildAction.Invoke(this);
                 SetRebuildFlag(Parent);
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            if ( Resource is IDisposable disposable )
+            {
+                Console.WriteLine( $"{this}: Disposing" );
+                disposable.Dispose();
             }
         }
     }

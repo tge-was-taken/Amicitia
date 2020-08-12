@@ -61,6 +61,8 @@ namespace AmicitiaLibrary.Field
         public List<BinaryFile> Entries7 { get; private set; }
 
         public List<BinaryFile> Entries8 { get; private set; }
+        
+        public byte[] FooterData { get; set; }
 
         public HbnFile( short versionMajor, short versionMinor )
         {
@@ -110,6 +112,8 @@ namespace AmicitiaLibrary.Field
             Entries6 = ReadEntries( entry6Count, Entry6Size, reader );
             Entries7 = ReadEntries( entry7Count, Entry7Size, reader );
             Entries8 = ReadEntries( entry8Count, Entry8Size, reader );
+
+            FooterData = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
         }
 
         private static void ReadEntryHeader( BinaryReader reader, int size, out int count)
@@ -158,6 +162,9 @@ namespace AmicitiaLibrary.Field
             WriteEntries( Entries6, writer );
             WriteEntries( Entries7, writer );
             WriteEntries( Entries8, writer );
+
+            if (FooterData != null)
+                writer.Write(FooterData);
         }
 
         private static void WriteEntries( List<BinaryFile> entries, BinaryWriter writer )

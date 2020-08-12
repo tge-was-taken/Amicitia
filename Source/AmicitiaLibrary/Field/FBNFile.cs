@@ -43,6 +43,8 @@ namespace AmicitiaLibrary.Field
 
         public List<BinaryFile> Entries2 { get; private set; }
 
+        public byte[] FooterData { get; set; }
+
         public FbnFile( string filepath ) : this(File.OpenRead(filepath), false) { }
 
         public FbnFile( Stream stream, bool leaveOpen = false )
@@ -89,6 +91,8 @@ namespace AmicitiaLibrary.Field
             {
                 Entries2.Add( new BinaryFile( reader.ReadBytes( entries2EntrySize ) ) );
             }
+
+            FooterData = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
         }
 
         internal override void Write( BinaryWriter writer )
@@ -118,6 +122,9 @@ namespace AmicitiaLibrary.Field
                     writer.Write( bytes[i] );
                 }
             }
+
+            if (FooterData != null)
+                writer.Write(FooterData);
         }
     }
 

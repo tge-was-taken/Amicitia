@@ -1,4 +1,6 @@
-﻿namespace AmicitiaLibrary.Graphics.RenderWare
+﻿using System.Linq;
+
+namespace AmicitiaLibrary.Graphics.RenderWare
 {
     using System;
     using System.Drawing;
@@ -71,7 +73,9 @@
             }
             else
             {
-                mPixels = BitmapHelper.GetColors(bitmap);
+                mPixels = BitmapHelper.GetColors( bitmap )
+                                      .Select( x => Color.FromArgb( PS2PixelFormatHelper.ScaleFullRangeAlphaToHalfRange( x.A ), x.R, x.G, x.B ) )
+                                      .ToArray();
             }
 
             mMipMapData = new byte[0];

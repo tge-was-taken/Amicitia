@@ -23,8 +23,8 @@ namespace AmicitiaLibrary.Graphics.SPR
         private int _unk0x38;
         private int _unk0x3C;
         private int _unk0x40;   // set in 'center' frames?
-        private int _unk0x44;
-        private int _unk0x48;
+        private int mOffsetX;
+        private int mOffsetY;
         private int _unk0x4C;
         private int _unk0x50;
         private int mCoordX1;
@@ -49,6 +49,18 @@ namespace AmicitiaLibrary.Graphics.SPR
         {
             get { return mTextureIndex; }
             set { mTextureIndex = value; }
+        }
+
+        public int OffsetX
+        {
+            get { return mOffsetX; }
+            set { mOffsetX = value;  }
+        }
+
+        public int OffsetY
+        {
+            get { return mOffsetY; }
+            set { mOffsetY = value; }
         }
 
         public Rectangle Coordinates
@@ -98,8 +110,8 @@ namespace AmicitiaLibrary.Graphics.SPR
             writer.Write(_unk0x38);
             writer.Write(_unk0x3C);
             writer.Write(_unk0x40);
-            writer.Write(_unk0x44);
-            writer.Write(_unk0x48);
+            writer.Write(mOffsetX);
+            writer.Write(mOffsetY);
             writer.Write(_unk0x4C);
             writer.Write(_unk0x50);
             writer.Write(mCoordX1);
@@ -132,8 +144,8 @@ namespace AmicitiaLibrary.Graphics.SPR
             _unk0x38 = reader.ReadInt32();
             _unk0x3C = reader.ReadInt32();
             _unk0x40 = reader.ReadInt32();
-            _unk0x44 = reader.ReadInt32();
-            _unk0x48 = reader.ReadInt32();
+            mOffsetX = reader.ReadInt32();
+            mOffsetY = reader.ReadInt32();
             _unk0x4C = reader.ReadInt32();
             _unk0x50 = reader.ReadInt32();
             mCoordX1 = reader.ReadInt32();

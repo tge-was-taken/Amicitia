@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Amicitia
@@ -8,21 +9,23 @@ namespace Amicitia
         public string Description;
         public SupportedFileType EnumType;
         public Type ClassType;
-        public Func<Stream, bool> Validator;
-        public Func<Stream, bool, object> Instantiator;
+        public Func<Stream, string, bool> Validator;
+        public Func<Stream, bool, string, object> Instantiator;
+        public Func<object, MemoryStream> GetStream;
         public string[] Extensions;
 
-        public SupportedFileInfo(string description, SupportedFileType type, Type classType, Func<Stream, bool> validator, Func<Stream, bool, object> instantiator, params string[] extensions)
+        public SupportedFileInfo(string description, SupportedFileType type, Type classType, Func<Stream, string, bool> validator, Func<Stream, bool, string, object> instantiator, Func<object, MemoryStream> getStream, params string[] extensions)
         {
             Description = description;
             EnumType = type;
             ClassType = classType;
             Validator = validator ?? Validate;
             Instantiator = instantiator;
+            GetStream = o => GetStreamWrapper( getStream, o );
             Extensions = extensions;
         }
 
-        private bool Validate( Stream stream )
+        private bool Validate( Stream stream, string fileName )
         {
             var info = SupportedFileManager.GetSupportedFileInfo( ClassType );
             if ( info == null )
@@ -34,7 +37,8 @@ namespace Amicitia
             {
                 try
                 {
-                    info.Instantiator( stream, true );
+                    var obj = info.Instantiator( stream, true, fileName );
+                    ( obj as IDisposable )?.Dispose();
                 }
                 catch ( Exception )
                 {
@@ -47,6 +51,14 @@ namespace Amicitia
             }
 
             return valid;
+        }
+
+        private MemoryStream GetStreamWrapper( Func<object, MemoryStream> getStream, object obj )
+        {
+            var stream = getStream( obj );
+            stream.Position = 0;
+            Trace.Assert( stream.CanRead, "Stream returned by GetStream is closed" );
+            return stream;
         }
     }
 
@@ -87,6 +99,16 @@ namespace Amicitia
         RwAnimationNode,
         RwMaterial,
         RwTextureReferenceNode,
-        RwUserDataList
+        RwUserDataList,
+        SpdFile,
+        SpdTexture,
+        SpdSprite,
+        DDS,
+        Spr6File,
+        Spr6Texture,
+        Spr6Sprite,
+        Spr6Panel,
+
+        MessageScript,
     }
 }

@@ -15,50 +15,59 @@ namespace Amicitia.Utilities
         private readonly HookProc mHookProc;
         private readonly IntPtr mHHook = IntPtr.Zero;
 
-        public DialogCenteringService( IWin32Window owner )
+        public DialogCenteringService(IWin32Window owner)
         {
-            this.mOwner = owner ?? throw new ArgumentNullException( nameof( owner ) );
-            mHookProc = DialogHookProc;
+            Type t = Type.GetType("Mono.Runtime");
+            if (t == null)
+            {
+                this.mOwner = owner ?? throw new ArgumentNullException(nameof(owner));
+                mHookProc = DialogHookProc;
 
-            mHHook = SetWindowsHookEx( WH_CALLWNDPROCRET, mHookProc, IntPtr.Zero, GetCurrentThreadId() );
+                mHHook = SetWindowsHookEx(WH_CALLWNDPROCRET, mHookProc, IntPtr.Zero, GetCurrentThreadId());
+            }
         }
 
-        private IntPtr DialogHookProc( int nCode, IntPtr wParam, IntPtr lParam )
+        private IntPtr DialogHookProc(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if ( nCode < 0 )
+            if (nCode < 0)
             {
-                return CallNextHookEx( mHHook, nCode, wParam, lParam );
+                return CallNextHookEx(mHHook, nCode, wParam, lParam);
             }
 
-            CWPRETSTRUCT msg = ( CWPRETSTRUCT )Marshal.PtrToStructure( lParam, typeof( CWPRETSTRUCT ) );
+            CWPRETSTRUCT msg = (CWPRETSTRUCT)Marshal.PtrToStructure(lParam, typeof(CWPRETSTRUCT));
             IntPtr hook = mHHook;
 
-            if ( msg.message == ( int )CbtHookAction.HCBT_ACTIVATE )
+            if (msg.message == (int)CbtHookAction.HCBT_ACTIVATE)
             {
                 try
                 {
-                    CenterWindow( msg.hwnd );
+                    CenterWindow(msg.hwnd);
                 }
                 finally
                 {
-                    UnhookWindowsHookEx( mHHook );
+                    UnhookWindowsHookEx(mHHook);
                 }
             }
 
-            return CallNextHookEx( hook, nCode, wParam, lParam );
+            return CallNextHookEx(hook, nCode, wParam, lParam);
         }
 
         public void Dispose()
         {
-            UnhookWindowsHookEx( mHHook );
+            //similar to the check monyarm implemented, just disables this function so files can be opened with mono runtime.
+            Type t = Type.GetType("Mono.Runtime");
+            if (t == null)
+            {
+                UnhookWindowsHookEx(mHHook);
+            }
         }
 
-        private void CenterWindow( IntPtr hChildWnd )
+        private void CenterWindow(IntPtr hChildWnd)
         {
-            var recChild = new Rectangle( 0, 0, 0, 0 );
-            bool success = GetWindowRect( hChildWnd, ref recChild );
+            var recChild = new Rectangle(0, 0, 0, 0);
+            bool success = GetWindowRect(hChildWnd, ref recChild);
 
-            if ( !success )
+            if (!success)
             {
                 return;
             }
@@ -66,37 +75,37 @@ namespace Amicitia.Utilities
             int width = recChild.Width - recChild.X;
             int height = recChild.Height - recChild.Y;
 
-            var recParent = new Rectangle( 0, 0, 0, 0 );
-            success = GetWindowRect( mOwner.Handle, ref recParent );
+            var recParent = new Rectangle(0, 0, 0, 0);
+            success = GetWindowRect(mOwner.Handle, ref recParent);
 
-            if ( !success )
+            if (!success)
             {
                 return;
             }
 
-            var ptCenter = new Point( 0, 0 )
+            var ptCenter = new Point(0, 0)
             {
-                X = recParent.X + ( ( recParent.Width - recParent.X ) / 2 ),
-                Y = recParent.Y + ( ( recParent.Height - recParent.Y ) / 2 )
+                X = recParent.X + ((recParent.Width - recParent.X) / 2),
+                Y = recParent.Y + ((recParent.Height - recParent.Y) / 2)
             };
 
 
-            var ptStart = new Point( 0, 0 )
+            var ptStart = new Point(0, 0)
             {
-                X = ( ptCenter.X - ( width / 2 ) ),
-                Y = ( ptCenter.Y - ( height / 2 ) )
+                X = (ptCenter.X - (width / 2)),
+                Y = (ptCenter.Y - (height / 2))
             };
 
             //MoveWindow(hChildWnd, ptStart.X, ptStart.Y, width, height, false);
-            Task.Factory.StartNew( () => SetWindowPos( hChildWnd, ( IntPtr )0, ptStart.X, ptStart.Y, width, height, SetWindowPosFlags.SWP_ASYNCWINDOWPOS | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE | SetWindowPosFlags.SWP_NOOWNERZORDER | SetWindowPosFlags.SWP_NOZORDER ) );
+            Task.Factory.StartNew(() => SetWindowPos(hChildWnd, (IntPtr)0, ptStart.X, ptStart.Y, width, height, SetWindowPosFlags.SWP_ASYNCWINDOWPOS | SetWindowPosFlags.SWP_NOSIZE | SetWindowPosFlags.SWP_NOACTIVATE | SetWindowPosFlags.SWP_NOOWNERZORDER | SetWindowPosFlags.SWP_NOZORDER));
         }
 
         // some p/invoke
 
         // ReSharper disable InconsistentNaming
-        public delegate IntPtr HookProc( int nCode, IntPtr wParam, IntPtr lParam );
+        public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
 
-        public delegate void TimerProc( IntPtr hWnd, uint uMsg, UIntPtr nIDEvent, uint dwTime );
+        public delegate void TimerProc(IntPtr hWnd, uint uMsg, UIntPtr nIDEvent, uint dwTime);
 
         private const int WH_CALLWNDPROCRET = 12;
 
@@ -120,14 +129,14 @@ namespace Amicitia.Utilities
         #region GetCurrentThreadId
         static int GetCurrentThreadId()
         {
-            Type t = Type.GetType( "Mono.Runtime" );
-            if ( t != null )
+            Type t = Type.GetType("Mono.Runtime");
+            if (t != null)
                 return GetCurrentThreadIdMono();
             else
                 return GetCurrentThreadIdWinNT();
         }
 
-        [DllImport( "kernel32.dll", EntryPoint = "GetCurrentThreadId" )]
+        [DllImport("kernel32.dll", EntryPoint = "GetCurrentThreadId")]
         static extern int GetCurrentThreadIdWinNT();
 
         static int GetCurrentThreadIdMono()
@@ -135,41 +144,41 @@ namespace Amicitia.Utilities
             return System.Threading.Thread.CurrentThread.ManagedThreadId;
         }
         #endregion
-        [DllImport( "user32.dll" )]
-        private static extern bool GetWindowRect( IntPtr hWnd, ref Rectangle lpRect );
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, ref Rectangle lpRect);
 
-        [DllImport( "user32.dll" )]
-        private static extern int MoveWindow( IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint );
+        [DllImport("user32.dll")]
+        private static extern int MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
-        [DllImport( "user32.dll" )]
-        [return: MarshalAs( UnmanagedType.Bool )]
-        private static extern bool SetWindowPos( IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, SetWindowPosFlags uFlags );
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, SetWindowPosFlags uFlags);
 
-        [DllImport( "User32.dll" )]
-        public static extern UIntPtr SetTimer( IntPtr hWnd, UIntPtr nIDEvent, uint uElapse, TimerProc lpTimerFunc );
+        [DllImport("User32.dll")]
+        public static extern UIntPtr SetTimer(IntPtr hWnd, UIntPtr nIDEvent, uint uElapse, TimerProc lpTimerFunc);
 
-        [DllImport( "User32.dll" )]
-        public static extern IntPtr SendMessage( IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam );
+        [DllImport("User32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport( "user32.dll" )]
-        public static extern IntPtr SetWindowsHookEx( int idHook, HookProc lpfn, IntPtr hInstance, int threadId );
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
 
-        [DllImport( "user32.dll" )]
-        public static extern int UnhookWindowsHookEx( IntPtr idHook );
+        [DllImport("user32.dll")]
+        public static extern int UnhookWindowsHookEx(IntPtr idHook);
 
-        [DllImport( "user32.dll" )]
-        public static extern IntPtr CallNextHookEx( IntPtr idHook, int nCode, IntPtr wParam, IntPtr lParam );
+        [DllImport("user32.dll")]
+        public static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, IntPtr wParam, IntPtr lParam);
 
-        [DllImport( "user32.dll" )]
-        public static extern int GetWindowTextLength( IntPtr hWnd );
+        [DllImport("user32.dll")]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
 
-        [DllImport( "user32.dll" )]
-        public static extern int GetWindowText( IntPtr hWnd, StringBuilder text, int maxLength );
+        [DllImport("user32.dll")]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int maxLength);
 
-        [DllImport( "user32.dll" )]
-        public static extern int EndDialog( IntPtr hDlg, IntPtr nResult );
+        [DllImport("user32.dll")]
+        public static extern int EndDialog(IntPtr hDlg, IntPtr nResult);
 
-        [StructLayout( LayoutKind.Sequential )]
+        [StructLayout(LayoutKind.Sequential)]
         public struct CWPRETSTRUCT
         {
             public IntPtr lResult;

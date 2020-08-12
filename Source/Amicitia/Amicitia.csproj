@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Amicitia</RootNamespace>
     <AssemblyName>Amicitia</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
@@ -81,10 +81,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AssimpNet, Version=3.3.1.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Users\smart\Downloads\assimp-net-master\AssimpNet\bin\Net47-Debug\AssimpNet.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\Managed\OpenTK.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -98,26 +94,20 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModelViewer\ModelViewer.cs" />
     <Compile Include="ModelViewer\ShaderProgram.cs" />
     <Compile Include="ResourceWrappers\ACXFileSystemWrapper.cs" />
     <Compile Include="ResourceWrappers\AMDFileWrapper.cs" />
-    <Compile Include="ResourceWrappers\BVPFileWrapper.cs" />
-    <Compile Include="ResourceWrappers\CMRFileWrapper.cs" />
-    <Compile Include="ResourceWrappers\FBNFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\BvpEntryWrapper.cs" />
+    <Compile Include="ResourceWrappers\BvpFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\CmrFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\FbnFileWrapper.cs" />
     <Compile Include="ResourceWrappers\GenericListWrapper.cs" />
-    <Compile Include="ResourceWrappers\HBNFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\HbnFileWrapper.cs" />
     <Compile Include="ResourceWrappers\PAKFileSystemWrapper.cs" />
     <Compile Include="ResourceWrappers\BitmapWrapper.cs" />
     <Compile Include="ResourceWrappers\ResourceWrapperHideProperties.cs" />
@@ -125,7 +115,9 @@
     <Compile Include="ResourceWrappers\RMDSceneWrapper.cs" />
     <Compile Include="ResourceWrappers\PropertySorter.cs" />
     <Compile Include="ResourceWrappers\RWWorldWrapper.cs" />
-    <Compile Include="ResourceWrappers\SPRFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\SpdFileWrapper.cs" />
+    <Compile Include="ResourceWrappers\Spr6FileWrapper.cs" />
+    <Compile Include="ResourceWrappers\SprFileWrapper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,6 +127,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceWrapperFactory.cs" />
+    <Compile Include="Utilities\StreamExtensions.cs" />
     <Compile Include="ResourceWrappers\TGAFileWrapper.cs" />
     <Compile Include="ResourceWrappers\TMXFileWrapper.cs" />
     <Compile Include="ResourceWrappers\Vector3Wrapper.cs" />
@@ -150,7 +143,6 @@
     <Compile Include="Utilities\TreeNodeCollectionExtension.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -206,12 +198,21 @@
       <Name>AtlusFileSystemLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\AmicitiaLibrary\AmicitiaLibrary.csproj">
-      <Project>{adf5e4ca-d622-41a1-8a09-5ab964cbb411}</Project>
+      <Project>{57cac588-5780-4938-bc49-1fe3170dc113}</Project>
       <Name>AmicitiaLibrary</Name>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="AssimpNet">
+      <Version>4.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Ookii.Dialogs">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="Ookii.Dialogs.WinForms">
+      <Version>1.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -37,6 +37,14 @@ namespace Amicitia.ResourceWrappers
         [OrderedProperty]
         public byte MipMapCount => Resource.MipMapCount;
 
+        [Category( "Texture format" )]
+        [OrderedProperty]
+        public float MipMapKValue => Resource.MipMapKValue;
+
+        [Category( "Texture format" )]
+        [OrderedProperty]
+        public float MipMapLValue => Resource.MipMapLValue;
+
         [Category("Texture wrapping modes")]
         [OrderedProperty]
         public TmxWrapMode HorizontalWrappingMode
@@ -50,6 +58,13 @@ namespace Amicitia.ResourceWrappers
         public TmxWrapMode VerticalWrappingMode
         {
             get => Resource.VerticalWrappingMode;
+            set => SetProperty(Resource, value);
+        }
+
+        [Category("Texture metadata"), OrderedProperty]
+        public short UserId
+        {
+            get => Resource.UserId;
             set => SetProperty(Resource, value);
         }
 
@@ -77,6 +92,14 @@ namespace Amicitia.ResourceWrappers
             set => SetProperty(Resource, value);
         }
 
+        [Category("Misc")]
+        [OrderedProperty]
+        public byte Reserved
+        {
+            get => Resource.Reserved;
+            set => SetProperty(Resource, value);
+        }
+
         public TmxFileWrapper(string text, TmxFile resource) : base(text, resource)
         {
         }
@@ -89,7 +112,7 @@ namespace Amicitia.ResourceWrappers
             RegisterFileExportAction(SupportedFileType.TmxFile, (res, path) => res.Save(path));
             RegisterFileExportAction(SupportedFileType.Bitmap, (res, path) => res.GetBitmap().Save(path, ImageFormat.Png));
             RegisterFileReplaceAction(SupportedFileType.TmxFile, (res, path) => TmxFile.Load(path));
-            RegisterFileReplaceAction(SupportedFileType.Bitmap, (res, path) => new TmxFile(new Bitmap(path), res.PixelFormat, res.UserComment));
+            RegisterFileReplaceAction(SupportedFileType.Bitmap, (res, path) => new TmxFile(new Bitmap(path), res.UserId, res.PixelFormat, res.UserComment));
         }
 
         protected override void PopulateView()

@@ -1,4 +1,7 @@
 ﻿using AmicitiaLibrary.Field;
+using AmicitiaLibrary.Graphics.SPD;
+using AmicitiaLibrary.Graphics.SPR6;
+using AtlusFileSystemLibrary;
 using AtlusFileSystemLibrary.FileSystems.ACX;
 
 namespace Amicitia
@@ -36,47 +39,57 @@ namespace Amicitia
 
         // Properties
         public static SupportedFileInfo[] SupportedFileInfos { get; } =
-        {   //                     Description                        File Type Enum                              Type                             Validator              Instanciator                                        Extensions
+        {   //                     Description                        File Type Enum                              Type                             Validator              Instanciator                                        Get Stream                                            Extensions
             // Generic formats
-            new SupportedFileInfo("Raw data",                         SupportedFileType.Resource,                 typeof(BinaryFile),              null,                  (s, o) => new BinaryFile(s, o),                     ".*"),
-            new SupportedFileInfo("Bitmap",                           SupportedFileType.Bitmap,                   typeof(Bitmap),                  null,                  (s, o) => new Bitmap(s),                            ".png", ".bmp", ".gif", ".ico", ".jpg", ".jpeg", ".jif", ".jfif", ".jfi", ".tiff", ".tif"),
-            new SupportedFileInfo("Truevision TARGA",                 SupportedFileType.TgaFile,                  typeof(TgaFile),                 null,                  (s, o) => new TgaFile(s, o),                        ".tga"),
-            new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                               ".fbx", ".dae", ".obj"),
+            new SupportedFileInfo("Raw data",                         SupportedFileType.Resource,                 typeof(BinaryFile),              null,                  (s, o, f) => new BinaryFile(s, o),                  o => ((BinaryBase)o).GetMemoryStream(),               ".*"),
+            new SupportedFileInfo("DDS image",                        SupportedFileType.DDS,                      typeof(BinaryFile),              null,                  (s, o, f) => new BinaryFile(s, o),                  o => ((BinaryBase)o).GetMemoryStream(),               ".dds"),
+            new SupportedFileInfo("Bitmap",                           SupportedFileType.Bitmap,                   typeof(Bitmap),                  null,                  (s, o, f) => new Bitmap(s),                         o => ((BinaryBase)o).GetMemoryStream(),               ".png", ".bmp", ".gif", ".ico", ".jpg", ".jpeg", ".jif", ".jfif", ".jfi", ".tiff", ".tif"),
+            new SupportedFileInfo("Truevision TARGA",                 SupportedFileType.TgaFile,                  typeof(TgaFile),                 null,                  (s, o, f) => new TgaFile(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".tga"),
+            new SupportedFileInfo("Assimp Model",                     SupportedFileType.AssimpModelFile,          typeof(Scene),                   null,                  null,                                               o => ((BinaryBase)o).GetMemoryStream(),               ".fbx", ".dae", ".obj"),
 
             // Archive formats
-            new SupportedFileInfo("Atlus Generic Archive",            SupportedFileType.PakArchiveFile,           typeof(PAKFileSystem),           PAKFileSystem.IsValid, OpenPAKFileSystemFile,                              ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se", ".arc", ".abin", ".se", ".pse"),
-            new SupportedFileInfo("Persona 3/4 Battle Voice Package", SupportedFileType.BvpArchiveFile,           typeof(BvpFile),                 null,                  (s, o) => new BvpFile(s, o),                        ".bvp"),
-            new SupportedFileInfo("Atlus Vita Resource Container",    SupportedFileType.AmdFile,                  typeof(AmdFile),                 null,                  (s, o) => new AmdFile(s, o),                        ".amd"),
-            new SupportedFileInfo("CRIWare Sound Container",          SupportedFileType.AcxFile,                  typeof(ACXFileSystem),           null,                  OpenACXFileSystemFile,                              ".acx"),
+            new SupportedFileInfo("Atlus Generic Archive",            SupportedFileType.PakArchiveFile,           typeof(PAKFileSystem),           (s, f) => PAKFileSystem.IsValid(s), OpenPAKFileSystemFile,                 o => (MemoryStream)((PAKFileSystem)o).Save(),         ".bin", ".f00", ".f01", ".p00", ".p01", ".fpc", ".pak", ".pac", ".pack", ".se", ".arc", ".abin", ".se", ".pse"),
+            new SupportedFileInfo("Persona 3/4 Battle Voice Package", SupportedFileType.BvpArchiveFile,           typeof(BvpFile),                 null,                  (s, o, f) => new BvpFile(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".bvp"),
+            new SupportedFileInfo("Atlus Vita Resource Container",    SupportedFileType.AmdFile,                  typeof(AmdFile),                 null,                  (s, o, f) => new AmdFile(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".amd"),
+            new SupportedFileInfo("CRIWare Sound Container",          SupportedFileType.AcxFile,                  typeof(ACXFileSystem),           null,                  OpenACXFileSystemFile,                              o => (MemoryStream)((ACXFileSystem)o).Save(),         ".acx"),
 
             // Texture (container) formats
-            new SupportedFileInfo("Atlus PS2 Texture",                SupportedFileType.TmxFile,                  typeof(TmxFile),                 null,                 (s, o) => new TmxFile(s, o),                         ".tmx"),
-            new SupportedFileInfo("RenderWare PS2 Texture Container", SupportedFileType.RwTextureDictionaryNode,  typeof(RwTextureDictionaryNode), null,                 RwNode.Load,                                         ".txd"),
-            new SupportedFileInfo("RenderWare PS2 Texture",           SupportedFileType.RwTextureNativeNode,      typeof(RwTextureNativeNode),     null,                 RwNode.Load,                                         ".txn"),
+            new SupportedFileInfo("Atlus PS2 Texture",                SupportedFileType.TmxFile,                  typeof(TmxFile),                 null,                 (s, o, f) => new TmxFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".tmx"),
+            new SupportedFileInfo("RenderWare PS2 Texture Container", SupportedFileType.RwTextureDictionaryNode,  typeof(RwTextureDictionaryNode), null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".txd"),
+            new SupportedFileInfo("RenderWare PS2 Texture",           SupportedFileType.RwTextureNativeNode,      typeof(RwTextureNativeNode),     null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".txn"),
 
             // Sprite
-            new SupportedFileInfo("Atlus TMX Sprite Container",       SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o) => new SprFile(s, o),                         ".spr"),
-            new SupportedFileInfo("Atlus TGA Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o) => new Spr4File(s, o),                        ".spr4"),
-            new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o) => new SprSprite(s, o),                       ".sprt"),
+            new SupportedFileInfo("Atlus P3/P4 Sprite Container",     SupportedFileType.SprFile,                  typeof(SprFile),                 null,                 (s, o, f) => new SprFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".spr"),
+            new SupportedFileInfo("Atlus P4D Sprite Container",       SupportedFileType.Spr4File,                 typeof(Spr4File),                null,                 (s, o, f) => new Spr4File(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".spr4"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Container",    SupportedFileType.Spr6File,                 typeof(Spr6File),                null,                 (s, o, f) => new Spr6File(s, o),                     o => ((Spr6File)o).Save(),                            ".spr6"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Texture",      SupportedFileType.Spr6Sprite,               typeof(Spr6Sprite),              null,                 (s, o, f) => new Spr6Sprite(s, o),                   o => ((Spr6Sprite)o).Save(),                          ".spr6spr"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Panel",        SupportedFileType.Spr6Panel,                typeof(Spr6Panel),               null,                 (s, o, f) => new Spr6Panel(s, o),                    o => ((Spr6Panel)o).Save(),                           ".spr6pnl"),
+            new SupportedFileInfo("Atlus P3/P5D Sprite Texture",      SupportedFileType.Spr6Texture,              typeof(Spr6Texture),             null,                 (s, o, f) => new Spr6Texture(s, o),                  o => ((Spr6Texture)o).Save(),                         ".spr6tex"),
+            new SupportedFileInfo("Atlus Sprite",                     SupportedFileType.SprSprite,                typeof(SprSprite),               null,                 (s, o, f) => new SprSprite(s, o),                    o => ((BinaryBase)o).GetMemoryStream(),               ".sprt"),
+            new SupportedFileInfo("Atlus P5 Sprite Container",        SupportedFileType.SpdFile,                  typeof(SpdFile),                 null,                 (s, o, f) => new SpdFile(s, o),                      o => ((SpdFile)o).Save(),                             ".spd"),
+            new SupportedFileInfo("Atlus P5 Sprite",                  SupportedFileType.SpdSprite,                typeof(SpdSprite),               null,                 (s, o, f) => new SpdSprite(s, o),                    o => ((SpdSprite)o).Save(),                           ".spdspr"),
+            new SupportedFileInfo("Atlus P5 Sprite Texture",          SupportedFileType.SpdTexture,               typeof(SpdTexture),              null,                 (s, o, f) => new SpdTexture(s, o),                   o => ((SpdTexture)o).Save(),                          ".spdtex"),
 
             // Model related formats
-            new SupportedFileInfo("Atlus RenderWare Model Data",      SupportedFileType.RmdScene,                 typeof(RmdScene),                null,                 (s, o) => new RmdScene(s, o),                        ".rmd", ".rws"),
-            new SupportedFileInfo("RenderWare Clump",                 SupportedFileType.RwClumpNode,              typeof(RwClumpNode),             null,                 RwNode.Load,                                         ".dff"),
-            new SupportedFileInfo("Atlus RenderWare Node Link",       SupportedFileType.RmdNodeLink,              typeof(RmdNodeLink),             null,                 (s, o) => new RmdNodeLink(s),                        ".nl"),
-            new SupportedFileInfo("Atlus RenderWare Node Link List",  SupportedFileType.RmdNodeLinkList,          typeof(RmdNodeLinkListNode),     null,                 (s, o) => new RmdNodeLinkListNode(s),                ".nll"),
-            new SupportedFileInfo("RenderWare Node",                  SupportedFileType.RwNode,                   typeof(RwNode),                  null,                 RwNode.Load,                                         ".rwn"),
-            new SupportedFileInfo("Atlus RenderWare Animation",       SupportedFileType.RmdAnimation,             typeof(RmdAnimation),            null,                 (s, o) => new RmdAnimation(s, o),                    ".rmdanm"),
-            new SupportedFileInfo("RenderWare Geometry",              SupportedFileType.RwGeometryNode,           typeof(RwGeometryNode),          null,                 RwNode.Load,                                         ".geo"),
-            new SupportedFileInfo("RenderWare Atomic",                SupportedFileType.RwAtomicNode,             typeof(RwAtomicNode),            null,                 RwNode.Load,                                         ".atm"),
-            new SupportedFileInfo("RenderWare Animation",             SupportedFileType.RwAnimationNode,          typeof(RwAnimationNode),         null,                 RwNode.Load,                                         ".anm"),
-            new SupportedFileInfo("RenderWare Material",              SupportedFileType.RwMaterial,               typeof(RwMaterial),              null,                 RwNode.Load,                                         ".mat"),
-            new SupportedFileInfo("RenderWare Texture Reference",     SupportedFileType.RwTextureReferenceNode,   typeof(RwTextureReferenceNode),  null,                 RwNode.Load,                                         ".trf"),
-            new SupportedFileInfo("RenderWare User Data List",        SupportedFileType.RwUserDataList,           typeof(RwUserDataList),          null,                 RwNode.Load,                                         ".udl"),
+            new SupportedFileInfo("Atlus RenderWare Model Data",      SupportedFileType.RmdScene,                 typeof(RmdScene),                null,                 (s, o, f) => new RmdScene(s, o),                     o => ((BinaryBase)o).GetMemoryStream(),               ".rmd", ".rws"),
+            new SupportedFileInfo("RenderWare Clump",                 SupportedFileType.RwClumpNode,              typeof(RwClumpNode),             null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".dff"),
+            new SupportedFileInfo("Atlus RenderWare Node Link",       SupportedFileType.RmdNodeLink,              typeof(RmdNodeLink),             null,                 (s, o, f) => new RmdNodeLink(s),                     o => ((BinaryBase)o).GetMemoryStream(),               ".nl"),
+            new SupportedFileInfo("Atlus RenderWare Node Link List",  SupportedFileType.RmdNodeLinkList,          typeof(RmdNodeLinkListNode),     null,                 (s, o, f) => new RmdNodeLinkListNode(s),             o => ((BinaryBase)o).GetMemoryStream(),               ".nll"),
+            new SupportedFileInfo("RenderWare Node",                  SupportedFileType.RwNode,                   typeof(RwNode),                  null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".rwn"),
+            new SupportedFileInfo("Atlus RenderWare Animation",       SupportedFileType.RmdAnimation,             typeof(RmdAnimation),            null,                 (s, o, f) => new RmdAnimation(s, o),                 o => ((BinaryBase)o).GetMemoryStream(),               ".rmdanm"),
+            new SupportedFileInfo("RenderWare Geometry",              SupportedFileType.RwGeometryNode,           typeof(RwGeometryNode),          null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".geo"),
+            new SupportedFileInfo("RenderWare Atomic",                SupportedFileType.RwAtomicNode,             typeof(RwAtomicNode),            null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".atm"),
+            new SupportedFileInfo("RenderWare Animation",             SupportedFileType.RwAnimationNode,          typeof(RwAnimationNode),         null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".anm"),
+            new SupportedFileInfo("RenderWare Material",              SupportedFileType.RwMaterial,               typeof(RwMaterial),              null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".mat"),
+            new SupportedFileInfo("RenderWare Texture Reference",     SupportedFileType.RwTextureReferenceNode,   typeof(RwTextureReferenceNode),  null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".trf"),
+            new SupportedFileInfo("RenderWare User Data List",        SupportedFileType.RwUserDataList,           typeof(RwUserDataList),          null,                 (s, o, f) => RwNode.Load(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".udl"),
 
             // Field related formats
-            new SupportedFileInfo("Field Camera Parameters",          SupportedFileType.CmrFile,                  typeof(CmrFile),                 null,                 (s, o) => new CmrFile(s, o),                         ".cmr"),
-            new SupportedFileInfo("Field Object Placement",           SupportedFileType.FbnFile,                  typeof(FbnFile),                 null,                 (s, o) => new FbnFile(s, o),                         ".fbn"),
-            new SupportedFileInfo("Field Hit Placement",              SupportedFileType.HbnFile,                  typeof(HbnFile),                 null,                 (s, o) => new HbnFile(s, o),                         ".hbn"),
+            new SupportedFileInfo("Field Camera Parameters",          SupportedFileType.CmrFile,                  typeof(CmrFile),                 null,                 (s, o, f) => new CmrFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".cmr"),
+            new SupportedFileInfo("Field Object Placement",           SupportedFileType.FbnFile,                  typeof(FbnFile),                 null,                 (s, o, f) => new FbnFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".fbn"),
+            new SupportedFileInfo("Field Hit Placement",              SupportedFileType.HbnFile,                  typeof(HbnFile),                 null,                 (s, o, f) => new HbnFile(s, o),                      o => ((BinaryBase)o).GetMemoryStream(),               ".hbn"),
+
+            new SupportedFileInfo("Atlus Message Script",             SupportedFileType.MessageScript,            typeof(BinaryFile),              null,                 (s, o, f) => new BinaryFile(s, o),                  o => ((BinaryBase)o).GetMemoryStream(),                ".bmd"),
         };
 
         public static string FileFilter { get; }
@@ -106,9 +119,20 @@ namespace Amicitia
             return SupportedFileInfos[index];
         }
 
+        /// <summary>
+        /// Get supported file info by type. Supports 1 level of inheritance.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static SupportedFileInfo GetSupportedFileInfo( Type type )
         {
-            return SupportedFileInfos.Single( x => x.ClassType == type );
+            var info = SupportedFileInfos.FirstOrDefault( x => x.ClassType == type );
+            while ( info == null )
+            {
+                info = SupportedFileInfos.FirstOrDefault( x => x.ClassType.BaseType == type );
+            }
+
+            return info;
         }
 
         public static SupportedFileInfo GetSupportedFileInfo( SupportedFileType type )
@@ -134,24 +158,32 @@ namespace Amicitia
 
         public static int GetSupportedFileIndex( string name, Stream stream )
         {
-            var extension = Path.GetExtension( name )?.ToLowerInvariant();
+            var originalStreamPosition = stream.Position;
+            var extension = Path.GetExtension( name )?.Trim().ToLowerInvariant();
             var matches = Array.FindAll( SupportedFileInfos, s => s.Extensions.Contains( extension ) );
 
             // No matches were found
             if ( matches.Length == 0 )
                 return -1;
 
-            if ( matches.Length > 1 )
+            try
             {
-                foreach ( var match in matches )
+                if ( matches.Length > 1 )
                 {
-                    if ( match.Validator( stream ) )
-                        Array.IndexOf( SupportedFileInfos, match );
+                    foreach ( var match in matches )
+                    {
+                        if ( match.Validator( stream, name ) )
+                            return Array.IndexOf( SupportedFileInfos, match );
+                    }
+                }
+                else if ( matches[0].Validator( stream, name ) )
+                {
+                    return Array.IndexOf( SupportedFileInfos, matches[0] );
                 }
             }
-            else if ( matches[0].Validator(stream) )
+            finally
             {
-                return Array.IndexOf( SupportedFileInfos, matches[0] );
+                stream.Position = originalStreamPosition;
             }
 
             return -1;
@@ -244,18 +276,33 @@ namespace Amicitia
             return filter;
         }
 
-        private static PAKFileSystem OpenPAKFileSystemFile( Stream stream, bool leaveOpen )
+        private static PAKFileSystem OpenPAKFileSystemFile( Stream stream, bool leaveOpen, string fileName )
         {
             var pak = new PAKFileSystem();
-            pak.Load( stream, leaveOpen );
+            LoadFileSystem<PAKFileSystem, string>( pak, stream, leaveOpen, fileName );
             return pak;
         }
 
-        private static ACXFileSystem OpenACXFileSystemFile( Stream stream, bool leaveOpen )
+        private static ACXFileSystem OpenACXFileSystemFile( Stream stream, bool leaveOpen, string fileName )
         {
             var acx = new ACXFileSystem();
-            acx.Load( stream, leaveOpen );
+            LoadFileSystem<ACXFileSystem, int>( acx, stream, leaveOpen, fileName );
             return acx;
+        }
+
+        private static void LoadFileSystem<T, T2>( T fs, Stream stream, bool leaveOpen, string fileName ) where T : IFileSystem<T2>
+        {
+            if ( stream is FileStream )
+            {
+                // Hack: close stream & load as file
+                //fs.Dispose();
+                //fs.Load( fileName );
+                fs.Load( stream, ownsStream: !leaveOpen );
+            }
+            else
+            {
+                fs.Load( stream, ownsStream: !leaveOpen );
+            }
         }
     }
 }

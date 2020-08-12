@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System.Windows.Forms;
+using Amicitia.Utilities;
 using AtlusFileSystemLibrary;
 using AtlusFileSystemLibrary.FileSystems.PAK;
 
 namespace Amicitia.ResourceWrappers
 {
+
     public class PAKFileSystemWrapper : ResourceWrapper<PAKFileSystem>
     {
         public int EntryCount => Nodes.Count;
@@ -18,11 +20,14 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace | CommonContextMenuOptions.Add |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
-            RegisterFileExportAction(SupportedFileType.PakArchiveFile, (res, path) => res.Save(path));
+            RegisterFileExportAction(SupportedFileType.PakArchiveFile, ( res, path ) =>
+            {
+                res.Save().SaveToFile( false, path );
+            } );
             RegisterFileReplaceAction( SupportedFileType.PakArchiveFile, ( res, path ) =>
             {
                 var pak = new PAKFileSystem();
-                pak.Load( path );
+                pak.Load( File.OpenRead( path ).ToMemoryStream( leaveOpen: false ), true );
                 return pak;
             } );
             RegisterFileAddAction(SupportedFileType.Resource, DefaultFileAddAction);

@@ -5,6 +5,7 @@ using System.IO;
 using Amicitia.ResourceWrappers;
 using AmicitiaLibrary.Graphics;
 using OpenTK;
+using OpenTK.Input;
 using System.Runtime.InteropServices;
 using AmicitiaLibrary.Graphics.RenderWare;
 using System.Drawing;
@@ -340,7 +341,7 @@ namespace Amicitia
             }
         }
 
-        private void OpenFile(string path)
+        public void OpenFile(string path)
         {
             // Get the supported file index so we can check if it's /actually/ supported as you can override the filter easily by copy pasting
             int supportedFileIndex = SupportedFileManager.GetSupportedFileIndex(path);
@@ -359,16 +360,15 @@ namespace Amicitia
             try
             {
 #endif
-                // Get the resource from the factory and it to the tree view
-                var fileStream = File.OpenRead( path );
-                treeNode = (TreeNode)ResourceWrapperFactory.GetResourceWrapper(Path.GetFileName(path), fileStream, supportedFileIndex);
+            // Get the resource from the factory and it to the tree view
+            using ( var fileStream = File.OpenRead( path ) )
+                treeNode = ( TreeNode )ResourceWrapperFactory.GetResourceWrapper( Path.GetFileName( path ), fileStream, supportedFileIndex, path );
 #if !DEBUG
             }
             catch (Exception)
             {
                 using (var centeringService = new DialogCenteringService(this))
                     MessageBox.Show("Can't open this file format.", "Open file error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-
                 return;
             }
 #endif
@@ -442,7 +442,6 @@ namespace Amicitia
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AllocConsole();
-
         public static bool GetAsyncKey(Keys key)
         {
             if (MainForm.GLControl.Focused)

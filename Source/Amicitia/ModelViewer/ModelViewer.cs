@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using OpenTK.Graphics;
+using OpenTK.Input;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using AmicitiaLibrary.Graphics.RenderWare;
@@ -291,53 +292,53 @@ namespace Amicitia.ModelViewer
             return true;
         }
 
-        private void Input(object sender, System.Windows.Forms.KeyPressEventArgs args )
+        private void Input(object sender, System.Windows.Forms.KeyPressEventArgs args)
         {
+            var state = OpenTK.Input.Keyboard.GetState();
             if (!mIsViewFocused || !mCanRender )
                 return;
-
             Vector3 oldpos = mCamera.Position;
             float moveSpeed = 10f;
-            if (NativeMethods.GetAsyncKey(Keys.Shift))
+            if (state[Key.ShiftLeft])
                 moveSpeed *= 2;
 
             bool inputWasHandled = false;
 
-            if ( NativeMethods.GetAsyncKey( Keys.W ) )
+            if (state[Key.W])
             {
-                mCamera.Position += mCamera.Forward * moveSpeed; // tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
+                    mCamera.Position += mCamera.Forward * moveSpeed; // tp = new Vector3(tp.X, tp.Y, tp.Z + 10f);
                 inputWasHandled = true;
             }
 
-            if (NativeMethods.GetAsyncKey(Keys.S))
+            if (state[Key.S])
             {
                 mCamera.Position -= mCamera.Forward * moveSpeed; // tp = new Vector3(tp.X, tp.Y, tp.Z - 10f);
                 inputWasHandled = true;
             }
 
-            if (NativeMethods.GetAsyncKey(Keys.D))
+            if (state[Key.D])
             {
                 mCamera.Position -= Vector3.Cross(mCamera.Forward, new Vector3(0, 1.0f, 0)) * moveSpeed; // tp = new Vector3(tp.X, tp.Y + 10f, tp.Z);
                 inputWasHandled = true;
             }
 
-            if (NativeMethods.GetAsyncKey(Keys.A))
+            if (state[Key.A])
             {
                 mCamera.Position += Vector3.Cross(mCamera.Forward, new Vector3(0, 1.0f, 0)) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
                 inputWasHandled = true;
             }
 
-            if (NativeMethods.GetAsyncKey(Keys.Q))
-            {
-                mCamera.Position += new Vector3(0, 1.0f, 0) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-                inputWasHandled = true;
-            }
+          	if (state[Key.Q])
+          	{
+              mCamera.Position += new Vector3(0, 1.0f, 0) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+              inputWasHandled = true;
+          	}
 
-            if (NativeMethods.GetAsyncKey(Keys.E))
-            {
-                mCamera.Position -= new Vector3(0, 1.0f, 0) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
-                inputWasHandled = true;
-            }
+          	if (state[Key.E])
+          	{
+              mCamera.Position -= new Vector3(0, 1.0f, 0) * moveSpeed; // tp = new Vector3(tp.X, tp.Y - 10f, tp.Z);
+              inputWasHandled = true;
+          	}
 
             if ( inputWasHandled && IsNaN( mCamera.Position))
             {

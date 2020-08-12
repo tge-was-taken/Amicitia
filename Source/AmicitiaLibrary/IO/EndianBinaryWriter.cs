@@ -1,48 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using AmicitiaLibrary.Utilities;
 
 namespace AmicitiaLibrary.IO
 {
     public class EndianBinaryWriter : BinaryWriter
     {
-        private StringBuilder   mStringBuilder;
-        private Endianness      mEndianness;
-        private bool            mSwap;
-        private Encoding        mEncoding;
-        private Queue<long>     mPosQueue;
+        internal class ScheduledWrite
+        {
+            public long Position { get; }
+
+            public Func<long> Action { get; }
+
+            public int Priority { get; }
+
+            public ScheduledWrite( long position, Func<long> action, int priority )
+            {
+                Position = position;
+                Action = action;
+                Priority = priority;
+            }
+        }
+
+        private Endianness mEndianness;
+        private Encoding mEncoding;
+        private LinkedList<ScheduledWrite> mScheduledWrites;
+        private LinkedList<long> mScheduledFileSizeWrites;
+        private List<long> mOffsetPositions;
+        private Stack<long> mBaseOffset;
 
         public Endianness Endianness
         {
-            get { return mEndianness; }
+            get => mEndianness;
             set
             {
-                if (value != EndiannessHelper.SystemEndianness)
-                    mSwap = true;
-                else
-                    mSwap = false;
-
+                SwapBytes = value != EndiannessHelper.SystemEndianness;
                 mEndianness = value;
             }
         }
 
-        public bool EndiannessNeedsSwapping
-        {
-            get { return mSwap; }
-        }
+        public bool SwapBytes { get; private set; }
 
         public long Position
         {
-            get { return BaseStream.Position; }
-            set { BaseStream.Position = value; }
+            get => BaseStream.Position;
+            set => BaseStream.Position = value;
         }
 
-        public long BaseStreamLength
-        {
-            get { return BaseStream.Length; }
-        }
+        public long Length => BaseStream.Length;
+
+        public IReadOnlyList<long> OffsetPositions => mOffsetPositions;
 
         public EndianBinaryWriter(Stream input, Endianness endianness)
             : base(input)
@@ -65,9 +76,12 @@ namespace AmicitiaLibrary.IO
         private void Init(Encoding encoding, Endianness endianness)
         {
             Endianness = endianness;
-            mStringBuilder = new StringBuilder();
             mEncoding = encoding;
-            mPosQueue = new Queue<long>();
+            mScheduledWrites = new LinkedList<ScheduledWrite>();
+            mScheduledFileSizeWrites = new LinkedList<long>();
+            mOffsetPositions = new List<long>();
+            mBaseOffset = new Stack<long>();
+            mBaseOffset.Push( 0 );
         }
 
         public void Seek(long offset, SeekOrigin origin)
@@ -90,49 +104,33 @@ namespace AmicitiaLibrary.IO
             BaseStream.Seek(offset, SeekOrigin.End);
         }
 
-        public void EnqueuePosition()
-        {
-            mPosQueue.Enqueue(Position);
-        }
+        public void PushBaseOffset( long baseOffset ) => mBaseOffset.Push( baseOffset );
 
-        public long PeekEnqueuedPosition()
-        {
-            return mPosQueue.Peek();
-        }
-
-        public long DequeuePosition()
-        {
-            return mPosQueue.Dequeue();
-        }
-
-        public void SeekBeginToDequeuedPosition()
-        {
-            SeekBegin(DequeuePosition());
-        }
+        public void PopBaseOffset() => mBaseOffset.Pop();
 
         public new void Write(byte[] values)
         {
             base.Write(values);
         }
 
-        public void Write(sbyte[] values)
+        public void Write( IEnumerable<sbyte> values)
         {
-            for (int i = 0; i < values.Length; i++)
-                Write(values[i]);
+            foreach ( sbyte t in values )
+                Write(t);
         }
 
-        public void Write(bool[] values)
+        public void Write( IEnumerable<bool> values)
         {
-            for (int i = 0; i < values.Length; i++)
-                Write(values[i]);
+            foreach ( bool t in values )
+                Write(t);
         }
 
         public override void Write(short value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(short[] values)
+        public void Write( IEnumerable<short> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -140,10 +138,10 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(ushort value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(ushort[] values)
+        public void Write( IEnumerable<ushort> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -151,10 +149,10 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(int value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(int[] values)
+        public void Write(IEnumerable<int> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -162,10 +160,10 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(uint value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(uint[] values)
+        public void Write( IEnumerable<uint> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -173,10 +171,10 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(long value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(long[] values)
+        public void Write( IEnumerable<long> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -184,10 +182,10 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(ulong value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(ulong[] values)
+        public void Write( IEnumerable<ulong> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -195,10 +193,10 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(float value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(float[] values)
+        public void Write( IEnumerable<float> values)
         {
             foreach (var value in values)
                 Write(value);
@@ -206,13 +204,38 @@ namespace AmicitiaLibrary.IO
 
         public override void Write(decimal value)
         {
-            base.Write(mSwap ? EndiannessHelper.Swap(value) : value);
+            base.Write(SwapBytes ? EndiannessHelper.Swap(value) : value);
         }
 
-        public void Write(decimal[] values)
+        public void Write( IEnumerable<decimal> values)
         {
             foreach (var value in values)
                 Write(value);
+        }
+
+        public void Write( Vector2 value )
+        {
+            Write( value.X );
+            Write( value.Y );
+        }
+
+        public void Write( IEnumerable<Vector2> values )
+        {
+            foreach ( var item in values )
+                Write( item );
+        }
+
+        public void Write( Vector3 value )
+        {
+            Write( value.X );
+            Write( value.Y );
+            Write( value.Z );
+        }
+
+        public void Write( IEnumerable<Vector3> values )
+        {
+            foreach ( var item in values )
+                Write( item );
         }
 
         public void Write(string value, StringBinaryFormat format, int fixedLength = -1)
@@ -236,9 +259,7 @@ namespace AmicitiaLibrary.IO
 
                         var bytes = mEncoding.GetBytes(value);
                         if (bytes.Length > fixedLength)
-                        {
-                            throw new ArgumentException("Provided string is longer than fixed length", nameof(value));
-                        }
+                            Array.Resize( ref bytes, fixedLength );
 
                         Write(bytes);
                         fixedLength -= bytes.Length;
@@ -274,52 +295,125 @@ namespace AmicitiaLibrary.IO
             }
         }
 
-        public void Write<T>(ref T value)
-            where T : struct
+        public void WritePadding( int count )
         {
-            // Allocate bytes for struct
-            var bytes = new byte[Marshal.SizeOf<T>()];
+            for ( int i = 0; i < count / 8; i++ )
+                Write( 0L );
 
-            unsafe
-            {
-                fixed (byte* ptr = bytes)
-                {
-                    // Marshal the structure into the allocated byte array
-                    if (mSwap)
-                        Marshal.StructureToPtr(EndiannessHelper.Swap(value), (IntPtr)ptr, true);
-                    else
-                        Marshal.StructureToPtr(value, (IntPtr)ptr, true);
-                }
-            }
-
-            // Lastly write out the bytes
-            Write(bytes);
+            for ( int i = 0; i < count % 8; i++ )
+                Write( ( byte ) 0 );
         }
 
-        public void Write<T>(T[] value)
-            where T : struct
+        public void WriteAlignmentPadding( int alignment )
         {
-            // Allocate bytes for struct
-            int typeSize = Marshal.SizeOf<T>();
-            var bytes = new byte[typeSize * value.Length];
+            WritePadding( AlignmentHelper.GetAlignedDifference( Position, alignment ) );
+        }
 
-            unsafe
+        public void ScheduleOffsetWrite( Action action )
+        {
+            ScheduleOffsetWrite( 0, () =>
             {
-                fixed (byte* ptr = bytes)
-                {
-                    for (int i = 0; i < value.Length; i++)
-                    {
-                        // Marshal the structure into the allocated byte array
-                        if (mSwap)
-                            Marshal.StructureToPtr(EndiannessHelper.Swap(value[i]), (IntPtr)(ptr + (i * typeSize)), true);
-                        else
-                            Marshal.StructureToPtr(value[i], (IntPtr)(ptr + (i * typeSize)), true);
-                    }             
-                }
-            }
+                long offset = BaseStream.Position;
+                action();
+                return offset;
+            } );
+        }
 
-            // Lastly write out the bytes
-            Write(bytes);
+        public void ScheduleOffsetWrite( int priority, Action action )
+        {
+            ScheduleOffsetWrite( priority, () =>
+            {
+                long offset = BaseStream.Position;
+                action();
+                return offset;
+            } );
+        }
+
+        public void ScheduleOffsetWriteAligned( int alignment, Action action )
+        {
+            ScheduleOffsetWrite( 0, () =>
+            {
+                WriteAlignmentPadding( alignment );
+                long offset = BaseStream.Position;
+                action();
+                return offset;
+            } );
+        }
+
+        public void ScheduleFileSizeWrite()
+        {
+            mScheduledFileSizeWrites.AddLast( Position );
+            Write( 0 );
+        }
+
+        private void ScheduleOffsetWrite( int priority, Func<long> action )
+        {
+            mScheduledWrites.AddLast( new ScheduledWrite( BaseStream.Position, action, priority ) );
+            Write( 0 );
+        }
+
+        public void PerformScheduledWrites()
+        {
+            DoScheduledOffsetWrites();
+            DoScheduledFileSizeWrites();
+        }
+
+        private void DoScheduledOffsetWrites()
+        {
+            int curPriority = 0;
+
+            while ( mScheduledWrites.Count > 0 )
+            {
+                var anyWritesDone = false;
+                var current = mScheduledWrites.First;
+
+                while ( current != null )
+                {
+                    var next = current.Next;
+
+                    if ( current.Value.Priority == curPriority )
+                    {
+                        DoScheduledWrite( current.Value );
+                        mScheduledWrites.Remove( current );
+                        anyWritesDone = true;
+                    }
+
+                    current = next;
+                }
+
+                if ( anyWritesDone || curPriority == 0 )
+                    ++curPriority;
+                else
+                    --curPriority;
+            }
+        }
+
+        private void DoScheduledFileSizeWrites()
+        {
+            var current = mScheduledFileSizeWrites.First;
+            while ( current != null )
+            {
+                SeekBegin( current.Value );
+                Write( ( int )Length );
+                current = current.Next;
+            }
+        }
+
+        private void DoScheduledWrite( ScheduledWrite scheduledWrite )
+        {
+            long offsetPosition = scheduledWrite.Position;
+            mOffsetPositions.Add( offsetPosition - mBaseOffset.Peek() );
+
+            // Do actual write
+            long offset = scheduledWrite.Action() - mBaseOffset.Peek();
+
+            // Write offset
+            long returnPos = BaseStream.Position;
+            BaseStream.Seek( offsetPosition, SeekOrigin.Begin );
+            Write( ( int )offset );
+
+            // Seek back for next one
+            BaseStream.Seek( returnPos, SeekOrigin.Begin );
         }
     }
 }

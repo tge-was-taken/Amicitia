@@ -5,6 +5,7 @@ namespace Amicitia
     using ResourceWrappers;
     using System.IO;
     using AmicitiaLibrary.IO;
+    using Amicitia.Utilities;
 
     internal static class ResourceWrapperFactory
     {
@@ -15,23 +16,31 @@ namespace Amicitia
         public static IResourceWrapper GetResourceWrapper(string path)
         {
             using (var stream = File.OpenRead(path))
-                return GetResourceWrapper(Path.GetFileName(path), stream);
+                return GetResourceWrapper(Path.GetFileName(path), stream, path);
         }
 
-        public static IResourceWrapper GetResourceWrapper(string text, Stream stream)
+        public static IResourceWrapper GetResourceWrapper(string text, Stream stream, string filePath = null)
         {
-            return GetResourceWrapper(text, stream, SupportedFileManager.GetSupportedFileIndex(text, stream));
+            return GetResourceWrapper(text, stream, SupportedFileManager.GetSupportedFileIndex(text, stream), filePath ?? text);
         }
 
-        public static IResourceWrapper GetResourceWrapper(string text, Stream stream, int supportedFileIndex)
+        public static IResourceWrapper GetResourceWrapper(string text, Stream stream, int supportedFileIndex, string filePath = null)
         {
+            if ( stream is FileStream fileStream )
+            {
+                if ( filePath == null )
+                    filePath = fileStream.Name;
+
+                stream = fileStream.ToMemoryStream( leaveOpen: false );
+            }
+
             if (supportedFileIndex == -1)
             {
                 return new BinaryFileWrapper(text, new BinaryFile(stream));
             }
 
-            var supportedFileInfo = SupportedFileManager.GetSupportedFileInfo(supportedFileIndex);
-            var resource = supportedFileInfo.Instantiator( stream, false );
+            var supportedFileInfo = SupportedFileManager.GetSupportedFileInfo(supportedFileIndex);      
+            var resource = supportedFileInfo.Instantiator( stream, false, filePath);
 
             return GetResourceWrapper(text, resource);
         }

@@ -377,7 +377,7 @@ namespace AmicitiaLibrary.Graphics.DDS
             }
         }
 
-        private static MemoryStream ReadBCMipLine( Stream compressed, int mipHeight, int mipWidth, int bitsPerScanLine, long mipOffset, int compressedLineSize, int rowIndex, Func<Stream, List<byte[]>> decompressBlock )
+        private static MemoryStream ReadBCMipLine( Stream compressed, int mipWidth, int mipHeight, int bitsPerScanLine, long mipOffset, int compressedLineSize, int rowIndex, Func<Stream, List<byte[]>> decompressBlock )
         {
             var bitsPerPixel = 4;
 

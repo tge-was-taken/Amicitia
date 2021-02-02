@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -410,14 +410,17 @@ namespace Amicitia.ResourceWrappers
 
                         foreach ( var material in scene.Materials )
                         {
-                            var texturePath = Path.Combine( pathDirectory, material.TextureDiffuse.FilePath );
-                            var textureName = Path.GetFileNameWithoutExtension( texturePath );
-                            var textureExt = Path.GetExtension( texturePath );
-
-                            if ( File.Exists( texturePath ) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.Contains( textureName ) )
+                            if (material.TextureDiffuse.FilePath != null)
                             {
-                                rmdScene.TextureDictionaryWrapper.Add( texturePath, SupportedFileType.Bitmap );
-                                textureNameLookup.Add( textureName );
+                                var texturePath = Path.Combine(pathDirectory, material.TextureDiffuse.FilePath);
+                                var textureName = Path.GetFileNameWithoutExtension(texturePath);
+                                var textureExt = Path.GetExtension(texturePath);
+
+                                if (File.Exists(texturePath) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.Contains(textureName))
+                                {
+                                    rmdScene.TextureDictionaryWrapper.Add(texturePath, SupportedFileType.Bitmap);
+                                    textureNameLookup.Add(textureName);
+                                }
                             }
                         }
                     }

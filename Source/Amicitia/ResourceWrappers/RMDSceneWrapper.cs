@@ -560,6 +560,11 @@ namespace Amicitia.ResourceWrappers
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
 
+            RegisterCustomAction("Add user data", Keys.None, (o, s) =>
+            {
+                ExtensionsWrapper.AddNode(new RwUserDataListWrapper(null, new RwUserDataList()));
+            });
+
             RegisterCustomAction( "Set vertex color", Keys.None, ( o, s ) =>
             {
                 using ( var dialog = new ColorDialog() )

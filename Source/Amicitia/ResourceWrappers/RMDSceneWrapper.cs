@@ -1112,7 +1112,7 @@ namespace Amicitia.ResourceWrappers
 
         protected override void Initialize()
         {
-            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete | CommonContextMenuOptions.Export;
+            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete | CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace;
             RegisterFileExportAction( SupportedFileType.RwUserDataList, ( res, path ) => res.Save( path ) );
             RegisterCustomAction( "Add user data", Keys.None, ( o, s ) =>
             {
@@ -1129,6 +1129,8 @@ namespace Amicitia.ResourceWrappers
 
                 return list;
             } );
+
+            RegisterFileReplaceAction(SupportedFileType.RwUserDataList, (res, path) => (RwUserDataList)RwUserDataList.Load(path));
         }
 
         protected override void PopulateView()

@@ -488,7 +488,8 @@ namespace AmicitiaLibrary.Graphics.RenderWare
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    break;//Some animations are just empty so Amicitia will die while trying to save some of the normal models
+                    
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -410,14 +410,17 @@ namespace Amicitia.ResourceWrappers
 
                         foreach ( var material in scene.Materials )
                         {
-                            var texturePath = Path.Combine( pathDirectory, material.TextureDiffuse.FilePath );
-                            var textureName = Path.GetFileNameWithoutExtension( texturePath );
-                            var textureExt = Path.GetExtension( texturePath );
-
-                            if ( File.Exists( texturePath ) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.Contains( textureName ) )
+                            if (material.TextureDiffuse.FilePath != null)
                             {
-                                rmdScene.TextureDictionaryWrapper.Add( texturePath, SupportedFileType.Bitmap );
-                                textureNameLookup.Add( textureName );
+                                var texturePath = Path.Combine(pathDirectory, material.TextureDiffuse.FilePath);
+                                var textureName = Path.GetFileNameWithoutExtension(texturePath);
+                                var textureExt = Path.GetExtension(texturePath);
+
+                                if (File.Exists(texturePath) && textureExtensions.Contains(textureExt.ToLowerInvariant()) && !textureNameLookup.Contains(textureName))
+                                {
+                                    rmdScene.TextureDictionaryWrapper.Add(texturePath, SupportedFileType.Bitmap);
+                                    textureNameLookup.Add(textureName);
+                                }
                             }
                         }
                     }
@@ -556,6 +559,11 @@ namespace Amicitia.ResourceWrappers
         {
             CommonContextMenuOptions = CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace |
                                        CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete;
+
+            RegisterCustomAction("Add user data", Keys.None, (o, s) =>
+            {
+                ExtensionsWrapper.AddNode(new RwUserDataListWrapper(null, new RwUserDataList()));
+            });
 
             RegisterCustomAction( "Set vertex color", Keys.None, ( o, s ) =>
             {
@@ -1104,7 +1112,7 @@ namespace Amicitia.ResourceWrappers
 
         protected override void Initialize()
         {
-            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete | CommonContextMenuOptions.Export;
+            CommonContextMenuOptions = CommonContextMenuOptions.Move | CommonContextMenuOptions.Rename | CommonContextMenuOptions.Delete | CommonContextMenuOptions.Export | CommonContextMenuOptions.Replace;
             RegisterFileExportAction( SupportedFileType.RwUserDataList, ( res, path ) => res.Save( path ) );
             RegisterCustomAction( "Add user data", Keys.None, ( o, s ) =>
             {
@@ -1121,6 +1129,8 @@ namespace Amicitia.ResourceWrappers
 
                 return list;
             } );
+
+            RegisterFileReplaceAction(SupportedFileType.RwUserDataList, (res, path) => (RwUserDataList)RwUserDataList.Load(path));
         }
 
         protected override void PopulateView()

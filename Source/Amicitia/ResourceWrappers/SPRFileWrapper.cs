@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using AmicitiaLibrary.Graphics;
 using AmicitiaLibrary.Graphics.SPR;
 using AmicitiaLibrary.Graphics.TGA;
@@ -46,7 +46,7 @@ namespace Amicitia.ResourceWrappers
 
         protected override GenericListWrapper<TmxFile> GetTextureListWrapper()
         {
-            return new GenericListWrapper<TmxFile>("Textures", Resource.Textures,
+            return new TmxListWrapper("Textures", Resource.Textures,
                 (tex, i) => !string.IsNullOrEmpty(tex.UserComment) ? tex.UserComment : $"Texture {i:00}");
         }
 

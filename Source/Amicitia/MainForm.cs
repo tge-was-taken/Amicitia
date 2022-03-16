@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
@@ -284,7 +284,17 @@ namespace Amicitia
             // mainPropertyGrid
             //mainPropertyGrid.PropertySort = PropertySort.Categorized;
             mainPropertyGrid.PropertySort = PropertySort.NoSort;
-            mainPropertyGrid.PropertyValueChanged += ( s, e ) => MainTreeViewAfterSelectEventHandler(s, new TreeViewEventArgs(MainTreeView.SelectedNode));
+            mainPropertyGrid.PropertyValueChanged += ((s, e) => {
+                var resNode = mainTreeView.SelectedNode;
+                var resWrap = resNode as IResourceWrapper;
+                if (resWrap == null)
+                {
+                    return;
+                }
+                ResourceWrapper<object>.SetRebuildFlag(resNode);
+                MainTreeViewAfterSelectEventHandler(s, new TreeViewEventArgs(MainTreeView.SelectedNode));
+                });
+  
         }
 
         // Handlers

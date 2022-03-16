@@ -21,10 +21,9 @@ namespace Amicitia.ResourceWrappers
             RegisterFileAddAction(SupportedFileManager.GetSupportedFileType(typeof(TmxFile)), DefaultFileAddAction);
             RegisterFileAddAction(SupportedFileType.Bitmap, (path, res) => {
                 var name = Path.GetFileName(path);
-                var tex = new TmxFile(new Bitmap(path),0, PS2PixelFormat.PSMT8,name);//, short userId = 0, PS2PixelFormat pixelFormat = PS2PixelFormat.PSMT8, string comment = ""
-                SetRebuildFlag(res.Parent);
+                var tex = new TmxFile(new Bitmap(path),0, PS2PixelFormat.PSMT8,name);
+                SetRebuildFlag(res);
                 res.Nodes.Add(new TmxFileWrapper(name,tex));
-                res.NeedsRebuild = true;
             });
 
             RegisterRebuildAction(wrap =>

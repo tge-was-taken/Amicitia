@@ -87,7 +87,7 @@ namespace Amicitia.ResourceWrappers
         {
             var resWrap = ResourceWrapperFactory.GetResourceWrapper(path);
             wrapper.Nodes.Add((TreeNode)resWrap);
-            wrapper.NeedsRebuild = true;
+            SetRebuildFlag(wrapper);
         };
 
         private TResource mResource;

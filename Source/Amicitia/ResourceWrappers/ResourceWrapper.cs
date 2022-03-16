@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -87,6 +87,7 @@ namespace Amicitia.ResourceWrappers
         {
             var resWrap = ResourceWrapperFactory.GetResourceWrapper(path);
             wrapper.Nodes.Add((TreeNode)resWrap);
+            wrapper.NeedsRebuild = true;
         };
 
         private TResource mResource;
@@ -125,13 +126,8 @@ namespace Amicitia.ResourceWrappers
         [OrderedProperty]
         public SupportedFileType FileType { get; }
 
-#if DEBUG
-        [Category("Debug")]
-        [OrderedProperty]
+
         [Browsable(true)]
-#else
-	    [Browsable(false)]
-#endif
         public bool NeedsRebuild
         {
             get { return mNeedsRebuild; }
@@ -517,7 +513,7 @@ namespace Amicitia.ResourceWrappers
             SetRebuildFlag(Parent);
         }
 
-        private static void SetRebuildFlag(TreeNode node)
+        public static void SetRebuildFlag(TreeNode node)
         {
             while (true)
             {
